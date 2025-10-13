@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import LanguageAutoComplete from "../components/LanguageAutoComplete";
 
 const Upload = () => {
 	const [title, setTitle] = useState("");
@@ -52,6 +53,7 @@ const Upload = () => {
 							className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
 						/>
 					</div>
+					<LanguageAutoComplete />
 
 					{/* Cover image */}
 					<div>
