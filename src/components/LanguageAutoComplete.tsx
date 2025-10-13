@@ -55,7 +55,7 @@ const LanguageAutoComplete = ({ onSelect }: { onSelect?: (lang: Language) => voi
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        placeholder="Tapez pour chercher une langue..."
+        placeholder="Enter a language..."
         className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
       />
 
