@@ -30,7 +30,7 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
   };
 
   return (
-    <div onSubmit={handleSubmit} className="w-max min-w-xl p-4 space-y-4">
+    <div onSubmit={handleSubmit} className="w-max md:min-w-xl p-4 space-y-4">
 
       <div className="flex items-center gap-3">
         <label className="block text-gray-700 font-medium">Titles</label>
@@ -165,7 +165,7 @@ const Upload = () => {
       <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         Upload
       </h1>
-      <div className="flex gap-7 w-max bg-white shadow-xl rounded-2xl p-8">
+      <div className="flex md:flex-row flex-col gap-7 w-max bg-white shadow-xl rounded-2xl p-8">
         <div className="space-y-6">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Ref</label>
