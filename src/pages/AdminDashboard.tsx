@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
+import { server } from "../constant";
 
 export type Video = {
     id: unknown;
@@ -78,8 +79,7 @@ const AdminDashboard = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
-              <th className="py-3 px-6 text-left">User</th>
-              <th className="py-3 px-6 text-left">Title</th>
+              <th className="py-3 px-6 text-left">Ref</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-center">Cover</th>
               <th className="p
@@ -91,8 +91,7 @@ const AdminDashboard = () => {
           <tbody className="divide-y divide-gray-200 text-gray-700">
             {data?.videos?.map((video, index) => (
               <tr key={index} className="hover:bg-gray-50 transition relative">
-                <td className="py-3 px-6">{video.user}</td>
-                <td className="py-3 px-6">{video.title}</td>
+                <td className="py-3 px-6">{video.ref}</td>
                 <td className="py-3 px-6">
                   {video.status === "Uploaded" ? (
                     <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
@@ -106,7 +105,7 @@ const AdminDashboard = () => {
                 </td>
                 <td className="py-3 px-6 text-center">
                   <img
-                    src={video.cover}
+                    src={server+'/'+video.cover}
                     alt="cover"
                     className="w-20 h-12 object-cover rounded-lg mx-auto"
                   />

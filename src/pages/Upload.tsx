@@ -48,7 +48,7 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
-          <LanguageAutoComplete />
+          <LanguageAutoComplete onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
