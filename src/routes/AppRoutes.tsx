@@ -5,6 +5,8 @@ import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AdminDashboard from "../pages/AdminDashboard";
+import Profil from "../pages/Profil";
+import Register from "../pages/Register";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -13,6 +15,11 @@ const AppRoutes = () => (
         path="/login"
         element={
           <Login />
+        } />
+      <Route
+        path="/register"
+        element={
+          <Register />
         } />
       <Route
         path="/"
@@ -35,6 +42,14 @@ const AppRoutes = () => (
         element={
           // <ProtectedRoute>
           <Upload />
+          // </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profil"
+        element={
+          // <ProtectedRoute>
+          <Profil />
           // </ProtectedRoute>
         }
       />

@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { MoreVertical } from "lucide-react"; // icône du menu (package: lucide-react)
 import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 // import { useAuth } from "../hooks/useAuth";
@@ -11,6 +13,17 @@ import { Link } from "react-router-dom";
 
 const Dashboard = () => {
 	const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // fonction handle logout
+  const handleLogout = () => {
+    // confirmation avant de se deconnecter
+    if (window.confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+      logout();
+      navigate("/login");
+    }
+  }
 
   const toggleMenu = (index: number) => {
     setOpenMenu(openMenu === index ? null : index);
@@ -47,6 +60,13 @@ const Dashboard = () => {
           <Link to={"/upload"} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition">
             + upload
           </Link>
+          {/* button deconnexion */}
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 cursor-pointer hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition"
+          >
+            Logout
+          </button>
         </div>
       </header>
 

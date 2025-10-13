@@ -1,12 +1,9 @@
-// src/pages/Login.tsx
-import { useState, useEffect } from "react";
-// import { toast } from "react-toastify";
+// src/pages/Register.tsx
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { validateEmail, validatePassword } from "../utils/validators";
-import ThemeToggle from "../components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 
 const backgroundUrl =
@@ -14,28 +11,23 @@ const backgroundUrl =
 const logoUrl =
   "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742348949/Prestataires_Documents/smj7n1bdlpjsfsotwpco.png";
 
-const Login: React.FC = () => {
+const Register: React.FC = () => {
   const isOnline = useNetworkStatus();
-  const { login, error, loading, token, user } = useAuth();
+  const { register, error, loading, token, user } = useAuth(); // ✅ On utilise register ici
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
   // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
-  useEffect(() => {
-    if (token || user) {
-      navigate("/"); // redirige vers l’accueil
-    }
-  }, [token, user, navigate]);
+    useEffect(() => {
+      if (token || user) {
+        navigate("/"); // redirige vers l’accueil
+      }
+    }, [token, user, navigate]);
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isOnline) {
@@ -52,13 +44,19 @@ const Login: React.FC = () => {
       toast.error("Mot de passe trop court", { position: "top-center" });
       return;
     }
+  
+    if (password !== confirmPassword) {
+      // alert("Les mots de passe ne correspondent pas.");
+      toast.error("Les mots de passe ne correspondent pas.");
+      return;
+    }
 
-    await login(email, password)
+    await register(username, email, password)
     .then(() => {
-      navigate("/");
+      navigate("/login"); // Rediriger vers la page d'accueil après l'inscription réussie
     })
     .catch((err) => {
-     toast.error("Login faild" +  err.message, { position: "top-center" });
+      toast.error(err.message || "Erreur lors de l'inscription.");
     });
   };
 
@@ -68,18 +66,11 @@ const Login: React.FC = () => {
       style={{ backgroundImage: `url(${backgroundUrl})` }}
     >
       <Toaster />
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-
       <div className="flex flex-col items-center space-y-8">
-        {/* Logo */}
-        <img src={logoUrl} alt="TyBot Logo" className="w-32 md:w-40 cursor-pointer" />
+        <img src={logoUrl} alt="App Logo" className="w-32 md:w-40 cursor-pointer" />
 
-        {/* Form Card */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitRegister}
           className="w-80 rounded-[20px] bg-white p-8 flex flex-col space-y-4"
           style={{ boxShadow: "#00000057 1px 3px 4px" }}
         >
@@ -87,17 +78,27 @@ const Login: React.FC = () => {
             className="text-3xl font-bold text-center mb-4 text-black"
             style={{ textShadow: "#00000063 0px 3px 5px" }}
           >
-            Login
+            Register
           </h1>
 
           <input
-            type="email"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
+            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
+          />
+
+          <input
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
             className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
             style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
           />
+
           <input
             type="password"
             value={password}
@@ -107,32 +108,32 @@ const Login: React.FC = () => {
             style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
           />
 
-          {/* Forget password */}
-          <span className="text-[10px] text-[#228CE0] cursor-pointer hover:underline ml-1">
-            Forget Password?
-          </span>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm password"
+            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
+            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
+          />
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
             className="h-10 w-full cursor-pointer mt-2 rounded-md bg-gradient-to-br from-[#7336FF] to-[#3269FF] text-white shadow-md shadow-blue-950 disabled:opacity-50"
           >
-            {loading ? "Loading..." : "Sign In"}
+            {loading ? "Loading..." : "Sign Up"}
           </button>
 
-          {/* Error message */}
           {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
 
-          {/* Sign up */}
           <p className="text-center text-[#969696] mt-2 text-sm">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <span className="cursor-pointer text-[#7337FF] hover:underline">
-              <Link to={"/register"}>
+              <Link to={"/login"}>
                 Sign up
               </Link>
             </span>
-            
           </p>
         </form>
       </div>
@@ -140,4 +141,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Register;
