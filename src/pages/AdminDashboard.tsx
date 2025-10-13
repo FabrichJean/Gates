@@ -49,11 +49,11 @@ const AdminDashboard = () => {
         <table className="min-w-full border-collapse">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
-              <th className="py-3 px-6 text-left">Utilisateur</th>
-              <th className="py-3 px-6 text-left">Titre</th>
+              <th className="py-3 px-6 text-left">User</th>
+              <th className="py-3 px-6 text-left">Title</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-center">Cover</th>
-              <th className="py-3 px-6 text-center">Durée</th>
+              <th className="py-3 px-6 text-center">Duration</th>
               <th className="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
@@ -117,7 +117,7 @@ const AdminDashboard = () => {
                           className="px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
                           onClick={() => alert("Vidéo supprimée")}
                         >
-                          🗑️ Supprimer
+                          🗑️ Delete
                         </li>
                       </ul>
                     </div>

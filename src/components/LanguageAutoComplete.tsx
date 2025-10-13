@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ISO6391 from "iso-639-1";
 
 type Language = {
