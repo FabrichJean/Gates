@@ -55,7 +55,7 @@ const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => voi
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        placeholder="Enter a language..."
+        placeholder="Enter category..."
         className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
       />
 
