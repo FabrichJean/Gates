@@ -5,6 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { validateEmail, validatePassword } from "../utils/validators";
 import ThemeToggle from "../components/ThemeToggle";
+import { useNavigate } from "react-router-dom";
 
 const backgroundUrl =
   "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg";
@@ -16,6 +17,8 @@ const Login: React.FC = () => {
   const { login, error, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +44,13 @@ const Login: React.FC = () => {
       return;
     }
 
-    await login(email, password);
+    await login(email, password)
+    .then(() => {
+      navigate("/");
+    })
+    .catch((err) => {
+     toast.error("Login failed");
+    });
   };
 
   return (
