@@ -24,9 +24,9 @@ const AppRoutes = () => (
       <Route
         path="/upload"
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <Upload />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }
       />
       <Route
