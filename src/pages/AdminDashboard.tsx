@@ -1,37 +1,66 @@
 import { useState } from "react";
-import { MoreVertical } from "lucide-react"; // icône du menu (package: lucide-react)
 import { Link } from "react-router-dom";
+import UseVideos from "../hooks/useVideos";
 
+export type Video = {
+    id: unknown;
+    user_id: unknown;
+    hls_url: unknown;
+    category_id: unknown;
+    temp_url: unknown;
+    url: string;
+    transfer_status: unknown;
+    upload_status: unknown;
+    cover: unknown;
+    duration: unknown;
+    sequence: unknown;
+    isDeleted: unknown;
+}
+
+const videos: Video[] = [
+  {
+    id: 1,
+    user_id: 1,
+    hls_url: "https://example.com/video1.m3u8",
+    category_id: 1,
+    temp_url: "https://example.com/temp/video1.mp4",
+    url: "https://example.com/video1.mp4",
+    transfer_status: "completed",
+    upload_status: "uploaded",
+    cover: "https://placehold.co/80x50",
+    title: "Introduction à React",
+    status: "Waiting for Upload",
+    cover: "https://placehold.co/80x50",
+    duration: "4:32",
+  },
+  {
+    id: 2,
+    user_id: 2,
+    hls_url: "https://example.com/video2.m3u8",
+    category_id: 2,
+    temp_url: "https://example.com/temp/video2.mp4",
+    url: "https://example.com/video2.mp4",
+    transfer_status: "completed",
+    upload_status: "uploaded",
+    cover: "https://placehold.co/80x50",
+    title: "Node.js Fundamentals",
+    status: "Uploaded",
+    cover: "https://placehold.co/80x50",
+    duration: "10:21",
+  },
+];
 
 const AdminDashboard = () => {
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
 
-  const toggleMenu = (index: number) => {
-    setOpenMenu(openMenu === index ? null : index);
-  };
+  const { data } = UseVideos();
 
-  const videos = [
-    {
-      user: "fabrich.dev",
-      title: "Introduction à React",
-      status: "Waiting for Upload",
-      cover: "https://placehold.co/80x50",
-      duration: "4:32",
-    },
-    {
-      user: "john_smith",
-      title: "Node.js Fundamentals",
-      status: "Uploaded",
-      cover: "https://placehold.co/80x50",
-      duration: "10:21",
-    },
-  ];
+  console.log(data?.videos);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
       <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">🎬 Video Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Video Management</h1>
         <div className="flex items-center gap-4">
           <input
             type="text"
@@ -53,13 +82,14 @@ const AdminDashboard = () => {
               <th className="py-3 px-6 text-left">Title</th>
               <th className="py-3 px-6 text-left">Status</th>
               <th className="py-3 px-6 text-center">Cover</th>
-              <th className="py-3 px-6 text-center">Duration</th>
+              <th className="p
+              y-3 px-6 text-center">Duration</th>
               <th className="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-gray-200 text-gray-700">
-            {videos.map((video, index) => (
+            {data?.videos?.map((video, index) => (
               <tr key={index} className="hover:bg-gray-50 transition relative">
                 <td className="py-3 px-6">{video.user}</td>
                 <td className="py-3 px-6">{video.title}</td>
@@ -105,12 +135,12 @@ const AdminDashboard = () => {
                     >
                       ☁️ Upload S3
                     </li>
-                    <li
+                    <Link to={"/videos/123"}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => alert("Upload vers S3")}
                     >
-                     Update
-                    </li>
+                      Update
+                    </Link>
                   </ul>
 
                 </td>
