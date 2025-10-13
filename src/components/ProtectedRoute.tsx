@@ -10,9 +10,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { token, loading } = useAuth();
-
+  const { token, user, loading } = useAuth();
   const isOnline = useNetworkStatus();
+
 // 🔔 Affiche un toast à chaque changement d’état réseau
   useEffect(() => {
     if (isOnline) {
@@ -34,6 +34,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (loading) return <div>Loading...</div>;
 
   if (!token) return <Navigate to="/login" replace />;
+
+  // 🔒 Si utilisateur non validé → redirect page info
+  if (user && !user.isValidated === false) {
+    toast.warn("Votre compte n'a pas encore été validé par le superadmin ⚠️", {
+      position: "top-left",
+      autoClose: 5000,
+      hideProgressBar: false,
+    });
+    return <Navigate to="/not-validated" replace />;
+  }
 
   return <>{children}</>;
 
