@@ -4,14 +4,15 @@ import Dashboard from "../pages/Dashboard";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AdminDashboard from "../pages/AdminDashboard";
 
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
-            <Login />
+          <Login />
         } />
       <Route
         path="/"
@@ -22,11 +23,19 @@ const AppRoutes = () => (
         }
       />
       <Route
+        path="/admin"
+        element={
+          // <ProtectedRoute>
+            <AdminDashboard />
+          // </ProtectedRoute>
+        }
+      />
+      <Route
         path="/upload"
         element={
-          <ProtectedRoute>
-            <Upload />
-          </ProtectedRoute>
+          // <ProtectedRoute>
+          <Upload />
+          // </ProtectedRoute>
         }
       />
       <Route
