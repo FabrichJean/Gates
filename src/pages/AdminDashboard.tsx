@@ -85,43 +85,34 @@ const AdminDashboard = () => {
 
                 {/* Menu déroulant */}
                 <td className="py-3 px-6 text-center relative">
-                  <button
+                  {/* <button
                     onClick={() => toggleMenu(index)}
                     className="p-2 rounded-full hover:bg-gray-100 transition"
                   >
                     <MoreVertical className="h-5 w-5 text-gray-600" />
-                  </button>
+                  </button> */}
 
-                  {openMenu === index && (
-                    <div className="absolute right-6 mt-2 w-40 bg-white border border-gray-200 shadow-xl rounded-xl z-10 animate-fade-in">
-                      <ul className="text-start text-sm text-gray-700">
-                        <li
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => alert("Transcodage lancé")}
-                        >
-                          🎞️ Transcoder
-                        </li>
-                        <li
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => alert("Upload vers S3")}
-                        >
-                          ☁️ Upload S3
-                        </li>
-                        <li
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => alert("Prévisualisation")}
-                        >
-                          ▶️ Preview
-                        </li>
-                        <li
-                          className="px-4 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
-                          onClick={() => alert("Vidéo supprimée")}
-                        >
-                          🗑️ Delete
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                  <ul className="flex justify-center text-start text-sm text-gray-700">
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => alert("Transcodage lancé")}
+                    >
+                      🎞️ Transcoder
+                    </li>
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => alert("Upload vers S3")}
+                    >
+                      ☁️ Upload S3
+                    </li>
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => alert("Upload vers S3")}
+                    >
+                     Update
+                    </li>
+                  </ul>
+
                 </td>
               </tr>
             ))}

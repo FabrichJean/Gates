@@ -3,12 +3,82 @@ import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { apiURL } from "../constant/index"
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
+
+
+type Couple = { i18_language: string; title: string };
+
+function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
+  const [couples, setCouples] = useState<Couple[]>([]);
+
+  const handleChange = (index: number, field: keyof Couple, value: string) => {
+    const newCouples = [...couples];
+    newCouples[index][field] = value;
+    setCouples(newCouples);
+    onChange?.(newCouples);
+  };
+
+  const addCouple = () => setCouples([...couples, { i18_language: '', title: '' }]);
+
+  const removeCouple = (index: number) => {
+    setCouples(couples.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    submit()
+  };
+
+  return (
+    <div onSubmit={handleSubmit} className="w-max min-w-xl p-4 space-y-4">
+
+      <div className="flex items-center gap-3">
+        <label className="block text-gray-700 font-medium">Titles</label>
+        <button
+          type="button"
+          onClick={addCouple}
+          className="flex items-center bg-blue-500 text-white px-2 w-max rounded-full hover:bg-blue-600 transition cursor-pointer"
+        >
+          <PlusIcon className="w-5 h-5" />
+        </button>
+      </div>
+
+      {couples.map((c, i) => (
+        <div
+          key={i}
+          className="flex gap-2 items-center p-4 px-0"
+        >
+          <LanguageAutoComplete />
+          <input
+            type="text"
+            placeholder="Title"
+            value={c.title}
+            onChange={(e) => handleChange(i, 'title', e.target.value)}
+            className="flex-1 border-b-2 border-gray-300 focus:border-blue-500 outline-none p-2 bg-transparent"
+            required
+          />
+          <button type="button" onClick={() => removeCouple(i)} className="text-red-500 hover:text-red-700">
+            <TrashIcon className="w-6 h-6" />
+          </button>
+        </div>
+      ))}
+
+      <button
+          onClick={handleSubmit}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
+          disabled={uploading}
+        >
+          {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
+        </button>
+    </div>
+  );
+}
+
 
 const Upload = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<{ code: string; name: string } | null>(null); const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("");
-  const [language, setLanguage] = useState<{ code: string; name: string } | null>(null);
+  const [ref, setRef] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
@@ -17,21 +87,52 @@ const Upload = () => {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title) return toast.error("Le titre est obligatoire");
+  const [category, setCategory] = useState<Category>();
+  const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
-    const formData = new FormData();
-    formData.append("title", title);
-    if (videoFile) formData.append("video", videoFile);
-    if (coverFile) formData.append("cover", coverFile);
-    if (language) formData.append("language", language.code);
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setVideoFile(file);
+      setVideoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCoverClick = () => coverInputRef.current?.click();
+  const handleVideoClick = () => videoInputRef.current?.click();
+
+  const handleSubmit = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formData = {} as any;
+    if (videoFile) {
+      formData.video = videoFile;
+    }
+    if (coverFile) {
+      formData.cover = coverFile;
+    }
+    if (category) {
+      formData.categoryId = category.id;
+    }
+    if(coupleTitles.length > 0) {
+      formData.titles = coupleTitles;
+    }
+    if (ref) {
+      formData.ref = ref;
+    }
 
     try {
       setUploading(true);
       setProgress(0);
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
 
       const res = await axios.post(apiURL + "/videos/upload", formData, {
         headers: {
@@ -48,6 +149,7 @@ const Upload = () => {
 
       toast.success("✅ Upload réussi !");
       console.log("Video uploaded:", res.data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       toast.error("❌ Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
@@ -58,34 +160,117 @@ const Upload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className="flex flex-col min-h-screen w-full bg-gray-50 items-center justify-center p-6">
       <Toaster position="top-right" />
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-          🎬 Upload Video
-        </h1>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <LanguageAutoComplete onSelect={(lang) => setLanguage(lang)} />
-
+      <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        Upload
+      </h1>
+      <div className="flex gap-7 w-max bg-white shadow-xl rounded-2xl p-8">
+        <div className="space-y-6">
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Title</label>
+            <label className="block text-gray-700 font-medium mb-2">Ref</label>
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titre de la vidéo"
+              value={ref || ""}
+              onChange={(e) => setRef(e.target.value)}
+              placeholder=""
               className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             />
           </div>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Cover</label>
-            <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
-          </div>
+          <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Video (MP4)</label>
-            <input type="file" accept="video/mp4" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
+            <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
+            <div
+              onClick={handleCoverClick}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer relative"
+            >
+              {coverPreview ? (
+                <img
+                  src={coverPreview}
+                  alt="Preview"
+                  className="rounded-lg object-cover w-full h-52"
+                />
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-gray-400 mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
+                    />
+                  </svg>
+                  <p className="text-gray-500 text-sm text-center">
+                    Click or drag an image (PNG, JPG, WEBP)
+                  </p>
+                </>
+              )}
+              <input
+                type="file"
+                ref={coverInputRef}
+                accept="image/*"
+                onChange={handleCoverChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Video (optional) */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Video (optional)</label>
+            <div
+              onClick={handleVideoClick}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
+            >
+              {videoPreview ? (
+                <video
+                  src={videoPreview}
+                  controls
+                  className="rounded-lg w-full max-h-56 object-cover"
+                />
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-gray-400 mb-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.752 11.168l-4.197-2.398A1 1 0 009 9.618v4.764a1 1 0 001.555.832l4.197-2.398a1 1 0 000-1.664z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p className="text-gray-500 text-sm text-center">
+                    Drag or select an MP4 file
+                  </p>
+                </>
+              )}
+              <input
+                type="file"
+                ref={videoInputRef}
+                accept="video/mp4"
+                onChange={handleVideoChange}
+                className="hidden"
+              />
+            </div>
           </div>
 
           {/* Barre de progression */}
@@ -94,15 +279,17 @@ const Upload = () => {
               <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
             </div>
           )}
+        </div>
 
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-            disabled={uploading}
-          >
-            {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
-          </button>
-        </form>
+        <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit}/>
+
+        {/* <button
+          onClick={handleSubmit}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
+          disabled={uploading}
+        >
+          {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
+        </button> */}
       </div>
     </div>
   );

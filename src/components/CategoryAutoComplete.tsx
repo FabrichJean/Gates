@@ -2,43 +2,40 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { apiURL } from "../constant";
 
-type Language = {
-  code: string;
-  name: string;
-};
+export type Category = 
+{id: number, name: string, createdAt: Date, updatedAt: Date}
 
-const LanguageAutoComplete = ({ onSelect }: { onSelect?: (lang: Language) => void }) => {
-  const [languages, setLanguages] = useState<Language[]>([]);
+const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => void }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState("");
-  const [filtered, setFiltered] = useState<Language[]>([]);
+  const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Charger toutes les langues depuis iso-639-1
   useEffect(() => {
-   axios.get<Language[]>(apiURL+"/i18languages").then(res => {
-      const allLanguages = res.data;
-      console.log(allLanguages);
-      
-      allLanguages.sort((a, b) => a.name.localeCompare(b.name));
-      setLanguages(allLanguages);
+   axios.get<Category[]>(apiURL+"/categories").then(res => {
+      const all = res.data;
+      console.log(all);
+      setCategories(all);
+      setFiltered(all);
     });
   }, []);
 
-  // Filtrage auto-complete
+    // Filtrage auto-complete
   useEffect(() => {
     if (!query) {
       setFiltered([]);
       return;
     }
-    const f = languages.filter(
+    const f = categories.filter(
       (lang) =>
         lang.name.toLowerCase().includes(query.toLowerCase()) ||
-        lang.code.toLowerCase().includes(query.toLowerCase())
+        lang.id.toString().includes(query.toLowerCase())
     );
     setFiltered(f);
-  }, [query, languages]);
+  }, [query, categories]);
 
-  const handleSelect = (lang: Language) => {
+  const handleSelect = (lang: Category) => {
     console.log(lang);
     
     setQuery(lang.name);
@@ -59,18 +56,18 @@ const LanguageAutoComplete = ({ onSelect }: { onSelect?: (lang: Language) => voi
         }}
         onFocus={() => setShowDropdown(true)}
         placeholder="Enter a language..."
-        className="flex-1 border-b-2 border-gray-300 focus:border-blue-500 outline-none p-2 bg-transparent"
+        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
       />
 
       {showDropdown && filtered.length > 0 && (
         <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg">
-          {filtered.map((lang) => (
+          {filtered.map((flt) => (
             <li
-              key={lang.code}
+              key={flt.id}
               className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-              onClick={() => handleSelect(lang)}
+              onClick={() => handleSelect(flt)}
             >
-              {lang.name} ({lang.code})
+              {flt.name}
             </li>
           ))}
         </ul>
@@ -79,4 +76,4 @@ const LanguageAutoComplete = ({ onSelect }: { onSelect?: (lang: Language) => voi
   );
 };
 
-export default LanguageAutoComplete;
+export default CategoryAutoComplete;
