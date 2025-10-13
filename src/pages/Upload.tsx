@@ -119,10 +119,10 @@ const Upload = () => {
       formData.cover = coverFile;
     }
     if (category) {
-      formData.categoryId = category.id;
+      formData.category_id = category.id;
     }
     if(coupleTitles.length > 0) {
-      formData.titles = coupleTitles;
+      formData.titles = JSON.stringify(coupleTitles);
     }
     if (ref) {
       formData.ref = ref;

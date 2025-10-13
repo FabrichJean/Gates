@@ -43,7 +43,7 @@ const videos: Video[] = [
     transfer_status: "completed",
     upload_status: "uploaded",
     cover: "https://placehold.co/80x50",
-    title: "Node.js Fundamentals",
+    // title: "Node.js Fundamentals",
     status: "Uploaded",
     cover: "https://placehold.co/80x50",
     duration: "10:21",
