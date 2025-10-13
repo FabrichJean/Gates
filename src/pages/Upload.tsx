@@ -2,14 +2,20 @@ import React, { useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { apiURL } from "../constant/index"
 
 const Upload = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<{ code: string; name: string } | null>(null);  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<{ code: string; name: string } | null>(null); const [videoFile, setVideoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState<{ code: string; name: string } | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
+
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +33,7 @@ const Upload = () => {
 
       const token = localStorage.getItem("token");
 
-      const res = await axios.post("/api/videos/upload", formData, {
+      const res = await axios.post(apiURL + "/videos/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
