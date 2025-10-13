@@ -24,7 +24,7 @@ const Login: React.FC = () => {
       toast.error(
         "Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.",
         {
-          position: "top-left",
+          position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
         }
@@ -32,12 +32,12 @@ const Login: React.FC = () => {
       return;
     }
 
-    if (!validateEmail(email)) {
-      toast.error("Email invalide", { position: "top-left" });
-      return;
-    }
+    // if (!validateEmail(email)) {
+    //   toast.error("Email invalide", { position: "top-center" });
+    //   return;
+    // }
     if (!validatePassword(password)) {
-      toast.error("Mot de passe trop court", { position: "top-left" });
+      toast.error("Mot de passe trop court", { position: "top-center" });
       return;
     }
 
@@ -72,7 +72,7 @@ const Login: React.FC = () => {
           </h1>
 
           <input
-            type="email"
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
