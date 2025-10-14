@@ -155,6 +155,9 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
+      console.log(formData.titles);
+      
+
       const res = await uploadVideo(formData, (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
