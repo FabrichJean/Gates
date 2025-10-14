@@ -25,10 +25,10 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
     onChange?.(newCouples);
   };
 
-  const addCouple = () => setCouples([...couples, { i18_language: '', title: '' }]);
+  const addCouple = () => setCouples([...couples, { id: null, i18_language: '', title: '' }]);
 
   const removeCouple = (index: number) => {
-    setCouples(couples.filter((_, i) => i !== index));
+    setCouples((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
