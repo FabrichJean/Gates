@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from './Upload';
 import { UseVideo, type TVideo } from "../hooks/useVideos";
 import { server } from "../constant";
