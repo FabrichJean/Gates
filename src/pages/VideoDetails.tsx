@@ -28,9 +28,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       </div>
     );
 
-  return video && <EditVideo video={video} />;
-
   return (
+    modifying ? <EditVideo video={video} /> :
     <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
       <Toaster position="top-right" />
 
