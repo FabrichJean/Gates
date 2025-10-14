@@ -143,6 +143,9 @@ function EditVideo({ video }: { video: TVideo }) {
       setUploading(true);
       setProgress(0);
 
+      console.log(formData);
+      
+
       const res = await updateVideo(video.id, formData, (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);

@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth";
-import { LogOutIcon } from "lucide-react";
+import { RiHome9Fill } from "react-icons/ri";
+import { BiSolidVideos } from "react-icons/bi";
+import { CgProfile } from "react-icons/cg";
+
 
 function Sidebar() {
 
@@ -27,53 +30,54 @@ function Sidebar() {
                             to="/"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
+                            <RiHome9Fill className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Dashboard
                             </span>
                         </Link>
 
-                        {/* <!-- Lien : Blogs --> */}
                         <Link
                             to="/videos"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
+                            <BiSolidVideos className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Videos
                             </span>
                         </Link>
-                        {/* 
-                            <!-- Lien : Mail --> */}
+
                         <a
-                            href="/app/clients"
+                            href="/users"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
+                            <BiSolidVideos className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Users
                             </span>
                         </a>
 
-                        {/* <!-- Lien : Projects (actif) --> */}
-                        <a
-                            href="/app/projects"
+                        <Link
+                            to="/profile"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold bg-primary-50 shadow-sm text-primary-400 font-bold"
                         >
+                            <CgProfile className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Profile
                             </span>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* <!-- Section inférieure --> */}
                     <div className="flex flex-col space-y-1 mx-1 lg:mt-1">
                         {/* <!-- Lien : Settings --> */}
-                        <a
-                            href="/app/settings"
+                        <Link
+                            to="/settings"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Settings
                             </span>
-                        </a>
+                        </Link>
                     </div>
                 </div>
 
