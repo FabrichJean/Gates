@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Toaster } from "react-hot-toast";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { TitlesForm } from './Upload';
 import { UseVideo } from "../hooks/useVideos";
 import { server } from "../constant";
 import { FaPlayCircle } from "react-icons/fa";
+import { formatDateFR } from "../utils/date";
 
 type Video = {
   id: string;
@@ -23,6 +24,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const videoId = videoIdProp || routeId;
 
   const { data: video } = UseVideo(videoId);
+  const [videoPlayed, setVideoPlayed] = useState(false);
 
   console.log(video);
 
@@ -126,67 +128,45 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     );
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 min-h-screen p-6 items-start justify-center bg-gray-50">
+    <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
       <Toaster position="top-right" />
 
       {/* Formulaire */}
       <div className="w-full md:w-[60%] bg-white rounded-lg p-6 border border-gray-200 space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Détails Vidéo</h1>
+        <div className="flex justify-between gap-4 items-center w-full">
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
+          <div className="flex gap-2">
+            <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
+            <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span>
+          </div>
+
+        </div>
         <div
-          className="relative w-full h-max rounded-lg flex items-center justify-center cursor-pointer"
+          className="relative w-full h-max rounded-lg flex items-center justify-center"
         >
-          <FaPlayCircle className="absolute text-8xl text-white" />
-          <img src={coverPreview || server + '/' + video.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-medium mb-1">Catégorie</label>
-          <input
-            type="text"
-            value={video.category.name || ""}
-            readOnly
-            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
+          <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={()}/>
+          {/* <video src={server + '/' + video?.temp_url}></video> */}
+          <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
         </div>
 
-        <div className="space-y-2">
-          {video?.titles?.map((t, i) => (
-            <div
-              key={i}
-              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-shadow shadow-sm hover:shadow-md"
-            >
-              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-                {t.i18_language}
-              </span>
-              <span className="flex-1 text-gray-800 font-medium text-sm">
-                {t.title}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {video?.titles?.map((t, i) => (
-            <div
-              key={i}
-              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-shadow shadow-sm hover:shadow-md"
-            >
-              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-                {t.i18_language}
-              </span>
-              <span className="flex-1 text-gray-800 font-medium text-sm">
-                {t.title}
-              </span>
-            </div>
-          ))}
+        {/* <span className="flex-1 text-gray-800 text-sm">11 fev 2024 08:15</span> */}
+
+        <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+          <h1 className="text-lg font-semibold text-gray-800">Category</h1>
+          <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+            {video?.category.name}
+          </span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 rounded-lg bg-gray-50 p-2">
+          <h1 className="text-lg font-semibold text-gray-800">Titles</h1>
           {video?.titles?.map((t, i) => (
             <div
               key={i}
-              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50"
+              className="flex gap-3 items-center p-2"
             >
-              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-                {t.i18_language}
+              <span className="w-20 font-bold text-blue-600 uppercase text-sm tracking-wide">
+                {t.i18_language} :
               </span>
               <span className="flex-1 text-gray-800 font-medium text-sm">
                 {t.title}

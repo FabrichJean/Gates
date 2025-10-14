@@ -77,7 +77,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 </div>
             </div>
             {/* View Content */}
-            <div className="col-span-6 bg-white">{children}</div>
+            <div className="col-span-6 bg-white overflow-auto">{children}</div>
         </div>
 
     )
