@@ -133,7 +133,8 @@ function EditVideo({ video }: { video: TVideo }) {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
       ...(ref && { ref }),
-      titles: JSON.stringify(coupleTitles.map(t => ({ i18_language: t.i18_language, title: t.title }))),
+     
+      titles: JSON.stringify(coupleTitles)
     };
     
 

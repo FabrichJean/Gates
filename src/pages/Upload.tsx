@@ -8,7 +8,9 @@ import CategoryAutoComplete, { type Category } from "../components/CategoryAutoC
 import { uploadVideo } from "../api/videos";
 
 
-export type Couple = { i18_language: string; title: string, name?: string };
+export type Couple = {
+  id: any; i18_language: string; title: string, name?: string 
+};
 
 export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit, defaultCouples, btnSubmit }: { defaultCouples?: Couple[], btnSubmit?: string, onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
   const [couples, setCouples] = useState<Couple[]>(defaultCouples || []);
