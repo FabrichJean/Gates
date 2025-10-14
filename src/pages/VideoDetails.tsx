@@ -144,7 +144,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         <div
           className="relative w-full h-max rounded-lg flex items-center justify-center"
         >
-          <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={()}/>
+          <FaPlayCircle className="absolute text-8xl text-white cursor-pointer"/>
           {/* <video src={server + '/' + video?.temp_url}></video> */}
           <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
         </div>
