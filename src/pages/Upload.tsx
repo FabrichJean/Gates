@@ -64,12 +64,12 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
       ))}
 
       <button
-          onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-          disabled={uploading}
-        >
-          {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
-        </button>
+        onClick={handleSubmit}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
+        disabled={uploading}
+      >
+        {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
+      </button>
     </div>
   );
 }
@@ -111,22 +111,14 @@ const Upload = () => {
 
   const handleSubmit = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formData = {} as any;
-    if (videoFile) {
-      formData.video = videoFile;
-    }
-    if (coverFile) {
-      formData.cover = coverFile;
-    }
-    if (category) {
-      formData.category_id = category.id;
-    }
-    if(coupleTitles.length > 0) {
-      formData.titles = JSON.stringify(coupleTitles);
-    }
-    if (ref) {
-      formData.ref = ref;
-    }
+    const formData: any = {
+      ...(videoFile && { video: videoFile }),
+      ...(coverFile && { cover: coverFile }),
+      ...(category && { category_id: category.id }),
+      ...(ref && { ref }),
+      titles: JSON.stringify(coupleTitles),
+    };
+
 
     try {
       setUploading(true);
@@ -149,7 +141,7 @@ const Upload = () => {
 
       toast.success("✅ Upload réussi !");
       console.log("Video uploaded:", res.data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       toast.error("❌ Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
@@ -281,7 +273,7 @@ const Upload = () => {
           )}
         </div>
 
-        <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit}/>
+        <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
 
         {/* <button
           onClick={handleSubmit}

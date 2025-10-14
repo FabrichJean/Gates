@@ -45,7 +45,9 @@ const AppRoutes = () => (
         path="/upload"
         element={
           // <ProtectedRoute>
-          <Upload />
+          <InsideSidebar>
+            <Upload />
+          </InsideSidebar>
           // </ProtectedRoute>
         }
       />
@@ -61,7 +63,9 @@ const AppRoutes = () => (
         path="/videos/:id"
         element={
           <ProtectedRoute>
-            <VideoDetails />
+            <InsideSidebar>
+              <VideoDetails />
+            </InsideSidebar>
           </ProtectedRoute>
         }
       />

@@ -18,39 +18,6 @@ export type Video = {
     isDeleted: unknown;
 }
 
-const videos: Video[] = [
-  {
-    id: 1,
-    user_id: 1,
-    hls_url: "https://example.com/video1.m3u8",
-    category_id: 1,
-    temp_url: "https://example.com/temp/video1.mp4",
-    url: "https://example.com/video1.mp4",
-    transfer_status: "completed",
-    upload_status: "uploaded",
-    cover: "https://placehold.co/80x50",
-    title: "Introduction à React",
-    status: "Waiting for Upload",
-    cover: "https://placehold.co/80x50",
-    duration: "4:32",
-  },
-  {
-    id: 2,
-    user_id: 2,
-    hls_url: "https://example.com/video2.m3u8",
-    category_id: 2,
-    temp_url: "https://example.com/temp/video2.mp4",
-    url: "https://example.com/video2.mp4",
-    transfer_status: "completed",
-    upload_status: "uploaded",
-    cover: "https://placehold.co/80x50",
-    // title: "Node.js Fundamentals",
-    status: "Uploaded",
-    cover: "https://placehold.co/80x50",
-    duration: "10:21",
-  },
-];
-
 const AdminDashboard = () => {
 
   const { data } = UseVideos();
@@ -134,11 +101,10 @@ const AdminDashboard = () => {
                     >
                       ☁️ Upload S3
                     </li>
-                    <Link to={"/videos/123"}
+                    <Link to={"/videos/"+video.id}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => alert("Upload vers S3")}
                     >
-                      Update
+                      Details
                     </Link>
                   </ul>
 
