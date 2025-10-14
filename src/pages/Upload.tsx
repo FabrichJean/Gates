@@ -9,7 +9,7 @@ import CategoryAutoComplete, { type Category } from "../components/CategoryAutoC
 
 type Couple = { i18_language: string; title: string };
 
-function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
+export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
   const [couples, setCouples] = useState<Couple[]>([]);
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
@@ -33,15 +33,24 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
     <div onSubmit={handleSubmit} className="w-max md:min-w-xl p-4 space-y-4">
 
       <div className="flex items-center gap-3">
-        <label className="block text-gray-700 font-medium">Titles</label>
+        <label className="text-sm font-medium text-gray-700 tracking-wide">
+          Titles
+        </label>
+
         <button
           type="button"
           onClick={addCouple}
-          className="flex items-center bg-blue-500 text-white px-2 w-max rounded-full hover:bg-blue-600 transition cursor-pointer"
+          className="flex items-center justify-center w-8 h-8 rounded-xl 
+      bg-white border border-gray-200 shadow-sm 
+      hover:border-gray-300 hover:shadow-md 
+      transition-all duration-200 ease-in-out 
+      text-gray-700 hover:text-blue-600 
+      focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
         >
-          <PlusIcon className="w-5 h-5" />
+          <PlusIcon className="w-4 h-4" />
         </button>
       </div>
+
 
       {couples.map((c, i) => (
         <div
@@ -65,11 +74,29 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
 
       <button
         onClick={handleSubmit}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
         disabled={uploading}
+        className={`relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border border-transparent cursor-pointer
+    ${uploading
+            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md"
+          } focus:outline-none focus:ring-2 focus:ring-blue-300`}
       >
-        {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
+        {uploading ? (
+          <>
+            <span className="flex items-center gap-2 text-gray-600">
+              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+              Uploading... {progress}%
+            </span>
+          </>
+        ) : (
+          <>
+            <span>🚀 Publish</span>
+          </>
+        )}
       </button>
+
     </div>
   );
 }
@@ -157,7 +184,7 @@ const Upload = () => {
       <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         Upload
       </h1>
-      <div className="flex md:flex-row flex-col gap-7 w-max bg-white shadow-xl rounded-2xl p-8">
+      <div className="flex md:flex-row flex-col gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
         <div className="space-y-6">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Ref</label>

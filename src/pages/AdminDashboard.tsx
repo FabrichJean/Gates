@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
+import { transcodeVideo } from "../api/videos";
+import toast from "react-hot-toast";
 
 export type Video = {
     id: unknown;
@@ -22,7 +24,15 @@ const AdminDashboard = () => {
 
   const { data } = UseVideos();
 
-  console.log(data?.videos);
+  const transcode = async (videoId: number) => {
+    await transcodeVideo(videoId)
+    .then(() => {
+      toast.success("success");
+    })
+    .catch(() => {
+      toast.error("Error");
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -89,12 +99,12 @@ const AdminDashboard = () => {
                   </button> */}
 
                   <ul className="flex justify-center text-start text-sm text-gray-700">
-                    <li
+                    <button
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => alert("Transcodage lancé")}
+                      onClick={transcode.bind(null, video.id as string)}
                     >
                       🎞️ Transcoder
-                    </li>
+                    </button>
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => alert("Upload vers S3")}

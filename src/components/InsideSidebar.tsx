@@ -1,8 +1,11 @@
+import { Toaster } from "react-hot-toast"
+
 function InsideSidebar({ children }: React.PropsWithChildren) {
 
 
     return (
         <div className="w-dvw h-dvh bg-gray-200 grid grid-cols-7">
+            <Toaster/>
             {/* SideBar */}
             <div className="col-span-1 bg-white">
                 <div className="p-2 h-full w-full flex flex-col bg-white dark:bg-gray-900 border-r border-r-gray-200">
