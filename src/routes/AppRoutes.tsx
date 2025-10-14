@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Upload from "../pages/Upload";
@@ -8,6 +8,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
+import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => (
@@ -27,7 +28,9 @@ const AppRoutes = () => (
         path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <InsideSidebar>
+              <Dashboard />
+            </InsideSidebar>
           </ProtectedRoute>
         }
       />
@@ -39,6 +42,16 @@ const AppRoutes = () => (
             <AdminDashboard />
           </InsideSidebar>
           // </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <Users />
+            </InsideSidebar>
+          </ProtectedRoute>
         }
       />
       <Route
@@ -54,9 +67,11 @@ const AppRoutes = () => (
       <Route
         path="/profil"
         element={
-          // <ProtectedRoute>
-          <Profil />
-          // </ProtectedRoute>
+          <ProtectedRoute>
+            <InsideSidebar>
+              <Profil />
+            </InsideSidebar>
+          </ProtectedRoute>
         }
       />
       <Route
