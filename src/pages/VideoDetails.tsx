@@ -144,9 +144,15 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         <div
           className="relative w-full h-max rounded-lg flex items-center justify-center"
         >
-          <FaPlayCircle className="absolute text-8xl text-white cursor-pointer"/>
-          {/* <video src={server + '/' + video?.temp_url}></video> */}
-          <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+          {
+            videoPlayed ?
+              <video src={server + '/' + video?.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
+              :
+              <>
+                <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)}/>
+                <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+              </>
+          }
         </div>
 
         {/* <span className="flex-1 text-gray-800 text-sm">11 fev 2024 08:15</span> */}
