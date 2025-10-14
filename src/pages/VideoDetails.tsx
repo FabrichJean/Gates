@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
-import { useParams, useNavigate } from "react-router-dom"; 
-import { apiURL } from "../constant/index";
+import { Toaster } from "react-hot-toast";
+import { useParams, useNavigate } from "react-router-dom";
 import { TitlesForm } from './Upload';
 import { UseVideo } from "../hooks/useVideos";
+import { server } from "../constant";
+import { FaPlayCircle } from "react-icons/fa";
 
 type Video = {
   id: string;
@@ -22,10 +22,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
-  const {data: video} = UseVideo(videoId);
+  const { data: video } = UseVideo(videoId);
 
   console.log(video);
-  
+
 
   // const [video, setVideo] = useState<Video | null>(null);
   // const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   //       });
   //       const data = res.data;
   //       console.log(data);
-        
+
   //       setVideo(data);
   //       setCoverPreview(data.cover || null);
   //       setCoupleTitles(data.titles || []);
@@ -132,7 +132,12 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       {/* Formulaire */}
       <div className="w-full md:w-[60%] bg-white rounded-lg p-6 border border-gray-200 space-y-6">
         <h1 className="text-2xl font-semibold text-gray-800 mb-4">Détails Vidéo</h1>
-
+        <div
+          className="relative w-full h-max rounded-lg flex items-center justify-center cursor-pointer"
+        >
+          <FaPlayCircle className="absolute text-8xl text-white" />
+          <img src={coverPreview || server + '/' + video.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+        </div>
         <div>
           <label className="block text-gray-700 font-medium mb-1">Catégorie</label>
           <input
@@ -142,6 +147,55 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
         </div>
+
+        <div className="space-y-2">
+          {video?.titles?.map((t, i) => (
+            <div
+              key={i}
+              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-shadow shadow-sm hover:shadow-md"
+            >
+              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+                {t.i18_language}
+              </span>
+              <span className="flex-1 text-gray-800 font-medium text-sm">
+                {t.title}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          {video?.titles?.map((t, i) => (
+            <div
+              key={i}
+              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-shadow shadow-sm hover:shadow-md"
+            >
+              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+                {t.i18_language}
+              </span>
+              <span className="flex-1 text-gray-800 font-medium text-sm">
+                {t.title}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {video?.titles?.map((t, i) => (
+            <div
+              key={i}
+              className="flex gap-3 items-center p-2 rounded-lg bg-gray-50"
+            >
+              <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+                {t.i18_language}
+              </span>
+              <span className="flex-1 text-gray-800 font-medium text-sm">
+                {t.title}
+              </span>
+            </div>
+          ))}
+        </div>
+
+
 
         {/* <div>
           <label className="block text-gray-700 font-medium mb-1">Statut</label>
@@ -173,12 +227,12 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
       {/* Preview + actions */}
       <div className="w-full md:w-[35%] flex flex-col gap-4">
-        <div
+        {/* <div
           className="w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden cursor-pointer"
           onClick={() => coverInputRef.current?.click()}
         >
-          {coverPreview ? (
-            <img src={coverPreview} alt="cover" className="w-full h-full object-cover" />
+          {(coverPreview || video.cover) ? (
+            <img src={coverPreview || server+'/'+video.cover} alt="cover" className="w-full h-full object-cover" />
           ) : (
             <div className="text-gray-400 text-sm">Cliquer pour changer la cover</div>
           )}
@@ -189,7 +243,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             onChange={handleCoverChange}
             className="hidden"
           />
-        </div>
+        </div> */}
 
         {/* <button
           onClick={handleSave}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
-import { transcodeVideo } from "../api/videos";
+import { transcodeVideo, uploadS3 } from "../api/videos";
 import toast from "react-hot-toast";
 
 export type Video = {
@@ -24,8 +24,19 @@ const AdminDashboard = () => {
 
   const { data } = UseVideos();
 
-  const transcode = async (videoId: number) => {
+  const transcode = async (videoId: string | number | undefined) => {
     await transcodeVideo(videoId)
+    .then(() => {
+      toast.success("success");
+    })
+    .catch(() => {
+      toast.error("Error");
+    });
+  }
+
+
+  const upload = async (videoId: string | number | undefined) => {
+    await uploadS3(videoId)
     .then(() => {
       toast.success("success");
     })
@@ -107,7 +118,7 @@ const AdminDashboard = () => {
                     </button>
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => alert("Upload vers S3")}
+                      onClick={(upload.bind(null, video.id as string))}
                     >
                       ☁️ Upload S3
                     </li>
