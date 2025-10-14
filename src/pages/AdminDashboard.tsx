@@ -4,45 +4,51 @@ import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
 import { transcodeVideo, uploadS3 } from "../api/videos";
 import toast from "react-hot-toast";
+import { SyncLoader } from "react-spinners";
 
 export type Video = {
-    id: unknown;
-    user_id: unknown;
-    hls_url: unknown;
-    category_id: unknown;
-    temp_url: unknown;
-    url: string;
-    transfer_status: unknown;
-    upload_status: unknown;
-    cover: unknown;
-    duration: unknown;
-    sequence: unknown;
-    isDeleted: unknown;
+  id: unknown;
+  user_id: unknown;
+  hls_url: unknown;
+  category_id: unknown;
+  temp_url: unknown;
+  url: string;
+  transfer_status: unknown;
+  upload_status: unknown;
+  cover: unknown;
+  duration: unknown;
+  sequence: unknown;
+  isDeleted: unknown;
 }
 
 const AdminDashboard = () => {
 
   const { data } = UseVideos();
+  const [loading, setLoading] = useState<{id: string | number | undefined, type: 'transc' | 'upload'}>();
 
   const transcode = async (videoId: string | number | undefined) => {
+    setLoading({id: videoId, type: 'transc'});
     await transcodeVideo(videoId)
-    .then(() => {
-      toast.success("success");
-    })
-    .catch(() => {
-      toast.error("Error");
-    });
+      .then(() => {
+        toast.success("success");
+      })
+      .catch(() => {
+        toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
   }
 
 
   const upload = async (videoId: string | number | undefined) => {
+    setLoading({id: videoId, type: 'upload'});
     await uploadS3(videoId)
-    .then(() => {
-      toast.success("success");
-    })
-    .catch(() => {
-      toast.error("Error");
-    });
+      .then(() => {
+        toast.success("success");
+      })
+      .catch(() => {
+        toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
   }
 
   return (
@@ -56,14 +62,16 @@ const AdminDashboard = () => {
             placeholder="🔍 Rechercher une vidéo..."
             className="border border-gray-300 rounded-lg px-3 py-2 w-64 focus:ring-2 focus:ring-blue-500"
           />
-          <Link to={"/upload"} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition">
+          <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border border-transparent cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
             + upload
           </Link>
         </div>
       </header>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-lg">
+      <div className="bg-white rounded-xl border border-gray-200">
         <table className="min-w-full border-collapse">
           <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
             <tr>
@@ -93,36 +101,41 @@ const AdminDashboard = () => {
                 </td>
                 <td className="py-3 px-6 text-center">
                   <img
-                    src={server+'/'+video.cover}
+                    src={server + '/' + video.cover}
                     alt="cover"
                     className="w-20 h-12 object-cover rounded-lg mx-auto"
                   />
                 </td>
                 <td className="py-3 px-6 text-center">{video.duration}</td>
 
-                {/* Menu déroulant */}
+                {/* Menu */}
                 <td className="py-3 px-6 text-center relative">
-                  {/* <button
-                    onClick={() => toggleMenu(index)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition"
-                  >
-                    <MoreVertical className="h-5 w-5 text-gray-600" />
-                  </button> */}
 
                   <ul className="flex justify-center text-start text-sm text-gray-700">
                     <button
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      disabled={Boolean(loading) || video?.transfer_status === 1}
+                      className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={transcode.bind(null, video.id as string)}
                     >
-                      🎞️ Transcoder
+                     {
+                      loading?.id === video.id && loading?.type === 'transc' ? 
+                      <SyncLoader className="scale-[0.4]" />
+                      :
+                      "🎞️ Transcoder"
+                     }
                     </button>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    <button
+                      disabled={Boolean(loading) || video?.upload_status === 1}
+                      className={`px-4 py-2 hover:bg-gray-100 ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={(upload.bind(null, video.id as string))}
                     >
-                      ☁️ Upload S3
-                    </li>
-                    <Link to={"/videos/"+video.id}
+                      {
+                      loading?.id === video.id && loading?.type === 'upload' ?
+                        <SyncLoader className="scale-[0.4]" />
+                        : "☁️ Upload S3"
+                      }
+                    </button>
+                    <Link to={"/videos/" + video.id}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                       Details
