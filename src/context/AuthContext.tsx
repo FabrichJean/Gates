@@ -7,6 +7,7 @@ import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gest
 interface AuthContextType {
   user: any;
   token: string | null;
+  isValidated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, username?: string) => Promise<void>;
   logout: () => void;
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isValidated, setIsValidated] = useState(false);
 
   // Au montage → on restaure le token depuis le localStorage
   useEffect(() => {
@@ -53,11 +55,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       // ✅ on force une chaîne vide si "name" est undefined
-      const data = await registerApi(email, password, username ?? "");
-      setTokenState(data.token);
+      const data = await registerApi(email, password, username ?? ""); // { token, userType }
+      // setTokenState(data.token);
       setUser(data.user);
-      if (!data.token) throw new Error("Token manquant lors de l'inscription");
-      setToken(data.token);
+      // setIsValidated(true);
+      // if (!data.token) throw new Error("Token manquant lors de l'inscription");
+      // setToken(data.token);
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'inscription");
     } finally {
@@ -74,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // 🔹 Valeur partagée dans tout le projet
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading, error }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, loading, error, isValidated }}>
       {children}
     </AuthContext.Provider>
   );

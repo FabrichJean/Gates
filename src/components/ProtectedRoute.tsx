@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { useEffect } from "react";
 
 interface ProtectedRouteProps {
@@ -10,40 +10,24 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { token, user, loading } = useAuth();
+  const auth = useAuth();
+  const { token } = auth;
   const isOnline = useNetworkStatus();
+  console.log(auth);
+  
 
 // 🔔 Affiche un toast à chaque changement d’état réseau
   useEffect(() => {
     if (isOnline) {
-      toast.success("Connexion Internet rétablie ✅", {
-        position: "top-left",
-        autoClose: 3000,
-        hideProgressBar: false,
-      });
+      toast.success("Connexion Internet rétablie");
     } else {
-      toast.error("Aucune connexion Internet ❌", {
-        position: "top-left",
-        autoClose: 3000,
-        hideProgressBar: false,
-      });
+      toast.error("Aucune connexion Internet");
     }
   }, [isOnline]);
 
-    // 🔒 Redirige vers la page de login si l'utilisateur n'est pas authentifié
-  if (loading) return <div>Loading...</div>;
-
   if (!token) return <Navigate to="/login" replace />;
 
-  // 🔒 Si utilisateur non validé → redirect page info
-  if (user && !user.isValidated === false) {
-    toast.warn("Votre compte n'a pas encore été validé par le superadmin ⚠️", {
-      position: "top-left",
-      autoClose: 5000,
-      hideProgressBar: false,
-    });
-    return <Navigate to="/not-validated" replace />;
-  }
+  // if () 
 
   return <>{children}</>;
 

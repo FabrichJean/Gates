@@ -13,7 +13,7 @@ const logoUrl =
 
 const Register: React.FC = () => {
   const isOnline = useNetworkStatus();
-  const { register, error, loading, token, user } = useAuth(); // ✅ On utilise register ici
+  const { register, loading, token, user } = useAuth(); // ✅ On utilise register ici
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +37,7 @@ const Register: React.FC = () => {
     }
 
     if (!validateEmail(email)) {
-      toast.error("Email invalide", { position: "top-center" });
+      toast.error("Email invalide Reg", { position: "top-center" });
       return;
     }
     if (!validatePassword(password)) {
@@ -53,10 +53,10 @@ const Register: React.FC = () => {
 
     await register(username, email, password)
     .then(() => {
-      navigate("/login"); // Rediriger vers la page d'accueil après l'inscription réussie
+      navigate("/register");
     })
     .catch((err) => {
-      toast.error(err.message || "Erreur lors de l'inscription.");
+     toast.error("Login faild" +  err.message);
     });
   };
 
