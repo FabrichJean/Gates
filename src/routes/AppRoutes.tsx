@@ -8,6 +8,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
+import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -68,7 +69,7 @@ const AppRoutes = () => (
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
 );
