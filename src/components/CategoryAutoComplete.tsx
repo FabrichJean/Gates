@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 
-export type Category = 
-{id: number, name: string, createdAt: Date, updatedAt: Date}
+export type Category =
+  { id: number, name: string, createdAt: Date, updatedAt: Date }
 
-const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => void }) => {
+const CategoryAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: Category) => void, defaultValue?: Category }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Charger toutes les langues depuis iso-639-1
   useEffect(() => {
-   axios.get<Category[]>(apiURL+"/categories").then(res => {
+    axios.get<Category[]>(apiURL + "/categories", {
+      headers: { Authorization: `Bearer ${token()}` },
+    }).then(res => {
       const all = res.data;
       console.log(all);
       setCategories(all);
@@ -21,7 +23,7 @@ const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => voi
     });
   }, []);
 
-    // Filtrage auto-complete
+  // Filtrage auto-complete
   useEffect(() => {
     if (!query) {
       setFiltered([]);
@@ -37,7 +39,7 @@ const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => voi
 
   const handleSelect = (lang: Category) => {
     console.log(lang);
-    
+
     setQuery(lang.name);
     setShowDropdown(false);
     if (onSelect) {

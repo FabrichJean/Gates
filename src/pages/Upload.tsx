@@ -5,12 +5,16 @@ import toast, { Toaster } from "react-hot-toast";
 import { apiURL } from "../constant/index"
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
+import { uploadVideo } from "../api/videos";
 
 
-type Couple = { i18_language: string; title: string };
+export type Couple = { i18_language: string; title: string, name?: string };
 
-function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
-  const [couples, setCouples] = useState<Couple[]>([]);
+export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit, defaultCouples, btnSubmit }: { defaultCouples?: Couple[], btnSubmit?: string, onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
+  const [couples, setCouples] = useState<Couple[]>(defaultCouples || []);
+
+  console.log('couples', btnSubmit, couples);
+  
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...couples];
@@ -33,22 +37,31 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
     <div onSubmit={handleSubmit} className="w-max md:min-w-xl p-4 space-y-4">
 
       <div className="flex items-center gap-3">
-        <label className="block text-gray-700 font-medium">Titles</label>
+        <label className="text-sm font-medium text-gray-700 tracking-wide">
+          Titles
+        </label>
+
         <button
           type="button"
           onClick={addCouple}
-          className="flex items-center bg-blue-500 text-white px-2 w-max rounded-full hover:bg-blue-600 transition cursor-pointer"
+          className="flex items-center justify-center w-8 h-8 rounded-xl 
+      bg-white border border-gray-200 shadow-sm 
+      hover:border-gray-300 hover:shadow-md 
+      transition-all duration-200 ease-in-out 
+      text-gray-700 hover:text-blue-600 
+      focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer"
         >
-          <PlusIcon className="w-5 h-5" />
+          <PlusIcon className="w-4 h-4" />
         </button>
       </div>
+
 
       {couples.map((c, i) => (
         <div
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
-          <LanguageAutoComplete onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+          <LanguageAutoComplete defaultValue={{code: c.i18_language, name: c.name!}} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
@@ -65,11 +78,29 @@ function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { o
 
       <button
         onClick={handleSubmit}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
         disabled={uploading}
+        className={`relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border border-transparent cursor-pointer
+    ${uploading
+            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md"
+          } focus:outline-none focus:ring-2 focus:ring-blue-300`}
       >
-        {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
+        {uploading ? (
+          <>
+            <span className="flex items-center gap-2 text-gray-600">
+              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+              progressing... {progress}%
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="underline hover:text-blue-500">{btnSubmit ? btnSubmit : '🚀 Publish'}</span>
+          </>
+        )}
       </button>
+
     </div>
   );
 }
@@ -124,19 +155,11 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
-      const token = localStorage.getItem("authToken");
-
-      const res = await axios.post(apiURL + "/videos/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setProgress(percent);
-          }
-        },
+      const res = await uploadVideo(formData, (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+        }
       });
 
       toast.success("✅ Upload réussi !");
@@ -157,7 +180,7 @@ const Upload = () => {
       <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
         Upload
       </h1>
-      <div className="flex md:flex-row flex-col gap-7 w-max bg-white shadow-xl rounded-2xl p-8">
+      <div className="flex md:flex-row flex-col gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
         <div className="space-y-6">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Ref</label>
@@ -170,7 +193,10 @@ const Upload = () => {
             />
           </div>
 
-          <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Category</label>
+              <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
+            </div>
 
           <div>
             <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
@@ -215,9 +241,9 @@ const Upload = () => {
             </div>
           </div>
 
-          {/* Video (optional) */}
+          {/* Video */}
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Video (optional)</label>
+            <label className="block text-gray-700 font-medium mb-2">Video</label>
             <div
               onClick={handleVideoClick}
               className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
@@ -274,14 +300,6 @@ const Upload = () => {
         </div>
 
         <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
-
-        {/* <button
-          onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-          disabled={uploading}
-        >
-          {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
-        </button> */}
       </div>
     </div>
   );

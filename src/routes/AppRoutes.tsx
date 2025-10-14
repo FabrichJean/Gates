@@ -4,12 +4,10 @@ import Dashboard from "../pages/Dashboard";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
-import AdminDashboard from "../pages/AdminDashboard";
 import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
-import Users from "../pages/Users";
-import NotFound from "../pages/NotFound";
+import VideosManagment from "../pages/VideosManagment";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -29,17 +27,18 @@ const AppRoutes = () => (
         element={
           <ProtectedRoute>
             <InsideSidebar>
-              <Dashboard />
+              {/* <Dashboard /> */}
+               <VideosManagment />
             </InsideSidebar>
           </ProtectedRoute>
         }
       />
       <Route
-        path="/admin"
+        path="/videos"
         element={
           // <ProtectedRoute>
           <InsideSidebar>
-            <AdminDashboard />
+            <VideosManagment />
           </InsideSidebar>
           // </ProtectedRoute>
         }
