@@ -117,8 +117,6 @@ function EditVideo({ video }: { video: TVideo }) {
   const [category, setCategory] = useState<Category>(video?.category);
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
 
-  const navigate = useNavigate();
-
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -135,15 +133,16 @@ function EditVideo({ video }: { video: TVideo }) {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
       ...(ref && { ref }),
-      titles: JSON.stringify(coupleTitles),
+     
+      titles: JSON.stringify(coupleTitles)
     };
-
+    
 
     try {
       setUploading(true);
       setProgress(0);
 
-      console.log(formData);
+      console.log(formData.titles);
       
 
       const res = await updateVideo(video.id, formData, (progressEvent) => {
