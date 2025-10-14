@@ -21,7 +21,7 @@ export type Video = {
   isDeleted: unknown;
 }
 
-const AdminDashboard = () => {
+const VideosManagment = () => {
 
   const { data, reFetch } = UseVideos();
   const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' }>();
@@ -167,4 +167,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default VideosManagment;
