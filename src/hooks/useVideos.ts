@@ -23,7 +23,7 @@ export type TVideo = {
 
 
 export default function UseVideos() {
-    return useFetch(apiURL + "/videos", {
+    return useFetch<{ videos: TVideo[] }>(apiURL + "/videos", {
         headers: { Authorization: `Bearer ${token()}` },
     })
 }

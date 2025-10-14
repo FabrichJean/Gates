@@ -91,7 +91,20 @@ const AdminDashboard = () => {
               <tr key={index} className="hover:bg-gray-50 transition relative">
                 <td className="py-3 px-6">{video.ref}</td>
                 <td className="py-3 px-6">
-                  {video.status === "Uploaded" ? (
+                  {video.upload_status === 1 ?
+                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                      uploaded
+                    </span>
+                    :
+                    video.transfer_status === 1 ?
+                      <span className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-semibold">
+                        waiting for Upload
+                      </span> :
+                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                        waiting for Transcode
+                      </span>
+                  }
+                  {/* {video.status === "Uploaded" ? (
                     <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
                       Uploaded
                     </span>
@@ -99,7 +112,7 @@ const AdminDashboard = () => {
                     <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
                       Waiting for Upload
                     </span>
-                  )}
+                  )} */}
                 </td>
                 <td className="py-3 px-6 text-center">
                   <img
@@ -117,19 +130,19 @@ const AdminDashboard = () => {
                     <button
                       disabled={Boolean(loading) || video?.transfer_status === 1}
                       className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                      onClick={transcode.bind(null, video.id as string)}
+                      onClick={transcode.bind(null, video.id)}
                     >
                       {
                         loading?.id === video.id && loading?.type === 'transc' ?
                           <SyncLoader className="scale-[0.4]" />
                           :
-                          "🎞️ Transcoder"
+                          "🎞️ Transcode"
                       }
                     </button>
                     <button
                       disabled={Boolean(loading) || video?.upload_status === 1}
                       className={`px-4 py-2 hover:bg-gray-100 ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                      onClick={(upload.bind(null, video.id as string))}
+                      onClick={(upload.bind(null, video.id))}
                     >
                       {
                         loading?.id === video.id && loading?.type === 'upload' ?
@@ -138,7 +151,7 @@ const AdminDashboard = () => {
                       }
                     </button>
                     <Link to={"/videos/" + video.id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline"
                     >
                       Details
                     </Link>
