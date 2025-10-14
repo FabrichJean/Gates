@@ -7,6 +7,8 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import AdminDashboard from "../pages/AdminDashboard";
 import Profil from "../pages/Profil";
 import Register from "../pages/Register";
+import Sidebar from "../components/InsideSidebar";
+import InsideSidebar from "../components/InsideSidebar";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -33,7 +35,9 @@ const AppRoutes = () => (
         path="/admin"
         element={
           // <ProtectedRoute>
+          <InsideSidebar>
             <AdminDashboard />
+          </InsideSidebar>
           // </ProtectedRoute>
         }
       />
