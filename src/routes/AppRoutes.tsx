@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -8,6 +7,8 @@ import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
+import Users from "../pages/Users";
+import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -28,7 +29,7 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               {/* <Dashboard /> */}
-               <VideosManagment />
+              <VideosManagment />
             </InsideSidebar>
           </ProtectedRoute>
         }
@@ -36,11 +37,11 @@ const AppRoutes = () => (
       <Route
         path="/videos"
         element={
-          // <ProtectedRoute>
-          <InsideSidebar>
-            <VideosManagment />
-          </InsideSidebar>
-          // </ProtectedRoute>
+          <ProtectedRoute>
+            <InsideSidebar>
+              <VideosManagment />
+            </InsideSidebar>
+          </ProtectedRoute>
         }
       />
       <Route
