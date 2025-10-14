@@ -23,7 +23,7 @@ export type Video = {
 
 const AdminDashboard = () => {
 
-  const { data } = UseVideos();
+  const { data, reFetch } = UseVideos();
   const [loading, setLoading] = useState<{id: string | number | undefined, type: 'transc' | 'upload'}>();
 
   const transcode = async (videoId: string | number | undefined) => {
@@ -31,6 +31,7 @@ const AdminDashboard = () => {
     await transcodeVideo(videoId)
       .then(() => {
         toast.success("success");
+        reFetch();
       })
       .catch(() => {
         toast.error("Error");
@@ -64,7 +65,7 @@ const AdminDashboard = () => {
           />
           <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
-    backdrop-blur-md border border-transparent cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
             + upload
           </Link>
         </div>
