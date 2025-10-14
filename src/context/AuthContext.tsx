@@ -56,11 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // ✅ on force une chaîne vide si "name" est undefined
       const data = await registerApi(email, password, username ?? ""); // { token, userType }
-      // setTokenState(data.token);
       setUser(data.user);
-      // setIsValidated(true);
-      // if (!data.token) throw new Error("Token manquant lors de l'inscription");
-      // setToken(data.token);
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'inscription");
     } finally {

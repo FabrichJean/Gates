@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 // import { toast } from "react-toastify";
 import { useAuth } from "../hooks/useAuth";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
-import { validateEmail, validatePassword } from "../utils/validators";
+import { validatePassword } from "../utils/validators";
 import ThemeToggle from "../components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -43,10 +43,6 @@ const Login: React.FC = () => {
       return;
     }
 
-    // if (!validateEmail(email)) {
-    //   toast.error("Email invalide Log");
-    //   return;
-    // }
     if (!validatePassword(password)) {
       toast.error("Mot de passe trop court");
       return;

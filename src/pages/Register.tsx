@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNetworkStatus } from "../hooks/useNetworkStatus";
+// import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { validateEmail, validatePassword } from "../utils/validators";
 import { useNavigate, Link } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
@@ -12,7 +12,7 @@ const logoUrl =
   "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742348949/Prestataires_Documents/smj7n1bdlpjsfsotwpco.png";
 
 const Register: React.FC = () => {
-  const isOnline = useNetworkStatus();
+  // const isOnline = useNetworkStatus();
   const { register, loading, token, user } = useAuth(); // ✅ On utilise register ici
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -21,20 +21,20 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
 
   // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
-    useEffect(() => {
-      if (token || user) {
-        navigate("/"); // redirige vers l’accueil
-      }
-    }, [token, user, navigate]);
+  useEffect(() => {
+    if (token || user) {
+      navigate("/"); // redirige vers l’accueil
+    }
+  }, [token, user, navigate]);
 
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isOnline) {
-      toast.error(
-        "Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.");
-      return;
-    }
+    // if (!isOnline) {
+    //   toast.error(
+    //     "Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.");
+    //   return;
+    // }
 
     if (!validateEmail(email)) {
       toast.error("Email invalide Reg", { position: "top-center" });
@@ -51,13 +51,13 @@ const Register: React.FC = () => {
       return;
     }
 
-    await register(username, email, password)
-    .then(() => {
-      navigate("/register");
-    })
-    .catch((err) => {
-     toast.error("Login faild" +  err.message);
-    });
+    await register(username, email, password);
+    // .then(() => {
+    //   navigate("/register");
+    // })
+    // .catch((err) => {
+    //  toast.error("Login faild" +  err.message);
+    // });
   };
 
   return (
