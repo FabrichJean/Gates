@@ -139,7 +139,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
             <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span>
           </div>
-
         </div>
         <div
           className="relative w-full h-max rounded-lg flex items-center justify-center"
@@ -149,13 +148,17 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               <video src={server + '/' + video?.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
               :
               <>
-                <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)}/>
+                <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
                 <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
               </>
           }
         </div>
 
-        {/* <span className="flex-1 text-gray-800 text-sm">11 fev 2024 08:15</span> */}
+        <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
+          modify
+        </button>
 
         <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
           <h1 className="text-lg font-semibold text-gray-800">Category</h1>

@@ -24,10 +24,10 @@ export type Video = {
 const AdminDashboard = () => {
 
   const { data, reFetch } = UseVideos();
-  const [loading, setLoading] = useState<{id: string | number | undefined, type: 'transc' | 'upload'}>();
+  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' }>();
 
   const transcode = async (videoId: string | number | undefined) => {
-    setLoading({id: videoId, type: 'transc'});
+    setLoading({ id: videoId, type: 'transc' });
     await transcodeVideo(videoId)
       .then(() => {
         toast.success("success");
@@ -41,9 +41,10 @@ const AdminDashboard = () => {
 
 
   const upload = async (videoId: string | number | undefined) => {
-    setLoading({id: videoId, type: 'upload'});
+    setLoading({ id: videoId, type: 'upload' });
     await uploadS3(videoId)
       .then(() => {
+        reFetch();
         toast.success("success");
       })
       .catch(() => {
@@ -118,12 +119,12 @@ const AdminDashboard = () => {
                       className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                       onClick={transcode.bind(null, video.id as string)}
                     >
-                     {
-                      loading?.id === video.id && loading?.type === 'transc' ? 
-                      <SyncLoader className="scale-[0.4]" />
-                      :
-                      "🎞️ Transcoder"
-                     }
+                      {
+                        loading?.id === video.id && loading?.type === 'transc' ?
+                          <SyncLoader className="scale-[0.4]" />
+                          :
+                          "🎞️ Transcoder"
+                      }
                     </button>
                     <button
                       disabled={Boolean(loading) || video?.upload_status === 1}
@@ -131,9 +132,9 @@ const AdminDashboard = () => {
                       onClick={(upload.bind(null, video.id as string))}
                     >
                       {
-                      loading?.id === video.id && loading?.type === 'upload' ?
-                        <SyncLoader className="scale-[0.4]" />
-                        : "☁️ Upload S3"
+                        loading?.id === video.id && loading?.type === 'upload' ?
+                          <SyncLoader className="scale-[0.4]" />
+                          : "☁️ Upload S3"
                       }
                     </button>
                     <Link to={"/videos/" + video.id}

@@ -92,7 +92,7 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
           </>
         ) : (
           <>
-            <span>🚀 Publish</span>
+            <span className="underline hover:text-blue-500">🚀 Publish</span>
           </>
         )}
       </button>
@@ -242,9 +242,9 @@ const Upload = () => {
             </div>
           </div>
 
-          {/* Video (optional) */}
+          {/* Video */}
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Video (optional)</label>
+            <label className="block text-gray-700 font-medium mb-2">Video</label>
             <div
               onClick={handleVideoClick}
               className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
