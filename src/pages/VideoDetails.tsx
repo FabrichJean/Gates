@@ -154,11 +154,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           }
         </div>
 
-        <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
+        <div className="flex gap-4">
+          <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
-          modify
-        </button>
+            modify
+          </button>
+          <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 bg-white/90 hover:bg-white text-red-800 border-gray-200 hover:border-gray-300">
+            delete
+          </button>
+        </div>
 
         <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
           <h1 className="text-lg font-semibold text-gray-800">Category</h1>
@@ -183,72 +190,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             </div>
           ))}
         </div>
-
-
-
-        {/* <div>
-          <label className="block text-gray-700 font-medium mb-1">Statut</label>
-          <input
-            type="text"
-            value={status || ""}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-        </div> */}
-
-        {/* <div>
-          <label className="block text-gray-700 font-medium mb-1">Prix</label>
-          <input
-            type="number"
-            value={price ?? ""}
-            onChange={(e) => setPrice(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          />
-        </div>
-
-        <TitlesForm
-          onChange={(titles) => setCoupleTitles(titles)}
-          uploading={saving}
-          progress={progress}
-          handleSubmit={handleSave}
-        /> */}
       </div>
 
       {/* Preview + actions */}
       <div className="w-full md:w-[35%] flex flex-col gap-4">
-        {/* <div
-          className="w-full h-64 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden cursor-pointer"
-          onClick={() => coverInputRef.current?.click()}
-        >
-          {(coverPreview || video.cover) ? (
-            <img src={coverPreview || server+'/'+video.cover} alt="cover" className="w-full h-full object-cover" />
-          ) : (
-            <div className="text-gray-400 text-sm">Cliquer pour changer la cover</div>
-          )}
-          <input
-            type="file"
-            ref={coverInputRef}
-            accept="image/*"
-            onChange={handleCoverChange}
-            className="hidden"
-          />
-        </div> */}
-
-        {/* <button
-          onClick={handleSave}
-          disabled={saving}
-          className={`w-full py-2.5 rounded-xl font-medium transition
-          ${saving ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white/90 text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md"}`}
-        >
-          {saving ? `Modification... ${progress}%` : "💾 Modifier"}
-        </button>
-
-        <button
-          onClick={() => video.video_path ? window.open(video.video_path, "_blank") : toast("Aucun fichier vidéo disponible", { icon: "ℹ️" })}
-          className="w-full py-2.5 rounded-xl border border-gray-200 bg-white hover:border-gray-300 shadow-sm hover:shadow-md text-gray-800"
-        >
-          ▶️ Prévisualiser vidéo
-        </button> */}
+        
       </div>
     </div>
   );
