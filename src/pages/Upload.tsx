@@ -5,12 +5,16 @@ import toast, { Toaster } from "react-hot-toast";
 import { apiURL } from "../constant/index"
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
+import { uploadVideo } from "../api/videos";
 
 
-type Couple = { i18_language: string; title: string };
+export type Couple = { i18_language: string; title: string, name?: string };
 
-export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit }: { onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
-  const [couples, setCouples] = useState<Couple[]>([]);
+export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit, defaultCouples, btnSubmit }: { defaultCouples?: Couple[], btnSubmit?: string, onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
+  const [couples, setCouples] = useState<Couple[]>(defaultCouples || []);
+
+  console.log('couples', btnSubmit, couples);
+  
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...couples];
@@ -57,7 +61,7 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
-          <LanguageAutoComplete onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+          <LanguageAutoComplete defaultValue={{code: c.i18_language, name: c.name!}} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
@@ -87,12 +91,12 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
           <>
             <span className="flex items-center gap-2 text-gray-600">
               <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
-              Uploading... {progress}%
+              progressing... {progress}%
             </span>
           </>
         ) : (
           <>
-            <span className="underline hover:text-blue-500">🚀 Publish</span>
+            <span className="underline hover:text-blue-500">{btnSubmit ? btnSubmit : '🚀 Publish'}</span>
           </>
         )}
       </button>
@@ -151,19 +155,11 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
-      const token = localStorage.getItem("authToken");
-
-      const res = await axios.post(apiURL + "/videos/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setProgress(percent);
-          }
-        },
+      const res = await uploadVideo(formData, (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+        }
       });
 
       toast.success("✅ Upload réussi !");
@@ -197,7 +193,10 @@ const Upload = () => {
             />
           </div>
 
-          <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Category</label>
+              <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
+            </div>
 
           <div>
             <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
@@ -301,14 +300,6 @@ const Upload = () => {
         </div>
 
         <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
-
-        {/* <button
-          onClick={handleSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-          disabled={uploading}
-        >
-          {uploading ? `Uploading... ${progress}%` : "🚀 Publish"}
-        </button> */}
       </div>
     </div>
   );

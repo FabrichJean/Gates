@@ -15,7 +15,7 @@ export type TVideo = {
   ref: string;
   sequence: number | null;
   temp_url: string;
-  titles: { title: string; i18_language: string; video_id: number }[];
+  titles: { title: string; i18_language: string; video_id: number, language: {code: string, name: string} }[];
   transfer_status: number;
   upload_status: number;
   url: string | null;
@@ -23,7 +23,9 @@ export type TVideo = {
 
 
 export default function UseVideos() {
-    return useFetch(apiURL + "/videos")
+    return useFetch(apiURL + "/videos", {
+        headers: { Authorization: `Bearer ${token()}` },
+    })
 }
 
 export function UseVideo(id: string | number | undefined) {

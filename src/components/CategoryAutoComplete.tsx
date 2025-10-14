@@ -5,9 +5,9 @@ import { apiURL } from "../constant";
 export type Category = 
 {id: number, name: string, createdAt: Date, updatedAt: Date}
 
-const CategoryAutoComplete = ({ onSelect }: { onSelect?: (lang: Category) => void }) => {
+const CategoryAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: Category) => void, defaultValue?: Category }) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 

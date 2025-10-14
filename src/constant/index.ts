@@ -1,3 +1,3 @@
 export const server = "http://localhost:3000"
 export const apiURL = server + "/api/v1";
-export const token = () => localStorage.getItem("token") || "";
+export const token = () => localStorage.getItem("authToken") || "";

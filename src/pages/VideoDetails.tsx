@@ -1,23 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Toaster } from "react-hot-toast";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { TitlesForm } from './Upload';
-import { UseVideo } from "../hooks/useVideos";
+import React, { useState, useRef } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { TitlesForm, type Couple } from './Upload';
+import { UseVideo, type TVideo } from "../hooks/useVideos";
 import { server } from "../constant";
 import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
-
-type Video = {
-  id: string;
-  userId?: string;
-  titles: { title: string; i18_language: string }[];
-  cover?: string | null;
-  video_path?: string | null;
-  categoryId?: string | null;
-  status?: string;
-  duration?: number | null;
-  price?: number | null;
-};
+import type { Category } from "../components/CategoryAutoComplete";
+import CategoryAutoComplete from "../components/CategoryAutoComplete";
+import { updateVideo } from "../api/videos";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
@@ -26,106 +17,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: video } = UseVideo(videoId);
   const [videoPlayed, setVideoPlayed] = useState(false);
 
+  const [modifying, setModifying] = useState(false);
+
   console.log(video);
-
-
-  // const [video, setVideo] = useState<Video | null>(null);
-  // const [loading, setLoading] = useState(true);
-  // const [saving, setSaving] = useState(false);
-  // const [progress, setProgress] = useState(0);
-
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const coverInputRef = useRef<HTMLInputElement | null>(null);
-
-  // const [coupleTitles, setCoupleTitles] = useState<{ title: string; i18_language: string }[]>([]);
-  // const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
-  // const [status, setStatus] = useState<string | undefined>(undefined);
-  // const [price, setPrice] = useState<number | undefined>(undefined);
-
-  // useEffect(() => {
-  //   if (!videoId) return;
-  //   const fetchVideo = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const token = localStorage.getItem("authToken");
-  //       const res = await axios.get(`${apiURL}/videos/${videoId}`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //       const data = res.data;
-  //       console.log(data);
-
-  //       setVideo(data);
-  //       setCoverPreview(data.cover || null);
-  //       setCoupleTitles(data.titles || []);
-  //       setCategoryId(data.categoryId || undefined);
-  //       setStatus(data.status || "Draft");
-  //       setPrice(data.price ?? undefined);
-  //     } catch (err) {
-  //       console.error(err);
-  //       toast.error("Impossible de charger la vidéo");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchVideo();
-  // }, [videoId]);
-
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] || null;
-    setCoverFile(f);
-    if (f) setCoverPreview(URL.createObjectURL(f));
-  };
-
-  // const handleSave = async () => {
-  //   if (!videoId) return toast.error("Video id manquant");
-  //   const token = localStorage.getItem("authToken");
-  //   try {
-  //     setSaving(true);
-  //     setProgress(0);
-
-  //     const formData: any = {
-  //       ...(coverFile && { cover: coverFile }),
-  //       categoryId,
-  //       status,
-  //       price,
-  //       titles: JSON.stringify(coupleTitles),
-  //     };
-
-  //     const res = await axios.put(`${apiURL}/videos/${videoId}`, formData, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": coverFile ? "multipart/form-data" : "application/json",
-  //       },
-  //       onUploadProgress: (ev) => {
-  //         if (ev.total) setProgress(Math.round((ev.loaded * 100) / ev.total));
-  //       },
-  //     });
-
-  //     setVideo(res.data);
-  //     toast.success("✅ Modifications enregistrées !");
-  //   } catch (err: any) {
-  //     console.error(err);
-  //     toast.error("Erreur lors de la sauvegarde : " + (err?.response?.data?.message || err.message));
-  //   } finally {
-  //     setSaving(false);
-  //     setProgress(0);
-  //   }
-  // };
-
-  // if (loading)
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-gray-500">Chargement…</div>
-  //     </div>
-  //   );
 
   if (!video)
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500">Vidéo introuvable</div>
+        <div className="text-red-500">Video not found</div>
       </div>
     );
+
+  return video && <EditVideo video={video} />;
 
   return (
     <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
@@ -149,13 +52,13 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               :
               <>
                 <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
-                <img src={coverPreview || server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+                <img src={server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
               </>
           }
         </div>
 
         <div className="flex gap-4">
-          <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
+          <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
             modify
@@ -194,10 +97,150 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
       {/* Preview + actions */}
       <div className="w-full md:w-[35%] flex flex-col gap-4">
-        
+
       </div>
     </div>
   );
 };
 
 export default VideoDetails;
+
+function EditVideo({ video }: { video: TVideo }) {
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [ref, setRef] = useState<string | null>(video?.ref || null);
+  const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+
+  const [coverPreview, setCoverPreview] = useState<string | null>(server + '/' + video?.cover);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const [category, setCategory] = useState<Category>(video?.category);
+  const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
+
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCoverClick = () => coverInputRef.current?.click();
+
+  const handleSubmit = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formData: any = {
+      ...(coverFile && { cover: coverFile }),
+      ...(category && { category_id: category.id }),
+      ...(ref && { ref }),
+      titles: JSON.stringify(coupleTitles),
+    };
+
+
+    try {
+      setUploading(true);
+      setProgress(0);
+
+      const res = await updateVideo(video.id, formData, (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+        }
+      });
+
+      toast.success("✅ successfull !");
+      console.log("Video updated:", res.data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error(err);
+      toast.error("❌ Error: " + (err.response?.data?.message || err.message));
+    } finally {
+      setUploading(false);
+      setProgress(0);
+    }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen w-full bg-gray-50 p-6">
+      <Toaster position="top-right" />
+      <div className="flex flex-col w-full">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-6 self-start">
+          Edit
+        </h1>
+        <div className="flex md:flex-row flex-col gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Ref</label>
+              <input
+                type="text"
+                value={ref || ""}
+                onChange={(e) => setRef(e.target.value)}
+                placeholder=""
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Category</label>
+              <CategoryAutoComplete defaultValue={category} onSelect={(cat) => setCategory(cat)} />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
+              <div
+                onClick={handleCoverClick}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer relative"
+              >
+                {coverPreview ? (
+                  <img
+                    src={coverPreview}
+                    alt="Preview"
+                    className="rounded-lg object-cover w-full h-52"
+                  />
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-gray-400 mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
+                      />
+                    </svg>
+                    <p className="text-gray-500 text-sm text-center">
+                      Click or drag an image (PNG, JPG, WEBP)
+                    </p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  ref={coverInputRef}
+                  accept="image/*"
+                  onChange={handleCoverChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Barre de progression */}
+            {uploading && (
+              <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
+              </div>
+            )}
+          </div>
+
+          <TitlesForm btnSubmit="✏️ update" defaultCouples={video?.titles.map(title => ({ ...title, language: title.language, name: title.language.name }))} onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
+        </div>
+      </div>
+    </div>
+  );
+
+}

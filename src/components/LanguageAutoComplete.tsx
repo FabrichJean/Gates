@@ -7,9 +7,9 @@ type Language = {
   name: string;
 };
 
-const LanguageAutoComplete = ({ onSelect }: { onSelect?: (lang: Language) => void }) => {
+const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: Language) => void, defaultValue?: Language }) => {
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Language[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
