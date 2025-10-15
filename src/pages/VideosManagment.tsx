@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
-import { transcodeVideo, uploadCover, uploadS3 } from "../api/videos";
+import { toggleStatus, transcodeVideo, uploadCover, uploadS3 } from "../api/videos";
 import toast from "react-hot-toast";
 import { SyncLoader } from "react-spinners";
 import Pagination from "../components/Pagination";
+import SearchModal from "../components/SearchModal";
 
 export type Video = {
   id: unknown;
@@ -28,7 +30,7 @@ const VideosManagment = () => {
 
   useEffect(() => {
     reFetch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' | 'cover' }>();
@@ -72,18 +74,46 @@ const VideosManagment = () => {
       .finally(() => setLoading(undefined));
   }
 
+  const activate = async (videoId: string | number) => {
+    await toggleStatus(videoId)
+      .then(() => {
+        reFetch();
+        toast.success("success");
+      })
+      .catch(() => {
+        toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Video Management</h1>
         <div className="flex items-center gap-4">
-          <input
+
+          <SearchModal />
+          {/* @ts-expect-error */}
+            <button onClick={()=>document.getElementById('search_modal_45').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
+              <svg className="hidden size-4 shrink-0 opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <g fill="none">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06l-2.79-2.79Z" fill="currentColor" />
+                </g>
+              </svg>
+              <span className="grow text-left">Search…</span>
+              <kbd className="kbd kbd-sm font-mono opacity-50">
+                <span className="me-1 text-sm">⌘</span>K
+              </kbd>
+            </button>
+
+
+          {/* <input
             type="text"
             placeholder="🔍 Search ..."
             className="border border-gray-300 rounded-lg px-3 py-2 w-64 focus:ring-2 focus:ring-blue-500"
-          />
-          <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+          /> */}
+          <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
             + new
@@ -139,13 +169,13 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
                   <td className="py-3 px-6 text-center">
-                   <input type="checkbox" defaultChecked className="toggle" />
+                    <input type="checkbox" defaultChecked={!video.isDeleted} checked={!video.isDeleted} className="toggle" onChange={activate.bind(null, video.id)} />
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
                       <button
                         disabled={Boolean(loading) || video?.transfer_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={transcode.bind(null, video.id)}
                       >
                         {
@@ -157,7 +187,7 @@ const VideosManagment = () => {
                       </button>
                       <button
                         disabled={false}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === null ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`px-4 py-2 hover:bg-gray-100 ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={cover.bind(null, video.id)}
                       >
                         {

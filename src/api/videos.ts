@@ -66,3 +66,11 @@ export async function uploadCover(videoId: string | number): Promise<void> {
         }
     });
 }
+
+export async function toggleStatus(videoId: string | number): Promise<void> {
+    return await axios.put(`${apiURL}/videos/${videoId}/toggleStatus`, null, {
+        headers: {
+            Authorization: `Bearer ${token()}`,
+        }
+    });
+}

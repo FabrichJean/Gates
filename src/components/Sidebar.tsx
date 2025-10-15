@@ -31,7 +31,7 @@ function Sidebar() {
                             to="/"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
-                            <RiHome9Fill className="w-5 h-5" />
+                            <RiHome9Fill className="min-w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Dashboard
                             </span>
@@ -41,7 +41,7 @@ function Sidebar() {
                             to="/videos"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
-                            <BiSolidVideos className="w-5 h-5" />
+                            <BiSolidVideos className="min-w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Videos
                             </span>
@@ -51,7 +51,7 @@ function Sidebar() {
                             to="/users"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
-                            <Users2 className="w-5 h-5" />
+                            <Users2 className="min-w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Users
                             </span>
@@ -61,7 +61,7 @@ function Sidebar() {
                             to="/profile"
                             className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold bg-primary-50 shadow-sm text-primary-400"
                         >
-                            <CgProfile className="w-5 h-5" />
+                            <CgProfile className="min-w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Profile
                             </span>

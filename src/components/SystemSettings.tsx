@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { saveSettings } from "../api/settings";
+import { useSettings } from "../hooks/useSettings";
 
 export default function SystemSettings() {
-    const [settings, setSettings] = useState({
-        system_code: "Vod001",
-        mp4_path: "D:/videos/",
-        image_path: "D:/images/",
-        cdn_url: "http://d2sd0e9glqadgh.cloudfront.net/",
-    });
+
+    const {data, reFetch} = useSettings()
+
+    console.log(data);
+    
+
+    const [settings, setSettings] = useState({...data?.settings});
 
     const [loading, setLoading] = useState(false);
 
@@ -20,7 +22,6 @@ export default function SystemSettings() {
         setLoading(true);
         try {
             await saveSettings(settings);
-
             toast.success("Paramètres sauvegardés !");
         } catch (err) {
             toast.error("Erreur lors de la sauvegarde");
@@ -45,13 +46,13 @@ export default function SystemSettings() {
                 <SettingField
                     label="MP4 Storage Path"
                     name="mp4_path"
-                    value={settings.mp4_path}
+                    value={settings.mp4_storage_path}
                     onChange={handleChange}
                 />
                 <SettingField
                     label="Image Storage Path"
                     name="image_path"
-                    value={settings.image_path}
+                    value={settings.image_storage_path}
                     onChange={handleChange}
                 />
                 <SettingField
