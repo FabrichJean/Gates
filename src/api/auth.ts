@@ -15,7 +15,6 @@ export const loginApi = async (identifier: string, password: string) => {
     const response = await api.post("/auth/login", { identifier, password });
     return response.data; // { token, user }
   } catch (error: any) {
-    // Gestion propre des erreurs
     if (error.response && error.response.data?.message) {
       throw new Error(error.response.data.message);
     }
@@ -35,3 +34,17 @@ export const registerApi = async (username: string, email: string, password: str
     throw new Error("Erreur de connexion au serveur");
   }
 };
+
+// 🔸 Valider un utilisateur
+export const validateUserApi = async (userId: number) => {
+  try {
+    const res = await api.patch(`/auth/validate/${userId}`);
+    return res.data; // { message }
+  } catch (error: any) {
+    if (error.response && error.response.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("Erreur de connexion au serveur");
+  }
+};
+

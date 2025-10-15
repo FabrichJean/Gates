@@ -57,11 +57,11 @@ const AppRoutes = () => (
       <Route
         path="/upload"
         element={
-          // <ProtectedRoute>
-          <InsideSidebar>
-            <Upload />
-          </InsideSidebar>
-          // </ProtectedRoute>
+          <ProtectedRoute>
+            <InsideSidebar>
+              <Upload />
+            </InsideSidebar>
+          </ProtectedRoute>
         }
       />
       <Route
