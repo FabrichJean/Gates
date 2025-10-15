@@ -121,7 +121,7 @@ const VideosManagment = () => {
                     className="w-20 h-12 object-cover rounded-lg mx-auto"
                   />
                 </td>
-                <td className="py-3 px-6 text-center">{video.duration}</td>
+                <td className="py-3 px-6 text-center">{video.duration} s</td>
 
                 {/* Menu */}
                 <td className="py-3 px-6 text-center relative">

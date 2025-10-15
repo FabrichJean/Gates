@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,16 +9,18 @@ import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
-import { updateVideo } from "../api/videos";
+import { archiveVideo, deletePerm, updateVideo } from "../api/videos";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
-  const { data: video } = UseVideo(videoId);
+  const { data: video, reFetch } = UseVideo(videoId);
   const [videoPlayed, setVideoPlayed] = useState(false);
 
   const [modifying, setModifying] = useState(false);
+
+  const navigate = useNavigate();
 
   console.log(video);
 
@@ -28,83 +31,128 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       </div>
     );
 
+  const deleteVideo = async (id: string | number, type: 'archive' | 'delete') => {
+    try {
+      if (type === 'archive') {
+        await archiveVideo(id);
+        toast.success('Video archived successfully');
+        navigate('/videos');
+      } else {
+        await deletePerm(id);
+        toast.success('Video deleted successfully');
+        navigate('/videos');
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Error deleting video');
+    }
+  };
+
   return (
-    modifying ? <EditVideo video={video} /> :
-    <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
-      <Toaster position="top-right" />
+    modifying ? <EditVideo video={video} onSubmit={() => {
+      setModifying(false);
+      reFetch();
+    }}/> :
+      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
+        <Toaster position="top-right" />
 
-      {/* Formulaire */}
-      <div className="w-full md:w-[60%] bg-white rounded-lg p-6 border border-gray-200 space-y-6">
-        <div className="flex justify-between gap-4 items-center w-full">
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
-          <div className="flex gap-2">
-            <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
-            <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span>
+        {/* Formulaire */}
+        <div className="w-full md:w-[60%] bg-white rounded-lg p-6 border border-gray-200 space-y-6">
+          <div className="flex justify-between gap-4 items-center w-full">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
+            <div className="flex gap-2">
+              <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
+              <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span>
+            </div>
           </div>
-        </div>
-        <div
-          className="relative w-full h-max rounded-lg flex items-center justify-center"
-        >
-          {
-            videoPlayed ?
-              <video src={server + '/' + video?.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
-              :
-              <>
-                <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
-                <img src={server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
-              </>
-          }
-        </div>
+          <div
+            className="relative w-full h-max rounded-lg flex items-center justify-center"
+          >
+            {
+              videoPlayed ?
+                <video src={server + '/' + video?.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
+                :
+                <>
+                  <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
+                  <img src={server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+                </>
+            }
+          </div>
 
-        <div className="flex gap-4">
-          <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+          <div className="flex gap-4">
+            <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
-            modify
-          </button>
-          <button className="relative flex items-center justify-center gap-2 px-6 py-2.5
+              modify
+            </button>
+
+            {/* @ts-expect-error */}
+            <button onClick={() => document.getElementById('my_modal_6').showModal()} className="btn relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 bg-white/90 hover:bg-white text-red-800 border-gray-200 hover:border-gray-300">
-            delete
-          </button>
+              delete
+            </button>
+
+            <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
+              <div className="modal-box">
+                <h3 className="font-bold text-lg">Delete</h3>
+                <div className="modal-action">
+                  <form method="dialog" className="flex flex-col gap-4 w-full">
+
+                    <div className="px-1 btn w-full" onClick={deleteVideo.bind(null, video.id, 'delete')}>
+                      <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600">
+                        <span className="inline-flex justify-center items-center ml-3.5"></span><span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">delete permanently</span>
+                      </div>
+                    </div>
+
+                    <div className="px-1 btn w-full" onClick={deleteVideo.bind(null, video.id, 'archive')}>
+                      <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600">
+                        <span className="inline-flex justify-center items-center ml-3.5"></span><span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">archive</span>
+                      </div>
+                    </div>
+
+                    <button className="btn w-full">cancel</button>
+                  </form>
+                </div>
+              </div>
+            </dialog>
+
+
+          </div>
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">Category</h1>
+            <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+              {video?.category.name}
+            </span>
+          </div>
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2">
+            <h1 className="text-lg font-semibold text-gray-800">Titles</h1>
+            {video?.titles?.map((t, i) => (
+              <div
+                key={i}
+                className="flex gap-3 items-center p-2"
+              >
+                <span className="w-20 font-bold text-blue-600 uppercase text-sm tracking-wide">
+                  {t.i18_language} :
+                </span>
+                <span className="flex-1 text-gray-800 font-medium text-sm">
+                  {t.title}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
-          <h1 className="text-lg font-semibold text-gray-800">Category</h1>
-          <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-            {video?.category.name}
-          </span>
-        </div>
-
-        <div className="space-y-2 rounded-lg bg-gray-50 p-2">
-          <h1 className="text-lg font-semibold text-gray-800">Titles</h1>
-          {video?.titles?.map((t, i) => (
-            <div
-              key={i}
-              className="flex gap-3 items-center p-2"
-            >
-              <span className="w-20 font-bold text-blue-600 uppercase text-sm tracking-wide">
-                {t.i18_language} :
-              </span>
-              <span className="flex-1 text-gray-800 font-medium text-sm">
-                {t.title}
-              </span>
-            </div>
-          ))}
-        </div>
+        <div className="w-full md:w-[35%] flex flex-col gap-4" />
       </div>
-
-      {/* Preview + actions */}
-      <div className="w-full md:w-[35%] flex flex-col gap-4">
-
-      </div>
-    </div>
   );
 };
 
 export default VideoDetails;
 
-function EditVideo({ video }: { video: TVideo }) {
+function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [ref, setRef] = useState<string | null>(video?.ref || null);
@@ -133,17 +181,17 @@ function EditVideo({ video }: { video: TVideo }) {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
       ...(ref && { ref }),
-     
+
       titles: JSON.stringify(coupleTitles)
     };
-    
+
 
     try {
       setUploading(true);
       setProgress(0);
 
       console.log(formData.titles);
-      
+
 
       const res = await updateVideo(video.id, formData, (progressEvent) => {
         if (progressEvent.total) {
@@ -154,6 +202,7 @@ function EditVideo({ video }: { video: TVideo }) {
 
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
+      onSubmit();
       // navigate('/')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

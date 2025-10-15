@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -9,26 +9,28 @@ import { uploadVideo } from "../api/videos";
 
 
 export type Couple = {
-  id: any; i18_language: string; title: string, name?: string 
+  id: any; i18_language: string; title: string, name?: string
 };
 
 export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit, defaultCouples, btnSubmit }: { defaultCouples?: Couple[], btnSubmit?: string, onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
   const [couples, setCouples] = useState<Couple[]>(defaultCouples || []);
 
   console.log('couples', btnSubmit, couples);
-  
+
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...couples];
     newCouples[index][field] = value;
     setCouples(newCouples);
-    onChange?.(newCouples);
+    onChange(newCouples);
   };
 
   const addCouple = () => setCouples([...couples, { id: null, i18_language: '', title: '' }]);
 
   const removeCouple = (index: number) => {
     setCouples((prev) => prev.filter((_, i) => i !== index));
+    const newCouples = [...couples];
+    onChange(newCouples);
   };
 
   const handleSubmit = () => {
@@ -63,7 +65,7 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
-          <LanguageAutoComplete defaultValue={{code: c.i18_language, name: c.name!}} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+          <LanguageAutoComplete defaultValue={{ code: c.i18_language, name: c.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
@@ -158,7 +160,7 @@ const Upload = () => {
       setProgress(0);
 
       console.log(formData.titles);
-      
+
 
       const res = await uploadVideo(formData, (progressEvent) => {
         if (progressEvent.total) {
@@ -179,132 +181,142 @@ const Upload = () => {
     }
   };
 
+  // useEffect(() => {
+  //   window.location.tit
+  // })
+
   return (
-    <div className="flex flex-col min-h-screen w-full bg-gray-50 items-center justify-center p-6">
+    <div className="bg-gray-50">
       <Toaster position="top-right" />
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+      {/* <h1 className="text-2xl font-semibold text-gray-800 flex items-center p-6">
         Upload
-      </h1>
-      <div className="flex md:flex-row flex-col gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Ref</label>
-            <input
-              type="text"
-              value={ref || ""}
-              onChange={(e) => setRef(e.target.value)}
-              placeholder=""
-              className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            />
-          </div>
+      </h1> */}
+      <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center">
+        <div className="flex md:flex-row flex-col flex-wrap gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Ref</label>
+              <input
+                type="text"
+                value={ref || ""}
+                onChange={(e) => setRef(e.target.value)}
+                placeholder=""
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              />
+            </div>
 
             <div>
               <label className="block text-gray-700 font-medium mb-2">Category</label>
               <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
             </div>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
-            <div
-              onClick={handleCoverClick}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer relative"
-            >
-              {coverPreview ? (
-                <img
-                  src={coverPreview}
-                  alt="Preview"
-                  className="rounded-lg object-cover w-full h-52"
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
+              <div
+                onClick={handleCoverClick}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer relative"
+              >
+                {coverPreview ? (
+                  <img
+                    src={coverPreview}
+                    alt="Preview"
+                    className="rounded-lg object-cover w-full h-52"
+                  />
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-gray-400 mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
+                      />
+                    </svg>
+                    <p className="text-gray-500 text-sm text-center">
+                      Click or drag an image (PNG, JPG, WEBP)
+                    </p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  ref={coverInputRef}
+                  accept="image/*"
+                  onChange={handleCoverChange}
+                  className="hidden"
                 />
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-400 mb-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
-                    />
-                  </svg>
-                  <p className="text-gray-500 text-sm text-center">
-                    Click or drag an image (PNG, JPG, WEBP)
-                  </p>
-                </>
-              )}
-              <input
-                type="file"
-                ref={coverInputRef}
-                accept="image/*"
-                onChange={handleCoverChange}
-                className="hidden"
-              />
+              </div>
             </div>
+
+            {/* Video */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Video</label>
+              <div
+                onClick={handleVideoClick}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
+              >
+                {videoPreview ? (
+                  <video
+                    src={videoPreview}
+                    controls
+                    className="rounded-lg w-full max-h-56 object-cover"
+                  />
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-gray-400 mb-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-4.197-2.398A1 1 0 009 9.618v4.764a1 1 0 001.555.832l4.197-2.398a1 1 0 000-1.664z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <p className="text-gray-500 text-sm text-center">
+                      Drag or select an MP4 file
+                    </p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  ref={videoInputRef}
+                  accept="video/mp4"
+                  onChange={handleVideoChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Barre de progression */}
+            {uploading && (
+              <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
+              </div>
+            )}
           </div>
 
-          {/* Video */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Video</label>
-            <div
-              onClick={handleVideoClick}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
-            >
-              {videoPreview ? (
-                <video
-                  src={videoPreview}
-                  controls
-                  className="rounded-lg w-full max-h-56 object-cover"
-                />
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-400 mb-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-4.197-2.398A1 1 0 009 9.618v4.764a1 1 0 001.555.832l4.197-2.398a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <p className="text-gray-500 text-sm text-center">
-                    Drag or select an MP4 file
-                  </p>
-                </>
-              )}
-              <input
-                type="file"
-                ref={videoInputRef}
-                accept="video/mp4"
-                onChange={handleVideoChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Barre de progression */}
-          {uploading && (
-            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-              <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
-            </div>
-          )}
+          <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
         </div>
 
-        <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
+        <div className="w-full md:w-[35%] flex flex-col gap-4">
+
+        </div>
       </div>
     </div>
   );

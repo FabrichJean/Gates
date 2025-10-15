@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { RiHome9Fill } from "react-icons/ri";
 import { BiSolidVideos } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
+import { Users2 } from "lucide-react";
 
 
 function Sidebar() {
@@ -28,7 +29,7 @@ function Sidebar() {
                             <!-- Lien : App --> */}
                         <Link
                             to="/"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
+                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
                             <RiHome9Fill className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
@@ -38,7 +39,7 @@ function Sidebar() {
 
                         <Link
                             to="/videos"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
+                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
                             <BiSolidVideos className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
@@ -48,9 +49,9 @@ function Sidebar() {
 
                         <Link
                             to="/users"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
+                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
-                            <BiSolidVideos className="w-5 h-5" />
+                            <Users2 className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Users
                             </span>
@@ -58,7 +59,7 @@ function Sidebar() {
 
                         <Link
                             to="/profile"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold bg-primary-50 shadow-sm text-primary-400 font-bold"
+                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold bg-primary-50 shadow-sm text-primary-400"
                         >
                             <CgProfile className="w-5 h-5" />
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
@@ -72,7 +73,7 @@ function Sidebar() {
                         {/* <!-- Lien : Settings --> */}
                         <Link
                             to="/settings"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 pr-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
+                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
                         >
                             <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
                                 Settings
