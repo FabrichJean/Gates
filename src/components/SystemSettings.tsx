@@ -22,6 +22,7 @@ export default function SystemSettings() {
         setLoading(true);
         try {
             await saveSettings(settings);
+            reFetch()
             toast.success("Paramètres sauvegardés !");
         } catch (err) {
             toast.error("Erreur lors de la sauvegarde");
