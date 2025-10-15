@@ -146,9 +146,9 @@ const VideosManagment = () => {
                         onClick={null}
                       >
                         {
-                          loading?.id === video.id && loading?.type === 'transc' ?
-                            <SyncLoader className="scale-[0.4]" />
-                            :
+                          // loading?.id === video.id && loading?.type === 'transc' ?
+                          //   <SyncLoader className="scale-[0.4]" />
+                          //   :
                             "upload cover"
                         }
                       </button>
