@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
-import { transcodeVideo, uploadS3 } from "../api/videos";
+import { transcodeVideo, uploadCover, uploadS3 } from "../api/videos";
 import toast from "react-hot-toast";
 import { SyncLoader } from "react-spinners";
 import Pagination from "../components/Pagination";
@@ -28,9 +28,10 @@ const VideosManagment = () => {
 
   useEffect(() => {
     reFetch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' }>();
+  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' | 'cover' }>();
 
   const transcode = async (videoId: string | number | undefined) => {
     setLoading({ id: videoId, type: 'transc' });
@@ -45,10 +46,22 @@ const VideosManagment = () => {
       .finally(() => setLoading(undefined));
   }
 
-
   const upload = async (videoId: string | number | undefined) => {
     setLoading({ id: videoId, type: 'upload' });
     await uploadS3(videoId)
+      .then(() => {
+        reFetch();
+        toast.success("success");
+      })
+      .catch(() => {
+        toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
+  }
+
+  const cover = async (videoId: string | number) => {
+    setLoading({ id: videoId, type: 'cover' });
+    await uploadCover(videoId)
       .then(() => {
         reFetch();
         toast.success("success");
@@ -87,9 +100,9 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-left">Ref</th>
                 <th className="py-3 px-6 text-left">Username</th>
                 <th className="py-3 px-6 text-left">Status</th>
-                <th className="py-3 px-6 text-left">Activate</th>
                 <th className="py-3 px-6 text-center">Cover</th>
                 <th className="py-3 px-6 text-center">Duration</th>
+                <th className="py-3 px-6 text-left">Activate</th>
                 <th className="py-3 px-6 text-center">Actions</th>
               </tr>
             </thead>
@@ -117,7 +130,6 @@ const VideosManagment = () => {
                         </span>
                     }
                   </td>
-                  <td className="py-3 px-6 text-center">Activate</td>
                   <td className="py-3 px-6 text-center">
                     <img
                       src={server + '/' + video.cover}
@@ -126,6 +138,9 @@ const VideosManagment = () => {
                     />
                   </td>
                   <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
+                  <td className="py-3 px-6 text-center">
+                   <input type="checkbox" defaultChecked className="toggle" />
+                  </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
                       <button
@@ -142,13 +157,13 @@ const VideosManagment = () => {
                       </button>
                       <button
                         disabled={false}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={null}
+                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === null ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                        onClick={cover.bind(null, video.id)}
                       >
                         {
-                          // loading?.id === video.id && loading?.type === 'transc' ?
-                          //   <SyncLoader className="scale-[0.4]" />
-                          //   :
+                          loading?.id === video.id && loading?.type === 'cover' ?
+                            <SyncLoader className="scale-[0.4]" />
+                            :
                             "upload cover"
                         }
                       </button>

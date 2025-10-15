@@ -58,3 +58,11 @@ export async function archiveVideo(videoId: string | number): Promise<any> {
         }
     });
 }
+
+export async function uploadCover(videoId: string | number): Promise<void> {
+    return await axios.post(`${apiURL}/videos/${videoId}/upload-cover`, null, {
+        headers: {
+            Authorization: `Bearer ${token()}`,
+        }
+    });
+}
