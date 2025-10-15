@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 // import { useNetworkStatus } from "../hooks/useNetworkStatus";
-import { validateEmail, validatePassword } from "../utils/validators";
+import { validatePassword } from "../utils/validators";
 import { useNavigate, Link } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -30,34 +30,15 @@ const Register: React.FC = () => {
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // if (!isOnline) {
-    //   toast.error(
-    //     "Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.");
-    //   return;
-    // }
-
-    if (!validateEmail(email)) {
-      toast.error("Email invalide Reg", { position: "top-center" });
-      return;
-    }
     if (!validatePassword(password)) {
       toast.error("Mot de passe trop court", { position: "top-center" });
-      return;
     }
   
     if (password !== confirmPassword) {
-      // alert("Les mots de passe ne correspondent pas.");
       toast.error("Les mots de passe ne correspondent pas.");
-      return;
     }
 
     await register(username, email, password);
-    // .then(() => {
-    //   navigate("/register");
-    // })
-    // .catch((err) => {
-    //  toast.error("Login faild" +  err.message);
-    // });
   };
 
   return (
