@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getToken } from "../utils/storage";
-import { validateUserApi } from "../api/auth";
+
+
 interface User {
   id: number;
   email: string;
@@ -12,6 +13,8 @@ interface User {
   isValidated: boolean;
   isDeleted: boolean;
 }
+
+
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,33 +42,35 @@ const Users = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
   // Fermer le menu si on clique ailleurs
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
     window.addEventListener("click", handleClickOutside);
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
-    const handleMenuToggle = (userId: number, e: React.MouseEvent) => {
+
+  const handleMenuToggle = (userId: number, e: React.MouseEvent) => {
     e.stopPropagation(); // empêcher la fermeture immédiate
     setOpenMenuId((prev) => (prev === userId ? null : userId));
   };
+
   const handleValidate = async (userId: number) => {
     setOpenMenuId(null);
     // ici tu pourras faire une requête API PUT/PATCH pour valider
-    try {
-      const result = await validateUserApi(userId);
-      alert(result.message);
-    } catch (err: any) {
-      alert(err.message);
-    }
+    // await validateUser(userId);
+    toast.success(`Utilisateur ${userId} validé!`);
   };
+
   const handleDelete = (userId: number) => {
-    // logique 
-    toast.success(`Utilisateur ${userId} supprimé!`);
     setOpenMenuId(null);
-    // ici tu pourras faire une requête API DELETE
+    // requête API DELETE
+
+    toast.success(`Utilisateur ${userId} supprimé!`);
   };
+
   if (loading) return <p className="text-center mt-8">Chargement...</p>;
+
   return (
     <div className="min-h-screen bg-white p-6">
       <header className="flex justify-between items-center mb-8">

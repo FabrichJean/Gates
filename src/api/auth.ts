@@ -38,7 +38,7 @@ export const registerApi = async (username: string, email: string, password: str
 // 🔸 Valider un utilisateur
 export const validateUserApi = async (userId: number) => {
   try {
-    const res = await api.patch(`/auth/validate/${userId}`);
+    const res = await api.put(`/auth/validate/${userId}`);
     return res.data; // { message }
   } catch (error: any) {
     if (error.response && error.response.data?.message) {
@@ -48,3 +48,15 @@ export const validateUserApi = async (userId: number) => {
   }
 };
 
+// 🔸 Supprimer un utilisateur (mise à jour isDeleted)
+export const deleteUserApi = async (userId: number) => {
+  try {
+    const res = await api.delete(`/auth/users/${userId}`);
+    return res.data; // { message }
+  } catch (error: any) {
+    if (error.response && error.response.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("Erreur de connexion au serveur");
+  }
+};
