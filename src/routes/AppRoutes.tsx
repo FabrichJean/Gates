@@ -9,6 +9,7 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
+import Settings from "../pages/Settings";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -47,11 +48,11 @@ const AppRoutes = () => (
       <Route
         path="/upload"
         element={
-          // <ProtectedRoute>
+          <ProtectedRoute>
           <InsideSidebar>
             <Upload />
           </InsideSidebar>
-          // </ProtectedRoute>
+          </ProtectedRoute>
         }
       />
       <Route
@@ -60,6 +61,16 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <Profil />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <Settings />
             </InsideSidebar>
           </ProtectedRoute>
         }

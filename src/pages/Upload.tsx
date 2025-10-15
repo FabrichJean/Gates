@@ -6,6 +6,7 @@ import { apiURL } from "../constant/index"
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
 import { uploadVideo } from "../api/videos";
+import { useNavigate } from "react-router-dom";
 
 
 export type Couple = {
@@ -125,6 +126,8 @@ const Upload = () => {
   const [category, setCategory] = useState<Category>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
+  const navigate = useNavigate()
+
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -171,6 +174,7 @@ const Upload = () => {
 
       toast.success("✅ Upload réussi !");
       console.log("Video uploaded:", res.data);
+      navigate('/videos')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
