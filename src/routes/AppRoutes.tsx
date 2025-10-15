@@ -35,6 +35,16 @@ const AppRoutes = () => (
         }
       />
       <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <Users />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/videos"
         element={
           <ProtectedRoute>
