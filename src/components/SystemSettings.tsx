@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { saveSettings } from "../api/settings";
 import { useSettings } from "../hooks/useSettings";
@@ -11,6 +11,10 @@ export default function SystemSettings() {
     
 
     const [settings, setSettings] = useState({...data?.settings});
+
+    useEffect(() => {
+        setSettings({...data?.settings})
+    }, [data])
 
     const [loading, setLoading] = useState(false);
 
