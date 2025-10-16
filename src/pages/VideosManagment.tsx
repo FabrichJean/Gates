@@ -30,6 +30,9 @@ const VideosManagment = () => {
   const [page, setPage] = useState(1);
   const { data, reFetch, mutate } = UseVideos('all', page);
 
+  // console.log(data.videos);
+  
+
   useEffect(() => {
     reFetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,6 +138,7 @@ const VideosManagment = () => {
               <tr>
                 <th className="py-3 px-6 text-left">Ref</th>
                 <th className="py-3 px-6 text-left">Username</th>
+                <th className="py-3 px-6 text-left">Category</th>
                 <th className="py-3 px-6 text-left">Status</th>
                 <th className="py-3 px-6 text-center">Cover</th>
                 <th className="py-3 px-6 text-center">Duration</th>
@@ -151,6 +155,7 @@ const VideosManagment = () => {
                       {video.user.username}
                     </Link>
                   </td>
+                  <td className="py-3 px-6">{video.category.name}</td>
                   <td className="py-3 px-6">
                     {video.upload_status === 1 ?
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">

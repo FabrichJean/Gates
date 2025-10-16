@@ -15,12 +15,16 @@ export type TVideo = {
   ref: string;
   sequence: number | null;
   temp_url: string;
-  titles: { title: string; i18_language: string; video_id: number, language: {code: string, name: string} }[];
+  titles: { title: string; i18_language: string; video_id: number, language: { code: string, name: string } }[];
   transfer_status: number;
   upload_status: number;
   cover_upload_status: number;
   url: string | null;
-  user: User
+  user: User;
+  // category: {
+  //   id: number,
+  //   "name": "Professional"
+  // },
 };
 
 export type User = {
@@ -32,14 +36,14 @@ export type User = {
 
 
 export default function UseVideos(status?: 'all' | '0' | '1', page?: number, search?: string) {
-    return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
-        headers: { Authorization: `Bearer ${token()}` },
-        query: { status, page, search }
-    })
+  return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
+    headers: { Authorization: `Bearer ${token()}` },
+    query: { status, page, search }
+  })
 }
 
 export function UseVideo(id: string | number | undefined) {
-    return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
-        headers: { Authorization: `Bearer ${token()}` },
-    })
+  return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
+    headers: { Authorization: `Bearer ${token()}` },
+  })
 }
