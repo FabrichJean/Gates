@@ -197,7 +197,7 @@ const VideosManagment = () => {
                         }
                       </button>
                       <button
-                        disabled={false}
+                        disabled={Boolean(loading) || video?.cover_upload_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={cover.bind(null, video.id)}
                       >
