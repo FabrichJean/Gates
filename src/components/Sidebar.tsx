@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { RiHome9Fill } from "react-icons/ri";
 import { BiSolidVideos } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
-import { LogOut, Settings, Users2 } from "lucide-react";
+import { Archive, LogOut, Settings, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 
@@ -89,6 +89,16 @@ function Sidebar() {
                         </Link>
 
                         <Link
+                            to="/archive"
+                            onClick={() => handleNav("archive")} className={linkClass("archive")}
+                        >
+                            <Archive className="min-w-5 h-5 text-cyan-400" />
+                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
+                                Archive
+                            </span>
+                        </Link>
+
+                        {/* <Link
                             to="/profile"
                             onClick={() => handleNav("profile")} className={linkClass("profile")}
                         >
@@ -96,7 +106,7 @@ function Sidebar() {
                             <span className="ml-2 text-sm tracking-wide hidden lg:block">
                                 Profile
                             </span>
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
 
