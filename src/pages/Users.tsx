@@ -155,7 +155,16 @@ const Users = () => {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {u.role}
+                <div
+                  className={`badge ${u.role === "superadmin"
+                      ? "badge-soft  badge-secondary"
+                      : u.role === "admin"
+                        ? "badge-soft b badge-accent"
+                        : "badge-soft badge-success"
+                    }`}
+                >
+                  {u.role}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
                 <div className="relative inline-block">
