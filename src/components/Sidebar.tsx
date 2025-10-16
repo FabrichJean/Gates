@@ -70,7 +70,7 @@ function Sidebar() {
             className={linkClass("videos")}
           >
             <BiSolidVideos className="min-w-5 h-5 text-indigo-400" />
-            <span className="ml-2 hidden lg:inline">Vidéos</span>
+            <span className="ml-2 hidden lg:inline">Videos</span>
           </Link>
 
           {user?.role === "superadmin" && (
@@ -80,7 +80,7 @@ function Sidebar() {
               className={linkClass("users")}
             >
               <Users2 className="min-w-5 h-5 text-cyan-400" />
-              <span className="ml-2 hidden lg:inline">Utilisateurs</span>
+              <span className="ml-2 hidden lg:inline">Users</span>
             </Link>
           )}
 
@@ -91,7 +91,7 @@ function Sidebar() {
               className={linkClass("archive")}
             >
               <Archive className="min-w-5 h-5 text-zinc-500" />
-              <span className="ml-2 hidden lg:inline">Archives</span>
+              <span className="ml-2 hidden lg:inline">Archive</span>
             </Link>
           )}
         </div>
@@ -105,7 +105,7 @@ function Sidebar() {
               className={linkClass("settings")}
             >
               <Settings className="min-w-5 h-5 text-zinc-400" />
-              <span className="ml-2 hidden lg:inline">Paramètres</span>
+              <span className="ml-2 hidden lg:inline">Settings</span>
             </Link>
           )}
 
@@ -117,7 +117,7 @@ function Sidebar() {
           >
             <div className="flex items-center px-3.5 py-2.5 rounded-xl text-red-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/30 transition-all">
               <LogOut className="h-5 w-5" />
-              <span className="ml-2 hidden lg:inline">Déconnexion</span>
+              <span className="ml-2 hidden lg:inline">Logout</span>
             </div>
           </button>
         </div>
@@ -126,9 +126,9 @@ function Sidebar() {
       {/* Dialog avec ref */}
       <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box dark:bg-gray-900 dark:text-white">
-          <h3 className="font-bold text-lg">Déconnexion</h3>
+          <h3 className="font-bold text-lg">Disconnect</h3>
           <p className="py-4">
-            Êtes-vous sûr de vouloir vous déconnecter ? <span>😞</span>
+           Are you sure you want to log out? <span>😞</span>
           </p>
           <div className="modal-action">
             <form
@@ -140,7 +140,7 @@ function Sidebar() {
               className="flex gap-4"
             >
               <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
-                Se déconnecter
+                logout
               </button>
               <button
                 type="button"
@@ -149,7 +149,7 @@ function Sidebar() {
                   closeLogoutModal();
                 }}
               >
-                Annuler
+                cancel
               </button>
             </form>
           </div>
