@@ -18,8 +18,8 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
     });
 
     const reverseStatus = (value: string) => {
-        if (value === '1') return 'display';
-        if (value === '0') return 'hidden';
+        if (value === '1') return 'yes';
+        if (value === '0') return 'no';
         return 'all';
     };
 
@@ -52,9 +52,9 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
     };
 
     const mapStatus = (value: string) => {
-        if (value === 'display') return '1';
-        if (value === 'hidden') return '0';
-        return null;
+        if (value === 'yes') return '1';
+        if (value === 'no') return '0';
+        return undefined;
     };
 
     const submit = async () => {
@@ -72,15 +72,11 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
 
             const fetched = await getFilteredVideos(data)
 
-            console.log(fetched);
-
-            onSubmit(fetched)
+            onSubmit(fetched.data)
 
         } catch (error) {
             console.error(error);
-
         }
-
     }
 
     return (
@@ -135,7 +131,7 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                         <div key={key} className="p-3 bg-base-100 rounded-lg">
                             <p className="font-medium mb-2">{label}</p>
                             <div className="flex gap-3">
-                                {["all", "display", "hidden"].map((option) => (
+                                {["all", "yes", "no"].map((option) => (
                                     <label key={option} className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="radio"
@@ -152,10 +148,13 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                     ))}
                 </div>
 
-                <div className="pt-3 flex justify-end gap-3">
-                    <button
+                <form method="dialog" className="pt-3 flex justify-end gap-3">
+
+                    <button className="btn btn-outline btn-sm">Close</button>
+
+                    <div
                         className="btn btn-outline btn-sm"
-                        onClick={() => {
+                        onClick={async () => {
                             setFilters({
                                 category_id: "",
                                 user_id: "",
@@ -165,13 +164,14 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                                 transfer_status: "all",
                             })
                             localStorage.removeItem('videos_filtered')
+                            await submit()
                         }
                         }
                     >
-                        Réinitialiser
-                    </button>
-                    <button className="btn btn-primary btn-sm" onClick={submit}>Appliquer</button>
-                </div>
+                        Reset
+                    </div>
+                    <button className="btn btn-primary btn-sm" onClick={submit}>Apply</button>
+                </form>
             </div>
         </dialog>
     );

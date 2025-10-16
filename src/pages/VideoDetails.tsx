@@ -276,7 +276,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
             )}
           </div>
 
-          <TitlesForm btnSubmit="✏️ update" defaultCouples={video?.titles.map(title => ({ ...title, language: title.language, name: title.language.name }))} onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
+          <TitlesForm btnSubmit="✏️ update" coupleTitles={coupleTitles} setCoupleTitles={setCoupleTitles} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
         </div>
       </div>
     </div>

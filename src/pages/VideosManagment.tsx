@@ -96,6 +96,8 @@ const VideosManagment = () => {
         <div className="flex items-center gap-4">
 
           <VideoFilters onSubmit={(fetched) => {
+            console.log(fetched);
+            
             mutate(fetched)
           }}/>
           {/* @ts-expect-error */}
