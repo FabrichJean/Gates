@@ -10,6 +10,7 @@ import VideosManagment from "../pages/VideosManagment";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
+import UsersArchives from "../pages/UsersArchive";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -81,6 +82,16 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <Users />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/archive"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <UsersArchives />
             </InsideSidebar>
           </ProtectedRoute>
         }
