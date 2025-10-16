@@ -34,6 +34,7 @@ const Users = () => {
       // setUsers(res.data);
       toast.success(`User ${userId} validated !`);
       fetchUsers();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Fetch users error:", err);
       toast.error(err.response?.data?.message || "Error");
@@ -75,6 +76,7 @@ const Users = () => {
       // setUsers(res.data);
       toast.success(`User ${userId} deleted !`);
       fetchUsers();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Fetch users error:", err);
       toast.error(err.response?.data?.message || "Error");

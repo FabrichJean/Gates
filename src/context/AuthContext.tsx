@@ -1,10 +1,12 @@
-import { createContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { deleteUserApi, loginApi, registerApi, validateUserApi } from "../api/auth"; // 🔹 Appel backend centralisé
 import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gestion du localStorage
+import { AuthContext } from ".";
 
 // 🔸 Interface du contexte d'authentification
-interface AuthContextType {
+export interface AuthContextType {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
@@ -16,11 +18,11 @@ interface AuthContextType {
   error: string | null;
 }
 
-// 🔸 Création du contexte (valeur par défaut = undefined)
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 
 // 🔸 Fournisseur du contexte d’authentification
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setTokenState(data.token);
       setUser(data.userType);
       setToken(data.token);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la connexion");
     } finally {
@@ -57,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // ✅ on force une chaîne vide si "name" est undefined
       const data = await registerApi(email, password, username ?? ""); // { token, userType }
       setUser(data.user);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'inscription");
     } finally {
@@ -71,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await validateUserApi(userId); // 🔥 appel API backend
       console.log("✅ Validation réussie:", res.message);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la validation de l'utilisateur");
     } finally {
@@ -84,6 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await deleteUserApi(userId);
       console.log("🗑️ Utilisateur supprimé :", res.message);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la suppression de l'utilisateur");
     } finally {

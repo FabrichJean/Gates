@@ -11,12 +11,13 @@ export async function getFilteredVideos(params: any){
     })
 }
 
-export async function transcodeVideo(videoId: string | number | undefined): Promise<void> {
+export async function transcodeVideo(videoId: string | number | undefined, onUploadProgress: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<void> {
     return await axios.post(`${apiURL}/videos/${videoId}/transcode`, null, {
         headers: {
             'Authorization': `Bearer ${token()}`
-        }
-    });
+        },
+        onUploadProgress
+    },);
 }
 
 export async function uploadS3(videoId: string | number | undefined): Promise<void> {

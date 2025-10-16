@@ -162,7 +162,6 @@ const Upload = () => {
 
       console.log(formData.titles);
 
-
       const res = await uploadVideo(formData, (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -343,7 +342,7 @@ const Upload = () => {
             )}
           </div>
 
-          <TitlesForm onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
+          <TitlesForm coupleTitles={coupleTitles} setCoupleTitles={setCoupleTitles} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
         </div>
 
         <div className="w-full md:w-[35%] flex flex-col gap-4">

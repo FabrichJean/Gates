@@ -8,6 +8,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         <div className="w-dvw h-dvh bg-gray-200 grid grid-cols-7">
             <Toaster/>
             <Sidebar/>
+         
             <div className="col-span-6 bg-white overflow-auto w-full h-full">{children}</div>
         </div>
 
