@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getToken } from "../utils/storage";
+import { apiURL } from "../constant";
 
 
 interface User {
@@ -13,7 +14,6 @@ interface User {
   isValidated: boolean;
   isDeleted: boolean;
 }
-
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -28,7 +28,7 @@ const Users = () => {
         toast.error("Utilisateur non authentifié");
         return;
       }
-      const res = await axios.get("http://localhost:3000/api/v1/auth/users", {
+      const res = await axios.get(apiURL+"/auth/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -39,6 +39,30 @@ const Users = () => {
       setLoading(false);
     }
   };
+
+  const handleValidate = async (userId: number) => {
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Utilisateur non authentifié");
+        return;
+      }
+      const res = await axios.get(apiURL+`/auth/validate`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(res.data);
+      toast.success(`Utilisateur ${userId} validé!`);
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Fetch users error:", err);
+      toast.error(err.response?.data?.message || "Erreur lors du chargement des utilisateurs");
+    } finally {
+      setLoading(false);
+    }
+
+   
+  };
+  
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -55,12 +79,7 @@ const Users = () => {
     setOpenMenuId((prev) => (prev === userId ? null : userId));
   };
 
-  const handleValidate = async (userId: number) => {
-    setOpenMenuId(null);
-    // ici tu pourras faire une requête API PUT/PATCH pour valider
-    // await validateUser(userId);
-    toast.success(`Utilisateur ${userId} validé!`);
-  };
+  
 
   const handleDelete = (userId: number) => {
     setOpenMenuId(null);
@@ -150,17 +169,19 @@ const Users = () => {
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
               <div className="relative inline-block">
-                <button
-                  onClick={(e) => handleMenuToggle(u.id, e)}
-                  className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-                  title="Options"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <circle cx="5" cy="12" r="2" />
-                    <circle cx="12" cy="12" r="2" />
-                    <circle cx="19" cy="12" r="2" />
-                  </svg>
-                </button>
+                {u.role !== "superadmin" && (
+                  <button
+                    onClick={(e) => handleMenuToggle(u.id, e)}
+                    className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    title="Options"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="5" cy="12" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="19" cy="12" r="2" />
+                    </svg>
+                  </button>
+                )}
                 {/* 👇 Menu contextuel positionné juste sous le bouton */}
                 {openMenuId === u.id && (
                   <div

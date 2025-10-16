@@ -4,7 +4,6 @@ import { AuthContext } from "../context/AuthContext";
 // 🔸 Hook personnalisé (pour simplifier l’accès au contexte)
 export const useAuth = () => {
     const ctx = useContext(AuthContext);
-    if (!ctx)
-    throw new Error("useAuth doit être utilisé à l'intérieur d'un AuthProvider");
-  return ctx;
+    if (!ctx) throw new Error("useAuth doit être utilisé à l'intérieur d'un AuthProvider");
+    return ctx;
 }
