@@ -162,7 +162,7 @@ const Users = () => {
                 </td>
 
                 {/* Status */}
-                <td className="px-4 sm:px-6 py-3 text-center">
+                <td className="px-4 sm:px-6 py-3 text-left">
                   {u.isValidated ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
