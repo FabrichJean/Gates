@@ -6,16 +6,6 @@ import { getToken } from "../utils/storage";
 import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
 
-
-interface User {
-  id: number;
-  email: string;
-  username: string;
-  role: string;
-  isValidated: boolean;
-  isDeleted: boolean;
-}
-
 const Users = () => {
   const [search, setSearch] = useState('')
   const { data, reFetch } = useUsers(search)

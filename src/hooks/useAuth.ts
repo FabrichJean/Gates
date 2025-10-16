@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import useFetch from "http-react";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
 import type { User } from "./useVideos";
 import { getToken } from "../utils/storage";
 import axios from "axios";
@@ -14,7 +13,8 @@ export const useAuth = () => {
   return ctx;
 }
 
-export const useUsers = (search: string) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useUsers = (search: string, params?: any) => {
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +23,7 @@ export const useUsers = (search: string) => {
     const token = getToken();
     const res = await axios.get(apiURL + '/auth/users?search=' + search, {
       headers: { Authorization: `Bearer ${token}` },
+      params
     });
     setData(res.data);
     setLoading(false);
