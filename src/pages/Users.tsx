@@ -1,9 +1,97 @@
-// import { Link } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { getToken } from "../utils/storage";
+import { apiURL } from "../constant";
+
+
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  role: string;
+  isValidated: boolean;
+  isDeleted: boolean;
+}
 
 const Users = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null); // 👈 pour suivre quel menu est ouvert
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Utilisateur non authentifié");
+        return;
+      }
+      const res = await axios.get(apiURL+"/auth/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(res.data);
+    } catch (err: any) {
+      console.error("Fetch users error:", err);
+      toast.error(err.response?.data?.message || "Erreur lors du chargement des utilisateurs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleValidate = async (userId: number) => {
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Utilisateur non authentifié");
+        return;
+      }
+      const res = await axios.get(apiURL+`/auth/validate`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(res.data);
+      toast.success(`Utilisateur ${userId} validé!`);
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Fetch users error:", err);
+      toast.error(err.response?.data?.message || "Erreur lors du chargement des utilisateurs");
+    } finally {
+      setLoading(false);
+    }
+
+   
+  };
   
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Fermer le menu si on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const handleMenuToggle = (userId: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // empêcher la fermeture immédiate
+    setOpenMenuId((prev) => (prev === userId ? null : userId));
+  };
+
+  
+
+  const handleDelete = (userId: number) => {
+    setOpenMenuId(null);
+    // requête API DELETE
+
+    toast.success(`Utilisateur ${userId} supprimé!`);
+  };
+
+  if (loading) return <p className="text-center mt-8">Chargement...</p>;
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-white p-6">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">
           <div className="flex items-center gap-2">
@@ -21,12 +109,11 @@ const Users = () => {
           />
         </div>
       </header>
-
       <table className="min-w-full divide-y divide-gray-200 overflow-x-auto">
         <thead className="bg-gray-50">
           <tr>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
+              Infos
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
@@ -35,7 +122,7 @@ const Users = () => {
               Role
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Email
+              Deleted
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -43,154 +130,86 @@ const Users = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          <tr>
+          {users.map((u) => (
+          <tr key={u.id}>
             <td className="px-6 py-4 whitespace-nowrap">
               <div className="flex items-center">
                 <div className="flex-shrink-0 h-10 w-10">
-                  <img className="h-10 w-10 rounded-full" src="https://i.pravatar.cc/150?img=1" />
+                  <img className="h-10 w-10 rounded-full" src={`https://api.dicebear.com/9.x/croodles/svg?seed=`+u.username} />
                 </div>
                 <div className="ml-4">
                   <div className="text-sm font-medium text-gray-900">
-                    Jane Cooper
+                    {u.username}
                   </div>
                   <div className="text-sm text-gray-500">
-                    jane.cooper@example.com
+                    {u.email}
                   </div>
                 </div>
               </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                Activated
+              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                {
+                  u.isValidated ?
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" className="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                  : 
+                    <div className="text-pink-200">
+                      Pending
+                    </div>
+                }
               </span>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Admin
+              {u.role}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              jane.cooper@example.com
+              {u.isDeleted ? "1" : "0"}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-              <button className="ml-2 text-gray-500 hover:text-gray-700" title="Options">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle cx="5" cy="12" r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="19" cy="12" r="2" />
-                </svg>
-              </button>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-10 w-10">
-                  <img className="h-10 w-10 rounded-full" src="https://i.pravatar.cc/150?img=1"  />
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    Jane Cooper
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
+              <div className="relative inline-block">
+                {u.role !== "superadmin" && (
+                  <button
+                    onClick={(e) => handleMenuToggle(u.id, e)}
+                    className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    title="Options"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="5" cy="12" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="19" cy="12" r="2" />
+                    </svg>
+                  </button>
+                )}
+                {/* 👇 Menu contextuel positionné juste sous le bouton */}
+                {openMenuId === u.id && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 z-20 w-32"
+                  >
+                    <button
+                      onClick={() => handleValidate(u.id)}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-700 cursor-pointer"
+                    >
+                      Valider
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u.id)}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-gray-700 cursor-pointer"
+                    >
+                      Supprimer
+                    </button>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    jane.cooper@example.com
-                  </div>
-                </div>
+                )}
               </div>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-pink-600">
-                Pending
-              </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Admin
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              jane.cooper@example.com
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-              <button className="ml-2 text-gray-500 hover:text-gray-700" title="Options">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle cx="5" cy="12" r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="19" cy="12" r="2" />
-                </svg>
-              </button>
-            </td>
           </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-10 w-10">
-                  <img className="h-10 w-10 rounded-full" src="https://i.pravatar.cc/150?img=1"  />
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    Jane Cooper
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    jane.cooper@example.com
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-pink-600">
-                Activated
-              </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Admin
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              jane.cooper@example.com
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-              <a href="#" className="text-indigo-600 hover:text-indigo-900">Edit</a>
-              <a href="#" className="ml-2 text-red-600 hover:text-red-900">Delete</a>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-10 w-10">
-                  <img className="h-10 w-10 rounded-full" src="https://i.pravatar.cc/150?img=1" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    Jane Cooper
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    jane.cooper@example.com
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                Active
-              </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Admin
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              jane.cooper@example.com
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-              <button className="ml-2 text-gray-500 hover:text-gray-700" title="Options">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle cx="5" cy="12" r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="19" cy="12" r="2" />
-                </svg>
-              </button>
-            </td>
-          </tr>
+          ))}
           {/* More rows... */}
         </tbody>
       </table>
     </div>
   );
 };
-
 export default Users;

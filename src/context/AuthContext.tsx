@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { loginApi, registerApi } from "../api/auth"; // 🔹 Appel backend centralisé
+import { deleteUserApi, loginApi, registerApi, validateUserApi } from "../api/auth"; // 🔹 Appel backend centralisé
 import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gestion du localStorage
 
 // 🔸 Interface du contexte d'authentification
@@ -9,6 +9,8 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, username?: string) => Promise<void>;
+  validateUser: (userId: number) => Promise<void>; // added·
+  deleteUser: (userId: number) => Promise<void>; // added·
   logout: () => void;
   loading: boolean;
   error: string | null;
@@ -62,6 +64,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // 🔹 Fonction de validation d’un utilisateur (superadmin)
+  const validateUser = async (userId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await validateUserApi(userId); // 🔥 appel API backend
+      console.log("✅ Validation réussie:", res.message);
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de la validation de l'utilisateur");
+    } finally {
+      setLoading(false);
+    }
+  };
+  // 🔹 Supprimer (désactiver) un utilisateur (superadmin)
+  const deleteUser = async (userId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await deleteUserApi(userId);
+      console.log("🗑️ Utilisateur supprimé :", res.message);
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de la suppression de l'utilisateur");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
   // 🔹 Fonction de déconnexion
   const logout = () => {
     setUser(null);
@@ -71,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // 🔹 Valeur partagée dans tout le projet
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading, error }}>
+    <AuthContext.Provider value={{ user, token, login, register, validateUser, deleteUser, logout, loading, error }}>
       {children}
     </AuthContext.Provider>
   );

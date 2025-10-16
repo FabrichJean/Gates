@@ -1,75 +1,52 @@
 
+
 const ProfilComponent = () => {
-  return (
-  <div className="flex items-center justify-center min-h-screen p-4">
-    <div className="max-w-md w-full bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
-        {/* Cover Image */}
-        <div className="h-32 bg-gradient-to-r from-purple-500 to-indigo-600 relative">
-        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-            <img className="h-24 w-24 rounded-full border-4 border-white object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80" alt="Profile picture" />
-        </div>
-        </div>
-        {/* Profile Info */}
-        <div className="pt-16 pb-8 px-6 text-center">
-        <h3 className="text-xl font-bold text-gray-800">Sarah Johnson</h3>
-        <p className="text-indigo-600 font-medium">Senior Product Designer</p>
-        <p className="text-gray-500 mt-2">Creating user-centered designs that solve real problems. Passionate about accessibility and inclusive design.</p>
-        {/* Stats */}
-        <div className="flex justify-center space-x-6 mt-6">
-            <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">142</p>
-            <p className="text-sm text-gray-500">Projects</p>
+    return (
+        <div className="w-full overflow-hidden dark:bg-gray-900">
+            <div className="flex flex-col">
+                {/* Cover Image */}
+                <img src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw2fHxlYXJ0aHxlbnwwfDB8fHwxNzQ2NTM0MzY3fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="User Cover" className="w-full xl:h-[20rem] lg:h-[18rem] md:h-[16rem] sm:h-[14rem] h-[11rem]" />
+                {/* Profile Image */}
+                <div className="sm:w-[80%] w-[90%] mx-auto flex">
+                    <img
+                        src="https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHw3fHxwZW9wbGV8ZW58MHwwfHx8MTcxMTExMTM4N3ww&ixlib=rb-4.0.3&q=80&w=1080"
+                        alt="User Profile"
+                        className="rounded-full lg:w-[12rem] lg:h-[12rem] md:w-[10rem] md:h-[10rem] sm:w-[8rem] sm:h-[8rem] w-[7rem] h-[7rem] outline-2 outline-offset-2 outline-blue-500 relative lg:bottom-[5rem] sm:bottom-[4rem] bottom-[3rem]"
+                    />
+                    {/* FullName */}
+                    <h1 className="w-full text-left my-4 sm:mx-4 pl-4 text-gray-800 dark:text-white lg:text-4xl md:text-3xl sm:text-3xl text-xl font-serif">
+                        Samuel Abera
+                    </h1>
+                </div>
+                <div className="xl:w-[80%] lg:w-[90%] md:w-[90%] sm:w-[92%] w-[90%] mx-auto flex flex-col gap-4 items-center relative lg:-top-8 md:-top-6 -top-4">
+                    {/* Description */}
+
+                    {/* Detail */}
+                    <div className="w-full my-auto py-6 flex flex-col justify-center gap-2">
+                        <div className="w-full flex sm:flex-row flex-col gap-2 justify-center">
+                            <div className="w-full">
+                                <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+                                    <div className="flex flex-col pb-3">
+                                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">First Name</dt>
+                                        <dd className="text-lg font-semibold">Samuel</dd>
+                                    </div>
+                                    <div className="flex flex-col pt-3">
+                                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Email</dt>
+                                        <dd className="text-lg font-semibold">samuel@example.com</dd>
+                                    </div>
+                                    <div className="flex flex-col py-3">
+                                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">Gender</dt>
+                                        <dd className="text-lg font-semibold">Male</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">24.5K</p>
-            <p className="text-sm text-gray-500">Followers</p>
-            </div>
-            <div className="text-center">
-            <p className="text-2xl font-bold text-gray-800">562</p>
-            <p className="text-sm text-gray-500">Following</p>
-            </div>
+
         </div>
-        {/* Contact Buttons */}
-        <div className="mt-8 flex justify-center space-x-3">
-            <button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition duration-150 ease-in-out">
-            Follow
-            </button>
-            <button className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-150 ease-in-out">
-            Message
-            </button>
-        </div>
-        {/* Social Links */}
-        <div className="mt-8 flex justify-center space-x-5">
-            <a href="#" className="text-gray-400 hover:text-indigo-500 transition-colors duration-200">
-            <i className="fab fa-twitter text-xl" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-indigo-500 transition-colors duration-200">
-            <i className="fab fa-linkedin-in text-xl" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-indigo-500 transition-colors duration-200">
-            <i className="fab fa-dribbble text-xl" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-indigo-500 transition-colors duration-200">
-            <i className="fab fa-github text-xl" />
-            </a>
-            <a href="#" className="text-gray-400 hover:text-indigo-500 transition-colors duration-200">
-            <i className="fab fa-instagram text-xl" />
-            </a>
-        </div>
-        </div>
-        {/* Skills */}
-        <div className="px-6 pb-8">
-        <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-sm font-medium rounded-full">UI/UX</span>
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-sm font-medium rounded-full">Figma</span>
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-sm font-medium rounded-full">Prototyping</span>
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-sm font-medium rounded-full">Wireframing</span>
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 text-sm font-medium rounded-full">User Research</span>
-        </div>
-        </div>
-    </div>
-    </div>
-  );
+    );
 
 }
 
