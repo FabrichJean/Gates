@@ -188,12 +188,12 @@ const Users = () => {
                     onClick={(e) => e.stopPropagation()}
                     className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 z-20 w-32"
                   >
-                    <button
+                   { !u.isValidated && <button
                       onClick={() => handleValidate(u.id)}
                       className="block w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-700 cursor-pointer"
                     >
                       Valider
-                    </button>
+                    </button>}
                     <button
                       onClick={() => handleDelete(u.id)}
                       className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-gray-700 cursor-pointer"
