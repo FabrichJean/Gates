@@ -1,11 +1,12 @@
 import axios from "axios";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 
 // 🔹 Configuration d'une instance axios réutilisable
 const api = axios.create({
   baseURL: apiURL,
   headers: {
     "Content-Type": "application/json",
+    "Authorization": `Bearer ${token()}`
   },
 });
 
@@ -63,7 +64,7 @@ export const deleteUserApi = async (userId: number) => {
 
 export const createUser = async (data: {username: string, email: string, password: string}) => {
   try {
-    const res = await api.post("/auth/register", data);
+    const res = await api.post("/auth/create", data);
     return res.data; // ➜ { token, userType }
   } catch (error: any) {
     if (error.response && error.response.data?.message) {
