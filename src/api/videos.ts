@@ -1,6 +1,16 @@
 import axios, { type AxiosProgressEvent } from "axios";
 import { apiURL, token } from "../constant";
 
+
+export async function getFilteredVideos(params: any){
+    return await axios.get(`${apiURL}/videos`, {
+        headers: {
+            'Authorization': `Bearer ${token()}`
+        },
+        params
+    })
+}
+
 export async function transcodeVideo(videoId: string | number | undefined): Promise<void> {
     return await axios.post(`${apiURL}/videos/${videoId}/transcode`, null, {
         headers: {

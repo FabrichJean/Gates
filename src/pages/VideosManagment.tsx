@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import { SyncLoader } from "react-spinners";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
+import VideoFilters from "../components/VideoFilters";
+import { Filter } from "lucide-react";
 
 export type Video = {
   id: unknown;
@@ -26,7 +28,7 @@ export type Video = {
 
 const VideosManagment = () => {
   const [page, setPage] = useState(1);
-  const { data, reFetch } = UseVideos('all', page);
+  const { data, reFetch, mutate } = UseVideos('all', page);
 
   useEffect(() => {
     reFetch();
@@ -89,30 +91,32 @@ const VideosManagment = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
-      <header className="flex justify-between items-center mb-8">
+      <header className="flex flex-wrap justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Video Management</h1>
         <div className="flex items-center gap-4">
 
+          <VideoFilters onSubmit={(fetched) => {
+            mutate(fetched)
+          }}/>
+          {/* @ts-expect-error */}
+          <button onClick={() => document.getElementById('search_modal_52').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
+            <Filter className="w-3" /> filters
+          </button>
+
           <SearchModal />
           {/* @ts-expect-error */}
-            <button onClick={()=>document.getElementById('search_modal_45').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
-              <svg className="hidden size-4 shrink-0 opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                <g fill="none">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06l-2.79-2.79Z" fill="currentColor" />
-                </g>
-              </svg>
-              <span className="grow text-left">Search…</span>
-              <kbd className="kbd kbd-sm font-mono opacity-50">
-                <span className="me-1 text-sm">⌘</span>K
-              </kbd>
-            </button>
+          <button onClick={() => document.getElementById('search_modal_45').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
+            <svg className="hidden size-4 shrink-0 opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+              <g fill="none">
+                <path fillRule="evenodd" clipRule="evenodd" d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06l-2.79-2.79Z" fill="currentColor" />
+              </g>
+            </svg>
+            <span className="grow text-left">Search…</span>
+            <kbd className="kbd kbd-sm font-mono opacity-50">
+              <span className="me-1 text-sm">⌘</span>K
+            </kbd>
+          </button>
 
-
-          {/* <input
-            type="text"
-            placeholder="🔍 Search ..."
-            className="border border-gray-300 rounded-lg px-3 py-2 w-64 focus:ring-2 focus:ring-blue-500"
-          /> */}
           <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
@@ -169,7 +173,7 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
                   <td className="py-3 px-6 text-center">
-                    <input type="checkbox" defaultChecked={!video.isDeleted} checked={!video.isDeleted} className="toggle" onChange={activate.bind(null, video.id)} />
+                    <input type="checkbox" defaultChecked={!video.isDeleted} checked={!video.isDeleted} className="toggle " onChange={activate.bind(null, video.id)} />
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
