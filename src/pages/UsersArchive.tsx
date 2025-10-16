@@ -57,7 +57,7 @@ const UsersArchives = () => {
               onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="🔍 Search ..."
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64 focus:ring-2 focus:ring-blue-500 text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64 text-sm"
             />
           </div>
         </header>
@@ -115,7 +115,7 @@ const UsersArchives = () => {
                   <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium relative">
                     <button
                       onClick={() => handleValidate(u.id)}
-                      className="block text-left px-3 py-2 text-sm text-green-700 hover:bg-green-50 rounded-lg transition"
+                      className="block text-left px-3 py-2 text-sm text-green-700 hover:bg-green-50 rounded-lg cursor-pointer transition"
                     >
                       Validate
                     </button>
