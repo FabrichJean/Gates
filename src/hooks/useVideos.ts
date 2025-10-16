@@ -33,6 +33,7 @@ export type User = {
   email: string;
   role: string;
   isValidated: boolean;
+  isDeleted: boolean;
 }
 
 
