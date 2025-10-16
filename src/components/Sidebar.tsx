@@ -98,7 +98,11 @@ function Sidebar() {
                             </span>
                         </Link>
 
+<<<<<<< HEAD
                         {/* <Link
+=======
+                        <Link
+>>>>>>> 0503ab7ef8b7fd7fdc742769e4145f40168a7246
                             to="/profile"
                             onClick={() => handleNav("profile")} className={linkClass("profile")}
                         >
