@@ -192,13 +192,13 @@ const Users = () => {
                       onClick={() => handleValidate(u.id)}
                       className="block w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-700 cursor-pointer"
                     >
-                      Valider
+                      Validate
                     </button>}
                     <button
                       onClick={() => handleDelete(u.id)}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-gray-700 cursor-pointer"
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-700 cursor-pointer"
                     >
-                      Supprimer
+                      Delete
                     </button>
                   </div>
                 )}
