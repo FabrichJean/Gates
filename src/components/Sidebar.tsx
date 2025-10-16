@@ -92,7 +92,7 @@ function Sidebar() {
                             to="/archive"
                             onClick={() => handleNav("archive")} className={linkClass("archive")}
                         >
-                            <Archive className="min-w-5 h-5 text-cyan-400" />
+                            <Archive className="min-w-5 h-5 text-zinc-500" />
                             <span className="ml-2 text-sm tracking-wide hidden lg:block">
                                 Archive
                             </span>
