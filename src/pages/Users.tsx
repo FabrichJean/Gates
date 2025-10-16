@@ -28,7 +28,7 @@ const Users = () => {
         toast.error("Utilisateur non authentifié");
         return;
       }
-      const res = await axios.get(apiURL+"/auth/users", {
+      const res = await axios.get(apiURL + "/auth/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -47,7 +47,7 @@ const Users = () => {
         toast.error("Utilisateur non authentifié");
         return;
       }
-      await axios.put(apiURL+'/auth/validate/'+userId, null,  {
+      await axios.put(apiURL + '/auth/validate/' + userId, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // setUsers(res.data);
@@ -59,10 +59,8 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-
-   
   };
-  
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -79,13 +77,29 @@ const Users = () => {
     setOpenMenuId((prev) => (prev === userId ? null : userId));
   };
 
-  
 
-  const handleDelete = (userId: number) => {
+
+  const handleDelete = async (userId: number) => {
     setOpenMenuId(null);
     // requête API DELETE
-
-    toast.success(`Utilisateur ${userId} supprimé!`);
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Utilisateur non authentifié");
+        return;
+      }
+      await axios.put(apiURL + '/auth/validate/' + userId, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // setUsers(res.data);
+      toast.success(`Utilisateur ${userId} validated !`);
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Fetch users error:", err);
+      toast.error(err.response?.data?.message || "Error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <p className="text-center mt-8">Chargement...</p>;
@@ -131,80 +145,80 @@ const Users = () => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {users.map((u) => (
-          <tr key={u.id}>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-10 w-10">
-                  <img className="h-10 w-10 rounded-full" src={`https://api.dicebear.com/9.x/croodles/svg?seed=`+u.username} />
-                </div>
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {u.username}
+            <tr key={u.id}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <img className="h-10 w-10 rounded-full" src={`https://api.dicebear.com/9.x/croodles/svg?seed=` + u.username} />
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {u.email}
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                {
-                  u.isValidated ?
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" className="size-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                    </svg>
-                  : 
-                    <div className="text-pink-200">
-                      Pending
+                  <div className="ml-4">
+                    <div className="text-sm font-medium text-gray-900">
+                      {u.username}
                     </div>
-                }
-              </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {u.role}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {u.isDeleted ? "1" : "0"}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
-              <div className="relative inline-block">
-                {u.role !== "superadmin" && (
-                  <button
-                    onClick={(e) => handleMenuToggle(u.id, e)}
-                    className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-                    title="Options"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle cx="5" cy="12" r="2" />
-                      <circle cx="12" cy="12" r="2" />
-                      <circle cx="19" cy="12" r="2" />
-                    </svg>
-                  </button>
-                )}
-                {/* 👇 Menu contextuel positionné juste sous le bouton */}
-                {openMenuId === u.id && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 z-20 w-32"
-                  >
-                   { !u.isValidated && <button
-                      onClick={() => handleValidate(u.id)}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-700 cursor-pointer"
-                    >
-                      Validate
-                    </button>}
-                    <button
-                      onClick={() => handleDelete(u.id)}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-700 cursor-pointer"
-                    >
-                      Delete
-                    </button>
+                    <div className="text-sm text-gray-500">
+                      {u.email}
+                    </div>
                   </div>
-                )}
-              </div>
-            </td>
-          </tr>
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  {
+                    u.isValidated ?
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="green" className="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                      </svg>
+                      :
+                      <div className="text-pink-200">
+                        Pending
+                      </div>
+                  }
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {u.role}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {u.isDeleted ? "1" : "0"}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
+                <div className="relative inline-block">
+                  {u.role !== "superadmin" && (
+                    <button
+                      onClick={(e) => handleMenuToggle(u.id, e)}
+                      className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                      title="Options"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="5" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="19" cy="12" r="2" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* 👇 Menu contextuel positionné juste sous le bouton */}
+                  {openMenuId === u.id && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 z-20 w-32"
+                    >
+                      {!u.isValidated && <button
+                        onClick={() => handleValidate(u.id)}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-700 cursor-pointer"
+                      >
+                        Validate
+                      </button>}
+                      <button
+                        onClick={() => handleDelete(u.id)}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-700 cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </td>
+            </tr>
           ))}
           {/* More rows... */}
         </tbody>
