@@ -47,15 +47,15 @@ const Users = () => {
         toast.error("Utilisateur non authentifié");
         return;
       }
-      const res = await axios.get(apiURL+`/auth/validate`, {
+      await axios.put(apiURL+'/auth/validate/'+userId, null,  {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(res.data);
-      toast.success(`Utilisateur ${userId} validé!`);
+      // setUsers(res.data);
+      toast.success(`Utilisateur ${userId} validated !`);
       fetchUsers();
     } catch (err: any) {
       console.error("Fetch users error:", err);
-      toast.error(err.response?.data?.message || "Erreur lors du chargement des utilisateurs");
+      toast.error(err.response?.data?.message || "Error");
     } finally {
       setLoading(false);
     }

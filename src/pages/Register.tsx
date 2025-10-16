@@ -33,12 +33,19 @@ const Register: React.FC = () => {
     if (!validatePassword(password)) {
       toast.error("Mot de passe trop court", { position: "top-center" });
     }
-  
+
     if (password !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas.");
     }
 
-    await register(username, email, password);
+    await register(username, email, password)
+      .then(() => {
+        toast.success('Register successfull !')
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error("❌ Error" + (err.response?.data?.message || err.message));
+      })
   };
 
   return (
@@ -112,7 +119,7 @@ const Register: React.FC = () => {
             Already have an account?{" "}
             <span className="cursor-pointer text-[#7337FF] hover:underline">
               <Link to={"/login"}>
-                Sign up
+                Sign in
               </Link>
             </span>
           </p>
