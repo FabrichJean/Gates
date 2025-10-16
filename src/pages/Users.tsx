@@ -4,6 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { getToken } from "../utils/storage";
 import { apiURL } from "../constant";
+import { useUsers } from "../hooks/useAuth";
 
 
 interface User {
@@ -16,42 +17,31 @@ interface User {
 }
 
 const Users = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [search, setSearch] = useState('')
+  const { data, reFetch } = useUsers(search)
   const [loading, setLoading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null); // 👈 pour suivre quel menu est ouvert
 
+  useEffect(() => {
+    reFetch()
+  }, [search])
+
   const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const token = getToken();
-      if (!token) {
-        toast.error("Utilisateur non authentifié");
-        return;
-      }
-      const res = await axios.get(apiURL + "/auth/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data);
-    } catch (err: any) {
-      console.error("Fetch users error:", err);
-      toast.error(err.response?.data?.message || "Erreur lors du chargement des utilisateurs");
-    } finally {
-      setLoading(false);
-    }
+    reFetch()
   };
 
   const handleValidate = async (userId: number) => {
     try {
       const token = getToken();
       if (!token) {
-        toast.error("Utilisateur non authentifié");
+        toast.error("Unauthenticated user");
         return;
       }
       await axios.put(apiURL + '/auth/validate/' + userId, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // setUsers(res.data);
-      toast.success(`Utilisateur ${userId} validated !`);
+      toast.success(`User ${userId} validated !`);
       fetchUsers();
     } catch (err: any) {
       console.error("Fetch users error:", err);
@@ -85,14 +75,14 @@ const Users = () => {
     try {
       const token = getToken();
       if (!token) {
-        toast.error("Utilisateur non authentifié");
+        toast.error("Unauthenticated user");
         return;
       }
-      await axios.put(apiURL + '/auth/validate/' + userId, null, {
+      await axios.delete(apiURL + '/auth/users/' + userId, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // setUsers(res.data);
-      toast.success(`Utilisateur ${userId} validated !`);
+      toast.success(`User ${userId} deleted !`);
       fetchUsers();
     } catch (err: any) {
       console.error("Fetch users error:", err);
@@ -102,7 +92,7 @@ const Users = () => {
     }
   };
 
-  if (loading) return <p className="text-center mt-8">Chargement...</p>;
+  if (loading) return <p className="text-center mt-8">loading...</p>;
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -117,6 +107,8 @@ const Users = () => {
         </h1>
         <div className="flex items-center gap-4">
           <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
             type="text"
             placeholder="🔍 Search ..."
             className="border border-gray-300 rounded-lg px-3 py-2 w-64 focus:ring-2 focus:ring-blue-500"
@@ -144,7 +136,7 @@ const Users = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((u) => (
+          {data.map((u) => (
             <tr key={u.id}>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">

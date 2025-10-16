@@ -1,8 +1,10 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import useFetch from "http-react";
 import { apiURL, token } from "../constant";
 import type { User } from "./useVideos";
+import { getToken } from "../utils/storage";
+import axios from "axios";
 
 // 🔸 Hook personnalisé (pour simplifier l’accès au contexte)
 export const useAuth = () => {
@@ -12,8 +14,23 @@ export const useAuth = () => {
   return ctx;
 }
 
-export const useUsers = () => {
-  return useFetch<User[]>(apiURL + '/auth/users', {
-    headers: { Authorization: `Bearer ${token()}` },
-  })
-}
+export const useUsers = (search: string) => {
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    const token = getToken();
+    const res = await axios.get(apiURL + '/auth/users?search=' + search, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setData(res.data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [search]);
+
+  return { data, reFetch: fetchUsers, loading };
+};
