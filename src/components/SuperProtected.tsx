@@ -7,9 +7,9 @@ interface Props {
 }
 
 function SuperProtected({ children }: Props) {
-    const {data: user} = useAuthMe()
+    const {data: user, loading} = useAuthMe()
 
-    return user?.role === "superadmin" ? children : <Navigate to="/" replace />
+    return loading ? null : user?.role === "superadmin" ? children : <Navigate to="/" replace />
 }
 
 export default SuperProtected

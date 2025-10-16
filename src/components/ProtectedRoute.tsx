@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth, useAuthMe } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { RotateLoader } from "react-spinners";
 
 interface ProtectedRouteProps {
@@ -8,13 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const {loading, error} = useAuthMe();
+  const { token, loading } = useAuth();
 
-  useEffect(() => {
+  // alert(token)
 
-  }, [])
-
-  return loading ? <div className="w-full h-screen flex items-center justify-center"><RotateLoader color="#00d3f2" className="w-14 h-auto" /></div> : !error ? children : <Navigate to="/login" replace />
+  return loading ? <div className="w-full h-screen flex items-center justify-center"><RotateLoader color="#00d3f2" className="w-14 h-auto" /></div> : token ? children : <Navigate to="/login" replace />
 };
 
 export default ProtectedRoute;
