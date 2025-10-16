@@ -118,9 +118,6 @@ const Users = () => {
               Role
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Deleted
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -159,9 +156,6 @@ const Users = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {u.role}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {u.isDeleted ? "1" : "0"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
                 <div className="relative inline-block">
