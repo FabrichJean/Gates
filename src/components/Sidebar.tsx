@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 function Sidebar() {
 
-    const {data: user} = useAuthMe()
+    const { data: user } = useAuthMe()
 
     const [page, setPage] = useState<string>(() => {
         // Lecture initiale une seule fois (lazy init)
@@ -55,20 +55,11 @@ function Sidebar() {
         <div className="col-span-1 bg-white">
             <div className="p-2 h-full w-full flex flex-col bg-white dark:bg-gray-900 border-r border-r-gray-200">
                 <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden flex-grow pt-2 justify-between">
+                    {/* Sidebar */}
+
                     {/* <!-- Section principale --> */}
                     <div className="flex flex-col space-y-1 mx-1 lg:mt-1">
                         <div className="px-5 pt-4 hidden lg:block"></div>
-                        {/* 
-                            <!-- Lien : App --> */}
-                        {/* <Link
-                            to="/"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
-                        >
-                            <RiHome9Fill className="min-w-5 h-5" />
-                            <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                                Dashboard
-                            </span>
-                        </Link> */}
 
                         <Link
                             to="/videos"
@@ -99,21 +90,11 @@ function Sidebar() {
                                 Archive
                             </span>
                         </Link>}
-
-                        {/* <Link
-                            to="/profile"
-                            onClick={() => handleNav("profile")} className={linkClass("profile")}
-                        >
-                            <CgProfile className="min-w-5 h-5 text-sky-400" />
-                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                                Profile
-                            </span>
-                        </Link> */}
                     </div>
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                   {user?.role === "superadmin" && <Link
+                    {user?.role === "superadmin" && <Link
                         to="/settings"
                         onClick={() => handleNav("settings")} className={linkClass("settings")}
                     >
