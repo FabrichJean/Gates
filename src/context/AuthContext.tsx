@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   // Au montage → on restaure le token depuis le localStorage
   useEffect(() => {
     const storedToken = getToken();
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await loginApi(email, password); // { token, user }
       setTokenState(data.token);
-      setUser(data.user);
+      setUser(data.userType);
       setToken(data.token);
     } catch (err: any) {
       setError(err.message || "Erreur lors de la connexion");

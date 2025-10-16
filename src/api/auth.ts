@@ -60,3 +60,15 @@ export const deleteUserApi = async (userId: number) => {
     throw new Error("Erreur de connexion au serveur");
   }
 };
+
+export const createUser = async (data: {username: string, email: string, password: string}) => {
+  try {
+    const res = await api.post("/auth/register", data);
+    return res.data; // ➜ { token, userType }
+  } catch (error: any) {
+    if (error.response && error.response.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("Erreur de connexion au serveur");
+  }
+};

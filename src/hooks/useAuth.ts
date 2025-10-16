@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 import type { User } from "./useVideos";
 import { getToken } from "../utils/storage";
 import axios from "axios";
+import useFetch from "http-react";
 
 // 🔸 Hook personnalisé (pour simplifier l’accès au contexte)
 export const useAuth = () => {
@@ -35,3 +36,9 @@ export const useUsers = (search: string, params?: any) => {
 
   return { data, reFetch: fetchUsers, loading };
 };
+
+export const useAuthMe = () => {
+  return useFetch<{role: string}>(apiURL + '/auth', {
+    headers: { Authorization: `Bearer ${token()}` },
+  })
+}

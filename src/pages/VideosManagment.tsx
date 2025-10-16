@@ -122,7 +122,7 @@ const VideosManagment = () => {
             </kbd>
           </button>
 
-          <Link to={"/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
+          <Link to={"/videos/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
             + new

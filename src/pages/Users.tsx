@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { getToken } from "../utils/storage";
 import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 const Users = () => {
   const [search, setSearch] = useState('')
@@ -86,7 +87,7 @@ const Users = () => {
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <header className="flex justify-between items-center mb-8">
+      <header className="flex flex-wrap justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">
           <div className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
@@ -96,6 +97,11 @@ const Users = () => {
           </div>
         </h1>
         <div className="flex items-center gap-4">
+          <Link to={'/users/create'} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
+            + new
+          </Link>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -157,10 +163,10 @@ const Users = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <div
                   className={`badge ${u.role === "superadmin"
-                      ? "badge-soft  badge-secondary"
-                      : u.role === "admin"
-                        ? "badge-soft b badge-accent"
-                        : "badge-soft badge-success"
+                    ? "badge-soft  badge-secondary"
+                    : u.role === "admin"
+                      ? "badge-soft b badge-accent"
+                      : "badge-soft badge-success"
                     }`}
                 >
                   {u.role}

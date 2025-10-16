@@ -11,6 +11,8 @@ import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
 import UsersArchives from "../pages/UsersArchive";
+import CreateUser from "../pages/CreateUser";
+import SuperProtected from "../components/SuperProtected";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -40,9 +42,11 @@ const AppRoutes = () => (
         path="/users"
         element={
           <ProtectedRoute>
-            <InsideSidebar>
-              <Users />
-            </InsideSidebar>
+            <SuperProtected>
+              <InsideSidebar>
+                <Users />
+              </InsideSidebar>
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
@@ -57,7 +61,7 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/upload"
+        path="/videos/upload"
         element={
           <ProtectedRoute>
             <InsideSidebar>
@@ -77,12 +81,14 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/users"
+        path="/users/create"
         element={
           <ProtectedRoute>
-            <InsideSidebar>
-              <Users />
-            </InsideSidebar>
+            <SuperProtected>
+              <InsideSidebar>
+                <CreateUser />
+              </InsideSidebar>
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
@@ -90,9 +96,11 @@ const AppRoutes = () => (
         path="/archive"
         element={
           <ProtectedRoute>
-            <InsideSidebar>
-              <UsersArchives />
-            </InsideSidebar>
+            <SuperProtected>
+              <InsideSidebar>
+                <UsersArchives />
+              </InsideSidebar>
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
@@ -100,9 +108,11 @@ const AppRoutes = () => (
         path="/settings"
         element={
           <ProtectedRoute>
-            <InsideSidebar>
-              <Settings />
-            </InsideSidebar>
+            <SuperProtected>
+              <InsideSidebar>
+                <Settings />
+              </InsideSidebar>
+            </SuperProtected>
           </ProtectedRoute>
         }
       />

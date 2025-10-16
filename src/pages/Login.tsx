@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 // import { toast } from "react-toastify";
 import { useAuth } from "../hooks/useAuth";
-import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { validatePassword } from "../utils/validators";
 import ThemeToggle from "../components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +14,6 @@ const logoUrl =
   "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742348949/Prestataires_Documents/smj7n1bdlpjsfsotwpco.png";
 
 const Login: React.FC = () => {
-  const isOnline = useNetworkStatus();
   const { login, error, loading, token, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,10 +36,10 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isOnline) {
-      toast.error("Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.");
-      return;
-    }
+    // if (!isOnline) {
+    //   toast.error("Aucune connexion Internet. Veuillez activer vos données mobiles ou le Wi-Fi pour continuer.");
+    //   return;
+    // }
 
     if (!validatePassword(password)) {
       toast.error("Mot de passe trop court");

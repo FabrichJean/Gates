@@ -16,7 +16,7 @@ export type Couple = {
 
 
 export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmit, coupleTitles, setCoupleTitles }: { coupleTitles: Couple[], setCoupleTitles: React.Dispatch<React.SetStateAction<Couple[]>>, btnSubmit?: string, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
-console.log(coupleTitles);
+  console.log(coupleTitles);
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...coupleTitles];
@@ -58,13 +58,13 @@ console.log(coupleTitles);
       </div>
 
 
-      {coupleTitles.map((c, i) => (
+      {coupleTitles?.map((c, i) => (
         <div
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
           {/* @ts-expect-error */}
-          <LanguageAutoComplete defaultValue={{ code: c.language.title, name: c.language.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+          <LanguageAutoComplete defaultValue={{ code: c?.language?.title, name: c?.language?.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
@@ -188,13 +188,13 @@ const Upload = () => {
   // })
 
   return (
-    <div className="bg-gray-50">
-      <Toaster position="top-right" />
+    <div className="bg-gray-50 h-full">
+      <Toaster position="top-center" />
       {/* <h1 className="text-2xl font-semibold text-gray-800 flex items-center p-6">
         Upload
       </h1> */}
-      <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center">
-        <div className="flex md:flex-row flex-col flex-wrap gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
+      <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center w-full">
+        <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-lg p-8 border border-gray-200 w-full">
           <div className="space-y-6">
             <div>
               <label className="block text-gray-700 font-medium mb-2">Ref</label>
@@ -212,11 +212,26 @@ const Upload = () => {
               <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
             </div>
 
+            {/* Cover Image */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">Cover Image</label>
               <div
                 onClick={handleCoverClick}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer relative"
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith("image/")) {
+                    setCoverFile(file);
+                    setCoverPreview(URL.createObjectURL(file));
+                  } else {
+                    toast.error("🚫 Invalid image format!");
+                  }
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDragEnter={(e) => e.currentTarget.classList.add("border-blue-500", "bg-blue-50")}
+                onDragLeave={(e) => e.currentTarget.classList.remove("border-blue-500", "bg-blue-50")}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center 
+               hover:border-blue-500 transition cursor-pointer relative"
               >
                 {coverPreview ? (
                   <img
@@ -260,7 +275,21 @@ const Upload = () => {
               <label className="block text-gray-700 font-medium mb-2">Video</label>
               <div
                 onClick={handleVideoClick}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type === "video/mp4") {
+                    setVideoFile(file);
+                    setVideoPreview(URL.createObjectURL(file));
+                  } else {
+                    toast.error("🚫 Only MP4 files are accepted!");
+                  }
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDragEnter={(e) => e.currentTarget.classList.add("border-blue-500", "bg-blue-50")}
+                onDragLeave={(e) => e.currentTarget.classList.remove("border-blue-500", "bg-blue-50")}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center 
+               hover:border-blue-500 transition cursor-pointer"
               >
                 {videoPreview ? (
                   <video
@@ -304,6 +333,7 @@ const Upload = () => {
                 />
               </div>
             </div>
+
 
             {/* Barre de progression */}
             {uploading && (

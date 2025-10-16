@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, useAuthMe } from "../hooks/useAuth";
 import { RiHome9Fill } from "react-icons/ri";
 import { BiSolidVideos } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 
 
 function Sidebar() {
+
+    const {data: user} = useAuthMe()
 
     const [page, setPage] = useState<string>(() => {
         // Lecture initiale une seule fois (lazy init)
@@ -78,7 +80,7 @@ function Sidebar() {
                             </span>
                         </Link>
 
-                        <Link
+                       {user?.role === "superadmin" && <Link
                             to="/users"
                             onClick={() => handleNav("users")} className={linkClass("users")}
                         >
@@ -86,9 +88,9 @@ function Sidebar() {
                             <span className="ml-2 text-sm tracking-wide hidden lg:block">
                                 Users
                             </span>
-                        </Link>
+                        </Link>}
 
-                        <Link
+                        {user?.role === "superadmin" && <Link
                             to="/archive"
                             onClick={() => handleNav("archive")} className={linkClass("archive")}
                         >
@@ -96,7 +98,7 @@ function Sidebar() {
                             <span className="ml-2 text-sm tracking-wide hidden lg:block">
                                 Archive
                             </span>
-                        </Link>
+                        </Link>}
 
                         {/* <Link
                             to="/profile"
@@ -111,7 +113,7 @@ function Sidebar() {
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                    <Link
+                   {user?.role === "superadmin" && <Link
                         to="/settings"
                         onClick={() => handleNav("settings")} className={linkClass("settings")}
                     >
@@ -119,7 +121,7 @@ function Sidebar() {
                         <span className="ml-2 text-sm tracking-wide hidden lg:block">
                             Settings
                         </span>
-                    </Link>
+                    </Link>}
 
                     {/* @ts-expect-error */}
                     <button className="px-1 btn" onClick={() => document.getElementById('my_modal_5').showModal()}>
