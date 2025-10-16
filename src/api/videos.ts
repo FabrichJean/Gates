@@ -1,6 +1,16 @@
 import axios, { type AxiosProgressEvent } from "axios";
 import { apiURL, token } from "../constant";
 
+
+export async function getFilteredVideos(params: any){
+    return await axios.get(`${apiURL}/videos`, {
+        headers: {
+            'Authorization': `Bearer ${token()}`
+        },
+        params
+    })
+}
+
 export async function transcodeVideo(videoId: string | number | undefined): Promise<void> {
     return await axios.post(`${apiURL}/videos/${videoId}/transcode`, null, {
         headers: {
@@ -54,6 +64,22 @@ export async function archiveVideo(videoId: string | number): Promise<any> {
     return await axios.delete(apiURL + "/videos/" + videoId, {
         headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token()}`,
+        }
+    });
+}
+
+export async function uploadCover(videoId: string | number): Promise<void> {
+    return await axios.post(`${apiURL}/videos/${videoId}/upload-cover`, null, {
+        headers: {
+            Authorization: `Bearer ${token()}`,
+        }
+    });
+}
+
+export async function toggleStatus(videoId: string | number): Promise<void> {
+    return await axios.put(`${apiURL}/videos/${videoId}/toggleStatus`, null, {
+        headers: {
             Authorization: `Bearer ${token()}`,
         }
     });

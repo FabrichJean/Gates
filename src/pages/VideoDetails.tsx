@@ -155,7 +155,6 @@ export default VideoDetails;
 function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [ref, setRef] = useState<string | null>(video?.ref || null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
@@ -180,11 +179,8 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
     const formData: any = {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
-      ...(ref && { ref }),
-
       titles: JSON.stringify(coupleTitles)
     };
-
 
     try {
       setUploading(true);
@@ -223,16 +219,6 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
         </h1>
         <div className="flex md:flex-row flex-col gap-7 w-max bg-white rounded-lg p-8 border border-gray-200">
           <div className="space-y-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Ref</label>
-              <input
-                type="text"
-                value={ref || ""}
-                onChange={(e) => setRef(e.target.value)}
-                placeholder=""
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-            </div>
 
             <div>
               <label className="block text-gray-700 font-medium mb-2">Category</label>
@@ -290,7 +276,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
             )}
           </div>
 
-          <TitlesForm btnSubmit="✏️ update" defaultCouples={video?.titles.map(title => ({ ...title, language: title.language, name: title.language.name }))} onChange={(titles) => setCoupleTitles(titles)} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
+          <TitlesForm btnSubmit="✏️ update" coupleTitles={coupleTitles} setCoupleTitles={setCoupleTitles} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
         </div>
       </div>
     </div>

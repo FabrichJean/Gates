@@ -28,17 +28,17 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
 
   // Filtrage auto-complete
   useEffect(() => {
-    if (!query) {
-      setFiltered([]);
-      return;
-    }
-    const f = languages.filter(
-      (lang) =>
-        lang.name.toLowerCase().includes(query.toLowerCase()) ||
-        lang.code.toLowerCase().includes(query.toLowerCase())
-    );
-    setFiltered(f);
-  }, [query, languages]);
+    // if (!query) {
+    //   setFiltered([]);
+    //   return;
+    // }
+    // const f = languages.filter(
+    //   (lang) =>
+    //     lang.name.toLowerCase().includes(query.toLowerCase()) ||
+    //     lang.code.toLowerCase().includes(query.toLowerCase())
+    // );
+    setFiltered(languages);
+  }, [languages]);
 
   const handleSelect = (lang: Language) => {
     console.log(lang);

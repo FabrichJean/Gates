@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useEffect, useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import axios from "axios";
@@ -6,31 +7,28 @@ import { apiURL } from "../constant/index"
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
 import { uploadVideo } from "../api/videos";
+import { useNavigate } from "react-router-dom";
 
 
 export type Couple = {
   id: any; i18_language: string; title: string, name?: string
 };
 
-export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit, defaultCouples, btnSubmit }: { defaultCouples?: Couple[], btnSubmit?: string, onChange: (couples: Couple[]) => void, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
-  const [couples, setCouples] = useState<Couple[]>(defaultCouples || []);
 
-  console.log('couples', btnSubmit, couples);
-
+export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmit, coupleTitles, setCoupleTitles }: { coupleTitles: Couple[], setCoupleTitles: React.Dispatch<React.SetStateAction<Couple[]>>, btnSubmit?: string, uploading?: boolean, progress?: number, handleSubmit: () => void }) {
+console.log(coupleTitles);
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
-    const newCouples = [...couples];
+    const newCouples = [...coupleTitles];
     newCouples[index][field] = value;
-    setCouples(newCouples);
-    onChange(newCouples);
+    setCoupleTitles(newCouples);
   };
 
-  const addCouple = () => setCouples([...couples, { id: null, i18_language: '', title: '' }]);
+  const addCouple = () => setCoupleTitles((c) => [...c, { id: null, i18_language: '', title: '' }]);
 
   const removeCouple = (index: number) => {
-    setCouples((prev) => prev.filter((_, i) => i !== index));
-    const newCouples = [...couples];
-    onChange(newCouples);
+    setCoupleTitles((prev) => prev.filter((_, i) => i !== index));
+    // const newCouples = [...newCouples];
   };
 
   const handleSubmit = () => {
@@ -60,12 +58,13 @@ export function TitlesForm({ onChange, progress, uploading, handleSubmit: submit
       </div>
 
 
-      {couples.map((c, i) => (
+      {coupleTitles.map((c, i) => (
         <div
           key={i}
           className="flex gap-2 items-center p-4 px-0"
         >
-          <LanguageAutoComplete defaultValue={{ code: c.i18_language, name: c.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+          {/* @ts-expect-error */}
+          <LanguageAutoComplete defaultValue={{ code: c.language.title, name: c.language.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
           <input
             type="text"
             placeholder="Title"
@@ -125,6 +124,8 @@ const Upload = () => {
   const [category, setCategory] = useState<Category>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
+  const navigate = useNavigate()
+
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -171,6 +172,7 @@ const Upload = () => {
 
       toast.success("✅ Upload réussi !");
       console.log("Video uploaded:", res.data);
+      navigate('/videos')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);

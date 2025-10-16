@@ -25,16 +25,16 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: Ca
 
   // Filtrage auto-complete
   useEffect(() => {
-    if (!query) {
-      setFiltered([]);
-      return;
-    }
-    const f = categories.filter(
-      (lang) =>
-        lang.name.toLowerCase().includes(query.toLowerCase()) ||
-        lang.id.toString().includes(query.toLowerCase())
-    );
-    setFiltered(f);
+    // if (!query) {
+    //   setFiltered([]);
+    //   return;
+    // }
+    // const f = categories.filter(
+    //   (lang) =>
+    //     lang.name.toLowerCase().includes(query.toLowerCase()) ||
+    //     lang.id.toString().includes(query.toLowerCase())
+    // );
+    setFiltered(categories);
   }, [query, categories]);
 
   const handleSelect = (lang: Category) => {

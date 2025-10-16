@@ -18,13 +18,23 @@ export type TVideo = {
   titles: { title: string; i18_language: string; video_id: number, language: {code: string, name: string} }[];
   transfer_status: number;
   upload_status: number;
+  cover_upload_status: number;
   url: string | null;
+  user: User
 };
 
+export type User = {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+}
 
-export default function UseVideos() {
-    return useFetch<{ videos: TVideo[] }>(apiURL + "/videos", {
+
+export default function UseVideos(status?: 'all' | '0' | '1', page?: number, search?: string) {
+    return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
         headers: { Authorization: `Bearer ${token()}` },
+        query: { status, page, search }
     })
 }
 
