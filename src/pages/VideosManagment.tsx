@@ -10,6 +10,7 @@ import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
 import VideoFilters from "../components/VideoFilters";
 import { Filter } from "lucide-react";
+import { useProgress } from "../hooks/useProgress";
 
 export type Video = {
   id: unknown;
@@ -29,9 +30,10 @@ export type Video = {
 const VideosManagment = () => {
   const [page, setPage] = useState(1);
   const { data, reFetch, mutate } = UseVideos('all', page);
+  const { addProgress, updateProgress } = useProgress();
 
   // console.log(data.videos);
-  
+
 
   useEffect(() => {
     reFetch();
@@ -42,7 +44,11 @@ const VideosManagment = () => {
 
   const transcode = async (videoId: string | number | undefined) => {
     setLoading({ id: videoId, type: 'transc' });
-    await transcodeVideo(videoId)
+    const id = addProgress({ name: String(videoId), type: "upload" });
+    await transcodeVideo(videoId, (event) => {
+      const percent = Math.round((event.loaded * 100) / (event.total || 1));
+      updateProgress(id, percent);
+    })
       .then(() => {
         toast.success("success");
         reFetch();
@@ -100,9 +106,9 @@ const VideosManagment = () => {
 
           <VideoFilters onSubmit={(fetched) => {
             console.log(fetched);
-            
+
             mutate(fetched)
-          }}/>
+          }} />
           {/* @ts-expect-error */}
           <button onClick={() => document.getElementById('search_modal_52').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
             <Filter className="w-3" /> filters
@@ -240,9 +246,9 @@ const VideosManagment = () => {
           onPageChange={setPage}
         />
 
-      </div>
+      </div >
 
-    </div>
+    </div >
   );
 };
 

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context";
 import { apiURL, token } from "../constant";
 import type { User } from "./useVideos";
 import { getToken } from "../utils/storage";
