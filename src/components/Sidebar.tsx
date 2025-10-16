@@ -1,160 +1,162 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
-import { RiHome9Fill } from "react-icons/ri";
 import { BiSolidVideos } from "react-icons/bi";
-import { CgProfile } from "react-icons/cg";
 import { Archive, LogOut, Settings, Users2 } from "lucide-react";
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 
 function Sidebar() {
+  const { data: user } = useAuthMe();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dialogRef = useRef<HTMLDialogElement | null>(null); // <- ref typé
 
-    const {data: user} = useAuthMe()
+  const [page, setPage] = useState<string>(() => {
+    return localStorage.getItem("page") || "";
+  });
 
-    const [page, setPage] = useState<string>(() => {
-        // Lecture initiale une seule fois (lazy init)
-        return localStorage.getItem('page') || '';
-    });
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
-    const { logout } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+  useEffect(() => {
+    const current = location.pathname.replace("/", "") || "videos";
+    setPage(current);
+    localStorage.setItem("page", current);
+  }, [location.pathname]);
 
-    // fonction handle logout
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    }
+  const handleNav = (newPage: string) => {
+    if (page !== newPage) navigate(`/${newPage}`);
+  };
 
-    // 🔹 À chaque changement d'URL, on met à jour la page active
-    useEffect(() => {
-        const current = location.pathname.replace("/", "") || "videos";
-        setPage(current);
-        localStorage.setItem("page", current);
-    }, [location.pathname]);
+  const baseClass =
+    "flex items-center rounded-xl px-3.5 py-2.5 transition-all duration-200 font-medium cursor-pointer";
 
-    // 🔹 Fonction pour naviguer proprement
-    const handleNav = (newPage: string) => {
-        if (page !== newPage) {
-            navigate(`/${newPage}`);
-        }
-    };
+  const linkClass = (name: string) =>
+    `${baseClass} ${
+      page === name
+        ? "bg-blue-100 text-blue-600 shadow-sm dark:bg-blue-950/40 dark:text-blue-400"
+        : "text-gray-500 hover:bg-gray-100 hover:text-blue-500 dark:text-gray-400 dark:hover:bg-gray-800"
+    }`;
 
-    // 🔹 Style commun aux liens
-    const baseClass =
-        "flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold cursor-pointer transition-colors";
+  // ouvre la modal en toute sécurité
+  const openLogoutModal = () => {
+    // si l'élément existe et supporte showModal()
+    dialogRef.current?.showModal();
+  };
 
-    const linkClass = (name: string) =>
-        `${baseClass} ${page === name
-            ? "bg-primary-50 shadow-sm text-primary-400"
-            : "text-gray-500 hover:text-primary-400"
-        }`;
+  // ferme la modal en toute sécurité
+  const closeLogoutModal = () => {
+    dialogRef.current?.close();
+  };
 
-    return (
-        <div className="col-span-1 bg-white">
-            <div className="p-2 h-full w-full flex flex-col bg-white dark:bg-gray-900 border-r border-r-gray-200">
-                <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden flex-grow pt-2 justify-between">
-                    {/* <!-- Section principale --> */}
-                    <div className="flex flex-col space-y-1 mx-1 lg:mt-1">
-                        <div className="px-5 pt-4 hidden lg:block"></div>
-                        {/* 
-                            <!-- Lien : App --> */}
-                        {/* <Link
-                            to="/"
-                            className="flex flex-row items-center justify-center lg:justify-start rounded-md h-12 px-3.5 lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer"
-                        >
-                            <RiHome9Fill className="min-w-5 h-5" />
-                            <span className="ml-0 lg:ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                                Dashboard
-                            </span>
-                        </Link> */}
+  return (
+    <aside className="col-span-1 h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm">
+      <div className="flex flex-col h-full justify-between">
+        {/* --------- SECTION PRINCIPALE --------- */}
+        <div className="flex flex-col gap-1 mt-4 px-3">
+          <div className="flex items-center justify-center lg:justify-start mb-4">
+            <h1 className="text-lg font-bold text-blue-600 dark:text-blue-400 hidden lg:block">
+              🎬 
+            </h1>
+          </div>
+          <hr className="border-t border-gray-200 dark:border-gray-700" />
 
-                        <Link
-                            to="/videos"
-                            onClick={() => handleNav("videos")} className={linkClass("videos")}
-                        >
-                            <BiSolidVideos className="min-w-5 h-5 text-indigo-400" />
-                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                                Videos
-                            </span>
-                        </Link>
+          <Link
+            to="/videos"
+            onClick={() => handleNav("videos")}
+            className={linkClass("videos")}
+          >
+            <BiSolidVideos className="min-w-5 h-5 text-indigo-400" />
+            <span className="ml-2 hidden lg:inline">Vidéos</span>
+          </Link>
 
-                       {user?.role === "superadmin" && <Link
-                            to="/users"
-                            onClick={() => handleNav("users")} className={linkClass("users")}
-                        >
-                            <Users2 className="min-w-5 h-5 text-cyan-400" />
-                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                                Users
-                            </span>
-                        </Link>}
+          {user?.role === "superadmin" && (
+            <Link
+              to="/users"
+              onClick={() => handleNav("users")}
+              className={linkClass("users")}
+            >
+              <Users2 className="min-w-5 h-5 text-cyan-400" />
+              <span className="ml-2 hidden lg:inline">Utilisateurs</span>
+            </Link>
+          )}
 
-                        {user?.role === "superadmin" && <Link
-                            to="/archive"
-                            onClick={() => handleNav("archive")} className={linkClass("archive")}
-                        >
-                            <Archive className="min-w-5 h-5 text-zinc-500" />
-                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                                Archive
-                            </span>
-                        </Link>}
-
-                        {/* <Link
-                            to="/profile"
-                            onClick={() => handleNav("profile")} className={linkClass("profile")}
-                        >
-                            <CgProfile className="min-w-5 h-5 text-sky-400" />
-                            <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                                Profile
-                            </span>
-                        </Link> */}
-                    </div>
-                </div>
-
-                <div className="flex flex-col space-y-2">
-                   {user?.role === "superadmin" && <Link
-                        to="/settings"
-                        onClick={() => handleNav("settings")} className={linkClass("settings")}
-                    >
-                        <Settings className="min-w-5 h-5 text-zinc-400" />
-                        <span className="ml-2 text-sm tracking-wide hidden lg:block">
-                            Settings
-                        </span>
-                    </Link>}
-
-                    {/* @ts-expect-error */}
-                    <button className="px-1 btn" onClick={() => document.getElementById('my_modal_5').showModal()}>
-                        <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600">
-                            <span className="inline-flex justify-center items-center ml-3.5">
-                                <LogOut />
-                            </span><span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">Logout</span>
-                        </div>
-                    </button>
-                </div>
-
-                <dialog id="my_modal_5" className="modal modal-bottom sm:modal-middle">
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg">Deconnexion</h3>
-                        <p className="py-4">Are you sure you want to logout ? <span className="text-xl">😞</span></p>
-                        <div className="modal-action">
-                            <form method="dialog" className="flex gap-4">
-                                <button className="px-1 btn" onClick={handleLogout}>
-                                    <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold text-gray-500 hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600">
-                                        <span className="inline-flex justify-center items-center ml-3.5">
-                                            <LogOut />
-                                        </span><span className="ml-2 text-sm tracking-wide truncate capitalize block">Logout</span>
-                                    </div>
-                                </button>
-
-                                <button className="btn">Close</button>
-                            </form>
-                        </div>
-                    </div>
-                </dialog>
-            </div>
+          {user?.role === "superadmin" && (
+            <Link
+              to="/archive"
+              onClick={() => handleNav("archive")}
+              className={linkClass("archive")}
+            >
+              <Archive className="min-w-5 h-5 text-zinc-500" />
+              <span className="ml-2 hidden lg:inline">Archives</span>
+            </Link>
+          )}
         </div>
-    )
+
+        {/* --------- SECTION BASSE --------- */}
+        <div className="flex flex-col gap-1 px-3 mb-4 border-t border-gray-200 dark:border-gray-800 pt-3">
+          {user?.role === "superadmin" && (
+            <Link
+              to="/settings"
+              onClick={() => handleNav("settings")}
+              className={linkClass("settings")}
+            >
+              <Settings className="min-w-5 h-5 text-zinc-400" />
+              <span className="ml-2 hidden lg:inline">Paramètres</span>
+            </Link>
+          )}
+
+          {/* Bouton déconnexion -> ouvre la modal via ref */}
+          <button
+            className="w-full text-left"
+            onClick={(e) => { e.preventDefault(); openLogoutModal(); }}
+            type="button"
+          >
+            <div className="flex items-center px-3.5 py-2.5 rounded-xl text-red-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/30 transition-all">
+              <LogOut className="h-5 w-5" />
+              <span className="ml-2 hidden lg:inline">Déconnexion</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Dialog avec ref */}
+      <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box dark:bg-gray-900 dark:text-white">
+          <h3 className="font-bold text-lg">Déconnexion</h3>
+          <p className="py-4">
+            Êtes-vous sûr de vouloir vous déconnecter ? <span>😞</span>
+          </p>
+          <div className="modal-action">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogout();
+                closeLogoutModal();
+              }}
+              className="flex gap-4"
+            >
+              <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
+                Se déconnecter
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  closeLogoutModal();
+                }}
+              >
+                Annuler
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+    </aside>
+  );
 }
 
-export default Sidebar
+export default Sidebar;
