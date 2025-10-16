@@ -1,5 +1,3 @@
-
-
 const ProfilComponent = () => {
     return (
         <div className="w-full overflow-hidden dark:bg-gray-900">
