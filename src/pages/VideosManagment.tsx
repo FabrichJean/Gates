@@ -11,6 +11,7 @@ import SearchModal from "../components/SearchModal";
 import VideoFilters from "../components/VideoFilters";
 import { Filter } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
+import DeepLoader from "../components/DeepLoader";
 
 export type Video = {
   id: unknown;
@@ -197,7 +198,7 @@ const VideosManagment = () => {
                       >
                         {
                           loading?.id === video.id && loading?.type === 'transc' ?
-                            <SyncLoader className="scale-[0.4]" />
+                            <DeepLoader />
                             :
                             "🎞️ Transcode"
                         }
@@ -209,7 +210,7 @@ const VideosManagment = () => {
                       >
                         {
                           loading?.id === video.id && loading?.type === 'cover' ?
-                            <SyncLoader className="scale-[0.4]" />
+                            <DeepLoader />
                             :
                             "upload cover"
                         }
