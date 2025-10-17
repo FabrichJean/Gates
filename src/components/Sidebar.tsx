@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
-import { BiSolidVideos } from "react-icons/bi";
-import { Archive, LogOut, Settings, Users2, X } from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface SidebarProps {

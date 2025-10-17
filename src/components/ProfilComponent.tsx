@@ -1,11 +1,9 @@
-import { Toaster } from "react-hot-toast"
-
 const ProfilComponent = () => {
 
 
     return (
         <div className="flex items-start h-screen overflow-auto w-full">
-            <Toaster position="top-center" />
+            {/* <Toaster position="top-center" /> */}
 
             {/* <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center w-full"></div> */}
             <div className="max-w-xl bg-white rounded-xl shadow-md overflow-hidden md:max-w-7xl">
