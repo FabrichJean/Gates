@@ -31,7 +31,7 @@ const Users = () => {
       });
       toast.success(`User ${userId} validated!`);
       fetchUsers();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");
     } finally {
@@ -49,7 +49,7 @@ const Users = () => {
       });
       toast.success(`User ${userId} deleted!`);
       fetchUsers();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");
     } finally {
@@ -88,7 +88,7 @@ const Users = () => {
           </svg>
           <span>Users</span>
           <span>
-            
+
           </span>
         </h1>
 
@@ -164,7 +164,7 @@ const Users = () => {
                 </td>
 
                 {/* Status */}
-                <td className="px-4 sm:px-6 py-3 text-">
+                <td className="px-4 sm:px-6 py-3 text-left">
                   {u.isValidated ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +172,7 @@ const Users = () => {
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="green"
-                      className="w-5 h-5 mx-auto"
+                      className="w-5 h-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -188,13 +188,12 @@ const Users = () => {
                 {/* Role */}
                 <td className="px-4 sm:px-6 py-3 text-gray-600 text-sm">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                      u.role === "superadmin"
+                    className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${u.role === "superadmin"
                         ? "bg-purple-100 text-purple-700"
                         : u.role === "admin"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
                   >
                     {u.role}
                   </span>
