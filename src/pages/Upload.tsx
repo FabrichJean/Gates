@@ -13,7 +13,7 @@ import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 
 
 export type Couple = {
-  id: any; i18_language: string; title: string, name?: string
+  i18_language: string; title: string, name?: string
 };
 
 
