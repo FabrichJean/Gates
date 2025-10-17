@@ -1,11 +1,13 @@
 import useFetch from "http-react"
 import { apiURL, token } from "../constant"
 import type { Category } from "../components/CategoryAutoComplete";
+import type { SubCategory } from "./useSubCategory";
 
 export type TVideo = {
   id: number;
   user_id: number;
   category: Category;
+  subCategory: SubCategory;
   cover: string;
   createdAt: string;       // ISO date string
   updatedAt: string;       // ISO date string

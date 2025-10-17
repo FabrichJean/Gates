@@ -161,7 +161,7 @@ const VideosManagment = () => {
                       {video.user.username}
                     </Link>
                   </td>
-                  <td className="py-3 px-6">{video.category.name}</td>
+                  <td className="py-3 px-6">{video.category.name} / {video.subCategory?.name}</td>
                   <td className="py-3 px-6">
                     {video.upload_status === 1 ?
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">

@@ -8,6 +8,8 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
 import { uploadVideo } from "../api/videos";
 import { useNavigate } from "react-router-dom";
+import type { SubCategory } from "../hooks/useSubCategory";
+import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 
 
 export type Couple = {
@@ -122,6 +124,7 @@ const Upload = () => {
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [category, setCategory] = useState<Category>();
+  const [subcategory, setSubCategory] = useState<SubCategory>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
   const navigate = useNavigate()
@@ -151,6 +154,7 @@ const Upload = () => {
       ...(videoFile && { video: videoFile }),
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
+      ...(subcategory && { sub_category_id: subcategory.id }),
       ...(ref && { ref }),
       titles: JSON.stringify(coupleTitles),
     };
@@ -182,16 +186,9 @@ const Upload = () => {
     }
   };
 
-  // useEffect(() => {
-  //   window.location.tit
-  // })
-
   return (
     <div className="bg-gray-50 h-full">
       <Toaster position="top-center" />
-      {/* <h1 className="text-2xl font-semibold text-gray-800 flex items-center p-6">
-        Upload
-      </h1> */}
       <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center w-full">
         <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-lg p-8 border border-gray-200 w-full">
           <div className="space-y-6">
@@ -209,6 +206,10 @@ const Upload = () => {
             <div>
               <label className="block text-gray-700 font-medium mb-2">Category</label>
               <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">SubCategory</label>
+              <SubCategoryAutoComplete onSelect={(cat) => setSubCategory(cat)} categoryId={category?.id} />
             </div>
 
             {/* Cover Image */}

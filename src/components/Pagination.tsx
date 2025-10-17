@@ -71,7 +71,7 @@ const Pagination: React.FC<PaginationProps> = ({
       {/* Info total */}
       <span className="ml-4 text-sm text-gray-500">
         Page <span className="font-semibold text-gray-700">{currentPage}</span> /{" "}
-        <span className="font-semibold text-gray-700">{totalPages}</span>
+        <span className="font-semibold text-gray-700">{totalPages || null}</span>
       </span>
     </div>
   );

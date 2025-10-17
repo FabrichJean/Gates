@@ -10,6 +10,8 @@ import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import { archiveVideo, deletePerm, updateVideo } from "../api/videos";
+import type { SubCategory } from "../hooks/useSubCategory";
+import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
@@ -123,7 +125,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
             <h1 className="text-lg font-semibold text-gray-800">Category</h1>
             <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-              {video?.category.name}
+              {video?.category.name} / {video?.subCategory.name }
             </span>
           </div>
 
@@ -162,6 +164,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [category, setCategory] = useState<Category>(video?.category);
+  const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,6 +182,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
     const formData: any = {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
+      ...(subcategory && { sub_category_id: subcategory.id }),
       titles: JSON.stringify(coupleTitles)
     };
 
@@ -223,6 +227,10 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
             <div>
               <label className="block text-gray-700 font-medium mb-2">Category</label>
               <CategoryAutoComplete defaultValue={category} onSelect={(cat) => setCategory(cat)} />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Sub Category</label>
+              <SubCategoryAutoComplete categoryId={category?.id} defaultValue={subcategory} onSelect={(cat) => setSubCategory(cat)} />
             </div>
 
             <div>

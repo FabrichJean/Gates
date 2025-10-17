@@ -2,20 +2,24 @@ import { useEffect, useState } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import { getFilteredVideos } from "../api/videos";
+import UseSubCategory from "../hooks/useSubCategory";
 
 export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }) {
 
-    const { data: users } = useUsers()
+    const { data: users } = useUsers('')
     const { data: cat } = UseCategory()
 
     const [filters, setFilters] = useState({
         category_id: "",
+        sub_category_id: "",
         user_id: "",
         isDeleted: "all",
         upload_status: "all",
         cover_upload_status: "all",
         transfer_status: "all",
     });
+
+    const { data: subcat } = UseSubCategory(Number(filters?.category_id))
 
     const reverseStatus = (value: string) => {
         if (value === '1') return 'yes';
@@ -95,7 +99,23 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                         >
                             <option value=''>all</option>
                             {
-                                cat?.map((c, i) => (
+                                cat?.map?.((c, i) => (
+                                    <option key={i} value={c.id}>{c.name}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block mb-1 font-medium">SubCategory</label>
+                        <select
+                            className="select select-bordered w-full"
+                            value={filters.sub_category_id}
+                            onChange={(e) => handleChange("sub_category_id", e.target.value)}
+                        >
+                            <option value=''>all</option>
+                            {
+                                subcat?.SubCategorys?.map((c, i) => (
                                     <option key={i} value={c.id}>{c.name}</option>
                                 ))
                             }
@@ -111,8 +131,8 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                         >
                             <option value=''>all</option>
                             {
-                                users?.map(u => (
-                                    <option value={u.id}>{u.username}</option>
+                                users?.map((u, i) => (
+                                    <option key={i} value={u.id}>{u.username}</option>
                                 ))
                             }
                         </select>
@@ -162,6 +182,7 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                                 upload_status: "all",
                                 cover_upload_status: "all",
                                 transfer_status: "all",
+                                sub_category_id: ""
                             })
                             localStorage.removeItem('videos_filtered')
                             await submit()

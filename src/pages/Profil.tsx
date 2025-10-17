@@ -2,9 +2,9 @@ import ProfilComponent from "../components/ProfilComponent";
 
 
 const Profil: React.FC = () => {
-    return (
+  return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <ProfilComponent />
+      <ProfilComponent />
     </div>
   );
 }
