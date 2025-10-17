@@ -11,7 +11,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 1024); // < 1024px = mobile/tablette
+            setIsMobile(window.innerWidth < 1024);
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -20,9 +20,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
     const toggleSidebar = () => {
         if (isMobile) {
-            setShowSidebar(!showSidebar);
+            setShowSidebar(!showSidebar); // toggle overlay mobile
         } else {
-            setIsCollapsed(!isCollapsed);
+            setIsCollapsed(!isCollapsed); // toggle collapse desktop
         }
     };
 
@@ -30,31 +30,33 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         <div className="w-dvw h-dvh bg-gray-200 flex overflow-hidden relative">
             <Toaster />
             <StickyUploadProgress />
-            {/* ✅ Sidebar Desktop */}
+
+            {/* Desktop Sidebar */}
             {!isMobile && <Sidebar isCollapsed={isCollapsed} />}
 
-            {/* ✅ Sidebar Mobile (overlay) */}
+            {/* Mobile Sidebar Overlay */}
             {isMobile && showSidebar && (
                 <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm">
                     <div className="absolute left-0 top-0 h-full">
                         <Sidebar
                             isCollapsed={false}
                             onCloseMobile={() => setShowSidebar(false)}
+                            isMobile
                         />
                     </div>
                 </div>
             )}
 
-            {/* ✅ Contenu principal */}
+            {/* Contenu principal */}
             <div
                 className={`
                     flex flex-col bg-white h-full overflow-auto transition-all duration-300
                     ${isMobile ? "w-full" : isCollapsed ? "w-[calc(100%-5rem)]" : "w-[calc(100%-16rem)]"}
                 `}
             >
-                {/* Header commun */}
+                {/* Header */}
                 <header className="w-full bg-gray-100 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
-                    {/* 🔹 Bouton menu */}
+                    {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
                         className="text-lg font-semibold cursor-pointer"
@@ -77,11 +79,13 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
                     <div className="flex items-center gap-4">
                         <span className="text-gray-600 text-sm">Admin</span>
-                        <img
-                            src="https://api.dicebear.com/9.x/adventurer/svg?seed=Admin"
-                            alt="User avatar"
-                            className="w-8 h-8 rounded-full"
-                        />
+                        <div className="cursor-pointer">
+                            <img
+                                src="https://api.dicebear.com/9.x/croodles/svg?seed=Super Admin"
+                                alt="User avatar"
+                                className="w-8 h-8 rounded-full"
+                            />
+                        </div>
                     </div>
                 </header>
 

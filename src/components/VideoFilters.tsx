@@ -93,7 +93,7 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                     <div>
                         <label className="block mb-1 font-medium">Category</label>
                         <select
-                            className="select select-bordered w-full"
+                            className="select select-bordered w-full outline-none"
                             value={filters.category_id}
                             onChange={(e) => handleChange("category_id", e.target.value)}
                         >
@@ -125,7 +125,7 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                     <div>
                         <label className="block mb-1 font-medium">User</label>
                         <select
-                            className="select select-bordered w-full"
+                            className="select select-bordered w-full outline-none"
                             value={filters.user_id}
                             onChange={(e) => handleChange("user_id", e.target.value)}
                         >
