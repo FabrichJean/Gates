@@ -2,14 +2,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
 import { BiSolidVideos } from "react-icons/bi";
-import { Archive, LogOut, Settings, Users2 } from "lucide-react";
+import { Archive, LogOut, Settings, Users2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface SidebarProps {
     isCollapsed: boolean;
+    onCloseMobile?: () => void; // ✅ facultatif, utilisé uniquement sur mobile
 }
 
-function Sidebar({ isCollapsed }: SidebarProps) {
+function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
     const { data: user } = useAuthMe();
     const { logout } = useAuth();
     const navigate = useNavigate();
@@ -35,6 +36,7 @@ function Sidebar({ isCollapsed }: SidebarProps) {
 
     const handleNav = (newPage: string) => {
         if (page !== newPage) navigate(`/${newPage}`);
+        if (onCloseMobile) onCloseMobile(); // ✅ ferme le menu mobile
     };
 
     const baseClass =
@@ -51,9 +53,19 @@ function Sidebar({ isCollapsed }: SidebarProps) {
 
     return (
         <aside
-            className={`h-screen border-r border-gray-200 dark:border-gray-800 shadow-sm bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between 
-    ${isCollapsed ? "w-20" : "w-64"} `}
+            className={`h-screen border-r border-gray-200 dark:border-gray-800 shadow-sm bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
+            ${isCollapsed ? "w-20" : "w-64"} `}
         >
+            {/* 🔹 Bouton de fermeture pour mobile */}
+            {onCloseMobile && (
+                <button
+                    onClick={onCloseMobile}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+            )}
+
             {/* --------- SECTION PRINCIPALE --------- */}
             <div className="flex flex-col h-full justify-between">
                 <div className="flex flex-col gap-1 mt-4 px-3">
@@ -64,7 +76,7 @@ function Sidebar({ isCollapsed }: SidebarProps) {
                     </div>
 
                     <hr className="border-t border-gray-200 dark:border-gray-700" />
-
+                    
                     <Link
                         to="/videos"
                         onClick={() => handleNav("videos")}
