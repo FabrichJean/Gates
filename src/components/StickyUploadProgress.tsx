@@ -7,21 +7,24 @@ import { X } from "lucide-react";
 export default function StickyUploadProgress() {
     const { uploads, clearProgress } = useProgressStore();
     useSocketProgress(); // ⚡ auto-sync avec Socket.IO
-    
-    // @ts-expect-error
+
     useEffect(() => {
-        if (uploads.length === 0) return null;
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-            event.preventDefault();
-            event.returnValue = ''; // nécessaire pour Chrome
+        if (uploads.length !== 0) {
+
+
+            const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+                event.preventDefault();
+                event.returnValue = ''; // nécessaire pour Chrome
+            };
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
+
+            return () => window.removeEventListener('beforeunload', handleBeforeUnload);
         };
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
+    }, [uploads]);
 
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, []);
 
-    
     if (uploads.length === 0) return null;
 
 
