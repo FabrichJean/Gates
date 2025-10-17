@@ -7,10 +7,11 @@ import { useEffect, useRef, useState } from "react";
 
 interface SidebarProps {
     isCollapsed: boolean;
-    onCloseMobile?: () => void; // ✅ facultatif, utilisé uniquement sur mobile
+    onCloseMobile?: () => void; // utilisé uniquement sur mobile
+    isMobile?: boolean; // pour savoir si c’est mobile
 }
 
-function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
+function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps) {
     const { data: user } = useAuthMe();
     const { logout } = useAuth();
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
     const handleLogout = () => {
         logout();
         navigate("/login");
+        if (onCloseMobile) onCloseMobile(); // ferme overlay mobile
     };
 
     useEffect(() => {
@@ -34,9 +36,10 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
         }
     }, [location.pathname]);
 
+    // 🔹 handleNav modifié : mobile = ferme, desktop = rien
     const handleNav = (newPage: string) => {
         if (page !== newPage) navigate(`/${newPage}`);
-        if (onCloseMobile) onCloseMobile(); // ✅ ferme le menu mobile
+        if (isMobile && onCloseMobile) onCloseMobile();
     };
 
     const baseClass =
@@ -56,8 +59,8 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
             className={`h-screen border-r border-gray-200 dark:border-gray-800 shadow-sm bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
             ${isCollapsed ? "w-20" : "w-64"} `}
         >
-            {/* 🔹 Bouton de fermeture pour mobile */}
-            {onCloseMobile && (
+            {/* Bouton de fermeture mobile */}
+            {isMobile && onCloseMobile && (
                 <button
                     onClick={onCloseMobile}
                     className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
@@ -66,7 +69,7 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
                 </button>
             )}
 
-            {/* --------- SECTION PRINCIPALE --------- */}
+            {/* SECTION PRINCIPALE */}
             <div className="flex flex-col h-full justify-between">
                 <div className="flex flex-col gap-1 mt-4 px-3">
                     <div className={`flex items-center justify-center ${!isCollapsed && "lg:justify-start"} mb-4`}>
@@ -76,58 +79,40 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
                     </div>
 
                     <hr className="border-t border-gray-200 dark:border-gray-700" />
-                    
-                    <Link
-                        to="/videos"
-                        onClick={() => handleNav("videos")}
-                        className={linkClass("videos")}
-                    >
+
+                    <Link to="/videos" onClick={() => handleNav("videos")} className={linkClass("videos")}>
                         <BiSolidVideos className="min-w-5 h-5 text-indigo-400" />
                         {!isCollapsed && <span className="ml-2">Videos</span>}
                     </Link>
 
                     {user?.role === "superadmin" && (
-                        <Link
-                            to="/users"
-                            onClick={() => handleNav("users")}
-                            className={linkClass("users")}
-                        >
-                            <Users2 className="min-w-5 h-5 text-cyan-400" />
-                            {!isCollapsed && <span className="ml-2">Users</span>}
-                        </Link>
-                    )}
+                        <>
+                            <Link to="/users" onClick={() => handleNav("users")} className={linkClass("users")}>
+                                <Users2 className="min-w-5 h-5 text-cyan-400" />
+                                {!isCollapsed && <span className="ml-2">Users</span>}
+                            </Link>
 
-                    {user?.role === "superadmin" && (
-                        <Link
-                            to="/archive"
-                            onClick={() => handleNav("archive")}
-                            className={linkClass("archive")}
-                        >
-                            <Archive className="min-w-5 h-5 text-zinc-500" />
-                            {!isCollapsed && <span className="ml-2">Archive</span>}
-                        </Link>
+                            <Link to="/archive" onClick={() => handleNav("archive")} className={linkClass("archive")}>
+                                <Archive className="min-w-5 h-5 text-zinc-500" />
+                                {!isCollapsed && <span className="ml-2">Archive</span>}
+                            </Link>
+
+                            <Link to="/settings" onClick={() => handleNav("settings")} className={linkClass("settings")}>
+                                <Settings className="min-w-5 h-5 text-zinc-400" />
+                                {!isCollapsed && <span className="ml-2">Settings</span>}
+                            </Link>
+                        </>
                     )}
                 </div>
 
-                {/* --------- SECTION BASSE --------- */}
+                {/* SECTION BASSE */}
                 <div className="flex flex-col gap-1 px-3 mb-4 border-t border-gray-200 dark:border-gray-800 pt-3">
-                    {user?.role === "superadmin" && (
-                        <Link
-                            to="/settings"
-                            onClick={() => handleNav("settings")}
-                            className={linkClass("settings")}
-                        >
-                            <Settings className="min-w-5 h-5 text-zinc-400" />
-                            {!isCollapsed && <span className="ml-2">Settings</span>}
-                        </Link>
-                    )}
-
                     <button
                         className="w-full text-left"
                         onClick={(e) => { e.preventDefault(); openLogoutModal(); }}
                         type="button"
                     >
-                        <div className="flex items-center px-3.5 py-2.5 rounded-xl text-red-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/30 transition-all">
+                        <div className="flex items-center px-3.5 cursor-pointer py-2.5 rounded-xl text-red-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/30 transition-all">
                             <LogOut className="h-5 w-5" />
                             {!isCollapsed && <span className="ml-2">Logout</span>}
                         </div>
@@ -135,7 +120,7 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
                 </div>
             </div>
 
-            {/* --------- MODAL LOGOUT --------- */}
+            {/* MODAL LOGOUT */}
             <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
                 <div className="modal-box dark:bg-gray-900 dark:text-white">
                     <h3 className="font-bold text-lg">Disconnect</h3>
@@ -154,13 +139,7 @@ function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
                             <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
                                 logout
                             </button>
-                            <button
-                                type="button"
-                                className="btn"
-                                onClick={() => {
-                                    closeLogoutModal();
-                                }}
-                            >
+                            <button type="button" className="btn" onClick={closeLogoutModal}>
                                 cancel
                             </button>
                         </form>

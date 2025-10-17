@@ -202,7 +202,7 @@ const Upload = () => {
                 value={ref || ""}
                 onChange={(e) => setRef(e.target.value)}
                 placeholder=""
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                className="w-full border border-gray-300 rounded-lg p-2 outline-none transition"
               />
             </div>
 

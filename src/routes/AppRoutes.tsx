@@ -32,7 +32,6 @@ const AppRoutes = () => (
         element={
           <ProtectedRoute>
             <InsideSidebar>
-              {/* <Dashboard /> */}
               <VideosManagment />
             </InsideSidebar>
           </ProtectedRoute>

@@ -98,10 +98,10 @@ const VideosManagment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-white p-6">
       {/* Header */}
-      <header className="flex flex-wrap justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Video Management</h1>
+      <header className="flex flex-wrap justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold pb-3 text-gray-800">Video Management</h1>
         <div className="flex items-center gap-4">
 
           <VideoFilters onSubmit={(fetched) => {

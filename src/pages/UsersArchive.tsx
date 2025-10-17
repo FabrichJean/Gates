@@ -57,7 +57,7 @@ const UsersArchives = () => {
               onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="🔍 Search ..."
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64 text-sm"
+              className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64 text-sm"
             />
           </div>
         </header>
@@ -131,9 +131,16 @@ const UsersArchives = () => {
 
         {/* ✅ Message si vide */}
         {data.length === 0 && (
-          <p className="text-center text-gray-500 text-sm mt-6">
-            Aucun utilisateur archivé trouvé.
-          </p>
+          <div className="text-center mt-6">
+            <img
+              src="img static/pngtree-data-empty-vector-png-image_15213862.png"
+              alt="No users"
+              className="mx-auto w-32 h-32 mb-4"
+            />
+            <p className="text-gray-500 text-sm">
+              No registered users found.
+            </p>
+          </div>
         )}
       </div>
     </div>
