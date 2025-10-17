@@ -1,9 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
-import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import { apiURL } from "../constant/index"
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
 import { uploadVideo } from "../api/videos";
@@ -13,7 +12,8 @@ import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 
 
 export type Couple = {
-  id: any; i18_language: string; title: string, name?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  id: any; i18_language: string; title: string, name?: string;
 };
 
 
