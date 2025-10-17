@@ -10,6 +10,8 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
+        setShowSidebar(Boolean(localStorage.getItem('show-side')))
+        setIsCollapsed(Boolean(localStorage.getItem('is-collapsed')))
         const handleResize = () => {
             setIsMobile(window.innerWidth < 1024);
         };
@@ -24,6 +26,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         } else {
             setIsCollapsed(!isCollapsed); // toggle collapse desktop
         }
+
+        localStorage.setItem('show-side', String(showSidebar))
+        localStorage.setItem('is-collapsed', String(isCollapsed))
     };
 
     return (
