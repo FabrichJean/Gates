@@ -37,6 +37,7 @@ export const useUsers = (search: string, params?: any) => {
   return { data, reFetch: fetchUsers, loading };
 };
 
+
 export const useAuthMe = () => {
   return useFetch<{role: string}>(apiURL + '/auth', {
     headers: { Authorization: `Bearer ${token()}` },

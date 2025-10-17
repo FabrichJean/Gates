@@ -42,11 +42,11 @@ const AppRoutes = () => (
         path="/users"
         element={
           <ProtectedRoute>
-            {/* <SuperProtected> */}
+            <SuperProtected>
               <InsideSidebar>
                 <Users />
               </InsideSidebar>
-            {/* </SuperProtected> */}
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
