@@ -60,7 +60,7 @@ const Users = () => {
   if (loading) return <p className="text-center mt-8">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6 overflow-x-hidden">
+    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6 ">
       {/* ✅ HEADER RESPONSIVE */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
@@ -124,13 +124,13 @@ const Users = () => {
             onChange={(e) => setSearch(e.target.value)}
             type="text"
             placeholder="🔍 Search..."
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64 focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64"
           />
         </div>
       </header>
 
       {/* ✅ TABLE RESPONSIVE */}
-      <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+      <div className="overflow-x-auto shadow-sm pb-20 rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
           <thead className="bg-gray-50">
             <tr>
@@ -164,7 +164,7 @@ const Users = () => {
                 </td>
 
                 {/* Status */}
-                <td className="px-4 sm:px-6 py-3 text-left">
+                <td className="px-4 sm:px-6 py-3 text-">
                   {u.isValidated ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +209,7 @@ const Users = () => {
                           e.stopPropagation();
                           setOpenMenuId((prev) => (prev === u.id ? null : u.id));
                         }}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-gray-500 hover:text-gray-700 cursor-pointer"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -225,18 +225,18 @@ const Users = () => {
                       </button>
 
                       {openMenuId === u.id && (
-                        <div className="absolute right-0 mt-2 bg-white border border-gray-200 shadow-lg rounded-lg z-20 w-28">
+                        <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 w-28">
                           {!u.isValidated && (
                             <button
                               onClick={() => handleValidate(u.id)}
-                              className="block w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700"
+                              className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700"
                             >
                               Validate
                             </button>
                           )}
                           <button
                             onClick={() => handleDelete(u.id)}
-                            className="block w-full text-left px-4 py-2 text-xs sm:text-sm hover:bg-red-50 text-red-600"
+                            className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600"
                           >
                             Delete
                           </button>
