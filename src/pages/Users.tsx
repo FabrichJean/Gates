@@ -87,9 +87,6 @@ const Users = () => {
             />
           </svg>
           <span>Users</span>
-          <span>
-
-          </span>
         </h1>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
