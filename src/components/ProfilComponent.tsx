@@ -2,7 +2,7 @@ import { Toaster } from "react-hot-toast"
 
 const ProfilComponent = () => {
 
-    
+
     return (
         <div className="flex items-start h-screen overflow-auto w-full">
             <Toaster position="top-center" />

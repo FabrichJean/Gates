@@ -1,0 +1,12 @@
+.waitprogress{
+    animation: waitprogress 0.7s infinite;
+}
+
+@keyframes waitprogress {
+    0%{
+        transform: translateX(0%);
+    }
+    100%{
+        transform: translateX(300%);
+    }
+}

@@ -1,5 +1,6 @@
 import axios, { type AxiosProgressEvent } from "axios";
 import { apiURL, token } from "../constant";
+import { socket } from "../utils/socket";
 
 
 export async function getFilteredVideos(params: any){
@@ -21,7 +22,7 @@ export async function transcodeVideo(videoId: string | number | undefined, onUpl
 }
 
 export async function uploadS3(videoId: string | number | undefined): Promise<void> {
-    return await axios.post(`${apiURL}/videos/${videoId}/upload`, null, {
+    return await axios.post(`${apiURL}/videos/${videoId}/upload`, {socketId: socket.id}, {
         headers: {
             'Authorization': `Bearer ${token()}`
         }

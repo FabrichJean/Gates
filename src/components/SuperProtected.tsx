@@ -18,6 +18,8 @@ function SuperProtected({ children }: Props) {
             })
             .then((res) => {
                 setOk(Boolean(res.data.role === "superadmin"))
+                console.log(res.data);
+                
             })
             .catch(() => {
                 setOk(false)

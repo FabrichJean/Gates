@@ -95,8 +95,8 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                         >
                             <option value=''>all</option>
                             {
-                                cat?.map(c => (
-                                    <option value={c.id}>{c.name}</option>
+                                cat?.map((c, i) => (
+                                    <option key={i} value={c.id}>{c.name}</option>
                                 ))
                             }
                         </select>
