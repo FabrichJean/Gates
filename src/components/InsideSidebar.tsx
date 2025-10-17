@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";
+import { useAuthMe } from "../hooks/useAuth";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
+    const {data} = useAuthMe()
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
+
+    console.log(data);
+    
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {

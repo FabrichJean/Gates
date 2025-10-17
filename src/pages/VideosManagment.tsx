@@ -191,7 +191,7 @@ const VideosManagment = () => {
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
                       <button
-                        disabled={(loading?.id === video.id && loading?.type === 'transc') || video?.transfer_status === 1}
+                        disabled={Boolean(loading) || video?.transfer_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={transcode.bind(null, video.id)}
                       >
@@ -203,7 +203,7 @@ const VideosManagment = () => {
                         }
                       </button>
                       <button
-                        disabled={(loading?.id === video.id && loading?.type === 'cover') || video?.cover_upload_status === 1}
+                        disabled={Boolean(loading) || video?.cover_upload_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={cover.bind(null, video.id)}
                       >
@@ -215,7 +215,7 @@ const VideosManagment = () => {
                         }
                       </button>
                       <button
-                        disabled={(loading?.id === video.id && loading?.type === 'upload') || video?.upload_status === 1}
+                        disabled={Boolean(loading) || video?.upload_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={(upload.bind(null, video.id))}
                       >
