@@ -113,10 +113,15 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
-        setShowSidebar(Boolean(localStorage.getItem('show-side')))
-        setIsCollapsed(Boolean(localStorage.getItem('is-collapsed')))
+        // localStorage stores strings - compare to 'true' to avoid Boolean('false') === true
+        setShowSidebar(localStorage.getItem('show-side') === 'true');
+        setIsCollapsed(localStorage.getItem('is-collapsed') === 'true');
         const handleResize = () => {
             setIsMobile(window.innerWidth < 1024);
+            // when switching to mobile, ensure overlay is closed by default
+            if (window.innerWidth < 1024) {
+                setShowSidebar(false);
+            }
         };
         handleResize();
         window.addEventListener("resize", handleResize);
@@ -125,13 +130,14 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
     const toggleSidebar = () => {
         if (isMobile) {
-            setShowSidebar(!showSidebar); // toggle overlay mobile
+            const next = !showSidebar;
+            setShowSidebar(next); // toggle overlay mobile
+            localStorage.setItem('show-side', String(next));
         } else {
-            setIsCollapsed(!isCollapsed); // toggle collapse desktop
+            const next = !isCollapsed;
+            setIsCollapsed(next); // toggle collapse desktop
+            localStorage.setItem('is-collapsed', String(next));
         }
-
-        localStorage.setItem('show-side', String(showSidebar))
-        localStorage.setItem('is-collapsed', String(isCollapsed))
     };
 
     return (

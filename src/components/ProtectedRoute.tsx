@@ -8,11 +8,22 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { token, loading } = useAuth();
+  const { token, loading, user } = useAuth();
 
-  // alert(JSON.stringify(user))
+  // While auth is loading, show spinner
+  if (loading) return <div className="w-full h-screen flex items-center justify-center"><RotateLoader color="#00d3f2" className="w-14 h-auto" /></div>;
 
-  return loading ? <div className="w-full h-screen flex items-center justify-center"><RotateLoader color="#00d3f2" className="w-14 h-auto" /></div> : token ? children : <Navigate to="/login" replace />
+  // Not authenticated
+  if (!token) return <Navigate to="/login" replace />;
+
+  // If user object exists and is not validated -> redirect to profile where status is shown
+  // If there is a token but no populated user object yet, or user explicitly not validated -> redirect to profile
+  if (!user || (typeof user === 'object' && user.isValidated === false)) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Authenticated and validated -> allow
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
