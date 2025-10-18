@@ -88,7 +88,7 @@ export async function toggleStatus(videoId: string | number): Promise<void> {
 }
 
 export async function webApp() {
-    return await axios.put(`${apiURL}/videos/to-web-app`, null, {
+    return await axios.post(`${apiURL}/videos/send-to-server`, null, {
         headers: {
             Authorization: `Bearer ${token()}`,
         }
