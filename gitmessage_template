@@ -1,0 +1,49 @@
+# — Commit type + scope + short description —  
+<type>(<scope>): <short description>
+
+# (blank line)
+
+# Body / detailed explanation (optional, multi-line)  
+<motivation / background>  
+<implementation / core logic / impact>  
+<compatibility / edge cases / considerations>  
+
+# (blank line)
+
+# Footer section (linking issue / PR / breaking changes / references)  
+# **Magic Words list / explanation:**  
+# — “Close / Complete / Resolve” kinds (will mark the issue as Done upon merge):  
+#   close, closes, closed, closing  
+#   fix, fixes, fixed, fixing  
+#   resolve, resolves, resolved, resolving  
+#   complete, completes, completed, completing  
+#  
+# — “Reference / relate / mention” kinds (will *not* automatically close the issue):  
+#   ref, references  
+#   part of  
+#   related to  
+#   contributes to  
+#   towards  
+#  
+# Example uses:  
+#   Closes LINEAR-1234  
+#   Fixes LINEAR-5678  
+#   Resolves LINEAR-9012  
+#   References LINEAR-3456  
+#   Related to LINEAR-7890  
+#  
+# **Breaking changes (Breaking Change) should be indicated like this:**  
+#   BREAKING CHANGE: <description of breaking change>  
+# Or put “!” after the type (e.g. feat!, refactor!) to indicate a breaking change  
+#  
+# **Multiple issue / PR associations**  
+# If a commit involves multiple Linear issues, you can write multiple magic-word lines, for example:  
+#   Closes LINEAR-1234  
+#   Fixes LINEAR-2345  
+#   Related to LINEAR-3456  
+#  
+# **PR / Issue reference relationships**  
+# In addition to putting magic words in the commit message, you can also use the same magic words + issue ID in PR titles or descriptions to trigger linking.
+
+Closes LINEAR-<issue_id>
+# BREAKING CHANGE: <description of breaking change>

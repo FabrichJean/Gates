@@ -2,16 +2,13 @@
 import { useEffect } from "react";
 import { useProgressStore } from "../hooks/useProgressStore";
 import { useSocketProgress } from "../hooks/useSocketProgress";
-import { X } from "lucide-react";
 
 export default function StickyUploadProgress() {
-    const { uploads, clearProgress } = useProgressStore();
+    const { uploads } = useProgressStore();
     useSocketProgress(); // ⚡ auto-sync avec Socket.IO
 
     useEffect(() => {
         if (uploads.length !== 0) {
-
-
             const handleBeforeUnload = (event: BeforeUnloadEvent) => {
                 event.preventDefault();
                 event.returnValue = ''; // nécessaire pour Chrome
@@ -42,12 +39,12 @@ export default function StickyUploadProgress() {
                         <div key={u.videoId} className="p-2 border rounded-xl bg-gray-50">
                             <div className="flex justify-between items-center">
                                 <span className="text-xs font-medium">{u.file || "HLS Files"}</span>
-                                <button
+                                {/* <button
                                     onClick={() => clearProgress(u.videoId)}
                                     className="text-gray-400 hover:text-red-500"
                                 >
                                     <X size={14} />
-                                </button>
+                                </button> */}
                             </div>
 
                             <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
