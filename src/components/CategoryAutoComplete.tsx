@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 
 export type Category = {
   id: number;
@@ -28,7 +29,7 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
     const fetchCategories = async () => {
       try {
         const res = await axios.get<Category[]>(`${apiURL}/categories`, {
-          headers: { Authorization: `Bearer ${token()}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         setCategories(res.data);
         setFiltered(res.data);

@@ -1,5 +1,6 @@
 import useFetch from "http-react"
-import { apiURL, token } from "../constant"
+import { apiURL } from "../constant"
+import { getToken } from "../utils/storage"
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
 
@@ -41,13 +42,13 @@ export type User = {
 
 export default function UseVideos(status?: 'all' | '0' | '1', page?: number, search?: string) {
   return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
-    headers: { Authorization: `Bearer ${token()}` },
+  headers: { Authorization: `Bearer ${getToken()}` },
     query: { status, page, search }
   })
 }
 
 export function UseVideo(id: string | number | undefined) {
   return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
-    headers: { Authorization: `Bearer ${token()}` },
+  headers: { Authorization: `Bearer ${getToken()}` },
   })
 }

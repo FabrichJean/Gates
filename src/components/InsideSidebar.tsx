@@ -19,7 +19,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
             displayName = user;
             seed = user;
         } else if (typeof user === "object") {
-            displayName = (user.name || user.username || user.email || user.role || user.userType) as string;
+            displayName = (user.name || user.username || user.email || user.role) as string;
             seed = displayName || seed;
         }
     }

@@ -1,10 +1,11 @@
 import useFetch from "http-react"
-import { apiURL, token } from "../constant"
+import { apiURL } from "../constant"
+import { getToken } from "../utils/storage"
 import type { Category } from "../components/CategoryAutoComplete"
 
 function UseCategory() {
    return useFetch<Category[]>(apiURL + "/categories", {
-      headers: { Authorization: `Bearer ${token()}` },
+      headers: { Authorization: `Bearer ${getToken()}` },
    })
 }
 

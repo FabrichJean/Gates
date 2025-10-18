@@ -4,6 +4,27 @@ import { deleteUserApi, loginApi, registerApi, validateUserApi, getMeApi } from 
 import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gestion du localStorage
 import { AuthContext } from ".";
 
+// Helper: decode JWT payload (returns claims or null)
+function parseJwt(token?: string | null) {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 // 🔸 Interface du contexte d'authentification
 export interface AuthContextType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +60,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setTokenState(storedToken);
       try {
         const me = await getMeApi();
-        setUser(me);
+        // If backend returns minimal info (like only role), try to enrich from token
+        if (me && (me.email || me.id || me.username)) {
+          setUser(me);
+        } else {
+          // fallback to parse token claims
+          const claims = parseJwt(storedToken);
+          if (claims) {
+            setUser({
+              id: claims.id ?? claims.sub,
+              email: claims.email,
+              username: claims.username ?? claims.name,
+              role: claims.role ?? me.role ?? me.userType,
+              isValidated: claims.isValidated ?? me.isValidated ?? false,
+            });
+          } else {
+            setUser(me);
+          }
+        }
       } catch (err) {
         // token invalide ou erreur -> clear
         removeToken();
@@ -60,7 +98,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await loginApi(email, password); // { token, user }
       setTokenState(data.token);
-      setUser(data.userType);
+      // If server returns a full user object, use it. Otherwise try token claims.
+      if (data.user && (data.user.email || data.user.id || data.user.username)) {
+        setUser(data.user);
+      } else if (data.userType) {
+        // backend sometimes returns only userType (legacy). Create a minimal user object
+        const claims = parseJwt(data.token);
+        if (claims) {
+          setUser({
+            id: claims.id ?? claims.sub,
+            email: claims.email,
+            username: claims.username ?? claims.name,
+            role: claims.role ?? data.userType,
+            isValidated: claims.isValidated ?? data.isValidated ?? false,
+          });
+        } else {
+          setUser({ role: data.userType });
+        }
+      }
       setToken(data.token);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
