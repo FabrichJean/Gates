@@ -173,8 +173,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-
-
   // 🔹 Fonction de déconnexion
   const logout = () => {
     setUser(null);
