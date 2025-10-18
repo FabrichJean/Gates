@@ -55,8 +55,8 @@ const Profil: React.FC = () => {
           <div className="p-4 border rounded-md">
             <h3 className="text-sm text-gray-500">Account info</h3>
             <ul className="mt-2 text-gray-700">
-              <li><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : '-'}</li>
-              <li><strong>Username:</strong> {user && typeof user === 'object' ? user.username ?? '-' : '-'}</li>
+              <li><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : 'unknown'}</li>
+              <li><strong>Username:</strong> {user && typeof user === 'object' ? user.username ?? '-' : 'unknown'}</li>
               <li><strong>Email:</strong> {email}</li>
             </ul>
           </div>
