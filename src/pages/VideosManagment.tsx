@@ -13,6 +13,7 @@ import { FilePlus, Filter, SendIcon } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
 import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
+import {motion} from "framer-motion"
 
 export type Video = {
   id: unknown;
@@ -151,13 +152,19 @@ const VideosManagment = () => {
             </kbd>
           </button>
 
-          <Link to={"/videos/upload"} className="flex items-center justify-center gap-2 p-2.5 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
+          <motion.div drag dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }} className="md:hidden fixed z-40 bottom-5 right-5 flex items-center justify-center gap-2 p-3 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
+            <Link to={"/videos/upload"}>
+              <FilePlus className="w-8 h-auto" />
+            </Link>
+          </motion.div>
+
+          <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
             <FilePlus className="w-5 h-auto" />
           </Link>
-          {user?.role === 'superadmin' ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
-    font-medium text-sm rounded-xl transition-all duration-300
+          {user?.role === 'superadmin' ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
+    font-medium text-sm md:rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
-            <SendIcon /> send to webApp
+            <SendIcon /> <span className="md:inline hidden">send to webApp</span>
           </button> : null}
         </div>
       </header >
