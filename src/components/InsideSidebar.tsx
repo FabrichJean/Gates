@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 // Inline component pour afficher le nom/email et l'avatar de l'utilisateur
 const UserDisplayInline: React.FC = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement | null>(null);
 
     // user peut être une string (userType) ou un objet contenant email/name
     let displayName = "Admin";
@@ -19,17 +23,53 @@ const UserDisplayInline: React.FC = () => {
         }
     }
 
+    useEffect(() => {
+        const onDocClick = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", onDocClick);
+        return () => document.removeEventListener("mousedown", onDocClick);
+    }, []);
+
+    const handleProfile = () => {
+        setOpen(false);
+        navigate('/profil');
+    };
+
+    const handleLogout = () => {
+        setOpen(false);
+        logout();
+        navigate('/login');
+    };
+
     return (
-        <>
+        <div ref={ref} className="relative flex items-center gap-3">
             <span className="text-gray-600 text-sm">{displayName}</span>
-            <div className="cursor-pointer">
+            <button
+                onClick={() => setOpen(o => !o)}
+                aria-haspopup="true"
+                aria-expanded={open}
+                className="cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-sky-300"
+                title="User menu"
+            >
                 <img
                     src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(seed)}`}
                     alt="User avatar"
                     className="w-8 h-8 rounded-full"
                 />
-            </div>
-        </>
+            </button>
+
+            {open && (
+                <div className="absolute top-full left-1/2 mt-2 transform -translate-x-1/2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md z-50">
+                    <div className="py-1">
+                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Profil</button>
+                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">Deconnexion</button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 import { Toaster } from "react-hot-toast";
