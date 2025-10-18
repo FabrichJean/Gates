@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import CategoryAutoComplete, { type Category } from "../components/CategoryAutoComplete";
 import { uploadVideo } from "../api/videos";
@@ -187,8 +187,8 @@ const Upload = () => {
   };
 
   return (
-    <div className="bg-gray-50 h-full">
-      <Toaster position="top-center" />
+    <div className="h-full">
+      {/* <Toaster position="top-center" /> */}
       <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center w-full">
         <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-lg p-8 border border-gray-200 w-full">
           <div className="space-y-6">

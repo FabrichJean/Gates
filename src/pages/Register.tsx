@@ -29,23 +29,35 @@ const Register: React.FC = () => {
 
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Basic validations
+    if (!username || username.trim().length === 0) {
+      toast.error("Le nom d'utilisateur est requis.");
+      return;
+    }
+
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      toast.error("Email invalide ou manquant.");
+      return;
+    }
 
     if (!validatePassword(password)) {
       toast.error("Mot de passe trop court", { position: "top-center" });
+      return;
     }
 
     if (password !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas.");
+      return;
     }
 
-    await register(username, email, password)
-      .then(() => {
-        toast.success('Register successfull !')
-      })
-      .catch(err => {
-        console.error(err);
-        toast.error("❌ Error" + (err.response?.data?.message || err.message));
-      })
+    try {
+      await register(email.trim(), password, username.trim());
+      toast.success("Inscription réussie !");
+    } catch (err: any) {
+      console.error(err);
+      // AuthContext/register throws Error or the api call returns an object with response
+      toast.error("Erreur: " + (err?.response?.data?.message || err?.message || "Erreur lors de l'inscription"));
+    }
   };
 
   return (

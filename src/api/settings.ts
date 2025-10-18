@@ -7,6 +7,7 @@ export type TSettings = {
     mp4_storage_path: string;
     image_storage_path: string;
     cdn_url: string;
+    server_url: string;
 };
 
 export function saveSettings(settings: TSettings) {
