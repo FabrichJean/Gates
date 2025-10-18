@@ -22,10 +22,17 @@ const Register: React.FC = () => {
 
   // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
   useEffect(() => {
-    if (token || user) {
-      navigate("/"); // redirige vers l’accueil
+    if (loading) return;
+
+    if (!token && !user) return;
+
+    if (user && typeof user === 'object' && user.isValidated === false) {
+      navigate("/profil");
+      return;
     }
-  }, [token, user, navigate]);
+
+    if (token) navigate("/");
+  }, [token, user, loading, navigate]);
 
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +58,15 @@ const Register: React.FC = () => {
     }
 
     try {
-      await register(email.trim(), password, username.trim());
-      toast.success("Inscription réussie !");
+      const res = await register(email.trim(), password, username.trim());
+      // show backend message when available
+      if (res && res.message) {
+        toast.success(res.message);
+      } else {
+        toast.success("Inscription réussie !");
+      }
+      // After register always send user to login so they can sign in after validation
+      navigate('/login');
     } catch (err: any) {
       console.error(err);
       // AuthContext/register throws Error or the api call returns an object with response
