@@ -4,7 +4,7 @@ import { getToken } from "../utils/storage";
 import { socket } from "../utils/socket";
 
 
-export async function getFilteredVideos(params: any){
+export async function getFilteredVideos(params: any) {
     return await axios.get(`${apiURL}/videos`, {
         headers: {
             'Authorization': `Bearer ${getToken()}`
@@ -23,7 +23,7 @@ export async function transcodeVideo(videoId: string | number | undefined, onUpl
 }
 
 export async function uploadS3(videoId: string | number | undefined): Promise<void> {
-    return await axios.post(`${apiURL}/videos/${videoId}/upload`, {socketId: socket.id}, {
+    return await axios.post(`${apiURL}/videos/${videoId}/upload`, { socketId: socket.id }, {
         headers: {
             'Authorization': `Bearer ${getToken()}`
         }
@@ -86,4 +86,12 @@ export async function toggleStatus(videoId: string | number): Promise<void> {
             Authorization: `Bearer ${getToken()}`,
         }
     });
+}
+
+export async function webApp() {
+    return await axios.post(`${apiURL}/videos/send-to-server`, null, {
+        headers: {
+            Authorization: `Bearer ${token()}`,
+        }
+    })
 }

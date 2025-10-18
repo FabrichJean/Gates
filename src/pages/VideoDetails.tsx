@@ -88,12 +88,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               modify
             </button>
 
-            {/* @ts-expect-error */}
-            <button onClick={() => document.getElementById('my_modal_6').showModal()} className="btn relative flex items-center justify-center gap-2 px-6 py-2.5
+            {/* <button onClick={() => document.getElementById('my_modal_6').showModal()} className="btn relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 bg-white/90 hover:bg-white text-red-800 border-gray-200 hover:border-gray-300">
               delete
-            </button>
+            </button> */}
 
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">

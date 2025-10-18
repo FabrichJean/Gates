@@ -3,15 +3,16 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
-import { toggleStatus, transcodeVideo, uploadCover, uploadS3 } from "../api/videos";
+import { toggleStatus, transcodeVideo, uploadCover, uploadS3, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import { SyncLoader } from "react-spinners";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
 import VideoFilters from "../components/VideoFilters";
-import { Filter } from "lucide-react";
+import { FilePlus, Filter, SendIcon } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
 import DeepLoader from "../components/DeepLoader";
+import { useAuthMe } from "../hooks/useAuth";
 
 export type Video = {
   id: unknown;
@@ -29,6 +30,7 @@ export type Video = {
 }
 
 const VideosManagment = () => {
+  const { data: user } = useAuthMe();
   const [page, setPage] = useState(1);
   const { data, reFetch, mutate } = UseVideos('all', page);
   const { addProgress, updateProgress } = useProgress();
@@ -41,7 +43,20 @@ const VideosManagment = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' | 'cover' }>();
+  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' | 'cover' | 'webapp' }>();
+
+  const toWebapp = async () => {
+    setLoading({ id: '', type: 'webapp' });
+    await webApp()
+      .then(() => {
+        reFetch();
+        toast.success("success");
+      })
+      .catch(() => {
+        toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
+  }
 
   const transcode = async (videoId: string | number | undefined) => {
     setLoading({ id: videoId, type: 'transc' });
@@ -98,6 +113,13 @@ const VideosManagment = () => {
       .finally(() => setLoading(undefined));
   }
 
+  // return (
+  //   <div className="min-h-screen bg-white p-6">
+  //     <VideoListCard />
+  //   </div>
+  // );
+
+
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Header */}
@@ -129,16 +151,20 @@ const VideosManagment = () => {
             </kbd>
           </button>
 
-          <Link to={"/videos/upload"} className="relative flex items-center justify-center gap-2 px-6 py-2.5 text-nowrap
+          <Link to={"/videos/upload"} className="flex items-center justify-center gap-2 p-2.5 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
+            <FilePlus className="w-5 h-auto" />
+          </Link>
+          {user?.role === 'superadmin' ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
-            + new
-          </Link>
+            <SendIcon /> send to webApp
+          </button> : null}
         </div>
-      </header>
+      </header >
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         {/* Table wrapper pour mobile */}
+        {loading?.type === 'webapp' ? <DeepLoader /> : null}
         <div className="overflow-x-auto">
           <table className="min-w-full w-max text-sm md:text-base">
             <thead className="bg-gray-50 text-gray-600 uppercase">
@@ -187,7 +213,7 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
                   <td className="py-3 px-6 text-center">
-                    <input type="checkbox" checked={!video.isDeleted} className="toggle " onChange={activate.bind(null, video.id)} />
+                    <input type="checkbox" checked={!video.isDeleted} className="toggle " onChange={user?.role === 'superadmin' ? activate.bind(null, video.id) : undefined} />
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
