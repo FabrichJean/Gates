@@ -28,6 +28,7 @@ export default function SystemSettings() {
             await saveSettings(settings);
             reFetch()
             toast.success("Paramètres sauvegardés !");
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             toast.error("Erreur lors de la sauvegarde");
         } finally {
@@ -64,6 +65,12 @@ export default function SystemSettings() {
                     label="CDN URL"
                     name="cdn_url"
                     value={settings.cdn_url}
+                    onChange={handleChange}
+                />
+                <SettingField
+                    label="SERVER URL"
+                    name="server_url"
+                    value={settings.server_url}
                     onChange={handleChange}
                 />
             </div>
