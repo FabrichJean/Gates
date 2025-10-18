@@ -26,7 +26,7 @@ const Profil: React.FC = () => {
   const avatarSeed = encodeURIComponent(displayName || "user");
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen bg-white py-10 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center gap-6">
           <img
