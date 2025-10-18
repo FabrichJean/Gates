@@ -38,13 +38,13 @@ const Register: React.FC = () => {
       toast.error("Les mots de passe ne correspondent pas.");
     }
 
-    await register(username, email, password)
+  await register(email, password, username)
       .then(() => {
         toast.success('Register successfull !')
       })
       .catch(err => {
         console.error(err);
-        toast.error("❌ Error" + (err.response?.data?.message || err.message));
+        toast.error("Error" + (err.response?.data?.message || err.message));
       })
   };
 

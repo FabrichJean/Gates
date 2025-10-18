@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
 import type { User } from "./useVideos";
 import { getToken } from "../utils/storage";
 import axios from "axios";
@@ -21,9 +21,9 @@ export const useUsers = (search: string, params?: any) => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const token = getToken();
+    const t = getToken();
     const res = await axios.get(apiURL + '/auth/users?search=' + search, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${t}` },
       params
     });
     setData(res.data);
@@ -40,6 +40,6 @@ export const useUsers = (search: string, params?: any) => {
 
 export const useAuthMe = () => {
   return useFetch<{role: string}>(apiURL + '/auth', {
-    headers: { Authorization: `Bearer ${token()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
   })
 }

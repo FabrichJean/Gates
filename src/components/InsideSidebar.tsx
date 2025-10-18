@@ -1,4 +1,37 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
+
+// Inline component pour afficher le nom/email et l'avatar de l'utilisateur
+const UserDisplayInline: React.FC = () => {
+    const { user } = useAuth();
+
+    // user peut être une string (userType) ou un objet contenant email/name
+    let displayName = "Admin";
+    let seed = "Super Admin";
+
+    if (user) {
+        if (typeof user === "string") {
+            displayName = user;
+            seed = user;
+        } else if (typeof user === "object") {
+            displayName = (user.name || user.username || user.email || user.role || user.userType) as string;
+            seed = displayName || seed;
+        }
+    }
+
+    return (
+        <>
+            <span className="text-gray-600 text-sm">{displayName}</span>
+            <div className="cursor-pointer">
+                <img
+                    src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(seed)}`}
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full"
+                />
+            </div>
+        </>
+    );
+};
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";
@@ -83,14 +116,8 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <span className="text-gray-600 text-sm">Admin</span>
-                        <div className="cursor-pointer">
-                            <img
-                                src="https://api.dicebear.com/9.x/croodles/svg?seed=Super Admin"
-                                alt="User avatar"
-                                className="w-8 h-8 rounded-full"
-                            />
-                        </div>
+                        {/* Affiche le nom/email de l'utilisateur si disponible, sinon fallback */}
+                        <UserDisplayInline />
                     </div>
                 </header>
 

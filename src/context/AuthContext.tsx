@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { deleteUserApi, loginApi, registerApi, validateUserApi } from "../api/auth"; // 🔹 Appel backend centralisé
+import { deleteUserApi, loginApi, registerApi, validateUserApi, getMeApi } from "../api/auth"; // 🔹 Appel backend centralisé
 import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gestion du localStorage
 import { AuthContext } from ".";
 
@@ -28,11 +28,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Au montage → on restaure le token depuis le localStorage
+  // Au montage → on restaure le token depuis le localStorage et on réhydrate l'utilisateur via /auth (me)
   useEffect(() => {
-    const storedToken = getToken();
-    if (storedToken) setTokenState(storedToken);
-    setLoading(false);
+    const init = async () => {
+      const storedToken = getToken();
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+      setTokenState(storedToken);
+      try {
+        const me = await getMeApi();
+        setUser(me);
+      } catch (err) {
+        // token invalide ou erreur -> clear
+        removeToken();
+        setTokenState(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
   }, []);
 
   // 🔹 Fonction de connexion
@@ -58,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       // ✅ on force une chaîne vide si "name" est undefined
-      const data = await registerApi(email, password, username ?? ""); // { token, userType }
+  const data = await registerApi(email, username ?? "", password); // { token, userType }
       setUser(data.user);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
