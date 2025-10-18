@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { User as UserIcon, LogOut as LogOutIcon } from "lucide-react";
 
 // Inline component pour afficher le nom/email et l'avatar de l'utilisateur
-const UserDisplayInline: React.FC = () => {
+const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
@@ -41,6 +41,10 @@ const UserDisplayInline: React.FC = () => {
 
     const handleLogout = () => {
         setOpen(false);
+        if (onLogoutRequest) {
+            onLogoutRequest();
+            return;
+        }
         logout();
         navigate('/login');
     };
@@ -74,7 +78,7 @@ const UserDisplayInline: React.FC = () => {
                         <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:hover:bg-gray-700 cursor-pointer">
                             <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 px-2 py-1">
                                 <LogOutIcon className="w-4 h-4 text-red-600" />
-                                <span>Deconnexion</span>
+                                <span>Logout</span>
                             </div>
                         </button>
                     </div>
@@ -91,6 +95,21 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
+    const dialogRef = useRef<HTMLDialogElement | null>(null);
+
+    const openLogoutModal = () => dialogRef.current?.showModal();
+    const closeLogoutModal = () => dialogRef.current?.close();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const handler = () => {
+            logout();
+            navigate('/login');
+        };
+        window.addEventListener('confirm-logout', handler as EventListener);
+        return () => window.removeEventListener('confirm-logout', handler as EventListener);
+    }, [logout, navigate]);
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
@@ -168,9 +187,41 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
                     <div className="flex items-center gap-4">
                         {/* Affiche le nom/email de l'utilisateur si disponible, sinon fallback */}
-                        <UserDisplayInline />
+                        <UserDisplayInline onLogoutRequest={openLogoutModal} />
                     </div>
                 </header>
+
+                {/* MODAL LOGOUT */}
+                <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
+                    <div className="modal-box dark:bg-gray-900 dark:text-white">
+                        <h3 className="font-bold text-lg">Disconnect</h3>
+                        <p className="py-4">
+                            Are you sure you want to log out? <span>😞</span>
+                        </p>
+                        <div className="modal-action">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    // perform logout by finding Auth context inside UserDisplayInline
+                                    // We'll import and call logout here through window event or navigate
+                                    // Simpler: trigger a custom event that the UserDisplayInline cannot listen to.
+                                    // We'll perform logout by calling logout through a small workaround: navigate to /login and clear token
+                                    // But better: dispatch a custom event and handle it here.
+                                    window.dispatchEvent(new CustomEvent('confirm-logout'));
+                                    closeLogoutModal();
+                                }}
+                                className="flex gap-4"
+                            >
+                                <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
+                                    logout
+                                </button>
+                                <button type="button" className="btn" onClick={closeLogoutModal}>
+                                    cancel
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </dialog>
 
                 <main className="flex-1 overflow-auto p-4">{children}</main>
             </div>
