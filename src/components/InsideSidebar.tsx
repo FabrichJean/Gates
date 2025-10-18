@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { User as UserIcon, LogOut as LogOutIcon } from "lucide-react";
 
 // Inline component pour afficher le nom/email et l'avatar de l'utilisateur
 const UserDisplayInline: React.FC = () => {
@@ -64,8 +65,18 @@ const UserDisplayInline: React.FC = () => {
             {open && (
                 <div className="absolute top-full left-1/2 mt-2 transform -translate-x-1/2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md z-50">
                     <div className="py-1">
-                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">Profil</button>
-                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">Deconnexion</button>
+                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 cursor-pointer">
+                            <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100">
+                                <UserIcon className="w-4 h-4 text-gray-600" />
+                                <span>Profil</span>
+                            </div>
+                        </button>
+                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:hover:bg-gray-700 cursor-pointer">
+                            <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 px-2 py-1">
+                                <LogOutIcon className="w-4 h-4 text-red-600" />
+                                <span>Deconnexion</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             )}
