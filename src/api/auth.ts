@@ -1,14 +1,28 @@
 import axios from "axios";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 
 // 🔹 Configuration d'une instance axios réutilisable
 const api = axios.create({
   baseURL: apiURL,
   headers: {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${token()}`
   },
 });
+
+// Attach the latest token to each request just before it is sent.
+api.interceptors.request.use((config) => {
+  try {
+    const t = getToken();
+    if (t) {
+      if (!config.headers) config.headers = {} as any;
+      config.headers["Authorization"] = `Bearer ${t}`;
+    }
+  } catch (err) {
+    console.error("Erreur lors de la récupération du token :", err);
+  }
+  return config;
+}, (error) => Promise.reject(error));
 
 // 🔸 Login API
 export const loginApi = async (identifier: string, password: string) => {
@@ -25,7 +39,7 @@ export const loginApi = async (identifier: string, password: string) => {
 };
 
 // 🔸 Register API
-export const registerApi = async (username: string, email: string, password: string) => {
+export const registerApi = async (email: string, username: string, password: string) => {
   try {
     const res = await api.post("/auth/register", { email, username, password });
     return res.data; // ➜ { token, userType }
@@ -70,6 +84,20 @@ export const createUser = async (data: {username: string, email: string, passwor
   try {
     const res = await api.post("/auth/create", data);
     return res.data; // ➜ { token, userType }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.response && error.response.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("Erreur de connexion au serveur");
+  }
+};
+
+// 🔸 Récupérer l'utilisateur courant (réhydratation)
+export const getMeApi = async () => {
+  try {
+    const res = await api.get(`/auth`);
+    return res.data; // ex: { role: 'superadmin', id, email, ... }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.response && error.response.data?.message) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 
 type Language = {
   code: string;
@@ -16,7 +17,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
   // Charger toutes les langues depuis iso-639-1
   useEffect(() => {
     axios.get<Language[]>(apiURL + "/i18languages", {
-      headers: { Authorization: `Bearer ${token()}` },
+      headers: { Authorization: `Bearer ${getToken()}` },
     }).then(res => {
       const allLanguages = res.data;
       console.log(allLanguages);
