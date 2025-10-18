@@ -7,8 +7,8 @@ const Profil: React.FC = () => {
 
   // derive fields
   let displayName = "Admin";
-  let email = "-";
-  let role = "-";
+  let email = "unknown";
+  let role = "unknown";
   let isValidated = false;
 
   if (user) {
