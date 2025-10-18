@@ -1,5 +1,5 @@
 import axios, { type AxiosProgressEvent } from "axios";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
 import { socket } from "../utils/socket";
 
