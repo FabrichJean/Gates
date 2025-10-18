@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 import type { SubCategory } from "../hooks/useSubCategory";
 
 interface Props {
@@ -27,7 +28,7 @@ const SubCategorySelect = ({ categoryId, defaultValue, onSelect }: Props) => {
         const res = await axios.get<{ SubCategorys: SubCategory[] }>(
           `${apiURL}/sub-categories`,
           {
-            headers: { Authorization: `Bearer ${token()}` },
+            headers: { Authorization: `Bearer ${getToken()}` },
             params: { category_id: categoryId },
           }
         );
