@@ -47,10 +47,10 @@ const Profil: React.FC = () => {
         </div>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 border rounded-md">
+          {/* <div className="p-4 border rounded-md">
             <h3 className="text-sm text-gray-500">Token</h3>
             <p className="text-xs break-all mt-2 text-gray-700">{token || '-'}</p>
-          </div>
+          </div> */}
 
           <div className="p-4 border rounded-md">
             <h3 className="text-sm text-gray-500">Account info</h3>
