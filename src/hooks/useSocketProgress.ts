@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useProgressStore } from "./useProgressStore";
-import { apiURL, server, token } from "../constant";
+import { apiURL, server } from "../constant";
+import { getToken } from "../utils/storage";
 import axios from "axios";
 
 let socket: Socket | null = null;
@@ -12,7 +13,7 @@ export function useSocketProgress() {
     useEffect(() => {
         (async () => {
             await axios.get<{ role: string, id: any }>(apiURL + '/auth', {
-                headers: { Authorization: `Bearer ${token()}` },
+                headers: { Authorization: `Bearer ${getToken()}` },
             })
                 .then((res) => {
                     setId(res.data.id)

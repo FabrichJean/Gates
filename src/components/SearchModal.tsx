@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { apiURL, server, token } from "../constant";
+import { apiURL, server } from "../constant";
+import { getToken } from "../utils/storage";
 import type { TVideo } from "../hooks/useVideos";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +18,7 @@ export default function SearchModal() {
                 return;
             }
             fetch(`${apiURL}/videos?search=${encodeURIComponent(query)}`, {
-                headers: { Authorization: `Bearer ${token()}` },
+                headers: { Authorization: `Bearer ${getToken()}` },
             })
                 .then(res => res.json())
                 .then(d => setVideos(d.videos || []))

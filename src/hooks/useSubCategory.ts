@@ -1,5 +1,6 @@
 import useFetch from "http-react"
-import { apiURL, token } from "../constant"
+import { apiURL } from "../constant"
+import { getToken } from "../utils/storage"
 
 export type SubCategory = {
    id: number;
@@ -11,7 +12,7 @@ export type SubCategory = {
 
 function UseSubCategory(category_id: number) {
    return useFetch<{SubCategorys: SubCategory[]}>(apiURL + "/sub-categories", {
-      headers: { Authorization: `Bearer ${token()}` },
+   headers: { Authorization: `Bearer ${getToken()}` },
       params: {
          category_id
       }
