@@ -187,7 +187,7 @@ const Upload = () => {
   };
 
   return (
-    <div className="bg-gray-50 h-full">
+    <div className="h-full">
       {/* <Toaster position="top-center" /> */}
       <div className="flex flex-col flex-wrap md:flex-row gap-8 p-6 items-start justify-center w-full">
         <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-lg p-8 border border-gray-200 w-full">
