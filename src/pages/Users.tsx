@@ -5,6 +5,7 @@ import { getToken } from "../utils/storage";
 import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
+import { TiUserAddOutline } from "react-icons/ti";
 
 interface ColumnConfig {
   key: string;
@@ -85,7 +86,7 @@ const Users = () => {
   return (
     <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6 ">
       {/* ✅ HEADER RESPONSIVE */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -112,43 +113,27 @@ const Users = () => {
           <span>Users</span>
         </h1>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <Link
-            to="/users/create"
-            className="flex items-center justify-center gap-2  p-3 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="blue"
-              className="w-5 h-5"
+        {/* Controls: keep in one row even on mobile */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <Link
+              to="/users/create"
+              className="flex items-center justify-center gap-2 p-3 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm hover:bg-blue-50 transition-all duration-200"
+              aria-label="Create user"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M18 7.5v3m0 0v3m0-3h3m-3
-                0h-3m-2.25-4.125a3.375 3.375 0
-                1 1-6.75 0 3.375 3.375 0 0 1
-                6.75 0ZM3
-                19.235v-.11a6.375 6.375 0 0 1
-                12.75 0v.109A12.318 12.318 0 0
-                1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
-              />
-            </svg>
-          </Link>
+              <TiUserAddOutline className="text-blue-400 size-4" />
+            </Link>
+            {/* make input shrinkable with flex-1 and min-w-0 */}
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              type="text"
+              placeholder="🔍 Search..."
+              className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64 ml-2 flex-1 min-w-0"
+            />
 
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            type="text"
-            placeholder="🔍 Search..."
-            className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64"
-          />
-
-          {/* Column Filter Button */}
-          <div className="relative">
+            {/* Column Filter Button */}
+            <div className="relative ml-2">
             <button
               onClick={(e) => { e.stopPropagation(); setIsColumnMenuOpen(prev => !prev); }}
               className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
@@ -189,6 +174,7 @@ const Users = () => {
                 </div>
               </>
             )}
+            </div>
           </div>
         </div>
       </header>
