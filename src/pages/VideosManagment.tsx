@@ -164,7 +164,7 @@ const VideosManagment = () => {
             <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm  hover:bg-blue-50 transition-all duration-200">
               <FilePlus className="w-5 h-auto text-blue-400" />
             </Link>
-            {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm md:rounded-xl transition-all duration-300 backdrop-blur-md border cursor-pointer bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 ">
+            {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-lg hover:bg-base-200 flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm md:rounded-xl transition-all duration-300 backdrop-blur-md border cursor-pointer bg-white/90 text-gray-800 border-gray-200 hover:border-gray-300 ">
               <SendIcon className="text-blue-400" /> <span className="md:inline hidden text-gray-600">send to webApp</span>
             </button> : null}
 
