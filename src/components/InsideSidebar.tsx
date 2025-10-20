@@ -90,8 +90,10 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";
+import { useAuthMe } from "../hooks/useAuth";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
+    const {data} = useAuthMe()
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
@@ -110,6 +112,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         window.addEventListener('confirm-logout', handler as EventListener);
         return () => window.removeEventListener('confirm-logout', handler as EventListener);
     }, [logout, navigate]);
+
+    console.log(data);
+    
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {

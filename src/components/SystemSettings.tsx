@@ -1,32 +1,46 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { toast } from "react-hot-toast";
-import { saveSettings } from "../api/settings";
-import { useSettings } from "../hooks/useSettings";
+import { saveSettings, type TSettings } from "../api/settings";
+import { apiURL, token } from "../constant";
 
 export default function SystemSettings() {
 
-    const {data, reFetch} = useSettings()
-
-    console.log(data);
-    
-
-    const [settings, setSettings] = useState({...data?.settings});
+    // Single local state for settings. We'll fetch once on mount using axios.
+    const [settings, setSettings] = useState<Partial<TSettings> | null>(null);
 
     useEffect(() => {
-        setSettings({...data?.settings})
-    }, [data])
+        let mounted = true;
+        const fetchSettings = async () => {
+            try {
+                const res = await axios.get(`${apiURL}/settings`, {
+                    headers: { Authorization: `Bearer ${token()}` },
+                });
+                const remote = res?.data?.settings ?? res?.data;
+                if (mounted) setSettings(remote);
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+                toast.error("Impossible de charger les paramètres");
+            }
+        };
+        fetchSettings();
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSettings({ ...settings, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setSettings((prev) => ({ ...(prev ?? {}), [name]: value }));
     };
 
     const submit = async () => {
         setLoading(true);
         try {
-            await saveSettings(settings);
-            reFetch()
+            if (!settings) return;
+            await saveSettings(settings as TSettings);
             toast.success("Paramètres sauvegardés !");
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
@@ -46,31 +60,31 @@ export default function SystemSettings() {
                 <SettingField
                     label="System Code"
                     name="system_code"
-                    value={settings.system_code}
+                    value={settings?.system_code ?? ""}
                     onChange={handleChange}
                 />
                 <SettingField
                     label="MP4 Storage Path"
-                    name="mp4_path"
-                    value={settings.mp4_storage_path}
+                    name="mp4_storage_path"
+                    value={settings?.mp4_storage_path ?? ""}
                     onChange={handleChange}
                 />
                 <SettingField
                     label="Image Storage Path"
-                    name="image_path"
-                    value={settings.image_storage_path}
+                    name="image_storage_path"
+                    value={settings?.image_storage_path ?? ""}
                     onChange={handleChange}
                 />
                 <SettingField
                     label="CDN URL"
                     name="cdn_url"
-                    value={settings.cdn_url}
+                    value={settings?.cdn_url ?? ""}
                     onChange={handleChange}
                 />
                 <SettingField
                     label="SERVER URL"
                     name="server_url"
-                    value={settings.server_url}
+                    value={settings?.server_url ?? ""}
                     onChange={handleChange}
                 />
             </div>
