@@ -87,7 +87,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
-                            className="size-6 text-blue-500"
+                            className="size-6 text-gray-500"
                         >
                             <path
                                 strokeLinecap="round"
@@ -108,7 +108,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                                     viewBox="0 0 24 24"
                                     strokeWidth="1.5"
                                     stroke="currentColor"
-                                    className="size-6 text-pink-500"
+                                    className="size-6 text-gray-500"
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -141,7 +141,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                                     viewBox="0 0 24 24"
                                     strokeWidth="1.5"
                                     stroke="currentColor"
-                                    className="size-6 text-orange-500"
+                                    className="size-6 text-gray-500"
                                 >
                                     <path
                                         strokeLinecap="round"
