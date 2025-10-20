@@ -165,7 +165,7 @@ const VideosManagment = () => {
           {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
     font-medium text-sm md:rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 ">
-            <SendIcon /> <span className="md:inline hidden">send to webApp</span>
+            <SendIcon className="text-blue-400" /> <span className="md:inline hidden">send to webApp</span>
           </button> : null}
         </div>
       </header >
@@ -190,7 +190,7 @@ const VideosManagment = () => {
             <tbody className="divide-y divide-gray-200 text-gray-700">
               {data?.videos?.map((video, index) => (
                 <tr key={index} className="hover:bg-gray-50 transition">
-                  <td className="py-3 px-6">{video.ref}</td>
+                  <td className="py-3 px-6 font-light">{video.ref}</td>
                   <td className="py-3 px-6 text-blue-600 underline">
                     <Link to={"/users/" + video.user.id} className="text-blue-600 hover:underline">
                       {video.user.username}
