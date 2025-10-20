@@ -13,7 +13,7 @@ import { FilePlus, Filter, SendIcon } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
 import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
-import {motion} from "framer-motion"
+import { motion, useAnimation } from "framer-motion"
 import RoleEnum from "../utils/roleEnum";
 
 export type Video = {
@@ -36,6 +36,9 @@ const VideosManagment = () => {
   const [page, setPage] = useState(1);
   const { data, reFetch, mutate } = UseVideos('all', page);
   const { addProgress, updateProgress } = useProgress();
+
+  // controls for the floating action button (FAB) so it can snap back after drag
+  const fabControls = useAnimation();
 
   // console.log(data.videos);
 
@@ -125,48 +128,62 @@ const VideosManagment = () => {
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Header */}
-      <header className="flex flex-wrap justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold pb-3 text-gray-800">Video Management</h1>
-        <div className="flex items-center gap-4">
+      <header className="flex flex-wrap justify-start items-center mb-6">
+        <h1 className="text-3xl font-semibold pb-3 text-gray-500">Video Management</h1>
+        <div className="flex items-center gap-4 justify-between w-full">
 
           <VideoFilters onSubmit={(fetched) => {
             console.log(fetched);
 
             mutate(fetched)
           }} />
-          {/* @ts-expect-error */}
-          <button onClick={() => document.getElementById('search_modal_52').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
-            <Filter className="w-3" /> filters
-          </button>
 
-          <SearchModal />
-          {/* @ts-expect-error */}
-          <button onClick={() => document.getElementById('search_modal_45').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
-            <svg className="hidden size-4 shrink-0 opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-              <g fill="none">
-                <path fillRule="evenodd" clipRule="evenodd" d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06l-2.79-2.79Z" fill="currentColor" />
-              </g>
-            </svg>
-            <span className="grow text-left">Search…</span>
-            <kbd className="kbd kbd-sm font-mono opacity-50">
-              <span className="me-1 text-sm">⌘</span>K
-            </kbd>
-          </button>
+          <div className="flex gap-2">
+            {/* @ts-expect-error */}
+            <button onClick={() => document.getElementById('search_modal_52').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
+              <Filter className="w-3" /> filters
+            </button>
 
-          <motion.div drag dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }} className="md:hidden fixed z-40 bottom-5 right-5 flex items-center justify-center gap-2 p-3 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
+            <SearchModal />
+            {/* @ts-expect-error */}
+            <button onClick={() => document.getElementById('search_modal_45').showModal()} className="input input-ghost hover:bg-base-200 focus-visible:bg-base-200 cursor-pointer transition-colors focus:outline-none bg-white rounded-lg">
+              <svg className="hidden size-4 shrink-0 opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <g fill="none">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l2.79 2.79a.75.75 0 1 1-1.06 1.06l-2.79-2.79Z" fill="currentColor" />
+                </g>
+              </svg>
+              <span className="grow text-left">Search…</span>
+              <kbd className="kbd kbd-sm font-mono opacity-50">
+                <span className="me-1 text-sm">⌘</span>K
+              </kbd>
+            </button>
+          </div>
+
+
+          <div className="flex gap-2">
+            <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm  hover:bg-blue-50 transition-all duration-200">
+              <FilePlus className="w-5 h-auto text-blue-400" />
+            </Link>
+            {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm md:rounded-xl transition-all duration-300 backdrop-blur-md border cursor-pointer bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 ">
+              <SendIcon className="text-blue-400" /> <span className="md:inline hidden text-gray-600">send to webApp</span>
+            </button> : null}
+
+          </div>
+
+          <motion.div
+            drag
+            dragMomentum={false}
+            onDragEnd={() => {
+              // snap back to its original position
+              fabControls.start({ x: 0, y: 0 });
+            }}
+            className="md:hidden fixed z-40 bottom-5 right-5 flex items-center justify-center gap-2 p-3 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200"
+          >
             <Link to={"/videos/upload"}>
-              <FilePlus className="w-8 h-auto" />
+              <FilePlus className="w-8 h-auto text-blue-400 animate-pulse" />
             </Link>
           </motion.div>
 
-          <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
-            <FilePlus className="w-5 h-auto" />
-          </Link>
-          {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
-    font-medium text-sm md:rounded-xl transition-all duration-300
-    backdrop-blur-md border cursor-pointer bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 ">
-            <SendIcon className="text-blue-400" /> <span className="md:inline hidden">send to webApp</span>
-          </button> : null}
         </div>
       </header >
 
@@ -192,7 +209,7 @@ const VideosManagment = () => {
                 <tr key={index} className="hover:bg-gray-50 transition">
                   <td className="py-3 px-6 font-light">{video.ref}</td>
                   <td className="py-3 px-6 text-blue-600 underline">
-                    { user.role === RoleEnum.SUPERADMIN ? 
+                    {user.role === RoleEnum.SUPERADMIN ?
                       <Link to={"/users/" + video.user.id} className="text-blue-600 hover:underline font-light">
                         {video.user.username}
                       </Link> : video.user.username
@@ -221,7 +238,7 @@ const VideosManagment = () => {
                       className="w-20 h-12 object-cover rounded-lg mx-auto"
                     />
                   </td>
-                  <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
+                  <td className="py-3 px-6 text-center font-light">{(Number(video.duration) / 1000).toFixed()} s</td>
                   <td className="py-3 px-6 text-center">
                     <input type="checkbox" checked={!video.isDeleted} className="toggle " onChange={user?.role === RoleEnum.SUPERADMIN ? activate.bind(null, video.id) : undefined} />
                   </td>
