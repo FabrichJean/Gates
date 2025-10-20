@@ -41,11 +41,11 @@ const AppRoutes = () => (
         path="/users"
         element={
           <ProtectedRoute>
-            <SuperProtected>
+            {/* <SuperProtected> */}
               <InsideSidebar>
                 <Users />
               </InsideSidebar>
-            </SuperProtected>
+            {/* </SuperProtected> */}
           </ProtectedRoute>
         }
       />
@@ -95,11 +95,11 @@ const AppRoutes = () => (
         path="/archive"
         element={
           <ProtectedRoute>
-            <SuperProtected>
+            {/* <SuperProtected> */}
               <InsideSidebar>
                 <UsersArchives />
               </InsideSidebar>
-            </SuperProtected>
+            {/* </SuperProtected> */}
           </ProtectedRoute>
         }
       />
@@ -107,11 +107,11 @@ const AppRoutes = () => (
         path="/settings"
         element={
           <ProtectedRoute>
-            <SuperProtected>
+            {/* <SuperProtected> */}
               <InsideSidebar>
                 <Settings />
               </InsideSidebar>
-            </SuperProtected>
+            {/* </SuperProtected> */}
           </ProtectedRoute>
         }
       />

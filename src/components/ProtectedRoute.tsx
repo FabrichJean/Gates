@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (!token) return <Navigate to="/login" replace />;
 
   // If user object exists and is not validated -> redirect to profile where status is shown
-  // If there is a token but no populated user object yet, or user explicitly not validated -> redirect to profile
+  // If there is a token but no populated user object yet, or user explicitly not validated -> redirect to login
   if (!user || (typeof user === 'object' && user.isValidated === false)) {
     return <Navigate to="/login" replace />;
   }
