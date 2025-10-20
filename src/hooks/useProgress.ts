@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import {useStore} from 'zustand'
 
 export interface ProgressItem {
   id: string;

@@ -164,6 +164,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
 
   const [category, setCategory] = useState<Category>(video?.category);
   const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
+  // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {

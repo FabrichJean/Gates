@@ -1,9 +1,10 @@
 import axios, { type AxiosProgressEvent } from "axios";
-import { apiURL, token } from "../constant";
+import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import { socket } from "../utils/socket";
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getFilteredVideos(params: any) {
     return await axios.get(`${apiURL}/videos`, {
         headers: {

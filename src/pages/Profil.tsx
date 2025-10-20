@@ -3,7 +3,7 @@
 import { useAuth } from "../hooks/useAuth";
 
 const Profil: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
 
   // derive fields
   let displayName = "Admin";
