@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Download, ChevronUp, ChevronDown } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
