@@ -14,6 +14,7 @@ import { useProgress } from "../hooks/useProgress";
 import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
 import {motion} from "framer-motion"
+import RoleEnum from "../utils/roleEnum";
 
 export type Video = {
   id: unknown;
@@ -161,9 +162,9 @@ const VideosManagment = () => {
           <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-full border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-200">
             <FilePlus className="w-5 h-auto" />
           </Link>
-          {user?.role === 'superadmin' ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
+          {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-full flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap
     font-medium text-sm md:rounded-xl transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md">
+    backdrop-blur-md border cursor-pointer bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 ">
             <SendIcon /> <span className="md:inline hidden">send to webApp</span>
           </button> : null}
         </div>

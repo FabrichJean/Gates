@@ -94,12 +94,14 @@ import StickyUploadProgress from "./StickyUploadProgress";
 function InsideSidebar({ children }: React.PropsWithChildren) {
     // Initialize synchronously from localStorage/window to avoid UI flicker on reload
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
-    const initialShowSidebar = typeof window !== 'undefined' && localStorage.getItem('show-side') === 'true';
+    // Do not auto-open mobile sidebar on initial load or on resize.
+    // Respect user's explicit choice only when they toggle the menu.
+    const initialShowSidebar = false; // always start closed on load
     const initialIsMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
     const [isCollapsed, setIsCollapsed] = useState<boolean>(initialIsCollapsed);
     const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
-    const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar && initialIsMobile);
+    const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar);
     const dialogRef = useRef<HTMLDialogElement | null>(null);
 
     const openLogoutModal = () => dialogRef.current?.showModal();
@@ -127,12 +129,13 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
             if (!nowMobile) {
                 const storedCollapsed = localStorage.getItem('is-collapsed') === 'true';
                 setIsCollapsed(storedCollapsed);
-                // when going to desktop, ensure sidebar visibility follows collapsed state (overlay irrelevant)
+                // when going to desktop, ensure sidebar overlay is closed
                 setShowSidebar(false);
             } else {
-                // when entering mobile, ensure overlay is closed by default unless explicitly opened
-                const storedShow = localStorage.getItem('show-side') === 'true';
-                setShowSidebar(storedShow);
+                // when entering mobile, do NOT auto-open the overlay even if localStorage had a value.
+                // Keep the previous showSidebar only if it was explicitly set true by the user during this session.
+                // We intentionally avoid reading 'show-side' here to prevent automatic open on resize.
+                setShowSidebar(false);
             }
         };
 
