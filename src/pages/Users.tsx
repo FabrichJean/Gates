@@ -6,11 +6,34 @@ import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
 
+interface ColumnConfig {
+  key: string;
+  label: string;
+  visible: boolean;
+}
+
 const Users = () => {
   const [search, setSearch] = useState('');
   const { data, reFetch } = useUsers(search);
   const [loading, setLoading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  // Column filter state
+  const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  const [columns, setColumns] = useState<ColumnConfig[]>([
+    { key: 'name', label: 'Infos', visible: true },
+    { key: 'status', label: 'Status', visible: true },
+    { key: 'role', label: 'Role', visible: true },
+    { key: 'actions', label: 'Actions', visible: true },
+  ]);
+
+  const toggleColumn = (key: string) => {
+    setColumns(prev => prev.map(col => col.key === key ? { ...col, visible: !col.visible } : col));
+  };
+
+  const toggleAllColumns = (visible: boolean) => setColumns(prev => prev.map(col => ({ ...col, visible })));
+
+  const visibleColumns = columns.filter(c => c.visible);
 
   useEffect(() => { reFetch(); }, [search]);
   useEffect(() => { fetchUsers(); }, []);
@@ -123,6 +146,50 @@ const Users = () => {
             placeholder="🔍 Search..."
             className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64"
           />
+
+          {/* Column Filter Button */}
+          <div className="relative">
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsColumnMenuOpen(prev => !prev); }}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+            >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                </svg>
+                Columns
+              <svg className={`w-4 h-4 ml-1 transition-transform ${isColumnMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {isColumnMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsColumnMenuOpen(false)} />
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                  <div className="py-2">
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 flex items-center justify-between">
+                        <span>Show columns</span>
+                      <span className="text-xs text-gray-400">({visibleColumns.length}/{columns.length})</span>
+                    </div>
+                    <div className="px-4 py-2 border-b border-gray-100 flex space-x-2">
+                      <button onClick={() => toggleAllColumns(true)} className="text-xs text-blue-600 hover:text-blue-800" disabled={visibleColumns.length === columns.length}>Tout</button>
+                      <span className="text-xs text-gray-300">|</span>
+                      <button onClick={() => toggleAllColumns(false)} className="text-xs text-gray-600 hover:text-gray-800" disabled={visibleColumns.length === 0}>Aucun</button>
+                    </div>
+
+                    {columns.map((column) => (
+                      <div key={column.key} className="px-4 py-2 hover:bg-gray-50">
+                        <label className="flex items-center cursor-pointer">
+                          <input type="checkbox" checked={column.visible} onChange={() => toggleColumn(column.key)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2" />
+                          <span className="ml-2 text-sm text-gray-700">{column.label}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -131,116 +198,73 @@ const Users = () => {
         <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
           <thead className="bg-gray-50">
             <tr>
-              {["Infos", "Status", "Role", "Actions"].map((title) => (
-                <th
-                  key={title}
-                  className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                >
-                  {title}
+              {visibleColumns.map((col) => (
+                <th key={col.key} className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {col.label}
                 </th>
               ))}
             </tr>
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((u) => (
+            {data.map((u: any) => (
               <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                {/* Infos */}
-                <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <img
-                      className="h-10 w-10 rounded-full"
-                      src={`https://api.dicebear.com/9.x/croodles/svg?seed=${u.username}`}
-                      alt={u.username}
-                    />
-                    <div>
-                      <div className="font-medium text-gray-900">{u.username}</div>
-                      <div className="text-gray-500 text-xs sm:text-sm">{u.email}</div>
+                {columns.find(c => c.key === 'name')?.visible && (
+                  <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <img className="h-10 w-10 rounded-full" src={`https://api.dicebear.com/9.x/croodles/svg?seed=${u.username}`} alt={u.username} />
+                      <div>
+                        <div className="font-medium text-gray-900">{u.username}</div>
+                        <div className="text-gray-500 text-xs sm:text-sm">{u.email}</div>
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
+                )}
 
-                {/* Status */}
-                <td className="px-4 sm:px-6 py-3 text-left">
-                  {u.isValidated ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="green"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75"
-                      />
-                    </svg>
-                  ) : (
-                    <span className="text-pink-400 text-xs sm:text-sm">Pending</span>
-                  )}
-                </td>
+                {columns.find(c => c.key === 'status')?.visible && (
+                  <td className="px-4 sm:px-6 py-3 text-left">
+                    {u.isValidated ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="green" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75" />
+                      </svg>
+                    ) : (
+                      <span className="text-pink-400 text-xs sm:text-sm">Pending</span>
+                    )}
+                  </td>
+                )}
 
-                {/* Role */}
-                <td className="px-4 sm:px-6 py-3 text-gray-600 text-sm">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${u.role === "superadmin"
-                        ? "bg-purple-100 text-purple-700"
-                        : u.role === "admin"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                  >
-                    {u.role}
-                  </span>
-                </td>
+                {columns.find(c => c.key === 'role')?.visible && (
+                  <td className="px-4 sm:px-6 py-3 text-gray-600 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${u.role === "superadmin" ? "bg-purple-100 text-purple-700" : u.role === "admin" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                      {u.role}
+                    </span>
+                  </td>
+                )}
 
-                {/* Actions */}
-                <td className="px-4 sm:px-6 py-3 relative text-right">
-                  {u.role !== "superadmin" && (
-                    <>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenMenuId((prev) => (prev === u.id ? null : u.id));
-                        }}
-                        className="text-gray-500 hover:text-gray-700 cursor-pointer"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <circle cx="5" cy="12" r="2" />
-                          <circle cx="12" cy="12" r="2" />
-                          <circle cx="19" cy="12" r="2" />
-                        </svg>
-                      </button>
+                {columns.find(c => c.key === 'actions')?.visible && (
+                  <td className="px-4 sm:px-6 py-3 relative text-right">
+                    {u.role !== "superadmin" && (
+                      <>
+                        <button onClick={(e) => { e.stopPropagation(); setOpenMenuId((prev) => (prev === u.id ? null : u.id)); }} className="text-gray-500 hover:text-gray-700 cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="5" cy="12" r="2" />
+                            <circle cx="12" cy="12" r="2" />
+                            <circle cx="19" cy="12" r="2" />
+                          </svg>
+                        </button>
 
-                      {openMenuId === u.id && (
-                        <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 w-28">
-                          {!u.isValidated && (
-                            <button
-                              onClick={() => handleValidate(u.id)}
-                              className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700"
-                            >
-                              Validate
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(u.id)}
-                            className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </td>
+                        {openMenuId === u.id && (
+                          <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 w-28">
+                            {!u.isValidated && (
+                              <button onClick={() => handleValidate(u.id)} className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700">Validate</button>
+                            )}
+                            <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600">Delete</button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
