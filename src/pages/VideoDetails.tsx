@@ -55,7 +55,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       setModifying(false);
       reFetch();
     }}/> :
-      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
+      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-white">
         <Toaster position="top-right" />
 
         {/* Formulaire */}

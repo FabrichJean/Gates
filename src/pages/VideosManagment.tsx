@@ -192,11 +192,13 @@ const VideosManagment = () => {
                 <tr key={index} className="hover:bg-gray-50 transition">
                   <td className="py-3 px-6 font-light">{video.ref}</td>
                   <td className="py-3 px-6 text-blue-600 underline">
-                    <Link to={"/users/" + video.user.id} className="text-blue-600 hover:underline">
-                      {video.user.username}
-                    </Link>
+                    { user.role === RoleEnum.SUPERADMIN ? 
+                      <Link to={"/users/" + video.user.id} className="text-blue-600 hover:underline font-light">
+                        {video.user.username}
+                      </Link> : video.user.username
+                    }
                   </td>
-                  <td className="py-3 px-6">{video.category.name} / {video.subCategory?.name}</td>
+                  <td className="py-3 px-6 font-light">{video.category.name} / {video.subCategory?.name}</td>
                   <td className="py-3 px-6">
                     {video.upload_status === 1 ?
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
@@ -221,13 +223,13 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">{(Number(video.duration) / 1000).toFixed()} s</td>
                   <td className="py-3 px-6 text-center">
-                    <input type="checkbox" checked={!video.isDeleted} className="toggle " onChange={user?.role === 'superadmin' ? activate.bind(null, video.id) : undefined} />
+                    <input type="checkbox" checked={!video.isDeleted} className="toggle " onChange={user?.role === RoleEnum.SUPERADMIN ? activate.bind(null, video.id) : undefined} />
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
                       <button
                         disabled={(loading?.id === video.id && loading?.type === 'transc') || video?.transfer_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={transcode.bind(null, video.id)}
                       >
                         {
@@ -239,7 +241,7 @@ const VideosManagment = () => {
                       </button>
                       <button
                         disabled={(loading?.id === video.id && loading?.type === 'cover') || video?.cover_upload_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed font-light' : 'cursor-pointer'}`}
                         onClick={cover.bind(null, video.id)}
                       >
                         {
@@ -251,7 +253,7 @@ const VideosManagment = () => {
                       </button>
                       <button
                         disabled={(loading?.id === video.id && loading?.type === 'upload') || video?.upload_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
+                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={(upload.bind(null, video.id))}
                       >
                         {
@@ -261,7 +263,7 @@ const VideosManagment = () => {
                         }
                       </button>
                       <Link to={"/videos/" + video.id}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline"
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline font-light hover:text-blue-400 transition-all"
                       >
                         Details
                       </Link>
