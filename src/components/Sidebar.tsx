@@ -64,14 +64,14 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                     onClick={onCloseMobile}
                     className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5 cursor-pointer" />
                 </button>
             )}
 
             {/* SECTION PRINCIPALE */}
             <div className="flex flex-col h-full justify-between">
                 <div className="flex flex-col gap-1 mt-4 px-3">
-                    <div className={`flex items-center justify-center ${!isCollapsed && "lg:justify-start"} mb-4`}>
+                    <div className={`flex items-center justify-center  ${!isCollapsed && "lg:justify-start"} mb-4`}>
                         <h1 className="text-lg font-bold text-blue-600 dark:text-blue-400">
                             VMS
                         </h1>
