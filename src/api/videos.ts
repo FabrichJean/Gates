@@ -4,6 +4,7 @@ import { getToken } from "../utils/storage";
 import { socket } from "../utils/socket";
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getFilteredVideos(params: any) {
     return await axios.get(`${apiURL}/videos`, {
         headers: {
@@ -91,7 +92,7 @@ export async function toggleStatus(videoId: string | number): Promise<void> {
 export async function webApp() {
     return await axios.post(`${apiURL}/videos/send-to-server`, null, {
         headers: {
-            Authorization: `Bearer ${token()}`,
+            Authorization: `Bearer ${getToken()}`,
         }
     })
 }

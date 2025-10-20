@@ -14,7 +14,7 @@ function parseJwt(token?: string | null) {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map(function(c) {
+        .map(function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         })
         .join('')
@@ -31,7 +31,7 @@ export interface AuthContextType {
   user: any;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<void>;
+  register: (email: string, password: string, username?: string) => Promise<any>;
   validateUser: (userId: number) => Promise<void>; // added·
   deleteUser: (userId: number) => Promise<void>; // added·
   logout: () => void;
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Au montage → on restaure le token depuis le localStorage et on réhydrate l'utilisateur via /auth (me)
   useEffect(() => {
     const init = async () => {
@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       setToken(data.token);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la connexion");
     } finally {
@@ -131,11 +131,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       // ✅ on force une chaîne vide si "name" est undefined
-  const data = await registerApi(email, username ?? "", password); // { token, userType }
-      setUser(data.user);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = await registerApi(email, username ?? "", password); // { token, user }
+      // Do NOT persist token or auto-login after register. Backend returns token for convenience
+      // but users should confirm via login (and wait for validation if needed).
+      return data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de l'inscription");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -148,7 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await validateUserApi(userId); // 🔥 appel API backend
       console.log("✅ Validation réussie:", res.message);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la validation de l'utilisateur");
     } finally {
@@ -162,15 +165,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await deleteUserApi(userId);
       console.log("🗑️ Utilisateur supprimé :", res.message);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la suppression de l'utilisateur");
     } finally {
       setLoading(false);
     }
   };
-
-
 
   // 🔹 Fonction de déconnexion
   const logout = () => {

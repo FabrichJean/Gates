@@ -21,10 +21,20 @@ const Login: React.FC = () => {
 
   // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
   useEffect(() => {
-    if (token || user) {
-      navigate("/"); // redirige vers l’accueil
+    // wait until auth loading settles to avoid navigating when token is set but user object not yet populated
+    if (loading) return;
+
+    if (!token && !user) return;
+
+    // If the user is present and not validated, send them to login page
+    if (user && typeof user === 'object' && user.isValidated === false) {
+      navigate("/login");
+      return;
     }
-  }, [token, user, navigate]);
+
+    // otherwise, go to home
+    if (token) navigate("/");
+  }, [token, user, loading, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -46,8 +56,17 @@ const Login: React.FC = () => {
       return;
     }
 
-    await login(email, password);
-    
+    // if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    //   toast.error("Email invalide ou manquant.");
+    //   return;
+    // }
+
+    try {
+      await login(email.trim(), password);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Erreur lors de la connexion');
+    }
+
   };
 
   return (

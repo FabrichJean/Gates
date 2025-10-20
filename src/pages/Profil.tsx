@@ -3,7 +3,7 @@
 import { useAuth } from "../hooks/useAuth";
 
 const Profil: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
 
   // derive fields
   let displayName = "Admin";
@@ -26,7 +26,7 @@ const Profil: React.FC = () => {
   const avatarSeed = encodeURIComponent(displayName || "user");
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen bg-white py-10 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center gap-6">
           <img
@@ -55,8 +55,8 @@ const Profil: React.FC = () => {
           <div className="p-4 border rounded-md">
             <h3 className="text-sm text-gray-500">Account info</h3>
             <ul className="mt-2 text-gray-700">
-              <li><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : '-'}</li>
-              <li><strong>Username:</strong> {user && typeof user === 'object' ? user.username ?? '-' : '-'}</li>
+              <li><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : 'unknown'}</li>
+              <li><strong>Username:</strong> {user && typeof user === 'object' ? user.username ?? '-' : 'unknown'}</li>
               <li><strong>Email:</strong> {email}</li>
             </ul>
           </div>

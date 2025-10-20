@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import {useStore} from 'zustand'
 
 export interface ProgressItem {
   id: string;
@@ -18,19 +17,19 @@ export const useProgress = () => {
 
   // 🧠 Charger les transferts sauvegardés au démarrage
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = sessionStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         setProgressList(JSON.parse(stored));
       } catch {
-        console.error("Erreur parsing localStorage");
+        console.error("Erreur parsing sessionStorage");
       }
     }
   }, []);
 
   // 💾 Sauvegarder les transferts à chaque mise à jour
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progressList));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progressList));
   }, [progressList]);
 
   // ➕ Ajouter un transfert
@@ -68,7 +67,7 @@ export const useProgress = () => {
   // 🧹 Nettoyer tout
   const clearAll = useCallback(() => {
     setProgressList([]);
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
   }, []);
 
   return {
