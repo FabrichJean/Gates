@@ -21,13 +21,12 @@ export default function StickyUploadProgress() {
 
     }, [uploads]);
 
-
     if (uploads.length === 0) return null;
 
-
+    // Small fixed panel in bottom-right without backdrop blur so users can continue interacting
     return (
-        <div className="fixed w-full h-full rounded-2xl shadow-xl p-4 z-50 inset-0 backdrop-blur-xs">
-            <div className="absolute right-4 w-80 bottom-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-200">
+        <div className="fixed right-4 bottom-4 z-50">
+            <div className="w-80 bg-white rounded-2xl shadow-xl p-4 border border-gray-200">
                 <div className="flex justify-between items-center mb-3">
                     <h2 className="font-semibold text-sm text-gray-700">
                         📤 Uploading
@@ -39,17 +38,11 @@ export default function StickyUploadProgress() {
                         <div key={u.videoId} className="p-2 border rounded-xl bg-gray-50">
                             <div className="flex justify-between items-center">
                                 <span className="text-xs font-medium">{u.file || "HLS Files"}</span>
-                                {/* <button
-                                    onClick={() => clearProgress(u.videoId)}
-                                    className="text-gray-400 hover:text-red-500"
-                                >
-                                    <X size={14} />
-                                </button> */}
                             </div>
 
                             <div className="w-full bg-gray-200 h-2 rounded-full mt-2 overflow-hidden">
                                 <div
-                                    className={`h-full animate-pulse ${u.status === "done"
+                                    className={`${u.status === "done"
                                         ? "bg-green-500"
                                         : u.status === "error"
                                             ? "bg-red-500"
