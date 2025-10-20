@@ -35,10 +35,10 @@ function CreateUser() {
 
     return (
         <div>
-            <div className="bg-gray-100 flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6">
                 <div className="w-full max-w-md space-y-8">
-                    <div className="bg-white shadow-md rounded-md p-6">
-                        <h2 className="my-3 text-center text-3xl font-bold tracking-tight text-gray-900">
+                    <div className="bg-white shadow-b-md rounded-md p-6">
+                        <h2 className="my-3 text-center justify-start text-3xl font-bold tracking-tight text-gray-900">
                             Create an account
                         </h2>
                         <form onSubmit={submit} className="space-y-6">
@@ -61,7 +61,7 @@ function CreateUser() {
                                 </div>
                             </div>
                             <div>
-                                <button type="submit" className="flex w-full justify-center rounded-md border border-transparent bg-sky-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2">
+                                <button type="submit" className="flex w-full cursor-pointer justify-center rounded-md border border-transparent bg-sky-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2">
                                     register
                                 </button>
                             </div>

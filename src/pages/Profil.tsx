@@ -32,7 +32,7 @@ const Profil: React.FC = () => {
           <img
             src={`https://api.dicebear.com/9.x/croodles/svg?seed=${avatarSeed}`}
             alt="User avatar"
-            className="w-24 h-24 rounded-full border"
+            className="w-24 h-24 rounded-full border border-gray-300"
           />
           <div>
             <h2 className="text-2xl font-semibold">{displayName}</h2>

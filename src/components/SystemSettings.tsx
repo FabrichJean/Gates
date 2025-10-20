@@ -109,7 +109,7 @@ function SettingField({
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-gray-600 focus:outline-none"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800 outline-none"
             />
         </div>
     );

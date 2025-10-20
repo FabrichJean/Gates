@@ -87,6 +87,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
         </div>
     );
 };
+
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";

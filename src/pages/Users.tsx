@@ -84,7 +84,7 @@ const Users = () => {
   if (loading) return <p className="text-center mt-8">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6 ">
+    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6">
       {/* ✅ HEADER RESPONSIVE */}
       <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-500 flex items-center gap-2">
