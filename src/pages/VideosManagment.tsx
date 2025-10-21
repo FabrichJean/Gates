@@ -74,8 +74,11 @@ const VideosManagment = () => {
   }
 
   const transcode = async (videoId: string | number | undefined) => {
+
     setActionLoading(videoId, 'transc', true);
+
     const id = addProgress({ name: String(videoId), type: "upload" });
+
     await transcodeVideo(videoId, (event) => {
       const percent = Math.round((event.loaded * 100) / (event.total || 1));
       updateProgress(id, percent);
@@ -88,6 +91,7 @@ const VideosManagment = () => {
         toast.error("Error");
       })
       .finally(() => setActionLoading(videoId, 'transc', false));
+
   }
 
   const upload = async (videoId: string | number | undefined) => {
@@ -197,7 +201,7 @@ const VideosManagment = () => {
       </header >
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-  {/* Table wrapper pour mobile */}
+        {/* Table wrapper pour mobile */}
         <div className="overflow-x-auto">
           <table className="min-w-full w-max text-sm md:text-base">
             <thead className="bg-gray-50 text-gray-600 uppercase">
@@ -252,27 +256,53 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
+                      {/* Upload button */} 
                       <button
-                        disabled={isActionLoading(video.id, 'transc') || video?.transfer_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={transcode.bind(null, video.id)}
+                        disabled={
+                          isActionLoading(video.id, 'transc') ||
+                          video?.transfer_status === 1
+                        }
+                        className={`px-4 py-2 rounded-md transition-all font-light ${isActionLoading(video.id, 'transc') || video?.transfer_status === 1
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
+                          : 'hover:bg-gray-100 hover:text-blue-400 cursor-pointer text-gray-700'
+                          }`}
+                        onClick={
+                          isActionLoading(video.id, 'transc') ? undefined : transcode.bind(null, video.id)
+                        }
                       >
                         {isActionLoading(video.id, 'transc') ? 'Processing...' : '🎞️ Transcode'}
                       </button>
+                      {/* Upload cover button */}  
                       <button
-                        disabled={isActionLoading(video.id, 'cover') || video?.cover_upload_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed font-light' : 'cursor-pointer'}`}
-                        onClick={cover.bind(null, video.id)}
+                        disabled={
+                          isActionLoading(video.id, 'cover') || video?.cover_upload_status === 1
+                        }
+                        className={`px-4 py-2 rounded-md transition-all font-light ${isActionLoading(video.id, 'cover') || video?.cover_upload_status === 1
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
+                          : 'hover:bg-gray-100 hover:text-blue-400 cursor-pointer text-gray-700'
+                          }`}
+                        onClick={
+                          isActionLoading(video.id, 'cover') ? undefined : cover.bind(null, video.id)
+                        }
                       >
-                        {isActionLoading(video.id, 'cover') ? 'Uploading cover...' : 'upload cover'}
+                        {isActionLoading(video.id, 'cover') ? 'Uploading cover...' : 'Upload cover'}
                       </button>
+                      {/* Upload button */}
                       <button
-                        disabled={isActionLoading(video.id, 'upload') || video?.upload_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={(upload.bind(null, video.id))}
+                        disabled={
+                          isActionLoading(video.id, 'upload') || video?.upload_status === 1
+                        }
+                        className={`px-4 py-2 rounded-md transition-all font-light ${isActionLoading(video.id, 'upload') || video?.upload_status === 1
+                            ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
+                            : 'hover:bg-gray-100 hover:text-blue-400 cursor-pointer text-gray-700'
+                          }`}
+                        onClick={
+                          isActionLoading(video.id, 'upload') ? undefined : upload.bind(null, video.id)
+                        }
                       >
                         {isActionLoading(video.id, 'upload') ? 'Uploading...' : '☁️ Upload S3'}
                       </button>
+                      {/* Details button */}
                       <Link to={"/videos/" + video.id}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline font-light hover:text-blue-400 transition-all"
                       >
