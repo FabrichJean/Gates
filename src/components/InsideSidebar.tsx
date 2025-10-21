@@ -185,7 +185,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 `}
             >
                 {/* Header */}
-                <header className="w-full bg-gray-100 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
+                <header className="w-full bg-gray-50 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
