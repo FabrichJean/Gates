@@ -87,16 +87,23 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
         </div>
     );
 };
+
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";
 import { useAuthMe } from "../hooks/useAuth";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-    const {data} = useAuthMe()
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const [showSidebar, setShowSidebar] = useState(false);
+    // Initialize synchronously from localStorage/window to avoid UI flicker on reload
+    const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
+    // Do not auto-open mobile sidebar on initial load or on resize.
+    // Respect user's explicit choice only when they toggle the menu.
+    const initialShowSidebar = false; // always start closed on load
+    const initialIsMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
+
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(initialIsCollapsed);
+    const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
+    const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar);
     const dialogRef = useRef<HTMLDialogElement | null>(null);
 
     const openLogoutModal = () => dialogRef.current?.showModal();
@@ -118,17 +125,25 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
-        // localStorage stores strings - compare to 'true' to avoid Boolean('false') === true
-        setShowSidebar(localStorage.getItem('show-side') === 'true');
-        setIsCollapsed(localStorage.getItem('is-collapsed') === 'true');
+        // Listen to resize and update isMobile without clobbering desktop collapse state.
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 1024);
-            // when switching to mobile, ensure overlay is closed by default
-            if (window.innerWidth < 1024) {
+            const nowMobile = window.innerWidth < 1024;
+            setIsMobile(nowMobile);
+
+            // If switching from mobile -> desktop, restore collapsed state from localStorage
+            if (!nowMobile) {
+                const storedCollapsed = localStorage.getItem('is-collapsed') === 'true';
+                setIsCollapsed(storedCollapsed);
+                // when going to desktop, ensure sidebar overlay is closed
+                setShowSidebar(false);
+            } else {
+                // when entering mobile, do NOT auto-open the overlay even if localStorage had a value.
+                // Keep the previous showSidebar only if it was explicitly set true by the user during this session.
+                // We intentionally avoid reading 'show-side' here to prevent automatic open on resize.
                 setShowSidebar(false);
             }
         };
-        handleResize();
+
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);

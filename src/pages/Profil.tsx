@@ -32,7 +32,7 @@ const Profil: React.FC = () => {
           <img
             src={`https://api.dicebear.com/9.x/croodles/svg?seed=${avatarSeed}`}
             alt="User avatar"
-            className="w-24 h-24 rounded-full border"
+            className="w-24 h-24 rounded-full border border-gray-300"
           />
           <div>
             <h2 className="text-2xl font-semibold">{displayName}</h2>
@@ -52,12 +52,12 @@ const Profil: React.FC = () => {
             <p className="text-xs break-all mt-2 text-gray-700">{token || '-'}</p>
           </div> */}
 
-          <div className="p-4 border rounded-md">
+          <div className="p-4 border rounded-md border-gray-300">
             <h3 className="text-sm text-gray-500">Account info</h3>
             <ul className="mt-2 text-gray-700">
-              <li><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : 'unknown'}</li>
-              <li><strong>Username:</strong> {user && typeof user === 'object' ? user.username ?? '-' : 'unknown'}</li>
-              <li><strong>Email:</strong> {email}</li>
+              {/* <li className="font-light"><strong>ID:</strong> {user && typeof user === 'object' ? user.id ?? '-' : 'unknown'}</li> */}
+              <li className="font-light"><strong>Username:</strong><span className="text-pink-500"> {user && typeof user === 'object' ? user.username ?? '-' : 'unknown'}</span></li>
+              <li className="font-light"><strong>Email:</strong> <span className="text-blue-400"> {email} </span></li>
             </ul>
           </div>
         </div>

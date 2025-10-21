@@ -40,7 +40,7 @@ const UsersArchives = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 md:px-6 lg:px-6 py-6">
+    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6">
       <div className="max-w-7xl mx-auto">
         {/* ✅ Header */}
         <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
