@@ -55,7 +55,7 @@ const SubCategorySelect = ({ categoryId, defaultValue, onSelect }: Props) => {
       disabled={!categoryId || subCategories.length === 0}
       className="w-full border border-gray-300 rounded-lg p-2 outline-none transition bg-white"
     >
-      <option value="" className="flex items-center justify-center">
+      <option value="" className="flex items-center justify-center text-black">
         --Select a subcategory--
       </option>
       {subCategories.map((sub) => (
