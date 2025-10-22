@@ -1,5 +1,6 @@
 
 
+import UpdatePassword from "../components/UpdatePassword";
 import { useAuth } from "../hooks/useAuth";
 
 const Profil: React.FC = () => {
@@ -61,6 +62,16 @@ const Profil: React.FC = () => {
             </ul>
           </div>
         </div>
+
+        {
+          user &&
+          <>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+            <button className="btn block w-ful mt-3" onClick={() => document.getElementById('modal_' + user.username).showModal()}>Change password</button>
+            <UpdatePassword u={user} self/>
+          </>
+        }
       </div>
     </div>
   );

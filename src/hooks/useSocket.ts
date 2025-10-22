@@ -1,53 +1,53 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { apiURL, server } from "../constant"
-import { getToken } from "../utils/storage"
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-
-let socket: Socket | null = null;
+import { apiURL, server } from "../constant";
+import { getToken } from "../utils/storage";
 
 const useSocket = () => {
-    const [id, setId] = useState<string | null>(null)
+  const [id, setId] = useState<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
-    useEffect(() => {
-        (async () => {
-            await axios.get<{ role: string, id: any }>(apiURL + '/auth', {
-                headers: { Authorization: `Bearer ${getToken()}` },
-            })
-                .then((res) => {
-                    setId(res.data.id)
-                    console.log(res.data);
-                })
-        })()
-    }, [])
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get<{ role: string; id: number }>(
+          `${apiURL}/auth`,
+          { headers: { Authorization: `Bearer ${getToken()}` } }
+        );
+        setId(String(res.data.id));
+      } catch (err) {
+        console.error("Erreur d’authentification :", err);
+      }
+    })();
+  }, []);
 
-    useEffect(() => {
-        if (!id)
-            return;
+  useEffect(() => {
+    if (!id) return;
 
-        if (!socket) {
-            socket = io(server); // 🔗 adapte selon ton backend
-        }
+    socketRef.current = io(server);
 
-        socket.on("connect", () => {
-            console.log("🟢 Connecté au serveur Socket.IO");
-        });
+    socketRef.current.on("connect", () => console.log("🟢 Connecté au serveur Socket.IO"));
 
-        socket.on("deleted-user", (data) => {
-            if (String(id) !== String(data.userId))
-                return;
+    socketRef.current.on("deleted-user", (data) => {
+      if (String(id) === String(data.userId)) window.location.reload();
+    });
 
-            window.location.reload()
-        });
+    socketRef.current.on("update-user", (data) => {
+      if (String(id) === String(data.userId)) {
+        localStorage.removeItem('authToken');
+        window.location.reload()
+      };
+    });
 
-        socket.on("disconnect", () => {
-            console.log("🔴 Déconnecté du serveur Socket.IO");
-        });
+    socketRef.current.on("disconnect", () => console.log("🔴 Déconnecté du serveur Socket.IO"));
 
-        return () => {
-            socket?.off("deleted-user");
-        };
-    }, [id]);
-}
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, [id]);
+
+  return { socket: socketRef.current, id };
+};
 
 export default useSocket;

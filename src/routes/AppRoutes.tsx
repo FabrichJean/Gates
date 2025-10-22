@@ -41,11 +41,11 @@ const AppRoutes = () => (
         path="/users"
         element={
           <ProtectedRoute>
-            {/* <SuperProtected> */}
+            <SuperProtected>
               <InsideSidebar>
                 <Users />
               </InsideSidebar>
-            {/* </SuperProtected> */}
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
@@ -86,6 +86,18 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <CreateUser />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users/:1"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <Profil />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>

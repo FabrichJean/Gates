@@ -5,7 +5,8 @@ import { getToken } from "../utils/storage";
 import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
-import { TiUserAddOutline } from "react-icons/ti";
+import { TiUserAddOutline } from 'react-icons/ti';
+import UpdatePassword from "../components/UpdatePassword";
 
 interface ColumnConfig {
   key: string;
@@ -134,46 +135,46 @@ const Users = () => {
 
             {/* Column Filter Button */}
             <div className="relative ml-2">
-            <button
-              onClick={(e) => { e.stopPropagation(); setIsColumnMenuOpen(prev => !prev); }}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-            >
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsColumnMenuOpen(prev => !prev); }}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+              >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                 </svg>
                 Columns
-              <svg className={`w-4 h-4 ml-1 transition-transform ${isColumnMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+                <svg className={`w-4 h-4 ml-1 transition-transform ${isColumnMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-            {isColumnMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setIsColumnMenuOpen(false)} />
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
-                  <div className="py-2">
-                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 flex items-center justify-between">
+              {isColumnMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsColumnMenuOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                    <div className="py-2">
+                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 flex items-center justify-between">
                         <span>Show columns</span>
-                      <span className="text-xs text-gray-400">({visibleColumns.length}/{columns.length})</span>
-                    </div>
-                    <div className="px-4 py-2 border-b border-gray-100 flex space-x-2">
-                      <button onClick={() => toggleAllColumns(true)} className="text-xs text-blue-600 hover:text-blue-800" disabled={visibleColumns.length === columns.length}>Tout</button>
-                      <span className="text-xs text-gray-300">|</span>
-                      <button onClick={() => toggleAllColumns(false)} className="text-xs text-gray-600 hover:text-gray-800" disabled={visibleColumns.length === 0}>Aucun</button>
-                    </div>
-
-                    {columns.map((column) => (
-                      <div key={column.key} className="px-4 py-2 hover:bg-gray-50">
-                        <label className="flex items-center cursor-pointer">
-                          <input type="checkbox" checked={column.visible} onChange={() => toggleColumn(column.key)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2" />
-                          <span className="ml-2 text-sm text-gray-700">{column.label}</span>
-                        </label>
+                        <span className="text-xs text-gray-400">({visibleColumns.length}/{columns.length})</span>
                       </div>
-                    ))}
+                      <div className="px-4 py-2 border-b border-gray-100 flex space-x-2">
+                        <button onClick={() => toggleAllColumns(true)} className="text-xs text-blue-600 hover:text-blue-800" disabled={visibleColumns.length === columns.length}>Tout</button>
+                        <span className="text-xs text-gray-300">|</span>
+                        <button onClick={() => toggleAllColumns(false)} className="text-xs text-gray-600 hover:text-gray-800" disabled={visibleColumns.length === 0}>Aucun</button>
+                      </div>
+
+                      {columns.map((column) => (
+                        <div key={column.key} className="px-4 py-2 hover:bg-gray-50">
+                          <label className="flex items-center cursor-pointer">
+                            <input type="checkbox" checked={column.visible} onChange={() => toggleColumn(column.key)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2" />
+                            <span className="ml-2 text-sm text-gray-700">{column.label}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -193,7 +194,7 @@ const Users = () => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((u: any) => (
+            {data?.map((u: any) => (
               <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                 {columns.find(c => c.key === 'name')?.visible && (
                   <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
@@ -240,10 +241,13 @@ const Users = () => {
                         </button>
 
                         {openMenuId === u.id && (
-                          <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 w-28">
+                          <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 min-w-28 w-max">
                             {!u.isValidated && (
                               <button onClick={() => handleValidate(u.id)} className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700">Validate</button>
                             )}
+                            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                            {/* @ts-ignore */}
+                            <button className="block text-nowrap w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700" onClick={() => document.getElementById('modal_'+u.username).showModal()}>update password</button>
                             <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600">block</button>
                           </div>
                         )}
@@ -251,6 +255,7 @@ const Users = () => {
                     )}
                   </td>
                 )}
+                <UpdatePassword u={u} />
               </tr>
             ))}
           </tbody>
