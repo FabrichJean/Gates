@@ -54,8 +54,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     modifying ? <EditVideo video={video} onSubmit={() => {
       setModifying(false);
       reFetch();
-    }}/> :
-      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-white">
+    }} /> :
+      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gray-50">
         <Toaster position="top-right" />
 
         {/* Formulaire */}
@@ -121,12 +121,19 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
           </div>
 
-          <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
-            <h1 className="text-lg font-semibold text-gray-800">Category</h1>
-            <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-              {video?.category.name} / {video?.subCategory.name }
-            </span>
-          </div>
+          {video?.cdn_url && video?.s3_hls_path && <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">CDN playback URL</h1>
+            <a className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+              {video?.cdn_url + video?.s3_hls_path}
+            </a>
+          </div>}
+
+          {video?.cdn_url && video?.s3_cover_path && <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">CDN Cover URL</h1>
+            <a className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+              {video?.cdn_url + video?.s3_cover_path}
+            </a>
+          </div>}
 
           <div className="space-y-2 rounded-lg bg-gray-50 p-2">
             <h1 className="text-lg font-semibold text-gray-800">Titles</h1>
@@ -144,6 +151,14 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </div>
             ))}
           </div>
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">Category</h1>
+            <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
+              {video?.category.name} / {video?.subCategory.name}
+            </span>
+          </div>
+
         </div>
 
         <div className="w-full md:w-[35%] flex flex-col gap-4" />

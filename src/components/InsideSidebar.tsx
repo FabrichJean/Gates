@@ -92,6 +92,7 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
+    useSocket()
     // Initialize synchronously from localStorage/window to avoid UI flicker on reload
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
     // Do not auto-open mobile sidebar on initial load or on resize.

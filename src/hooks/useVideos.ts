@@ -5,6 +5,7 @@ import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
 
 export type TVideo = {
+  // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
   category: Category;
@@ -24,10 +25,24 @@ export type TVideo = {
   cover_upload_status: number;
   url: string | null;
   user: User;
-  // category: {
-  //   id: number,
-  //   "name": "Professional"
-  // },
+  
+  // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
+  category_id: number;
+  sub_category_id: number | null;
+  s3_hls_path: string | null;
+  cdn_url: string | null;
+  s3_cover_path: string | null;
+  local_mp4_path: string | null;
+  local_cover_path: string | null;
+  local_hls_path: string | null;
+  hash: string | null;
+  sys_code: string | null;
+  sendToServer: boolean;
+  server_url: string | null;
+  
+  // HLS AES-128 encryption fields
+  hls_key_db_id: number | null;
+  hls_key_iv: string | null;
 };
 
 export type User = {

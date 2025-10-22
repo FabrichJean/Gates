@@ -155,7 +155,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                                     />
                                 </svg>
 
-                                {!isCollapsed && <span className="ml-2">Archive</span>}
+                                {!isCollapsed && <span className="ml-2">Blocked User</span>}
                             </Link>
 
                             <Link to="/settings" onClick={() => handleNav("settings")} className={linkClass("settings")}>
