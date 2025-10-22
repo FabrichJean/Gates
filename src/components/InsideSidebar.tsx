@@ -91,8 +91,10 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import StickyUploadProgress from "./StickyUploadProgress";
+import useSocket from "../hooks/useSocket";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
+    useSocket()
     // Initialize synchronously from localStorage/window to avoid UI flicker on reload
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
     // Do not auto-open mobile sidebar on initial load or on resize.
