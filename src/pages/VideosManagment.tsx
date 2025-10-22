@@ -14,6 +14,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion"
 import RoleEnum from "../utils/roleEnum";
+import { socket } from "../utils/socket"; // import socket for real-time updates
 
 export type Video = {
   id: unknown;
@@ -53,6 +54,28 @@ const VideosManagment = () => {
   const setActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp', value: boolean) => {
     const key = videoId === null || videoId === undefined ? 'global' : String(videoId);
     setLoadingMap(prev => ({ ...prev, [key]: { ...(prev[key] || {}), [action]: value } }));
+    // persister les IDs de transcodage en cours pour que le bouton reste désactivé lors de la navigation
+    if (action === 'transc') {
+      try {
+        const raw = localStorage.getItem('transcodingVideos') || '[]';
+        const list: string[] = JSON.parse(raw);
+        const idStr = String(videoId);
+        if (value) {
+          if (!list.includes(idStr)) {
+            list.push(idStr);
+            localStorage.setItem('transcodingVideos', JSON.stringify(list));
+          }
+        } else {
+          const idx = list.indexOf(idStr);
+          if (idx !== -1) {
+            list.splice(idx, 1);
+            localStorage.setItem('transcodingVideos', JSON.stringify(list));
+          }
+        }
+      } catch (e) {
+        // ignore localStorage errors
+      }
+    }
   }
 
   const isActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp') => {
@@ -73,6 +96,56 @@ const VideosManagment = () => {
       .finally(() => setActionLoading(null, 'webapp', false));
   }
 
+  // initialiser depuis localStorage pour que les boutons restent désactivés lors de la navigation
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('transcodingVideos') || '[]';
+      const list: string[] = JSON.parse(raw);
+      if (Array.isArray(list) && list.length > 0) {
+        const newMap: Record<string, Partial<Record<'transc' | 'upload' | 'cover' | 'webapp', boolean>>> = {};
+        for (const id of list) newMap[String(id)] = { transc: true };
+        setLoadingMap(prev => ({ ...newMap, ...prev }));
+      }
+    } catch (e) { }
+  }, []);
+
+  // Écouter les événements socket émis par le worker backend
+  useEffect(() => {
+    const handler = (payload: any) => {
+      // backend emits: { videoId, status, type, userId }
+      if (!payload || payload.type !== 'transcode') return;
+
+      const vid = String(payload.videoId);
+
+      if (payload.status === 'finished') {
+        // mark finished: remove from localStorage and clear loading
+        setActionLoading(vid, 'transc', false);
+        // also refetch data to update upload_status / hls_url
+        reFetch();
+        toast.success(`Video ${vid} transcoded`);
+      } else if (payload.status === 'error') {
+        setActionLoading(vid, 'transc', false);
+        toast.error(`Transcode error for video ${vid}`);
+      } else if (payload.status === 'started' || payload.status === 'processing') {
+        // mark as in-progress
+        setActionLoading(vid, 'transc', true);
+      }
+    };
+
+    try {
+      socket.on('async-status', handler);
+    } catch (e) {
+      // socket may be undefined or not connected; ignore
+    }
+
+    return () => {
+      try {
+        socket.off('async-status', handler);
+      } catch (e) { }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reFetch]);
+
   const transcode = async (videoId: string | number | undefined) => {
 
     setActionLoading(videoId, 'transc', true);
@@ -91,7 +164,6 @@ const VideosManagment = () => {
         toast.error("Error");
       })
       .finally(() => setActionLoading(videoId, 'transc', false));
-
   }
 
   const upload = async (videoId: string | number | undefined) => {
@@ -130,12 +202,6 @@ const VideosManagment = () => {
         toast.error("Error");
       });
   }
-
-  // return (
-  //   <div className="min-h-screen bg-white p-6">
-  //     <VideoListCard />
-  //   </div>
-  // );
 
 
   return (

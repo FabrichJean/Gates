@@ -90,7 +90,6 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
-import StickyUploadProgress from "./StickyUploadProgress";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
     // Initialize synchronously from localStorage/window to avoid UI flicker on reload
@@ -159,7 +158,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     return (
         <div className="w-dvw h-dvh bg-gray-200 flex overflow-hidden relative">
             <Toaster />
-            <StickyUploadProgress />
 
             {/* Desktop Sidebar */}
             {!isMobile && <Sidebar isCollapsed={isCollapsed} />}
