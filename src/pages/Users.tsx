@@ -244,7 +244,7 @@ const Users = () => {
                             {!u.isValidated && (
                               <button onClick={() => handleValidate(u.id)} className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700">Validate</button>
                             )}
-                            <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600">Delete</button>
+                            <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600">block</button>
                           </div>
                         )}
                       </>

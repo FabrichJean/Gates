@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import axios from "axios"
+import { useEffect, useState } from "react"
+import { apiURL, server } from "../constant"
+import { getToken } from "../utils/storage"
 import { io, Socket } from "socket.io-client";
-import { useProgressStore } from "./useProgressStore";
-import { apiURL, server } from "../constant";
-import { getToken } from "../utils/storage";
-import axios from "axios";
 
 let socket: Socket | null = null;
 
-export function useSocketProgress() {
+const useSocket = () => {
     const [id, setId] = useState<string | null>(null)
 
     useEffect(() => {
@@ -22,10 +21,8 @@ export function useSocketProgress() {
         })()
     }, [])
 
-    const setProgress = useProgressStore((s) => s.setProgress);
-
     useEffect(() => {
-        if (!id) 
+        if (!id)
             return;
 
         if (!socket) {
@@ -36,12 +33,11 @@ export function useSocketProgress() {
             console.log("🟢 Connecté au serveur Socket.IO");
         });
 
-        socket.on("upload-progress", (data) => {
+        socket.on("deleted-user", (data) => {
             if (String(id) !== String(data.userId))
                 return;
 
-            console.log("📡 Progress event reçu :", data);
-            setProgress(data);
+            window.location.reload()
         });
 
         socket.on("disconnect", () => {
@@ -49,7 +45,9 @@ export function useSocketProgress() {
         });
 
         return () => {
-            socket?.off("upload-progress");
+            socket?.off("deleted-user");
         };
-    }, [id, setProgress]);
+    }, [id]);
 }
+
+export default useSocket;
