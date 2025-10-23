@@ -81,6 +81,15 @@ export async function uploadCover(videoId: string | number): Promise<void> {
     });
 }
 
+export async function sendProcessing(videoId: string | number) {
+    return await axios.post(`${apiURL}/videos/${videoId}/deep-upload`, null, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        }
+    });
+}
+
+
 export async function toggleStatus(videoId: string | number): Promise<void> {
     return await axios.put(`${apiURL}/videos/${videoId}/toggleStatus`, null, {
         headers: {
