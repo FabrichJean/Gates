@@ -42,7 +42,6 @@ const VideosManagment = () => {
 
   // console.log(data.videos);
 
-
   useEffect(() => {
     reFetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,7 +53,7 @@ const VideosManagment = () => {
   const setActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp', value: boolean) => {
     const key = videoId === null || videoId === undefined ? 'global' : String(videoId);
     setLoadingMap(prev => ({ ...prev, [key]: { ...(prev[key] || {}), [action]: value } }));
-    // persist transcoding IDs so the button remains disabled during navigation
+    // persister les IDs de transcodage en cours pour que le bouton reste désactivé lors de la navigation
     if (action === 'transc') {
       try {
         const raw = localStorage.getItem('transcodingVideos') || '[]';
