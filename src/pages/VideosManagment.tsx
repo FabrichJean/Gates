@@ -13,6 +13,7 @@ import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion"
 import RoleEnum from "../utils/roleEnum";
+import { socket } from "../utils/socket"; // import socket for real-time updates
 
 export type Video = {
   id: unknown;
@@ -46,10 +47,43 @@ const VideosManagment = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  const [loading, setLoading] = useState<{ id: string | number | undefined, type: 'transc' | 'upload' | 'cover' | 'webapp' }>();
+  // per-video, per-action loading map to allow concurrent actions
+  const [loadingMap, setLoadingMap] = useState<Record<string, Partial<Record<'transc' | 'upload' | 'cover' | 'webapp', boolean>>>>({});
+
+  const setActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp', value: boolean) => {
+    const key = videoId === null || videoId === undefined ? 'global' : String(videoId);
+    setLoadingMap(prev => ({ ...prev, [key]: { ...(prev[key] || {}), [action]: value } }));
+    // persist transcoding IDs so the button remains disabled during navigation
+    if (action === 'transc') {
+      try {
+        const raw = localStorage.getItem('transcodingVideos') || '[]';
+        const list: string[] = JSON.parse(raw);
+        const idStr = String(videoId);
+        if (value) {
+          if (!list.includes(idStr)) {
+            list.push(idStr);
+            localStorage.setItem('transcodingVideos', JSON.stringify(list));
+          }
+        } else {
+          const idx = list.indexOf(idStr);
+          if (idx !== -1) {
+            list.splice(idx, 1);
+            localStorage.setItem('transcodingVideos', JSON.stringify(list));
+          }
+        }
+      } catch (e) {
+        // ignore localStorage errors
+      }
+    }
+  }
+
+  const isActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp') => {
+    const key = videoId === null || videoId === undefined ? 'global' : String(videoId);
+    return !!loadingMap[key]?.[action];
+  }
 
   const toWebapp = async () => {
-    setLoading({ id: '', type: 'webapp' });
+    setActionLoading(null, 'webapp', true);
     await webApp()
       .then(() => {
         reFetch();
@@ -58,8 +92,54 @@ const VideosManagment = () => {
       .catch(() => {
         toast.error("Error");
       })
-      .finally(() => setLoading(undefined));
+      .finally(() => setActionLoading(null, 'webapp', false));
   }
+  // initialize from localStorage so buttons remain disabled during navigation
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('transcodingVideos') || '[]';
+      const list: string[] = JSON.parse(raw);
+      if (Array.isArray(list) && list.length > 0) {
+        const newMap: Record<string, Partial<Record<'transc' | 'upload' | 'cover' | 'webapp', boolean>>> = {};
+        for (const id of list) newMap[String(id)] = { transc: true };
+        setLoadingMap(prev => ({ ...newMap, ...prev }));
+      }
+    } catch (e) { }
+  }, []);
+
+  // Écouter les événements socket émis par le worker backend
+  useEffect(() => {
+    const handler = (payload: any) => {
+      // backend emits: { videoId, status, type, userId }
+      if (!payload || payload.type !== 'transcode') return;
+
+      const vid = String(payload.videoId);
+
+      if (payload.status === 'finished') {
+        setActionLoading(vid, 'transc', false);
+        reFetch();
+        toast.success(`Video ${vid} transcoded`);
+      } else if (payload.status === 'error') {
+        setActionLoading(vid, 'transc', false);
+        toast.error(`Transcode error for video ${vid}`);
+      } else if (payload.status === 'started' || payload.status === 'processing') {
+        setActionLoading(vid, 'transc', true);
+      }
+    };
+
+    try {
+      socket.on('async-status', handler);
+    } catch (e) {
+      // socket may be undefined or not connected; ignore
+    }
+
+    return () => {
+      try {
+        socket.off('async-status', handler);
+      } catch (e) { }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reFetch]);
 
   // const transcode = async (videoId: string | number | undefined) => {
   //   setLoading({ id: videoId, type: 'transc' });
@@ -112,8 +192,7 @@ const VideosManagment = () => {
       })
       .catch(() => {
         toast.error("Error");
-      })
-      .finally(() => setLoading(undefined));
+      });
   }
 
   const send = async (videoId: string | number) => {
@@ -174,7 +253,7 @@ const VideosManagment = () => {
             <Link to={"/videos/upload"} className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm  hover:bg-blue-50 transition-all duration-200">
               <FilePlus className="w-5 h-auto text-blue-400" />
             </Link>
-            {user?.role === RoleEnum.SUPERADMIN ? <button disabled={loading?.type === 'webapp'} onClick={toWebapp.bind(null)} className="p-2.5 rounded-lg hover:bg-base-200 flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm md:rounded-xl transition-all duration-300 backdrop-blur-md border cursor-pointer bg-white/90 text-gray-800 border-gray-200 hover:border-gray-300 ">
+            {user?.role === RoleEnum.SUPERADMIN ? <button disabled={isActionLoading(null, 'webapp')} onClick={toWebapp.bind(null)} className="p-2.5 rounded-lg hover:bg-base-200 flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm md:rounded-xl transition-all duration-300 backdrop-blur-md border cursor-pointer bg-white/90 text-gray-800 border-gray-200 hover:border-gray-300 ">
               <SendIcon className="text-blue-400" /> <span className="md:inline hidden text-gray-600">send to webApp</span>
             </button> : null}
 
@@ -199,7 +278,6 @@ const VideosManagment = () => {
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         {/* Table wrapper pour mobile */}
-        {loading?.type === 'webapp' ? <DeepLoader /> : null}
         <div className="overflow-x-auto">
           <table className="min-w-full w-max text-sm md:text-base">
             <thead className="bg-gray-50 text-gray-600 uppercase">
@@ -281,29 +359,36 @@ const VideosManagment = () => {
 
                       {/* 
                       <button
-                        disabled={(loading?.id === video.id && loading?.type === 'transc') || video?.transfer_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={transcode.bind(null, video.id)}
-                      >
-                        {
-                          loading?.id === video.id && loading?.type === 'transc' ?
-                            <DeepLoader />
-                            :
-                            "🎞️ Transcode"
+                        disabled={
+                          isActionLoading(video.id, 'transc') ||
+                          video?.transfer_status === 1
                         }
+                        className={`px-4 py-2 rounded-md transition-all font-light ${isActionLoading(video.id, 'transc') || video?.transfer_status === 1
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
+                          : 'hover:bg-gray-100 hover:text-blue-400 cursor-pointer text-gray-700'
+                          }`}
+                        onClick={
+                          isActionLoading(video.id, 'transc') ? undefined : transcode.bind(null, video.id)
+                        }
+                      >
+                        {isActionLoading(video.id, 'transc') ? 'Processing...' : '🎞️ Transcode'}
                       </button>
+                      {/* Upload cover button */}  
                       <button
-                        disabled={(loading?.id === video.id && loading?.type === 'cover') || video?.cover_upload_status === 1}
-                        className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.cover_upload_status === 1 ? 'opacity-20 cursor-not-allowed font-light' : 'cursor-pointer'}`}
-                        onClick={cover.bind(null, video.id)}
-                      >
-                        {
-                          loading?.id === video.id && loading?.type === 'cover' ?
-                            <DeepLoader />
-                            :
-                            "upload cover"
+                        disabled={
+                          isActionLoading(video.id, 'cover') || video?.cover_upload_status === 1
                         }
+                        className={`px-4 py-2 rounded-md transition-all font-light ${isActionLoading(video.id, 'cover') || video?.cover_upload_status === 1
+                          ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
+                          : 'hover:bg-gray-100 hover:text-blue-400 cursor-pointer text-gray-700'
+                          }`}
+                        onClick={
+                          isActionLoading(video.id, 'cover') ? undefined : cover.bind(null, video.id)
+                        }
+                      >
+                        {isActionLoading(video.id, 'cover') ? 'Uploading cover...' : 'Upload cover'}
                       </button>
+                      {/* Upload button */}
                       <button
                         disabled={(loading?.id === video.id && loading?.type === 'upload') || video?.upload_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.upload_status === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}

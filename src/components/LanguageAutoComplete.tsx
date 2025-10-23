@@ -70,7 +70,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
           {filtered.map((lang) => (
             <li
               key={lang.code}
-              className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+              className="px-4 py-2 hover:bg-blue-100 cursor-pointer text-black"
               onClick={() => handleSelect(lang)}
             >
               {lang.name} ({lang.code})

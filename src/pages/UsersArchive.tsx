@@ -117,7 +117,7 @@ const UsersArchives = () => {
                       onClick={() => handleValidate(u.id)}
                       className="block text-left px-3 py-2 text-sm text-green-700 hover:bg-green-50 rounded-lg cursor-pointer transition"
                     >
-                      Validate
+                      unblock
                     </button>
                   </td>
                 </tr>

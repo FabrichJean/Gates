@@ -106,3 +106,16 @@ export const getMeApi = async () => {
     throw new Error("Erreur de connexion au serveur");
   }
 };
+
+export const updatePassword = async (id: number, newPassword: string, confirmPassword: string, oldPassword?: string) => {
+  try {
+    const res = await api.put(`/auth/password/`+id, {newPassword, confirmPassword, oldPassword});
+    return res.data; // ex: { role: 'superadmin', id, email, ... }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.response && error.response.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error("Erreur de connexion au serveur");
+  }
+}

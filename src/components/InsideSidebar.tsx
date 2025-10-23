@@ -90,10 +90,10 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
-import StickyUploadProgress from "./StickyUploadProgress";
-// import { useAuthMe } from "../hooks/useAuth";
+import useSocket from "../hooks/useSocket";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
+    useSocket()
     // Initialize synchronously from localStorage/window to avoid UI flicker on reload
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
     // Do not auto-open mobile sidebar on initial load or on resize.
@@ -119,9 +119,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         window.addEventListener('confirm-logout', handler as EventListener);
         return () => window.removeEventListener('confirm-logout', handler as EventListener);
     }, [logout, navigate]);
-
-    // console.log(data);
-    
 
     // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
@@ -163,7 +160,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     return (
         <div className="w-dvw h-dvh bg-gray-200 flex overflow-hidden relative">
             <Toaster />
-            <StickyUploadProgress />
 
             {/* Desktop Sidebar */}
             {!isMobile && <Sidebar isCollapsed={isCollapsed} />}
@@ -189,7 +185,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 `}
             >
                 {/* Header */}
-                <header className="w-full bg-gray-100 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
+                <header className="w-full bg-gray-50 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}

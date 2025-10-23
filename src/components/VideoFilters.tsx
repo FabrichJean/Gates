@@ -7,8 +7,8 @@ import UseSubCategory from "../hooks/useSubCategory";
 
 export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }) {
 
-    const { data: users } = useUsers('')
-    const { data: cat } = UseCategory()
+    const { data: users } = useUsers('');
+    const { data: cat } = UseCategory();
 
     const [filters, setFilters] = useState({
         category_id: "",
@@ -18,9 +18,11 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
         upload_status: "all",
         cover_upload_status: "all",
         transfer_status: "all",
+        startedAt: "",
+        endAt: "",
     });
 
-    const { data: subcat } = UseSubCategory(Number(filters?.category_id))
+    const { data: subcat } = UseSubCategory(Number(filters?.category_id));
 
     const reverseStatus = (value: string) => {
         if (value === '1') return 'yes';
@@ -28,11 +30,11 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
         return 'all';
     };
 
-
+    // 🧩 Chargement des filtres sauvegardés
     useEffect(() => {
         try {
             const saved = localStorage.getItem('videos_filtered');
-            if (!saved) return; // rien à charger
+            if (!saved) return;
 
             const savedFilter = JSON.parse(saved);
 
@@ -42,6 +44,8 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                 cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
                 transfer_status: reverseStatus(savedFilter.transfer_status),
                 upload_status: reverseStatus(savedFilter.upload_status),
+                startedAt: savedFilter.startedAt || "",
+                endAt: savedFilter.endAt || "",
             };
 
             setFilters(_);
@@ -50,7 +54,6 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
             localStorage.removeItem('videos_filtered');
         }
     }, []);
-
 
     const handleChange = (key: string, value: string) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
@@ -62,6 +65,7 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
         return undefined;
     };
 
+    // 🧠 Soumission des filtres
     const submit = async () => {
         const data = {
             ...filters,
@@ -71,23 +75,19 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
             upload_status: mapStatus(filters.upload_status),
         };
 
-        localStorage.setItem('videos_filtered', JSON.stringify(data))
+        localStorage.setItem('videos_filtered', JSON.stringify(data));
 
         try {
-
-            const fetched = await getFilteredVideos(data)
-
-            onSubmit(fetched.data)
-
+            const fetched = await getFilteredVideos(data);
+            onSubmit(fetched.data);
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     return (
         <dialog id="search_modal_52" className="modal">
             <div className="flex flex-col gap-4 modal-box w-max">
-                {/* <h2 className="text-lg font-semibold">Filtrer les vidéos</h2> */}
 
                 {/* Sélections principales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -99,11 +99,9 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                             onChange={(e) => handleChange("category_id", e.target.value)}
                         >
                             <option value=''>all</option>
-                            {
-                                cat?.map?.((c, i) => (
-                                    <option key={i} value={c.id}>{c.name}</option>
-                                ))
-                            }
+                            {cat?.map?.((c, i) => (
+                                <option key={i} value={c.id}>{c.name}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -115,11 +113,9 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                             onChange={(e) => handleChange("sub_category_id", e.target.value)}
                         >
                             <option value=''>all</option>
-                            {
-                                subcat?.SubCategorys?.map((c, i) => (
-                                    <option key={i} value={c.id}>{c.name}</option>
-                                ))
-                            }
+                            {subcat?.SubCategorys?.map((c, i) => (
+                                <option key={i} value={c.id}>{c.name}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -131,14 +127,33 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                             onChange={(e) => handleChange("user_id", e.target.value)}
                         >
                             <option value=''>all</option>
-                            {
-                                users?.map((u, i) => (
-                                    <option key={i} value={u.id}>{u.username}</option>
-                                ))
-                            }
+                            {users?.map((u, i) => (
+                                <option key={i} value={u.id}>{u.username}</option>
+                            ))}
                         </select>
                     </div>
+                </div>
 
+                {/* 📅 Filtres de date */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block mb-1 font-medium">Start Date</label>
+                        <input
+                            type="date"
+                            className="input input-bordered w-full"
+                            value={filters.startedAt}
+                            onChange={(e) => handleChange("startedAt", e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1 font-medium">End Date</label>
+                        <input
+                            type="date"
+                            className="input input-bordered w-full"
+                            value={filters.endAt}
+                            onChange={(e) => handleChange("endAt", e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {/* Filtres booléens */}
@@ -169,8 +184,8 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                     ))}
                 </div>
 
+                {/* Boutons */}
                 <form method="dialog" className="pt-3 flex justify-end gap-3">
-
                     <button className="btn btn-outline btn-sm">Close</button>
 
                     <div
@@ -183,16 +198,20 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
                                 upload_status: "all",
                                 cover_upload_status: "all",
                                 transfer_status: "all",
-                                sub_category_id: ""
-                            })
-                            localStorage.removeItem('videos_filtered')
-                            await submit()
-                        }
-                        }
+                                sub_category_id: "",
+                                startedAt: "",
+                                endAt: "",
+                            });
+                            localStorage.removeItem('videos_filtered');
+                            await submit();
+                        }}
                     >
                         Reset
                     </div>
-                    <button className="btn btn-primary btn-sm" onClick={submit}>Apply</button>
+
+                    <button className="btn btn-primary btn-sm" onClick={submit}>
+                        Apply
+                    </button>
                 </form>
             </div>
         </dialog>
