@@ -170,12 +170,16 @@ export default VideoDetails;
 
 function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
 
+  const navigate = useNavigate()
+
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(server + '/' + video?.cover);
   const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const [duration, setDuration] = useState<number | null>(video?.duration);
 
   const [category, setCategory] = useState<Category>(video?.category);
   const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
@@ -198,7 +202,8 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
       ...(subcategory && { sub_category_id: subcategory.id }),
-      titles: JSON.stringify(coupleTitles)
+      titles: JSON.stringify(coupleTitles),
+      duration
     };
 
     try {
@@ -218,7 +223,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
       onSubmit();
-      // navigate('/')
+      navigate('/videos')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
@@ -246,6 +251,11 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
             <div>
               <label className="block text-gray-700 font-medium mb-2">Sub Category</label>
               <SubCategoryAutoComplete categoryId={category?.id} defaultValue={subcategory} onSelect={(cat) => setSubCategory(cat)} />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Duration ( ms)</label>
+              <input type="number" className="input w-full" defaultValue={duration || 0} onChange={(e) => setDuration(Number(e.currentTarget.value))} />
             </div>
 
             <div>
