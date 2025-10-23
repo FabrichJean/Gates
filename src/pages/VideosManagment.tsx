@@ -54,7 +54,7 @@ const VideosManagment = () => {
   const setActionLoading = (videoId: string | number | undefined | null, action: 'transc' | 'upload' | 'cover' | 'webapp', value: boolean) => {
     const key = videoId === null || videoId === undefined ? 'global' : String(videoId);
     setLoadingMap(prev => ({ ...prev, [key]: { ...(prev[key] || {}), [action]: value } }));
-    // persister les IDs de transcodage en cours pour que le bouton reste désactivé lors de la navigation
+    // persist transcoding IDs so the button remains disabled during navigation
     if (action === 'transc') {
       try {
         const raw = localStorage.getItem('transcodingVideos') || '[]';
@@ -95,8 +95,7 @@ const VideosManagment = () => {
       })
       .finally(() => setActionLoading(null, 'webapp', false));
   }
-
-  // initialiser depuis localStorage pour que les boutons restent désactivés lors de la navigation
+  // initialize from localStorage so buttons remain disabled during navigation
   useEffect(() => {
     try {
       const raw = localStorage.getItem('transcodingVideos') || '[]';
@@ -118,16 +117,13 @@ const VideosManagment = () => {
       const vid = String(payload.videoId);
 
       if (payload.status === 'finished') {
-        // mark finished: remove from localStorage and clear loading
         setActionLoading(vid, 'transc', false);
-        // also refetch data to update upload_status / hls_url
         reFetch();
         toast.success(`Video ${vid} transcoded`);
       } else if (payload.status === 'error') {
         setActionLoading(vid, 'transc', false);
         toast.error(`Transcode error for video ${vid}`);
       } else if (payload.status === 'started' || payload.status === 'processing') {
-        // mark as in-progress
         setActionLoading(vid, 'transc', true);
       }
     };
