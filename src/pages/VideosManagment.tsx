@@ -40,7 +40,6 @@ const VideosManagment = () => {
 
   // console.log(data.videos);
 
-
   useEffect(() => {
     reFetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps

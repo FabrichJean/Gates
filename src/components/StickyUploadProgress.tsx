@@ -7,6 +7,18 @@ export default function StickyUploadProgress() {
     const { uploads } = useProgressStore();
     useSocketProgress(); // ⚡ auto-sync avec Socket.IO
 
+    // Helper: detect uploads that are related to S3/HLS transfer and skip showing them
+    const isS3Upload = (u: { file?: string; videoId: string }) => {
+        const f = (u.file || '').toLowerCase();
+        const vid = String(u.videoId).toLowerCase();
+
+        // common hints: filename/path contains 's3' or 'hls' or 'hls_files',
+        // or videoId sent by backend may contain 's3-' prefix in some setups
+        if (!f && vid.startsWith('s3-')) return true;
+        if (f.includes('s3') || f.includes('hls') || f.includes('hls_files') || f.includes('hls.js')) return true;
+        return false;
+    }
+
     useEffect(() => {
         if (uploads.length !== 0) {
             const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -21,7 +33,10 @@ export default function StickyUploadProgress() {
 
     }, [uploads]);
 
-    if (uploads.length === 0) return null;
+    // filter out S3 uploads from the sticky panel
+    const visibleUploads = uploads.filter((u) => !isS3Upload(u));
+
+    if (visibleUploads.length === 0) return null;
 
     // Small fixed panel in bottom-right without backdrop blur so users can continue interacting
     return (
@@ -34,7 +49,7 @@ export default function StickyUploadProgress() {
                 </div>
 
                 <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {uploads.map((u) => (
+                    {visibleUploads.map((u) => (
                         <div key={u.videoId} className="p-2 border rounded-xl bg-gray-50">
                             <div className="flex justify-between items-center">
                                 <span className="text-xs font-medium">{u.file || "HLS Files"}</span>
