@@ -3,14 +3,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import UseVideos from "../hooks/useVideos";
 import { server } from "../constant";
-import { toggleStatus, transcodeVideo, uploadCover, uploadS3, webApp } from "../api/videos";
+import { sendProcessing, toggleStatus, transcodeVideo, uploadCover, uploadS3, webApp } from "../api/videos";
 import toast from "react-hot-toast";
-import { SyncLoader } from "react-spinners";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
 import VideoFilters from "../components/VideoFilters";
 import { FilePlus, Filter, SendIcon } from "lucide-react";
-import { useProgress } from "../hooks/useProgress";
 import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion"
@@ -35,7 +33,7 @@ const VideosManagment = () => {
   const { data: user } = useAuthMe();
   const [page, setPage] = useState(1);
   const { data, reFetch, mutate } = UseVideos('all', page);
-  const { addProgress, updateProgress } = useProgress();
+  // const { addProgress, updateProgress } = useProgress();
 
   // controls for the floating action button (FAB) so it can snap back after drag
   const fabControls = useAnimation();
@@ -63,48 +61,48 @@ const VideosManagment = () => {
       .finally(() => setLoading(undefined));
   }
 
-  const transcode = async (videoId: string | number | undefined) => {
-    setLoading({ id: videoId, type: 'transc' });
-    const id = addProgress({ name: String(videoId), type: "upload" });
-    await transcodeVideo(videoId, (event) => {
-      const percent = Math.round((event.loaded * 100) / (event.total || 1));
-      updateProgress(id, percent);
-    })
-      .then(() => {
-        toast.success("success");
-        reFetch();
-      })
-      .catch(() => {
-        toast.error("Error");
-      })
-      .finally(() => setLoading(undefined));
-  }
+  // const transcode = async (videoId: string | number | undefined) => {
+  //   setLoading({ id: videoId, type: 'transc' });
+  //   const id = addProgress({ name: String(videoId), type: "upload" });
+  //   await transcodeVideo(videoId, (event) => {
+  //     const percent = Math.round((event.loaded * 100) / (event.total || 1));
+  //     updateProgress(id, percent);
+  //   })
+  //     .then(() => {
+  //       toast.success("success");
+  //       reFetch();
+  //     })
+  //     .catch(() => {
+  //       toast.error("Error");
+  //     })
+  //     .finally(() => setLoading(undefined));
+  // }
 
-  const upload = async (videoId: string | number | undefined) => {
-    setLoading({ id: videoId, type: 'upload' });
-    await uploadS3(videoId)
-      .then(() => {
-        reFetch();
-        toast.success("success");
-      })
-      .catch(() => {
-        toast.error("Error");
-      })
-      .finally(() => setLoading(undefined));
-  }
+  // const upload = async (videoId: string | number | undefined) => {
+  //   setLoading({ id: videoId, type: 'upload' });
+  //   await uploadS3(videoId)
+  //     .then(() => {
+  //       reFetch();
+  //       toast.success("success");
+  //     })
+  //     .catch(() => {
+  //       toast.error("Error");
+  //     })
+  //     .finally(() => setLoading(undefined));
+  // }
 
-  const cover = async (videoId: string | number) => {
-    setLoading({ id: videoId, type: 'cover' });
-    await uploadCover(videoId)
-      .then(() => {
-        reFetch();
-        toast.success("success");
-      })
-      .catch(() => {
-        toast.error("Error");
-      })
-      .finally(() => setLoading(undefined));
-  }
+  // const cover = async (videoId: string | number) => {
+  //   setLoading({ id: videoId, type: 'cover' });
+  //   await uploadCover(videoId)
+  //     .then(() => {
+  //       reFetch();
+  //       toast.success("success");
+  //     })
+  //     .catch(() => {
+  //       toast.error("Error");
+  //     })
+  //     .finally(() => setLoading(undefined));
+  // }
 
   const activate = async (videoId: string | number) => {
     await toggleStatus(videoId)
@@ -114,6 +112,18 @@ const VideosManagment = () => {
       })
       .catch(() => {
         toast.error("Error");
+      })
+      .finally(() => setLoading(undefined));
+  }
+
+  const send = async (videoId: string | number) => {
+    await sendProcessing(videoId)
+      .then((res) => {
+        reFetch();
+        toast.success(res?.data?.message || res?.data || 'sucess');
+      })
+      .catch((err) => {
+         toast.error(err?.response?.data?.message || err?.message || 'error');
       })
       .finally(() => setLoading(undefined));
   }
@@ -244,6 +254,32 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className="flex justify-center gap-2 flex-wrap">
+
+                      <button
+                        onClick={send.bind(null, video.id)}
+                        className={`relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border border-transparent cursor-pointer
+    ${Number(1) === 2
+                            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md"
+                          } focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                      >
+                        {Number(1) === 2 ? (
+                          <>
+                            <span className="flex items-center gap-2 text-gray-600">
+                              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                              progressing... {Number(1) === 2}%
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="underline hover:text-blue-500">🚀 Send</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* 
                       <button
                         disabled={(loading?.id === video.id && loading?.type === 'transc') || video?.transfer_status === 1}
                         className={`px-4 py-2 hover:bg-gray-100 hover:text-blue-400 transition-all font-light ${video?.transfer_status === 1 ? 'opacity-15 cursor-not-allowed' : 'cursor-pointer'}`}
@@ -278,7 +314,8 @@ const VideosManagment = () => {
                             <SyncLoader className="scale-[0.4]" />
                             : "☁️ Upload S3"
                         }
-                      </button>
+                      </button> */}
+
                       <Link to={"/videos/" + video.id}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline font-light hover:text-blue-400 transition-all"
                       >
