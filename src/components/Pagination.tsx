@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface PaginationProps {
   totalItems: number;
   pageSize?: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  storageKey?: string; // 👈 optionnel, utile si tu veux plusieurs paginations indépendantes
 }
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -12,8 +13,25 @@ const Pagination: React.FC<PaginationProps> = ({
   pageSize = 5,
   currentPage,
   onPageChange,
+  storageKey = "current_page_videos", // 👈 clé par défaut
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
+
+  // ⏳ Restaurer la page sauvegardée au montage
+  useEffect(() => {
+    const savedPage = localStorage.getItem(storageKey);
+    if (savedPage) {
+      const pageNumber = Number(savedPage);
+      if (!isNaN(pageNumber)) {
+        onPageChange(pageNumber);
+      }
+    }
+  }, []);
+
+  // 💾 Sauvegarder la page actuelle à chaque changement
+  useEffect(() => {
+    localStorage.setItem(storageKey, currentPage.toString());
+  }, [currentPage]);
 
   const handlePrev = () => {
     if (currentPage > 1) onPageChange(currentPage - 1);
@@ -23,7 +41,6 @@ const Pagination: React.FC<PaginationProps> = ({
     if (currentPage < totalPages) onPageChange(currentPage + 1);
   };
 
-  // On limite l’affichage des pages visibles
   const visiblePages = Array.from({ length: totalPages }, (_, i) => i + 1).slice(
     Math.max(0, currentPage - 3),
     Math.min(totalPages, currentPage + 2)
@@ -31,7 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex justify-end items-center gap-2 p-4 bg-white border-t border-gray-200">
-      {/* Précédent */}
+      {/* ← Précédent */}
       <button
         onClick={handlePrev}
         disabled={currentPage === 1}
@@ -57,7 +74,7 @@ const Pagination: React.FC<PaginationProps> = ({
         </button>
       ))}
 
-      {/* Suivant */}
+      {/* → Suivant */}
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
@@ -68,7 +85,7 @@ const Pagination: React.FC<PaginationProps> = ({
         </svg>
       </button>
 
-      {/* Info total */}
+      {/* Info */}
       <span className="ml-4 text-sm text-gray-500">
         Page <span className="font-semibold text-gray-700">{currentPage}</span> /{" "}
         <span className="font-semibold text-gray-700">{totalPages || null}</span>

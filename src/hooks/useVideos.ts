@@ -62,6 +62,14 @@ export default function UseVideos(status?: 'all' | '0' | '1', page?: number, sea
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function UseVideosWithParams(query: any) {
+  return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
+  headers: { Authorization: `Bearer ${getToken()}` },
+    query
+  })
+}
+
 export function UseVideo(id: string | number | undefined) {
   return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
   headers: { Authorization: `Bearer ${getToken()}` },
