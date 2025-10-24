@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import UseVideos from "../hooks/useVideos";
+import UseVideos, { UseVideosWithParams } from "../hooks/useVideos";
 import { server } from "../constant";
-import { sendProcessing, toggleStatus, webApp } from "../api/videos";
+import { getFilteredVideos, sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
@@ -14,6 +14,7 @@ import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
+import { mapStatus, reverseStatus } from "../utils/filter";
 
 export type Video = {
   id: number;
@@ -37,12 +38,62 @@ export type Video = {
 const VideosManagment = () => {
   const { data: user } = useAuthMe();
   const [page, setPage] = useState(1);
-  const { data, reFetch, mutate } = UseVideos("all", page);
+
   const fabControls = useAnimation();
 
   // 🔹 Gestion persistante des états (en cours / traités)
   const SENDING_STORAGE_KEY = "vms:sending_videos";
   const PROCESSED_STORAGE_KEY = "vms:processed_videos";
+
+  const [filters, setFilters] = useState({
+    category_id: "",
+    sub_category_id: "",
+    user_id: "",
+    isDeleted: "all",
+    upload_status: "all",
+    cover_upload_status: "all",
+    transfer_status: "all",
+    startedAt: "",
+    endAt: "",
+  });
+
+  const [params, setParams] = useState<any>(null);
+  const { data, reFetch, mutate } = UseVideosWithParams(params);
+
+  // recalcul dynamique des params
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("videos_filtered");
+      if (!saved || saved === "undefined") return;
+
+      const savedFilter = JSON.parse(saved);
+
+      const _ = {
+        ...savedFilter,
+        isDeleted: reverseStatus(savedFilter.isDeleted),
+        cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
+        transfer_status: reverseStatus(savedFilter.transfer_status),
+        upload_status: reverseStatus(savedFilter.upload_status),
+        startedAt: savedFilter.startedAt || "",
+        endAt: savedFilter.endAt || "",
+      };
+
+      const data = {
+        ..._,
+        isDeleted: mapStatus(_.isDeleted),
+        cover_upload_status: mapStatus(_.cover_upload_status),
+        transfer_status: mapStatus(_.transfer_status),
+        upload_status: mapStatus(_.upload_status),
+      };
+
+      const finalParams = { status: "all", page, ...data };
+      setParams(finalParams);
+    } catch (e) {
+      console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
+      localStorage.removeItem("videos_filtered");
+    }
+  }, [filters, page]);
+
 
   const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
     try {
@@ -93,11 +144,6 @@ const VideosManagment = () => {
     addProcessedId(id);
     reFetch();
   });
-
-  useEffect(() => {
-    reFetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
 
   const [loading, setLoading] = useState<{
     id: number | undefined;
@@ -154,6 +200,9 @@ const VideosManagment = () => {
 
         <div className="flex items-center gap-4 justify-between w-full">
           <VideoFilters
+            filters={filters}
+            setFilters={setFilters}
+            params={{ status: 'all', page, ...params }}
             onSubmit={(fetched) => {
               mutate(fetched);
             }}
@@ -321,8 +370,8 @@ const VideosManagment = () => {
                           disabled={isProcessing}
                           onClick={() => send(video.id)}
                           className={`relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
-                              ? "cursor-not-allowed bg-gray-100 text-gray-500"
-                              : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                            : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
                             }`}
                         >
                           {sendingIds.includes(video.id) ? (
