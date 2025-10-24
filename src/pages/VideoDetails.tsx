@@ -155,7 +155,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
             <h1 className="text-lg font-semibold text-gray-800">Category</h1>
             <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-              {video?.category.name} / {video?.subCategory.name}
+              {video?.category?.name} / {video?.subCategory?.name}
             </span>
           </div>
 
@@ -314,5 +314,6 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       </div>
     </div>
   );
+
 
 }
