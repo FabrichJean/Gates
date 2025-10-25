@@ -1,34 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import { getFilteredVideos } from "../api/videos";
 import UseSubCategory from "../hooks/useSubCategory";
+import { mapStatus, reverseStatus } from "../utils/filter";
 
-export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }) {
+export default function VideoFilters({ onSubmit, params, filters, setFilters }: { params: any, filters: any, setFilters: any, onSubmit: (d: any) => void }) {
 
     const { data: users } = useUsers('');
     const { data: cat } = UseCategory();
 
-    const [filters, setFilters] = useState({
-        category_id: "",
-        sub_category_id: "",
-        user_id: "",
-        isDeleted: "all",
-        upload_status: "all",
-        cover_upload_status: "all",
-        transfer_status: "all",
-        startedAt: "",
-        endAt: "",
-    });
-
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
 
-    const reverseStatus = (value: string) => {
-        if (value === '1') return 'yes';
-        if (value === '0') return 'no';
-        return 'all';
-    };
 
     // 🧩 Chargement des filtres sauvegardés
     useEffect(() => {
@@ -59,12 +43,6 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
         setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
-    const mapStatus = (value: string) => {
-        if (value === 'yes') return '1';
-        if (value === 'no') return '0';
-        return undefined;
-    };
-
     // 🧠 Soumission des filtres
     const submit = async () => {
         const data = {
@@ -75,15 +53,24 @@ export default function FilterPanel({ onSubmit }: { onSubmit: (d: any) => void }
             upload_status: mapStatus(filters.upload_status),
         };
 
+        // ✅ sauvegarde locale pour rechargement ultérieur
         localStorage.setItem('videos_filtered', JSON.stringify(data));
 
+        // ✅ fusion sécurisée des params (sans écraser les clés existantes)
+        const safeParams = params || {};
+        const finalQuery = { ...safeParams, ...data };
+
         try {
-            const fetched = await getFilteredVideos(data);
+            const fetched = await getFilteredVideos(finalQuery);
             onSubmit(fetched.data);
+
+            // ✅ feedback visuel (au choix)
+            console.log("✅ Filtres appliqués :", finalQuery);
         } catch (error) {
-            console.error(error);
+            console.error("❌ Erreur lors du filtrage :", error);
         }
     };
+
 
     return (
         <dialog id="search_modal_52" className="modal">

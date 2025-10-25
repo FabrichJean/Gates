@@ -4,10 +4,14 @@ import { getToken } from "../utils/storage"
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
 
+export type Checking = "null" | "waiting for checking" | "refused" | "checked";
+
 export type TVideo = {
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
+  checking: Checking;
+  comment: string;
   category: Category;
   subCategory: SubCategory;
   cover: string;
@@ -68,6 +72,14 @@ export default function UseVideos(status?: 'all' | '0' | '1', page?: number, sea
   return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
     headers: { Authorization: `Bearer ${getToken()}` },
     query: { status, page, search }
+  })
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function UseVideosWithParams(query: any) {
+  return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
+    headers: { Authorization: `Bearer ${getToken()}` },
+    query
   })
 }
 

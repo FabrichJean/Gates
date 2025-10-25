@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from './Upload';
 import { UseVideo, type TVideo } from "../hooks/useVideos";
 import { server } from "../constant";
@@ -63,8 +63,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="flex justify-between gap-4 items-center w-full">
             <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
             <div className="flex gap-2">
-              <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
-              <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span>
+              <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking}</span>
+              {/* <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
+              <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span> */}
             </div>
           </div>
           <div
@@ -82,17 +83,16 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           </div>
 
           <div className="flex gap-4">
-            <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+            {
+              video.checking !== 'refused' ?
+                <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
-              modify
-            </button>
-
-            {/* <button onClick={() => document.getElementById('my_modal_6').showModal()} className="btn relative flex items-center justify-center gap-2 px-6 py-2.5
-    font-medium text-sm rounded-xl transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 bg-white/90 hover:bg-white text-red-800 border-gray-200 hover:border-gray-300">
-              delete
-            </button> */}
+                  modify
+                </button>
+                :
+                <Link to={'/touch/'+videoId} className="btn">touch again</Link>
+            }
 
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">
@@ -155,7 +155,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
             <h1 className="text-lg font-semibold text-gray-800">Category</h1>
             <span className="w-20 font-semibold text-blue-600 uppercase text-xs tracking-wide">
-              {video?.category.name} / {video?.subCategory.name}
+              {video?.category?.name} / {video?.subCategory?.name}
             </span>
           </div>
 
@@ -314,5 +314,6 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       </div>
     </div>
   );
+
 
 }
