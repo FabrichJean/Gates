@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import UseVideos, { UseVideosWithParams } from "../hooks/useVideos";
+import { UseVideosWithParams } from "../hooks/useVideos";
 import { server } from "../constant";
-import { getFilteredVideos, sendProcessing, toggleStatus, webApp } from "../api/videos";
+import { sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
@@ -15,6 +15,7 @@ import { motion, useAnimation } from "framer-motion";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
 import { mapStatus, reverseStatus } from "../utils/filter";
+import CheckingSuperadmin from "../components/CheckingSuperadmin";
 
 export type Video = {
   id: number;
@@ -57,6 +58,7 @@ const VideosManagment = () => {
     endAt: "",
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [params, setParams] = useState<any>(null);
   const { data, reFetch, mutate } = UseVideosWithParams(params);
 
@@ -183,6 +185,7 @@ const VideosManagment = () => {
       const res = await sendProcessing(videoId);
       toast.success(res?.data?.message || "✅ Deep upload workflow started");
       reFetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "❌ Erreur d’envoi !");
       removeSendingId(videoId); // 🔓 réactive seulement si erreur immédiate
@@ -281,8 +284,8 @@ const VideosManagment = () => {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         {loading?.type === "webapp" && <DeepLoader />}
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full w-max text-sm md:text-base">
+        <div className="overflow-x-auto pb-[8rem]">
+          <table className="min-w-full w-max text-sm md:text-base ">
             <thead className="bg-gray-50 text-gray-600 uppercase">
               <tr>
                 <th className="py-3 px-6 text-left">Ref</th>
@@ -292,10 +295,11 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-center">Cover</th>
                 <th className="py-3 px-6 text-center">Duration</th>
                 <th className="py-3 px-6 text-left">Activate</th>
+                <th className="py-3 px-6 text-center">Checking</th>
                 <th className="py-3 px-6 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 text-gray-700">
+            <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
               {data?.videos?.map((video, index) => {
                 const isProcessing =
                   sendingIds.includes(video.id) ||
@@ -362,6 +366,11 @@ const VideosManagment = () => {
                             : undefined
                         }
                       />
+                    </td>
+
+                    <td className="py-3 px-6 text-center">
+                      {/* @ts-ignore */}
+                      <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user}/>
                     </td>
 
                     <td className="py-3 px-6 text-center">

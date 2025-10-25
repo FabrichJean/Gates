@@ -4,10 +4,14 @@ import { getToken } from "../utils/storage"
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
 
+export type Checking = "null" | "waiting for checking" | "refused" | "checked";
+
 export type TVideo = {
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
+  checking: Checking;
+  comment: string;
   category: Category;
   subCategory: SubCategory;
   cover: string;
@@ -25,7 +29,7 @@ export type TVideo = {
   cover_upload_status: number;
   url: string | null;
   user: User;
-  
+
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
   category_id: number;
   sub_category_id: number | null;
@@ -39,7 +43,7 @@ export type TVideo = {
   sys_code: string | null;
   sendToServer: boolean;
   server_url: string | null;
-  
+
   // HLS AES-128 encryption fields
   hls_key_db_id: number | null;
   hls_key_iv: string | null;
@@ -57,7 +61,7 @@ export type User = {
 
 export default function UseVideos(status?: 'all' | '0' | '1', page?: number, search?: string) {
   return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
-  headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
     query: { status, page, search }
   })
 }
@@ -65,13 +69,13 @@ export default function UseVideos(status?: 'all' | '0' | '1', page?: number, sea
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function UseVideosWithParams(query: any) {
   return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
-  headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
     query
   })
 }
 
 export function UseVideo(id: string | number | undefined) {
   return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
-  headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
   })
 }

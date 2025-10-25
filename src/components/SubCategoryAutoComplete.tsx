@@ -10,7 +10,7 @@ interface Props {
   onSelect?: (sub: SubCategory) => void;
 }
 
-const SubCategorySelect = ({ categoryId, defaultValue, onSelect }: Props) => {
+const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [selected, setSelected] = useState<number | "">(
     defaultValue?.id || ""
@@ -67,4 +67,4 @@ const SubCategorySelect = ({ categoryId, defaultValue, onSelect }: Props) => {
   );
 };
 
-export default SubCategorySelect;
+export default SubCategoryAutoComplete;
