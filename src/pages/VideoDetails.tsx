@@ -73,11 +73,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           >
             {
               videoPlayed ?
-                <video src={server + '/' + video?.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
+                <video src={video.public_urls.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
                 :
                 <>
                   <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
-                  <img src={server + '/' + video?.cover} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+                  <img src={video.public_urls.cover_url} alt="cover" className="w-full h-auto object-cover rounded-lg" />
                 </>
             }
           </div>
@@ -176,7 +176,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
-  const [coverPreview, setCoverPreview] = useState<string | null>(server + '/' + video?.cover);
+  const [coverPreview, setCoverPreview] = useState<string | null>(video.public_urls.cover_url);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [duration, setDuration] = useState<number | null>(video?.duration);

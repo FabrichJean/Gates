@@ -47,6 +47,15 @@ export type TVideo = {
   // HLS AES-128 encryption fields
   hls_key_db_id: number | null;
   hls_key_iv: string | null;
+
+  public_urls: {
+    temp_url: string,
+    cover_url: string,
+    hls_url: string,
+    local_mp4_url: string,
+    local_cover_url: string,
+    local_hls_url: string
+  };
 };
 
 export type User = {
