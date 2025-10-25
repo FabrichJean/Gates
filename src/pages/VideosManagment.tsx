@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import UseVideos, { UseVideosWithParams } from "../hooks/useVideos";
+import { UseVideosWithParams } from "../hooks/useVideos";
 import { server } from "../constant";
-import { getFilteredVideos, sendProcessing, toggleStatus, webApp } from "../api/videos";
+import { sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
@@ -57,6 +57,7 @@ const VideosManagment = () => {
     endAt: "",
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [params, setParams] = useState<any>(null);
   const { data, reFetch, mutate } = UseVideosWithParams(params);
 
@@ -183,6 +184,7 @@ const VideosManagment = () => {
       const res = await sendProcessing(videoId);
       toast.success(res?.data?.message || "✅ Deep upload workflow started");
       reFetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "❌ Erreur d’envoi !");
       removeSendingId(videoId); // 🔓 réactive seulement si erreur immédiate
@@ -366,25 +368,27 @@ const VideosManagment = () => {
 
                     <td className="py-3 px-6 text-center">
                       <div className="flex justify-center gap-2 flex-wrap">
-                        <button
-                          disabled={isProcessing}
-                          onClick={() => send(video.id)}
-                          className={`relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
-                            ? "cursor-not-allowed bg-gray-100 text-gray-500"
-                            : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            }`}
-                        >
-                          {sendingIds.includes(video.id) ? (
-                            <>
-                              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                              <span>processing...</span>
-                            </>
-                          ) : video.upload_status === 1 && video.transfer_status === 1 ? (
-                            <span className="text-green-600 font-semibold">✅ Uploaded</span>
-                          ) : (
-                            <span className="underline hover:text-blue-500">🚀 Send</span>
-                          )}
-                        </button>
+                        {user?.role === RoleEnum.SUPERADMIN && (
+                          <button
+                            disabled={isProcessing}
+                            onClick={() => send(video.id)}
+                            className={`relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
+                              ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                              : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                              }`}
+                          >
+                            {sendingIds.includes(video.id) ? (
+                              <>
+                                <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                <span>processing...</span>
+                              </>
+                            ) : video.upload_status === 1 && video.transfer_status === 1 ? (
+                              <span className="text-green-600 font-semibold">✅ Uploaded</span>
+                            ) : (
+                              <span className="underline hover:text-blue-500">🚀 Send</span>
+                            )}
+                          </button>
+                        )}
 
                         <Link
                           to={`/videos/${video.id}`}
