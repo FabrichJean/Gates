@@ -295,6 +295,7 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-center">Duration</th>
                 <th className="py-3 px-6 text-left">Activate</th>
                 <th className="py-3 px-6 text-center">Actions</th>
+                <th className="py-3 px-6 text-center">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-gray-700">
@@ -365,14 +366,14 @@ const VideosManagment = () => {
                         }
                       />
                     </td>
-
+                    {/* actions */}
                     <td className="py-3 px-6 text-center">
                       <div className="flex justify-center gap-2 flex-wrap">
                         {user?.role === RoleEnum.SUPERADMIN && (
                           <button
                             disabled={isProcessing}
                             onClick={() => send(video.id)}
-                            className={`relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
+                            className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
                               ? "cursor-not-allowed bg-gray-100 text-gray-500"
                               : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
                               }`}
@@ -383,7 +384,12 @@ const VideosManagment = () => {
                                 <span>processing...</span>
                               </>
                             ) : video.upload_status === 1 && video.transfer_status === 1 ? (
-                              <span className="text-green-600 font-semibold">✅ Uploaded</span>
+                              <span className="text-green-600 font-semibold flex gap-1 items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                Uploaded
+                              </span>
                             ) : (
                               <span className="underline hover:text-blue-500">🚀 Send</span>
                             )}
@@ -397,6 +403,13 @@ const VideosManagment = () => {
                           Details
                         </Link>
                       </div>
+                    </td>
+                    <td className="py-3 px-6 text-center font-light">
+                      {new Date(video.createdAt).toLocaleDateString("fr-FR", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })}
                     </td>
                   </tr>
                 );
