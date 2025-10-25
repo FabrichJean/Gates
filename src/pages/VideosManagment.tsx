@@ -242,7 +242,7 @@ const VideosManagment = () => {
                   </td>
                   <td className="py-3 px-6 text-center">
                     <img
-                      src={server + '/' + video.cover}
+                      src={video.public_urls.cover_url}
                       alt="cover"
                       className="w-20 h-12 object-cover rounded-lg mx-auto"
                     />

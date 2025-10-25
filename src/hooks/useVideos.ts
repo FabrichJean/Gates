@@ -25,7 +25,7 @@ export type TVideo = {
   cover_upload_status: number;
   url: string | null;
   user: User;
-  
+
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
   category_id: number;
   sub_category_id: number | null;
@@ -39,10 +39,19 @@ export type TVideo = {
   sys_code: string | null;
   sendToServer: boolean;
   server_url: string | null;
-  
+
   // HLS AES-128 encryption fields
   hls_key_db_id: number | null;
   hls_key_iv: string | null;
+
+  public_urls: {
+    temp_url: string,
+    cover_url: string,
+    hls_url: string,
+    local_mp4_url: string,
+    local_cover_url: string,
+    local_hls_url: string
+  };
 };
 
 export type User = {
@@ -57,13 +66,13 @@ export type User = {
 
 export default function UseVideos(status?: 'all' | '0' | '1', page?: number, search?: string) {
   return useFetch<{ total: number, page: number, limit: number, videos: TVideo[] }>(apiURL + "/videos", {
-  headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
     query: { status, page, search }
   })
 }
 
 export function UseVideo(id: string | number | undefined) {
   return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
-  headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
   })
 }
