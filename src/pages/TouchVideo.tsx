@@ -21,11 +21,11 @@ function TouchVideo() {
     const [progress, setProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
 
-    const [coverPreview, setCoverPreview] = useState<string | null>(server + '/' + video?.cover);
+    const [coverPreview, setCoverPreview] = useState<string | null>(video.public_urls.cover_url);
     const coverInputRef = useRef<HTMLInputElement>(null);
 
     const [videoFile, setVideoFile] = useState<File | null>(null);
-    const [videoPreview, setVideoPreview] = useState<string | null>(server + '/' + video?.temp_url || null);
+    const [videoPreview, setVideoPreview] = useState<string | null>(video.public_urls.temp_url);
     const videoInputRef = useRef<HTMLInputElement>(null);
 
     const [duration, setDuration] = useState<number | null>(video?.duration);

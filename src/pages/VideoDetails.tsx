@@ -63,7 +63,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="flex justify-between gap-4 items-center w-full">
             <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
             <div className="flex gap-2">
-              <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking}</span>
+              <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span>
               {/* <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
               <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span> */}
             </div>

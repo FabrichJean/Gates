@@ -379,7 +379,12 @@ const VideosManagment = () => {
                         {user?.role === RoleEnum.SUPERADMIN && (
                           <button
                             disabled={isProcessing}
-                            onClick={() => send(video.id)}
+                            onClick={() => {
+                              if (video.checking !== 'checked') {
+                                return alert("We need to check this video")
+                              }
+                              send(video.id)
+                            }}
                             className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
                               ? "cursor-not-allowed bg-gray-100 text-gray-500"
                               : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
