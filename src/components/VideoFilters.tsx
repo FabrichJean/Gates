@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import { getFilteredVideos } from "../api/videos";

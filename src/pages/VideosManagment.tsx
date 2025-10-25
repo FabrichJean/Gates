@@ -15,6 +15,7 @@ import { motion, useAnimation } from "framer-motion";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
 import { mapStatus, reverseStatus } from "../utils/filter";
+import CheckingSuperadmin from "../components/CheckingSuperadmin";
 
 export type Video = {
   id: number;
@@ -283,8 +284,8 @@ const VideosManagment = () => {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         {loading?.type === "webapp" && <DeepLoader />}
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full w-max text-sm md:text-base">
+        <div className="overflow-x-auto pb-[8rem]">
+          <table className="min-w-full w-max text-sm md:text-base ">
             <thead className="bg-gray-50 text-gray-600 uppercase">
               <tr>
                 <th className="py-3 px-6 text-left">Ref</th>
@@ -294,11 +295,12 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-center">Cover</th>
                 <th className="py-3 px-6 text-center">Duration</th>
                 <th className="py-3 px-6 text-left">Activate</th>
+                <th className="py-3 px-6 text-center">Checking</th>
                 <th className="py-3 px-6 text-center">Actions</th>
                 <th className="py-3 px-6 text-center">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 text-gray-700">
+            <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
               {data?.videos?.map((video, index) => {
                 const isProcessing =
                   sendingIds.includes(video.id) ||
@@ -365,6 +367,11 @@ const VideosManagment = () => {
                             : undefined
                         }
                       />
+                    </td>
+
+                    <td className="py-3 px-6 text-center">
+                      {/* @ts-ignore */}
+                      <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user}/>
                     </td>
                     {/* actions */}
                     <td className="py-3 px-6 text-center">
