@@ -13,6 +13,7 @@ import Settings from "../pages/Settings";
 import UsersArchives from "../pages/UsersArchive";
 import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
+import TouchVideo from "../pages/TouchVideo";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -133,6 +134,16 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <VideoDetails />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/touch/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <TouchVideo />
             </InsideSidebar>
           </ProtectedRoute>
         }
