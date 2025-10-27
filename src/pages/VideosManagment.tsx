@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { UseVideosWithParams } from "../hooks/useVideos";
-import { server } from "../constant";
 import { sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import Pagination from "../components/Pagination";
@@ -62,39 +61,71 @@ const VideosManagment = () => {
   const [params, setParams] = useState<any>(null);
   const { data, reFetch, mutate } = UseVideosWithParams(params);
 
-  // recalcul dynamique des params
+  // 🔹 Lecture initiale du filtre sauvegardé
   useEffect(() => {
+    const saved = localStorage.getItem("videos_filtered");
+    if (!saved || saved === "undefined") return;
     try {
-      const saved = localStorage.getItem("videos_filtered");
-      if (!saved || saved === "undefined") return;
-
-      const savedFilter = JSON.parse(saved);
-
-      const _ = {
-        ...savedFilter,
-        isDeleted: reverseStatus(savedFilter.isDeleted),
-        cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-        transfer_status: reverseStatus(savedFilter.transfer_status),
-        upload_status: reverseStatus(savedFilter.upload_status),
-        startedAt: savedFilter.startedAt || "",
-        endAt: savedFilter.endAt || "",
-      };
-
-      const data = {
-        ..._,
-        isDeleted: mapStatus(_.isDeleted),
-        cover_upload_status: mapStatus(_.cover_upload_status),
-        transfer_status: mapStatus(_.transfer_status),
-        upload_status: mapStatus(_.upload_status),
-      };
-
-      const finalParams = { status: "all", page, ...data };
-      setParams(finalParams);
+      const parsed = JSON.parse(saved);
+      setFilters((prev) => ({ ...prev, ...parsed }));
     } catch (e) {
-      console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
+      console.warn("⚠️ Filtres corrompus :", e);
       localStorage.removeItem("videos_filtered");
     }
+  }, []);
+
+  // 🔹 Création mémoïsée des params
+  const computedParams = useMemo(() => {
+    const _ = {
+      ...filters,
+      isDeleted: mapStatus(filters.isDeleted),
+      upload_status: mapStatus(filters.upload_status),
+      cover_upload_status: mapStatus(filters.cover_upload_status),
+      transfer_status: mapStatus(filters.transfer_status),
+    };
+
+    return { status: "all", page, ..._ };
   }, [filters, page]);
+
+  // 🔹 Mise à jour de params quand computedParams change
+  useEffect(() => {
+    setParams(computedParams);
+  }, [computedParams]);
+
+
+  // // recalcul dynamique des params
+  // useEffect(() => {
+  //   try {
+  //     const saved = localStorage.getItem("videos_filtered");
+  //     if (!saved || saved === "undefined") return;
+
+  //     const savedFilter = JSON.parse(saved);
+
+  //     const _ = {
+  //       ...savedFilter,
+  //       isDeleted: reverseStatus(savedFilter.isDeleted),
+  //       cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
+  //       transfer_status: reverseStatus(savedFilter.transfer_status),
+  //       upload_status: reverseStatus(savedFilter.upload_status),
+  //       startedAt: savedFilter.startedAt || "",
+  //       endAt: savedFilter.endAt || "",
+  //     };
+
+  //     const data = {
+  //       ..._,
+  //       isDeleted: mapStatus(_.isDeleted),
+  //       cover_upload_status: mapStatus(_.cover_upload_status),
+  //       transfer_status: mapStatus(_.transfer_status),
+  //       upload_status: mapStatus(_.upload_status),
+  //     };
+
+  //     const finalParams = { status: "all", page, ...data };
+  //     setParams(finalParams);
+  //   } catch (e) {
+  //     console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
+  //     localStorage.removeItem("videos_filtered");
+  //   }
+  // }, [filters, page]);
 
 
   const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
@@ -371,7 +402,7 @@ const VideosManagment = () => {
 
                     <td className="py-3 px-6 text-center">
                       {/* @ts-ignore */}
-                      <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user}/>
+                      <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user} />
                     </td>
                     {/* actions */}
                     <td className="py-3 px-6 text-center">
