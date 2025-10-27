@@ -6,14 +6,14 @@ import { sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import Pagination from "../components/Pagination";
 import SearchModal from "../components/SearchModal";
-import VideoFilters from "../components/VideoFilters";
+import VideoFilters, { type TFilter } from "../components/VideoFilters";
 import { FilePlus, Filter, SendIcon } from "lucide-react";
 import DeepLoader from "../components/DeepLoader";
 import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
-import { mapStatus, reverseStatus } from "../utils/filter";
+import { checkObjectContent, mapStatus } from "../utils/filter";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 
 export type Video = {
@@ -45,17 +45,20 @@ const VideosManagment = () => {
   const SENDING_STORAGE_KEY = "vms:sending_videos";
   const PROCESSED_STORAGE_KEY = "vms:processed_videos";
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<TFilter>({
     category_id: "",
     sub_category_id: "",
     user_id: "",
-    isDeleted: "all",
-    upload_status: "all",
-    cover_upload_status: "all",
-    transfer_status: "all",
+    isDeleted: "",
+    upload_status: "",
+    cover_upload_status: "",
+    transfer_status: "",
     startedAt: "",
     endAt: "",
   });
+
+  console.log(filters);
+  
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [params, setParams] = useState<any>(null);
@@ -226,8 +229,8 @@ const VideosManagment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <header className="flex flex-wrap justify-start items-center mb-6">
+    <div className="flex flex-col gap-2 min-h-screen bg-white p-6 pb-0">
+      <header className="flex flex-wrap justify-start items-center">
         <h1 className="text-3xl font-semibold pb-3 text-gray-500">
           Video Management
         </h1>
@@ -253,7 +256,7 @@ const VideosManagment = () => {
               }}
               className="input input-ghost hover:bg-base-200 cursor-pointer transition-colors bg-white rounded-lg"
             >
-              <Filter className="w-3" /> filters
+              {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters 
             </button>
 
             <SearchModal />
@@ -310,6 +313,8 @@ const VideosManagment = () => {
           </motion.div>
         </div>
       </header>
+
+      {checkObjectContent(filters).hasContent ? <span className="mb-3 text-xs font-bold">* videos filters</span> : null}
 
       {/* ---- Table ---- */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">

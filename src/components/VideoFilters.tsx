@@ -6,6 +6,19 @@ import { getFilteredVideos } from "../api/videos";
 import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, reverseStatus } from "../utils/filter";
 
+export type TFilter = {
+    category_id: string;
+    sub_category_id: string;
+    user_id: string;
+    isDeleted: string;
+    upload_status: string;
+    cover_upload_status: string;
+    transfer_status: string;
+    startedAt: string;
+    endAt: string;
+}
+
+
 export default function VideoFilters({ onSubmit, params, filters, setFilters }: { params: any, filters: any, setFilters: any, onSubmit: (d: any) => void }) {
 
     const { data: users } = useUsers('');
@@ -40,7 +53,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
     }, []);
 
     const handleChange = (key: string, value: string) => {
-        setFilters((prev) => ({ ...prev, [key]: value }));
+        setFilters((prev: any) => ({ ...prev, [key]: value }));
     };
 
     // 🧠 Soumission des filtres
@@ -160,7 +173,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                                             type="radio"
                                             name={key}
                                             className="radio radio-sm"
-                                            checked={filters[key as keyof typeof filters] === option}
+                                            checked={option === 'all' ? ( filters[key as keyof typeof filters] === 'all' || filters[key as keyof typeof filters] === '') : filters[key as keyof typeof filters] === option}
                                             onChange={() => handleChange(key, option)}
                                         />
                                         <span className="text-sm capitalize">{option}</span>
