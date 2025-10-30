@@ -4,7 +4,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from './Upload';
 import { UseVideo, type TVideo } from "../hooks/useVideos";
-import { server } from "../constant";
 import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
@@ -12,8 +11,11 @@ import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import { archiveVideo, deletePerm, updateVideo } from "../api/videos";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import { useAuthMe } from "../hooks/useAuth";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
@@ -63,9 +65,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="flex justify-between gap-4 items-center w-full">
             <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
             <div className="flex gap-2">
-              <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span>
-              {/* <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
-              <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span> */}
+              <CheckingSuperadmin index={video.id} reFetch={reFetch} video={video} user={user} />
+              {/* <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span> */}
             </div>
           </div>
           <div
@@ -91,7 +92,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   modify
                 </button>
                 :
-                <Link to={'/touch/'+videoId} className="btn">touch again</Link>
+                <Link to={'/touch/' + videoId} className="btn">touch again</Link>
             }
 
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
