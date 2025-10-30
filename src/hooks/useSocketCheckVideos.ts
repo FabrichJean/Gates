@@ -11,11 +11,12 @@ import { toast } from "react-hot-toast";
  * - Écoute l'événement 'checking' du backend
  * - Déclenche un callback pour rafraîchir les données quand l'état de checking change
  */
-const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; video_id: number; checking: string; comment?: string }) => void) => {
+const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => void) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  // 🧠 Étape 1 — Authentification pour récupérer l'ID utilisateur
+  // 🧠 Étape 1 — Authentification pour récupérer l'ID utilisateur et son rôle
   useEffect(() => {
     (async () => {
       try {
@@ -24,6 +25,7 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
           { headers: { Authorization: `Bearer ${getToken()}` } }
         );
         setUserId(String(res.data.id));
+        setUserRole(res.data.role);
       } catch (err) {
         console.error("❌ Erreur d'authentification :", err);
       }
@@ -60,16 +62,37 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
     });
 
     // mise à jour du statut de checking
-    socket.on("checking", (data: { user_id: number; video_id: number; checking: string; comment?: string }) => {
+    socket.on("checking", (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => {
       console.log("📋 Mise à jour checking reçue :", data);
+      
+      const currentUserId = Number(userId);
+      const isVideoOwner = data.user_id === currentUserId;
+      const isSuperadmin = userRole === 'superadmin';
+      
+      // 🔒 Déterminer qui doit recevoir la notification
+      // 1. Propriétaire de la vidéo → toujours
+      // 2. Superadmin → toujours (pour voir ses propres actions)
+      if (!isVideoOwner && !isSuperadmin) {
+        console.log(`🚫 Notification ignorée - Vidéo ${data.video_id} appartient à l'utilisateur ${data.user_id}, utilisateur connecté: ${currentUserId} (rôle: ${userRole})`);
+        return;
+      }
       
       const checkingStatus = data.checking === 'ready' ? 'prête' : 
                            data.checking === 'checked' ? 'vérifiée' : 
                            data.checking === 'rejected' ? 'rejetée' : data.checking;
       
-      toast.success(`✅ Vidéo ${data.video_id} marquée comme ${checkingStatus}`);
+      // Message personnalisé selon le contexte
+      if (isVideoOwner && !isSuperadmin) {
+        // Propriétaire normal de la vidéo
+        toast.success(`✅ Votre vidéo ${data.video_id} a été marquée comme ${checkingStatus}`);
+      } else if (isSuperadmin && isVideoOwner) {
+        // Superadmin qui modifie sa propre vidéo
+        toast.success(`✅ Votre vidéo ${data.video_id} a été marquée comme ${checkingStatus}`);
+      } else if (isSuperadmin && !isVideoOwner) {
+        // Superadmin qui modifie la vidéo de quelqu'un d'autre
+        toast.success(`✅ Vidéo ${data.video_id} marquée comme ${checkingStatus}`);
+      }
 
-      // 🔥 Appel du callback pour rafraîchir les données côté frontend
       if (onCheckingUpdated) onCheckingUpdated(data);
     });
 
@@ -78,7 +101,7 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
       console.log("🔌 Déconnexion du serveur Socket.IO checking");
       socket.disconnect();
     };
-  }, [userId, onCheckingUpdated]);
+  }, [userId, userRole, onCheckingUpdated]);
 
   return socketRef.current;
 };
