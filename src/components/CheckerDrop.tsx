@@ -59,7 +59,7 @@ function CheckerDrop({ video, reFetch, user }: Props) {
             <div tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-md z-100 w-52 p-2 border border-gray-300 shadow-sm">
                 {
                     user.role === 'superadmin' ?
-                        ["refused", "checked"]?.map(check => <div onClick={() => update((check === 'go ready' ? 'null' : check))} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs hover:bg-gray-200 w-full p-2 rounded-md cursor-default m-auto">
+                        ["refused", "checked"]?.map(check => <div key={check} onClick={() => update((check === 'go ready' ? 'null' : check))} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs hover:bg-gray-200 w-full p-2 rounded-md cursor-default m-auto">
                             <span className="flex items-center gap-2"><FiHexagon /> {check}</span> {(check === 'go ready' ? 'null' : check) === video.checking ? <FaCheck /> : null}
                         </div>)
                         :

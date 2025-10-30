@@ -7,7 +7,10 @@ import { getToken } from '../utils/storage';
 
 const Conversion = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(() => {
+        // Récupérer l'état de loading depuis localStorage au chargement
+        return localStorage.getItem('excel_conversion_loading') === 'true';
+    });
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
@@ -17,12 +20,12 @@ const Conversion = () => {
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
                 'application/vnd.ms-excel', // .xls
             ];
-            
+
             if (!validTypes.includes(selectedFile.type)) {
                 toast.error('Please select an Excel file (.xlsx or .xls)');
                 return;
             }
-            
+
             setFile(selectedFile);
             toast.success(`File "${selectedFile.name}" selected`);
         }
@@ -46,6 +49,8 @@ const Conversion = () => {
         }
 
         setLoading(true);
+        // Persister l'état de loading dans localStorage
+        localStorage.setItem('excel_conversion_loading', 'true');
 
         try {
             const formDataToSend = new FormData();
@@ -61,7 +66,7 @@ const Conversion = () => {
 
             // Get the file as blob
             const blob = response.data;
-            
+
             // Generate filename with timestamp
             const originalName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
@@ -70,11 +75,11 @@ const Conversion = () => {
             // Automatic download
             downloadFile(blob, filename);
 
-            toast.success(`Conversion successful! File downloaded: ${filename}`);
+            toast.success(` Conversion successful! File downloaded: ${filename}`);
 
         } catch (error: any) {
             console.error('Error during conversion:', error);
-            
+
             // Handle axios errors
             if (error.response) {
                 toast.error(`Error ${error.response.status}: ${error.response.data || 'Server error'}`);
@@ -85,6 +90,8 @@ const Conversion = () => {
             }
         } finally {
             setLoading(false);
+            // Supprimer l'état de loading du localStorage
+            localStorage.removeItem('excel_conversion_loading');
         }
     };
 
@@ -120,16 +127,25 @@ const Conversion = () => {
                                 type="file"
                                 accept=".xlsx,.xls"
                                 onChange={handleFileChange}
+                                disabled={loading}
                                 className="hidden"
                             />
                             <label
                                 htmlFor="file-input"
-                                className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                                className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${
+                                    loading 
+                                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
+                                        : 'border-gray-300 cursor-pointer hover:border-blue-400 hover:bg-blue-50'
+                                }`}
                             >
                                 <div className="text-center">
-                                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-600">
-                                        {file ? (
+                                    <Upload className={`w-8 h-8 mx-auto mb-2 ${loading ? 'text-gray-300' : 'text-gray-400'}`} />
+                                    <p className={`text-sm ${loading ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {loading ? (
+                                            <span className="text-gray-400">
+                                                ⏳ Conversion in progress...
+                                            </span>
+                                        ) : file ? (
                                             <span className="text-green-600 font-medium">
                                                 📄 {file.name}
                                             </span>
@@ -151,11 +167,10 @@ const Conversion = () => {
                         <button
                             onClick={handleConvert}
                             disabled={!file || loading}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all ${
-                                !file || loading
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all ${!file || loading
                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
-                            }`}
+                                }`}
                         >
                             {loading ? (
                                 <>
@@ -173,7 +188,11 @@ const Conversion = () => {
                         <button
                             onClick={resetForm}
                             disabled={loading}
-                            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            className={`px-6 py-3 border rounded-lg transition-colors ${
+                                loading 
+                                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50' 
+                                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
                         >
                             Reset
                         </button>
