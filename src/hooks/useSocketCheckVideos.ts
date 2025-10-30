@@ -16,7 +16,6 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
   const [userRole, setUserRole] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  // 🧠 Étape 1 — Authentification pour récupérer l'ID utilisateur et son rôle
   useEffect(() => {
     (async () => {
       try {
@@ -27,18 +26,17 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
         setUserId(String(res.data.id));
         setUserRole(res.data.role);
       } catch (err) {
-        console.error("❌ Erreur d'authentification :", err);
+        console.error("❌ Authentication error:", err);
       }
     })();
   }, []);
 
-  // ⚙️ Étape 2 — Connexion socket dès que l'utilisateur est identifié
   useEffect(() => {
     if (!userId) return;
 
     const socket = io(server, {
       transports: ["websocket"],
-      auth: { token: getToken() }, // envoie le token d'auth côté serveur
+      auth: { token: getToken() }, 
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 3000,
@@ -46,19 +44,19 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
 
     socketRef.current = socket;
 
-    // ✅ Connexion réussie
+    // ✅ Connection successful
     socket.on("connect", () => {
-      console.log("🟢 Connecté au serveur Socket.IO pour checking");
+      console.log("🟢 Connected to Socket.IO server for checking");
     });
 
-    // ⚠️ Erreur de connexion
+    // ⚠️ Connection error
     socket.on("connect_error", (err) => {
-      console.error("🔴 Erreur de connexion Socket.IO checking :", err.message);
+      console.error("🔴 Socket.IO checking connection error:", err.message);
     });
 
-    // 🔁 Tentative de reconnexion
+    // 🔁 Reconnection attempt
     socket.on("reconnect_attempt", (attempt) => {
-      console.log(`🔄 Tentative de reconnexion checking (${attempt})...`);
+      console.log(`🔄 Checking reconnection attempt (${attempt})...`);
     });
 
     // mise à jour du statut de checking
@@ -69,11 +67,8 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
       const isVideoOwner = data.user_id === currentUserId;
       const isSuperadmin = userRole === 'superadmin';
       
-      // 🔒 Déterminer qui doit recevoir la notification
-      // 1. Propriétaire de la vidéo → toujours
-      // 2. Superadmin → toujours (pour voir ses propres actions)
       if (!isVideoOwner && !isSuperadmin) {
-        console.log(`🚫 Notification ignorée - Vidéo ${data.video_id} appartient à l'utilisateur ${data.user_id}, utilisateur connecté: ${currentUserId} (rôle: ${userRole})`);
+        console.log(`🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${userRole})`);
         return;
       }
       
@@ -81,24 +76,19 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
                            data.checking === 'checked' ? 'vérifiée' : 
                            data.checking === 'rejected' ? 'rejetée' : data.checking;
       
-      // Message personnalisé selon le contexte
       if (isVideoOwner && !isSuperadmin) {
-        // Propriétaire normal de la vidéo
-        toast.success(`✅ Votre vidéo ${data.video_id} a été marquée comme ${checkingStatus}`);
-      } else if (isSuperadmin && isVideoOwner) {
-        // Superadmin qui modifie sa propre vidéo
-        toast.success(`✅ Votre vidéo ${data.video_id} a été marquée comme ${checkingStatus}`);
-      } else if (isSuperadmin && !isVideoOwner) {
-        // Superadmin qui modifie la vidéo de quelqu'un d'autre
-        toast.success(`✅ Vidéo ${data.video_id} marquée comme ${checkingStatus}`);
+        toast.success(`✅ Your video ${data.video_id} has been marked as ${checkingStatus}`);
+            } else if (isSuperadmin && isVideoOwner) {
+        toast.success(`✅ Your video ${data.video_id} has been marked as ${checkingStatus}`);
+            } else if (isSuperadmin && !isVideoOwner) {
+        toast.success(`✅ Video ${data.video_id} marked as ${checkingStatus}`);
       }
 
       if (onCheckingUpdated) onCheckingUpdated(data);
     });
 
-    // 🔚 Nettoyage à la fermeture du composant
     return () => {
-      console.log("🔌 Déconnexion du serveur Socket.IO checking");
+      console.log("🔌 Disconnecting from Socket.IO checking server");
       socket.disconnect();
     };
   }, [userId, userRole, onCheckingUpdated]);
