@@ -13,6 +13,7 @@ import { useAuthMe } from "../hooks/useAuth";
 import { motion, useAnimation } from "framer-motion";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
+import useSocketCheckVideos from "../hooks/useSocketCheckVideos";
 import { checkObjectContent, mapStatus } from "../utils/filter";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 
@@ -173,11 +174,17 @@ const VideosManagment = () => {
     });
   };
 
-  // 🔌 Connexion socket : quand le backend envoie "deep-upload-success" → on bloque définitivement le bouton
   useSocketSend((videoId) => {
     const id = Number(videoId);
     removeSendingId(id);
     addProcessedId(id);
+    reFetch();
+  });
+  
+  // état de checking des vidéos
+  useSocketCheckVideos((data) => {
+    console.log("📋 Checking mis à jour pour la vidéo :", data.video_id);
+    // Rafraîchir les données pour mettre à jour l'affichage
     reFetch();
   });
 
