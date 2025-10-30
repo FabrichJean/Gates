@@ -341,6 +341,7 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-center">Checking</th>
                 <th className="py-3 px-6 text-center">Actions</th>
                 <th className="py-3 px-6 text-center">Date</th>
+                <th className="py-3 px-6 text-center">ID</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
@@ -352,7 +353,7 @@ const VideosManagment = () => {
                   video.upload_status === 1;
 
                 return (
-                  <tr key={index} className="hover:bg-gray-50 transition">
+                  <tr key={video.id} className="hover:bg-gray-50 transition">
                     <td className="py-3 px-6 font-light">{video.ref}</td>
                     <td className="py-3 px-6 text-blue-600 underline">
                       {user?.role === RoleEnum.SUPERADMIN ? (
@@ -416,6 +417,7 @@ const VideosManagment = () => {
                       {/* @ts-ignore */}
                       <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user} />
                     </td>
+
                     {/* actions */}
                     <td className="py-3 px-6 text-center">
                       <div className="flex justify-center gap-2 flex-wrap">
@@ -459,6 +461,7 @@ const VideosManagment = () => {
                         </Link>
                       </div>
                     </td>
+
                     <td className="py-3 px-6 text-center font-light">
                       {new Date(video.createdAt).toLocaleDateString("fr-FR", {
                         year: "numeric",
@@ -466,6 +469,8 @@ const VideosManagment = () => {
                         day: "2-digit",
                       })}
                     </td>
+
+                    <td className="py-3 px-6 text-center">{video.id}</td>
                   </tr>
                 );
               })}
