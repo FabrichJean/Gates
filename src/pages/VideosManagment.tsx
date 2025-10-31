@@ -16,6 +16,7 @@ import useSocketSend from "../hooks/useSocketSend";
 import useSocketCheckVideos from "../hooks/useSocketCheckVideos";
 import { checkObjectContent, mapStatus } from "../utils/filter";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import { PROCESSED_STORAGE_KEY, SENDING_STORAGE_KEY } from "../constant";
 
 export type Video = {
   id: number;
@@ -43,8 +44,6 @@ const VideosManagment = () => {
   const fabControls = useAnimation();
 
   // 🔹 Gestion persistante des états (en cours / traités)
-  const SENDING_STORAGE_KEY = "vms:sending_videos";
-  const PROCESSED_STORAGE_KEY = "vms:processed_videos";
 
   const [filters, setFilters] = useState<TFilter>({
     category_id: "",
@@ -58,8 +57,6 @@ const VideosManagment = () => {
     endAt: "",
   });
 
-  console.log(filters);
-  
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [params, setParams] = useState<any>(null);
@@ -94,42 +91,8 @@ const VideosManagment = () => {
   // 🔹 Mise à jour de params quand computedParams change
   useEffect(() => {
     setParams(computedParams);
+    localStorage.setItem('video_params', JSON.stringify(computedParams))
   }, [computedParams]);
-
-
-  // // recalcul dynamique des params
-  // useEffect(() => {
-  //   try {
-  //     const saved = localStorage.getItem("videos_filtered");
-  //     if (!saved || saved === "undefined") return;
-
-  //     const savedFilter = JSON.parse(saved);
-
-  //     const _ = {
-  //       ...savedFilter,
-  //       isDeleted: reverseStatus(savedFilter.isDeleted),
-  //       cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-  //       transfer_status: reverseStatus(savedFilter.transfer_status),
-  //       upload_status: reverseStatus(savedFilter.upload_status),
-  //       startedAt: savedFilter.startedAt || "",
-  //       endAt: savedFilter.endAt || "",
-  //     };
-
-  //     const data = {
-  //       ..._,
-  //       isDeleted: mapStatus(_.isDeleted),
-  //       cover_upload_status: mapStatus(_.cover_upload_status),
-  //       transfer_status: mapStatus(_.transfer_status),
-  //       upload_status: mapStatus(_.upload_status),
-  //     };
-
-  //     const finalParams = { status: "all", page, ...data };
-  //     setParams(finalParams);
-  //   } catch (e) {
-  //     console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
-  //     localStorage.removeItem("videos_filtered");
-  //   }
-  // }, [filters, page]);
 
 
   const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
@@ -180,7 +143,7 @@ const VideosManagment = () => {
     addProcessedId(id);
     reFetch();
   });
-  
+
   // état de checking des vidéos
   useSocketCheckVideos((data) => {
     console.log("📋 Checking mis à jour pour la vidéo :", data.video_id);
@@ -263,7 +226,7 @@ const VideosManagment = () => {
               }}
               className="input input-ghost hover:bg-base-200 cursor-pointer transition-colors bg-white rounded-lg"
             >
-              {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters 
+              {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters
             </button>
 
             <SearchModal />
@@ -352,7 +315,7 @@ const VideosManagment = () => {
                   video.upload_status === 1;
 
                 return (
-                  <tr key={index} className="hover:bg-gray-50 transition">
+                  <tr key={video.id} className="hover:bg-gray-50 transition">
                     <td className="py-3 px-6 font-light">{video.ref}</td>
                     <td className="py-3 px-6 text-blue-600 underline">
                       {user?.role === RoleEnum.SUPERADMIN ? (
@@ -416,6 +379,7 @@ const VideosManagment = () => {
                       {/* @ts-ignore */}
                       <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user} />
                     </td>
+
                     {/* actions */}
                     <td className="py-3 px-6 text-center">
                       <div className="flex justify-center gap-2 flex-wrap">
@@ -459,6 +423,7 @@ const VideosManagment = () => {
                         </Link>
                       </div>
                     </td>
+
                     <td className="py-3 px-6 text-center font-light">
                       {new Date(video.createdAt).toLocaleDateString("fr-FR", {
                         year: "numeric",

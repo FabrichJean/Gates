@@ -1,46 +1,32 @@
 import { FiHexagon } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa";
-import type { TVideo, User } from "../hooks/useVideos"
+import type { TVideo, User } from "../hooks/useVideos";
 import { updateVideo } from "../api/videos";
 import toast from "react-hot-toast";
-import { useState } from "react";
-import { Link } from "react-router-dom";
 
 interface Props {
     user: User;
     video: TVideo;
     reFetch: () => void;
+    openRefuseModal: () => void;
 }
 
-function CheckerDrop({ video, reFetch, user }: Props) {
-
-    const [comment, setComment] = useState<string>()
-
-    const update = async (check: string, comment?: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formData: any = {
-            checking: check,
-            comment
-        }
-
-        if (check === 'refused' && !comment) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            document.getElementById('my_modal_16354').showModal()
+function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
+    const update = async (check: string) => {
+        if (check === "refused") {
+            openRefuseModal();
             return;
         }
 
-        await updateVideo(video.id, formData)
-            .then(() => {
-                reFetch();
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                document.getElementById('my_modal_16354').close()
-            })
-            .catch(err => {
-                toast.error("❌ Error: " + (err.response?.data?.message || err.message));
-            })
-    }
+        try {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            await updateVideo(video.id, { checking: check });
+            reFetch();
+        } catch (err: any) {
+            toast.error("❌ Error: " + (err.response?.data?.message || err.message));
+        }
+    };
 
     return (
         <>
@@ -78,4 +64,4 @@ function CheckerDrop({ video, reFetch, user }: Props) {
     )
 }
 
-export default CheckerDrop
+export default CheckerDrop;

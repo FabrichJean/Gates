@@ -3,17 +3,22 @@ import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from './Upload';
-import { UseVideo, type TVideo } from "../hooks/useVideos";
-import { server } from "../constant";
+import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
 import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
-import { archiveVideo, deletePerm, updateVideo } from "../api/videos";
+import { archiveVideo, deletePerm, sendProcessing, updateVideo } from "../api/videos";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import { useAuthMe } from "../hooks/useAuth";
+import RoleEnum from "../utils/roleEnum";
+import { PROCESSED_STORAGE_KEY, SENDING_STORAGE_KEY } from "../constant";
+import useSocketSend from "../hooks/useSocketSend";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
@@ -22,9 +27,42 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   const [modifying, setModifying] = useState(false);
 
+  const { loading: nextLoad, nextVideo } = useNextVideo(routeId)
+
   const navigate = useNavigate();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState<{
+    id: number | undefined;
+    type: "transc" | "upload" | "cover" | "webapp";
+  }>();
+
+  useSocketSend((videoId) => {
+    const id = Number(videoId);
+    removeSendingId(id);
+    addProcessedId(id);
+    reFetch();
+  });
+
   console.log(video);
+
+  const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
+    try {
+      const raw = localStorage.getItem(SENDING_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [processedIds, setProcessedIds] = useState<Array<number>>(() => {
+    try {
+      const raw = localStorage.getItem(PROCESSED_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
 
   if (!video)
     return (
@@ -50,6 +88,55 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     }
   };
 
+  const addSendingId = (id: number) => {
+    setSendingIds((prev) => {
+      const next = Array.from(new Set([...prev, id]));
+      localStorage.setItem(SENDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const removeSendingId = (id: number) => {
+    setSendingIds((prev) => {
+      const next = prev.filter((x) => x !== id);
+      localStorage.setItem(SENDING_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const addProcessedId = (id: number) => {
+    setProcessedIds((prev) => {
+      const next = Array.from(new Set([...prev, id]));
+      localStorage.setItem(PROCESSED_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const send = async (videoId: number) => {
+    if (sendingIds.includes(videoId) || processedIds.includes(videoId)) return;
+
+    addSendingId(videoId);
+    setLoading({ id: videoId, type: "transc" });
+
+    try {
+      const res = await sendProcessing(videoId);
+      toast.success(res?.data?.message || "✅ Deep upload workflow started");
+      reFetch();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "❌ Erreur d’envoi !");
+      removeSendingId(videoId); // 🔓 réactive seulement si erreur immédiate
+    } finally {
+      setLoading(undefined);
+    }
+  };
+
+  const isProcessing =
+    sendingIds.includes(video.id) ||
+    processedIds.includes(video.id) ||
+    video.transfer_status === 1 ||
+    video.upload_status === 1;
+
   return (
     modifying ? <EditVideo video={video} onSubmit={() => {
       setModifying(false);
@@ -63,9 +150,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="flex justify-between gap-4 items-center w-full">
             <h1 className="text-2xl font-semibold text-gray-800 mb-4">{formatDateFR(video?.createdAt)}</h1>
             <div className="flex gap-2">
-              <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span>
-              {/* <span className={`bg-gray-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.transfer_status === 0 ? 'opacity-20' : ''}`}>transcoded</span>
-              <span className={`bg-yellow-500 font-bold text-white text-center py-1 px-2 text-xs rounded ${video?.upload_status === 0 ? 'opacity-20' : ''}`}>uploaded</span> */}
+              <CheckingSuperadmin index={video.id} reFetch={reFetch} video={video} user={user} />
+              {/* <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span> */}
             </div>
           </div>
           <div
@@ -91,8 +177,46 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   modify
                 </button>
                 :
-                <Link to={'/touch/'+videoId} className="btn">touch again</Link>
+                <Link to={'/touch/' + videoId} className="btn">touch again</Link>
             }
+
+            {user?.role === RoleEnum.SUPERADMIN && (
+              <button
+                disabled={isProcessing}
+                onClick={() => {
+                  if (video.checking !== 'checked') {
+                    return alert("We need to check this video")
+                  }
+                  send(video.id)
+                }}
+                className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
+                  ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                  : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  }`}
+              >
+                {sendingIds.includes(video.id) ? (
+                  <>
+                    <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    <span>processing...</span>
+                  </>
+                ) : video.upload_status === 1 && video.transfer_status === 1 ? (
+                  <span className="text-green-600 font-semibold flex gap-1 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    Uploaded
+                  </span>
+                ) : (
+                  <span className="underline hover:text-blue-500">🚀 Send</span>
+                )}
+              </button>
+            )}
+
+            <Link to={'/videos/' + nextVideo} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+    font-medium text-sm rounded-xl transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
+              next
+            </Link>
 
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
               <div className="modal-box">
@@ -134,6 +258,16 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               {video?.cdn_url + video?.s3_cover_path}
             </a>
           </div>}
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">Author</h1>
+            <Link
+              to={`/users/${video.user?.id}`}
+              className="text-blue-600 hover:underline"
+            >
+              {video.user?.username}
+            </Link>
+          </div>
 
           <div className="space-y-2 rounded-lg bg-gray-50 p-2">
             <h1 className="text-lg font-semibold text-gray-800">Titles</h1>

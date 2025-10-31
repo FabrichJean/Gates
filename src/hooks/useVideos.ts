@@ -30,6 +30,8 @@ export type TVideo = {
   url: string | null;
   user: User;
 
+  nexts: TVideo[]
+
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
   category_id: number;
   sub_category_id: number | null;
@@ -87,4 +89,16 @@ export function UseVideo(id: string | number | undefined) {
   return useFetch<TVideo>(`${apiURL}/videos/${id}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   })
+}
+
+export function useNextVideo(currentId: string | number | undefined) {
+  const params = JSON.parse(localStorage.getItem('video_params') || '');
+
+  const {data, loading} = UseVideosWithParams(params);
+
+  const currentVideoIndex = data?.videos?.findIndex(vd => vd.id === Number(currentId));
+
+  return {
+    loading, nextVideo: data?.videos?.at(currentVideoIndex+1)?.id || currentId
+  }
 }

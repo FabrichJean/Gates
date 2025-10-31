@@ -39,7 +39,7 @@ export const useUsers = (search: string, params?: any) => {
 
 
 export const useAuthMe = () => {
-  return useFetch<{ id?: number; email?: string; username?: string; role?: string; isValidated?: boolean }>(apiURL + '/auth', {
+  return useFetch<User>(apiURL + '/auth', {
     headers: { Authorization: `Bearer ${getToken()}` },
   })
 }
