@@ -16,6 +16,7 @@ import useSocketSend from "../hooks/useSocketSend";
 import useSocketCheckVideos from "../hooks/useSocketCheckVideos";
 import { checkObjectContent, mapStatus } from "../utils/filter";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import { PROCESSED_STORAGE_KEY, SENDING_STORAGE_KEY } from "../constant";
 
 export type Video = {
   id: number;
@@ -43,8 +44,6 @@ const VideosManagment = () => {
   const fabControls = useAnimation();
 
   // 🔹 Gestion persistante des états (en cours / traités)
-  const SENDING_STORAGE_KEY = "vms:sending_videos";
-  const PROCESSED_STORAGE_KEY = "vms:processed_videos";
 
   const [filters, setFilters] = useState<TFilter>({
     category_id: "",
@@ -95,41 +94,6 @@ const VideosManagment = () => {
   useEffect(() => {
     setParams(computedParams);
   }, [computedParams]);
-
-
-  // // recalcul dynamique des params
-  // useEffect(() => {
-  //   try {
-  //     const saved = localStorage.getItem("videos_filtered");
-  //     if (!saved || saved === "undefined") return;
-
-  //     const savedFilter = JSON.parse(saved);
-
-  //     const _ = {
-  //       ...savedFilter,
-  //       isDeleted: reverseStatus(savedFilter.isDeleted),
-  //       cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-  //       transfer_status: reverseStatus(savedFilter.transfer_status),
-  //       upload_status: reverseStatus(savedFilter.upload_status),
-  //       startedAt: savedFilter.startedAt || "",
-  //       endAt: savedFilter.endAt || "",
-  //     };
-
-  //     const data = {
-  //       ..._,
-  //       isDeleted: mapStatus(_.isDeleted),
-  //       cover_upload_status: mapStatus(_.cover_upload_status),
-  //       transfer_status: mapStatus(_.transfer_status),
-  //       upload_status: mapStatus(_.upload_status),
-  //     };
-
-  //     const finalParams = { status: "all", page, ...data };
-  //     setParams(finalParams);
-  //   } catch (e) {
-  //     console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
-  //     localStorage.removeItem("videos_filtered");
-  //   }
-  // }, [filters, page]);
 
 
   const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
@@ -341,7 +305,6 @@ const VideosManagment = () => {
                 <th className="py-3 px-6 text-center">Checking</th>
                 <th className="py-3 px-6 text-center">Actions</th>
                 <th className="py-3 px-6 text-center">Date</th>
-                <th className="py-3 px-6 text-center">ID</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
@@ -469,8 +432,6 @@ const VideosManagment = () => {
                         day: "2-digit",
                       })}
                     </td>
-
-                    <td className="py-3 px-6 text-center">{video.id}</td>
                   </tr>
                 );
               })}

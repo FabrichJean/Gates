@@ -30,6 +30,8 @@ export type TVideo = {
   url: string | null;
   user: User;
 
+  nexts: TVideo[]
+
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
   category_id: number;
   sub_category_id: number | null;
@@ -88,3 +90,7 @@ export function UseVideo(id: string | number | undefined) {
     headers: { Authorization: `Bearer ${getToken()}` },
   })
 }
+
+// export function useNextVideo(currentId: string | number | undefined) {
+//   const 
+// }
