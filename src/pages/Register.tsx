@@ -18,6 +18,8 @@ const Register: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
@@ -85,13 +87,9 @@ const Register: React.FC = () => {
 
         <form
           onSubmit={handleSubmitRegister}
-          className="w-80 rounded-[20px] bg-white p-8 flex flex-col space-y-4"
-          style={{ boxShadow: "#00000057 1px 3px 4px" }}
+          className="w-100 rounded-[20px] bg-white/10 p-8 flex flex-col space-y-4 backdrop-blur-lg border border-white/20 shadow-2xl"
         >
-          <h1
-            className="text-3xl font-bold text-center mb-4 text-black"
-            style={{ textShadow: "#00000063 0px 3px 5px" }}
-          >
+          <h1 className="font-sans text-3xl font-bold text-center mb-4 text-white antialiased tracking-wide">
             Register
           </h1>
 
@@ -100,8 +98,7 @@ const Register: React.FC = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
-            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
-            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
+            className="font-sans w-full rounded-sm bg-transparent p-2.5 placeholder:text-white text-white font-medium border border-white antialiased transition-all focus:border-white/80 focus:bg-white/5"
           />
 
           <input
@@ -109,41 +106,88 @@ const Register: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
-            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
-            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
+            className="font-sans w-full rounded-sm bg-transparent p-2.5 placeholder:text-white text-white font-medium border border-white antialiased transition-all focus:border-white/80 focus:bg-white/5"
           />
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
-            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
-          />
+          {/* Password field with toggle visibility */}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="font-sans w-full rounded-sm bg-transparent p-2.5 pr-12 placeholder:text-white text-white font-medium border border-white antialiased transition-all focus:border-white/80 focus:bg-white/5"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors duration-200 focus:outline-none"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                // Eye slash icon (hide password)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                  <line x1="2" y1="2" x2="22" y2="22"/>
+                </svg>
+              ) : (
+                // Eye icon (show password)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+          </div>
 
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm password"
-            className="w-full rounded-md bg-[#E9EFF6] p-2.5 placeholder:text-[#000000]"
-            style={{ boxShadow: "rgb(0 0 0 / 21%) 0px 7px 5px 0px" }}
-          />
+          {/* Confirm Password field with toggle visibility */}
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm password"
+              className="font-sans w-full rounded-sm bg-transparent p-2.5 pr-12 placeholder:text-white text-white font-medium border border-white antialiased transition-all focus:border-white/80 focus:bg-white/5"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors duration-200 focus:outline-none"
+              aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+            >
+              {showConfirmPassword ? (
+                // Eye slash icon (hide password)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                  <line x1="2" y1="2" x2="22" y2="22"/>
+                </svg>
+              ) : (
+                // Eye icon (show password)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="h-10 w-full cursor-pointer mt-2 rounded-md bg-gradient-to-br from-[#7336FF] to-[#3269FF] text-white shadow-md shadow-blue-950 disabled:opacity-50"
+            className="font-sans h-10 w-full cursor-pointer mt-2 rounded-sm bg-gradient-to-br from-[#7336FF] to-[#3269FF] text-white shadow-md shadow-blue-950 disabled:opacity-50 font-semibold antialiased tracking-wide transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? "Loading..." : "Sign Up"}
           </button>
 
           {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
 
-          <p className="text-center text-[#969696] mt-2 text-sm">
+          <p className="font-sans text-center text-gray-200 mt-2 text-sm antialiased">
             Already have an account?{" "}
-            <span className="cursor-pointer text-[#7337FF] hover:underline">
+            <span className="font-sans cursor-pointer text-teal-500 hover:underline font-semibold antialiased transition-colors hover:text-teal-300">
               <Link to={"/login"}>
                 Sign in
               </Link>

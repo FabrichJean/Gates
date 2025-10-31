@@ -14,6 +14,7 @@ import UsersArchives from "../pages/UsersArchive";
 import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
+import Conversion from "../pages/Convertion";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -111,6 +112,18 @@ const AppRoutes = () => (
             {/* <SuperProtected> */}
               <InsideSidebar>
                 <UsersArchives />
+              </InsideSidebar>
+            {/* </SuperProtected> */}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conversion"
+        element={
+          <ProtectedRoute>
+            {/* <SuperProtected> */}
+              <InsideSidebar>
+                <Conversion />
               </InsideSidebar>
             {/* </SuperProtected> */}
           </ProtectedRoute>

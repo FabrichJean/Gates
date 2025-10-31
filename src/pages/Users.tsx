@@ -255,12 +255,16 @@ const Users = () => {
                     )}
                   </td>
                 )}
-                <UpdatePassword u={u} />
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      
+      {/* Modales UpdatePassword - placées en dehors du tableau */}
+      {data?.map((u: any) => (
+        <UpdatePassword key={`modal-${u.id}`} u={u} />
+      ))}
     </div>
   );
 };
