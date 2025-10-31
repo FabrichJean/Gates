@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Upload, Download, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
@@ -11,6 +11,35 @@ const Conversion = () => {
         // Récupérer l'état de loading depuis localStorage au chargement
         return localStorage.getItem('excel_conversion_loading') === 'true';
     });
+
+    // Fonction pour mettre à jour l'état de loading
+    const updateLoadingState = (isLoading: boolean) => {
+        setLoading(isLoading);
+        if (isLoading) {
+            localStorage.setItem('excel_conversion_loading', 'true');
+        } else {
+            localStorage.removeItem('excel_conversion_loading');
+        }
+    };
+
+    // Effet pour surveiller les changements dans localStorage (cas d'autres onglets)
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const storageLoading = localStorage.getItem('excel_conversion_loading') === 'true';
+            setLoading(storageLoading);
+        };
+
+        // Écouter les changements de localStorage
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Vérifier périodiquement l'état au cas où le localStorage serait modifié
+        const interval = setInterval(handleStorageChange, 1000);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, []);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
@@ -48,9 +77,7 @@ const Conversion = () => {
             return;
         }
 
-        setLoading(true);
-        // Persister l'état de loading dans localStorage
-        localStorage.setItem('excel_conversion_loading', 'true');
+        updateLoadingState(true);
 
         try {
             const formDataToSend = new FormData();
@@ -89,17 +116,20 @@ const Conversion = () => {
                 toast.error(`Error: ${error.message}`);
             }
         } finally {
-            setLoading(false);
-            // Supprimer l'état de loading du localStorage
-            localStorage.removeItem('excel_conversion_loading');
+            updateLoadingState(false);
         }
     };
 
     const resetForm = () => {
+        if (loading) return; // Empêcher le reset pendant le loading
+        
         setFile(null);
         // Reset file input
         const fileInput = document.getElementById('file-input') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+        
+        // S'assurer que le loading est bien désactivé
+        updateLoadingState(false);
     };
 
     return (
