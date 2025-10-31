@@ -48,11 +48,6 @@ const Login: React.FC = () => {
       return;
     }
 
-    // if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    //   toast.error("Email invalide ou manquant.");
-    //   return;
-    // }
-
     try {
       await login(email.trim(), password);
     } catch (err: any) {
