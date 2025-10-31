@@ -3,3 +3,47 @@
 
 /* stylelint-disable-next-line */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Cross-browser font compatibility and readability improvements */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  line-height: 1.5;
+}
+
+/* Input field improvements for better readability across browsers */
+input, textarea, select {
+  font-family: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Button improvements for better consistency */
+button {
+  font-family: inherit;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Ensure proper font rendering on Windows */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  body {
+    font-weight: 400;
+  }
+}
+
+/* High DPI display optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

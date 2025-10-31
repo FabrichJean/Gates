@@ -53,7 +53,7 @@ const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) 
       value={selected}
       onChange={handleChange}
       disabled={!categoryId || subCategories.length === 0}
-      className="w-full border border-gray-300 rounded-lg p-2 outline-none transition bg-white"
+      className="w-full border border-gray-300 rounded-md p-2 outline-none transition bg-white"
     >
       <option value="" className="flex items-center justify-center text-black">
         --Select a subcategory--

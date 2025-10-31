@@ -87,7 +87,7 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
       />
 
       {showDropdown && filtered.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg animate-fadeIn">
+        <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg animate-fadeIn">
           {filtered.map((cat) => (
             <li
               key={cat.id}
