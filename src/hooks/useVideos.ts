@@ -91,6 +91,14 @@ export function UseVideo(id: string | number | undefined) {
   })
 }
 
-// export function useNextVideo(currentId: string | number | undefined) {
-//   const 
-// }
+export function useNextVideo(currentId: string | number | undefined) {
+  const params = JSON.parse(localStorage.getItem('video_params') || '');
+
+  const {data, loading} = UseVideosWithParams(params);
+
+  const currentVideoIndex = data?.videos?.findIndex(vd => vd.id === Number(currentId));
+
+  return {
+    loading, nextVideo: data?.videos?.at(currentVideoIndex+1)?.id || currentId
+  }
+}

@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from './Upload';
-import { UseVideo, type TVideo } from "../hooks/useVideos";
+import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
 import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
@@ -26,6 +26,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [videoPlayed, setVideoPlayed] = useState(false);
 
   const [modifying, setModifying] = useState(false);
+
+  const { loading: nextLoad, nextVideo } = useNextVideo(routeId)
 
   const navigate = useNavigate();
 
@@ -210,7 +212,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </button>
             )}
 
-            <Link to={'/videos/'+video.nexts?.at(0)?.id} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+            <Link to={'/videos/' + nextVideo} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
               next
@@ -256,6 +258,16 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               {video?.cdn_url + video?.s3_cover_path}
             </a>
           </div>}
+
+          <div className="space-y-2 rounded-lg bg-gray-50 p-2 mt-5">
+            <h1 className="text-lg font-semibold text-gray-800">Author</h1>
+            <Link
+              to={`/users/${video.user?.id}`}
+              className="text-blue-600 hover:underline"
+            >
+              {video.user?.username}
+            </Link>
+          </div>
 
           <div className="space-y-2 rounded-lg bg-gray-50 p-2">
             <h1 className="text-lg font-semibold text-gray-800">Titles</h1>
