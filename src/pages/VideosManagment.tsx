@@ -96,41 +96,6 @@ const VideosManagment = () => {
   }, [computedParams]);
 
 
-  // // recalcul dynamique des params
-  // useEffect(() => {
-  //   try {
-  //     const saved = localStorage.getItem("videos_filtered");
-  //     if (!saved || saved === "undefined") return;
-
-  //     const savedFilter = JSON.parse(saved);
-
-  //     const _ = {
-  //       ...savedFilter,
-  //       isDeleted: reverseStatus(savedFilter.isDeleted),
-  //       cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-  //       transfer_status: reverseStatus(savedFilter.transfer_status),
-  //       upload_status: reverseStatus(savedFilter.upload_status),
-  //       startedAt: savedFilter.startedAt || "",
-  //       endAt: savedFilter.endAt || "",
-  //     };
-
-  //     const data = {
-  //       ..._,
-  //       isDeleted: mapStatus(_.isDeleted),
-  //       cover_upload_status: mapStatus(_.cover_upload_status),
-  //       transfer_status: mapStatus(_.transfer_status),
-  //       upload_status: mapStatus(_.upload_status),
-  //     };
-
-  //     const finalParams = { status: "all", page, ...data };
-  //     setParams(finalParams);
-  //   } catch (e) {
-  //     console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
-  //     localStorage.removeItem("videos_filtered");
-  //   }
-  // }, [filters, page]);
-
-
   const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
     try {
       const raw = localStorage.getItem(SENDING_STORAGE_KEY);

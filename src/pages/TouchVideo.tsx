@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { UseVideo } from "../hooks/useVideos";
 import { useRef, useState } from "react";
-import { server } from "../constant";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
 import { updateVideo } from "../api/videos";

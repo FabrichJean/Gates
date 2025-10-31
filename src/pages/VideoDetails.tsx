@@ -29,6 +29,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   const navigate = useNavigate();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<{
     id: number | undefined;
     type: "transc" | "upload" | "cover" | "webapp";
@@ -67,7 +68,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         <div className="text-red-500">Video not found</div>
       </div>
     );
-
 
   const deleteVideo = async (id: string | number, type: 'archive' | 'delete') => {
     try {
@@ -210,7 +210,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </button>
             )}
 
-            <Link to={'/videos/'+video.nexts.at(0)?.id} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+            <Link to={'/videos/'+video.nexts?.at(0)?.id} className="relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-xl transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
               next

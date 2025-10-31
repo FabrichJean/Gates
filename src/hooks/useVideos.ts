@@ -90,3 +90,7 @@ export function UseVideo(id: string | number | undefined) {
     headers: { Authorization: `Bearer ${getToken()}` },
   })
 }
+
+// export function useNextVideo(currentId: string | number | undefined) {
+//   const 
+// }
