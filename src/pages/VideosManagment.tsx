@@ -57,8 +57,6 @@ const VideosManagment = () => {
     endAt: "",
   });
 
-  console.log(filters);
-  
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [params, setParams] = useState<any>(null);
@@ -93,6 +91,7 @@ const VideosManagment = () => {
   // 🔹 Mise à jour de params quand computedParams change
   useEffect(() => {
     setParams(computedParams);
+    localStorage.setItem('video_params', JSON.stringify(computedParams))
   }, [computedParams]);
 
 
@@ -144,7 +143,7 @@ const VideosManagment = () => {
     addProcessedId(id);
     reFetch();
   });
-  
+
   // état de checking des vidéos
   useSocketCheckVideos((data) => {
     console.log("📋 Checking mis à jour pour la vidéo :", data.video_id);
@@ -227,7 +226,7 @@ const VideosManagment = () => {
               }}
               className="input input-ghost hover:bg-base-200 cursor-pointer transition-colors bg-white rounded-lg"
             >
-              {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters 
+              {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters
             </button>
 
             <SearchModal />
