@@ -83,7 +83,7 @@ const Register: React.FC = () => {
     >
       <Toaster />
       <div className="flex flex-col items-center space-y-8">
-        <img src={logoUrl} alt="App Logo" className="w-32 md:w-40 cursor-pointer" />
+        <img src="/img static/logo login.png" alt="App Logo" className="w-32 md:w-40 cursor-pointer" />
 
         <form
           onSubmit={handleSubmitRegister}

@@ -3,6 +3,7 @@ import { FaCheck } from "react-icons/fa";
 import type { TVideo, User } from "../hooks/useVideos";
 import { updateVideo } from "../api/videos";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 interface Props {
     user: User;
@@ -23,6 +24,7 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
             // @ts-ignore
             await updateVideo(video.id, { checking: check });
             reFetch();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             toast.error("❌ Error: " + (err.response?.data?.message || err.message));
         }
@@ -30,7 +32,7 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
 
     return (
         <>
-            <dialog id="my_modal_16354" className="modal">
+            {/* <dialog id="my_modal_16354" className="modal">
                 <div className="modal-box flex flex-col gap-3 ">
                     <textarea className="textarea w-full" placeholder="Comment" onChange={(e) => {
                         setComment(e.currentTarget.value);
@@ -41,7 +43,7 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
                         await update('refused', comment);
                     }}>submit</button>
                 </div>
-            </dialog>
+            </dialog> */}
             <div tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-md z-100 w-52 p-2 border border-gray-300 shadow-sm">
                 {
                     user.role === 'superadmin' ?

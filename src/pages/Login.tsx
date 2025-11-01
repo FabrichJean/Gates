@@ -63,8 +63,7 @@ const Login: React.FC = () => {
     >
       <Toaster />
       <div className="flex flex-col items-center space-y-8">
-        {/* Logo */}
-        <img src={logoUrl} alt="TyBot Logo" className="w-32 md:w-40 cursor-pointer" />
+        <img src="/img static/logo login.png" alt="TyBot Logo" className="w-32 md:w-40 cursor-pointer" />
         {/* Form Card */}
         <form
           onSubmit={handleSubmit}
