@@ -7,8 +7,6 @@ import { Toaster, toast } from "react-hot-toast";
 
 const backgroundUrl =
   "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg";
-const logoUrl =
-  "https://res.cloudinary.com/dkt1t22qc/image/upload/v1742348949/Prestataires_Documents/smj7n1bdlpjsfsotwpco.png";
 
 const Login: React.FC = () => {
   const { login, error, loading, token, user } = useAuth();
@@ -36,6 +34,8 @@ const Login: React.FC = () => {
   useEffect(() => {
     if (error) {
       toast.error(error);
+      setPassword("");
+      setEmail("");
     }
   }, [error]);
 
