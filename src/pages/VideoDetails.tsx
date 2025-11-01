@@ -106,7 +106,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             {
               video.checking !== 'refused' ?
                 <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-6 py-2.5
-    font-medium text-sm rounded-xl transition-all duration-300
+    font-medium text-sm rounded-md transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
                   modify
                 </button>
@@ -123,7 +123,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   }
                   send(video.id);
                 }}
-                className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300
+                className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300
           ${video.processing === "done"
                     ? "bg-green-100 text-green-700 cursor-default"
                     : video.processing === "working"
@@ -147,9 +147,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             )}
 
             <Link to={'/videos/' + nextVideo} className="relative flex items-center justify-center gap-2 px-6 py-2.5
-    font-medium text-sm rounded-xl transition-all duration-300
+    font-medium text-sm rounded-md transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
               next
+            </Link>
+
+            <Link to={'/videos'} className="relative flex items-center justify-center gap-2 px-6 py-2.5
+        font-medium text-sm rounded-md transition-all duration-300
+        backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Retour
             </Link>
 
             <dialog id="my_modal_6" className="modal modal-bottom sm:modal-middle">
@@ -236,9 +245,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
 export default VideoDetails;
 
-function EditVideo({ video }: { video: TVideo, onSubmit: () => void }) {
-
-  const navigate = useNavigate()
+function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -290,8 +297,7 @@ function EditVideo({ video }: { video: TVideo, onSubmit: () => void }) {
 
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
-      // onSubmit();
-      navigate('/videos')
+      onSubmit();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
