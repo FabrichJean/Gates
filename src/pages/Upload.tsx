@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import { useAuthMe } from "../hooks/useAuth";
-import {Md5} from 'ts-md5';
+import { Md5 } from 'ts-md5';
 
 
 export type Couple = {
@@ -104,7 +104,7 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
         ) : (
           <>
             <span className="font-sans underline hover:text-blue-500 antialiased font-medium">
-                {btnSubmit ? btnSubmit : '🚀\u00A0\u00A0\u00A0Publish'}
+              {btnSubmit ? btnSubmit : '🚀\u00A0\u00A0\u00A0Publish'}
             </span>
           </>
         )}
@@ -144,6 +144,7 @@ function uploadReducer(state: UploadState, action: Partial<UploadState>): Upload
 }
 
 const Upload = () => {
+
   const { data: user } = useAuthMe();
   const navigate = useNavigate();
 
@@ -161,11 +162,15 @@ const Upload = () => {
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   // 🧠 Mémorisation du ref utilisateur
-  const ref = useMemo(() => {
-    if (!user?.id || !user?.username) return null;
-    const hash = Md5.hashStr(user.id.toString() + Date.now().toString()).slice(0, 8);
-    return user.username.slice(0, 3) + hash;
+  const [ref, setRef] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id && user?.username) {
+      const hash = Md5.hashStr(user.id.toString() + Date.now().toString()).slice(0, 8);
+      setRef(user.username.slice(0, 3) + hash);
+    }
   }, [user]);
+
 
   // 🧹 Libère les URLs temporaires pour éviter les fuites mémoire
   useEffect(() => {
@@ -217,6 +222,7 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
+      // @ts-ignore
       const res = await uploadVideo(formData, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
@@ -226,6 +232,7 @@ const Upload = () => {
       toast.success("✅ Upload réussi !");
       navigate("/videos");
       console.log("Video uploaded:", res.data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       toast.error("Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
@@ -245,7 +252,7 @@ const Upload = () => {
               <input
                 type="text"
                 value={ref || ""}
-                disabled
+                onChange={(e) => setRef(e.currentTarget.value.trim())}
                 className="w-full border border-gray-300 rounded-md p-2 outline-none focus:border-blue-500"
               />
             </div>
