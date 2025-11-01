@@ -28,6 +28,7 @@
     "react-toastify": "^11.0.5",
     "recharts": "^3.2.1",
     "socket.io-client": "^4.8.1",
+    "ts-md5": "^2.0.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

@@ -9,6 +9,8 @@ import { uploadVideo } from "../api/videos";
 import { useNavigate } from "react-router-dom";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import { useAuthMe } from "../hooks/useAuth";
+import {Md5} from 'ts-md5';
 
 
 export type Couple = {
@@ -114,9 +116,11 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
 
 
 const Upload = () => {
+
+  const {data: user} = useAuthMe()
+
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [ref, setRef] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
 
@@ -128,6 +132,10 @@ const Upload = () => {
   const [category, setCategory] = useState<Category>();
   const [subcategory, setSubCategory] = useState<SubCategory>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
+
+  const hashRef = Md5.hashStr(user?.id.toString()+Date.now().toString())
+  
+  const [ref, setRef] = useState<string | null>(user?.username.slice(0, 3)+hashRef);
 
   const navigate = useNavigate()
 
@@ -201,7 +209,8 @@ const Upload = () => {
               <input
                 type="text"
                 value={ref || ""}
-                onChange={(e) => setRef(e.target.value)}
+                onChange={(e) => e.target.value !== ' ' ? setRef(e.target.value.trim()) : undefined}
+                maxLength={50}
                 placeholder=""
                 className="font-sans w-full border border-gray-300 rounded-md p-2 outline-none transition-colors focus:border-blue-500 antialiased"
               />
