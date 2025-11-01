@@ -30,6 +30,8 @@ export type TVideo = {
   url: string | null;
   user: User;
 
+  processing: 'null' | 'working' | 'done'
+
   nexts: TVideo[]
 
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
