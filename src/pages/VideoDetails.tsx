@@ -236,9 +236,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
 export default VideoDetails;
 
-function EditVideo({ video }: { video: TVideo, onSubmit: () => void }) {
-
-  const navigate = useNavigate()
+function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -290,8 +288,7 @@ function EditVideo({ video }: { video: TVideo, onSubmit: () => void }) {
 
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
-      // onSubmit();
-      navigate('/videos')
+      onSubmit();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);

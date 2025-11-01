@@ -317,7 +317,7 @@ type UploadBoxProps = {
   onClick: () => void;
   onDrop: (file: File) => void;
   preview: string | null;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   accept: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   emptyMessage: string;
