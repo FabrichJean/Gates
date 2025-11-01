@@ -3,14 +3,13 @@ import { Link } from "react-router-dom";
 import CheckingSuperadmin from "../CheckingSuperadmin";
 import VideoActions from "./VideoActions";
 import RoleEnum from "../../utils/roleEnum";
-import type { Video } from "../../types/video";
+import type { TVideo } from "../../hooks/useVideos";
+import type { User } from "../../hooks/useVideos";
 
 interface VideoTableRowProps {
-  video: Video;
+  video: TVideo;
   index: number;
-  user: any;
-  isProcessing: boolean;
-  sendingIds: number[];
+  user: User;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
   reFetch: () => void;
@@ -20,8 +19,6 @@ const VideoTableRow = ({
   video,
   index,
   user,
-  isProcessing,
-  sendingIds,
   onActivate,
   onSend,
   reFetch,
@@ -96,8 +93,6 @@ const VideoTableRow = ({
         <VideoActions
           video={video}
           user={user}
-          isProcessing={isProcessing}
-          sendingIds={sendingIds}
           onSend={onSend}
         />
       </td>

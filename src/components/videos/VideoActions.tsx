@@ -1,39 +1,36 @@
 import { Link } from "react-router-dom";
 import RoleEnum from "../../utils/roleEnum";
-import type { Video } from "../../types/video";
+import type { TVideo } from "../../hooks/useVideos";
+import type { User } from "../../hooks/useVideos";
 
 interface VideoActionsProps {
-  video: Video;
-  user: any;
-  isProcessing: boolean;
-  sendingIds: number[];
+  video: TVideo;
+  user: User;
   onSend: (videoId: number) => void;
 }
 
 const VideoActions = ({
   video,
   user,
-  isProcessing,
-  sendingIds,
   onSend,
 }: VideoActionsProps) => {
   return (
     <div className="flex justify-center gap-2 flex-wrap">
       {user?.role === RoleEnum.SUPERADMIN && (
         <button
-          disabled={isProcessing}
+          disabled={video.processing === 'working' || video.processing === 'done'}
           onClick={() => {
             if (video.checking !== 'checked') {
               return alert("We need to check this video")
             }
             onSend(video.id)
           }}
-          className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${isProcessing
+          className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${video.processing === 'working'
             ? "cursor-not-allowed bg-gray-100 text-gray-500"
             : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             }`}
         >
-          {sendingIds.includes(video.id) ? (
+          {video.processing === 'working' ? (
             <>
               <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               <span>processing...</span>

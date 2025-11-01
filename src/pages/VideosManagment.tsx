@@ -22,8 +22,6 @@ const VideosManagment = () => {
     params,
     data,
     loading,
-    sendingIds,
-    processedIds,
     reFetch,
     mutate,
     toWebapp,
@@ -55,27 +53,16 @@ const VideosManagment = () => {
           <table className="min-w-full w-max text-sm md:text-base ">
             <VideoTableHeader />
             <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
-              {data?.videos?.map((video, index) => {
-                const isProcessing =
-                  sendingIds.includes(video.id) ||
-                  processedIds.includes(video.id) ||
-                  video.transfer_status === 1 ||
-                  video.upload_status === 1;
-
-                return (
-                  <VideoTableRow
-                    key={video.id}
-                    video={video}
-                    index={index}
-                    user={user}
-                    isProcessing={isProcessing}
-                    sendingIds={sendingIds}
-                    onActivate={activate}
-                    onSend={send}
-                    reFetch={reFetch}
-                  />
-                );
-              })}
+              {data?.videos?.map((video, index) =>
+                <VideoTableRow
+                  key={video.id}
+                  video={video}
+                  index={index}
+                  user={user}
+                  onActivate={activate}
+                  onSend={send}
+                  reFetch={reFetch}
+                />)}
             </tbody>
           </table>
         </div>
