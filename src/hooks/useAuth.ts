@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 import type { User } from "./useVideos";
 import { getToken } from "../utils/storage";
 import axios from "axios";
@@ -40,6 +40,6 @@ export const useUsers = (search: string, params?: any) => {
 
 export const useAuthMe = () => {
   return useFetch<User>(apiURL + '/auth', {
-    headers: { Authorization: `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${token()}` },
   })
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import toast from "react-hot-toast";
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -115,78 +115,117 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
 }
 
 
+// import { useState, useRef, useMemo, useCallback, useReducer, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import toast from "react-hot-toast";
+// import Md5 from "ts-md5";
+// import { useAuthMe } from "../hooks/useAuthMe";
+// import { uploadVideo } from "../api/videos";
+// import CategoryAutoComplete from "../components/CategoryAutoComplete";
+// import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+// import TitlesForm from "../components/TitlesForm";
+
+type UploadState = {
+  videoFile: File | null;
+  coverFile: File | null;
+  videoPreview: string | null;
+  coverPreview: string | null;
+};
+
+const initialUploadState: UploadState = {
+  videoFile: null,
+  coverFile: null,
+  videoPreview: null,
+  coverPreview: null,
+};
+
+function uploadReducer(state: UploadState, action: Partial<UploadState>): UploadState {
+  return { ...state, ...action };
+}
+
 const Upload = () => {
+  const { data: user } = useAuthMe();
+  const navigate = useNavigate();
 
-  const {data: user} = useAuthMe()
+  // Gestion des fichiers
+  const [state, dispatch] = useReducer(uploadReducer, initialUploadState);
+  const { videoFile, coverFile, videoPreview, coverPreview } = state;
 
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
-
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-
   const [category, setCategory] = useState<Category>();
   const [subcategory, setSubCategory] = useState<SubCategory>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
-  const hashRef = Md5.hashStr(user?.id.toString()+Date.now().toString())
-  
-  const [ref, setRef] = useState<string | null>(user?.username.slice(0, 3)+hashRef);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
-  const navigate = useNavigate()
+  // 🧠 Mémorisation du ref utilisateur
+  const ref = useMemo(() => {
+    if (!user?.id || !user?.username) return null;
+    const hash = Md5.hashStr(user.id.toString() + Date.now().toString()).slice(0, 8);
+    return user.username.slice(0, 3) + hash;
+  }, [user]);
+
+  // 🧹 Libère les URLs temporaires pour éviter les fuites mémoire
+  useEffect(() => {
+    return () => {
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+      if (videoPreview) URL.revokeObjectURL(videoPreview);
+    };
+  }, [coverPreview, videoPreview]);
+
+  // 🧩 Gestion des fichiers
+  const handleFileChange = useCallback((file: File, type: "video" | "cover") => {
+    const preview = URL.createObjectURL(file);
+    if (type === "video") dispatch({ videoFile: file, videoPreview: preview });
+    else dispatch({ coverFile: file, coverPreview: preview });
+  }, []);
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setVideoFile(file);
-      setVideoPreview(URL.createObjectURL(file));
-    }
+    if (file && file.type === "video/mp4") handleFileChange(file, "video");
+    else toast.error("Only MP4 files are accepted!");
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setCoverFile(file);
-      setCoverPreview(URL.createObjectURL(file));
-    }
+    if (file && file.type.startsWith("image/")) handleFileChange(file, "cover");
+    else toast.error("Invalid image format!");
   };
 
   const handleCoverClick = () => coverInputRef.current?.click();
   const handleVideoClick = () => videoInputRef.current?.click();
 
-  const handleSubmit = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formData: any = {
-      ...(videoFile && { video: videoFile }),
-      ...(coverFile && { cover: coverFile }),
-      ...(category && { category_id: category.id }),
+  // 📨 Upload vidéo
+  const handleSubmit = useCallback(async () => {
+    if (!videoFile || !coverFile || !category || !ref) {
+      toast.error("Veuillez remplir tous les champs obligatoires !");
+      return;
+    }
+
+    const formData = {
+      video: videoFile,
+      cover: coverFile,
+      category_id: category.id,
       ...(subcategory && { sub_category_id: subcategory.id }),
-      ...(ref && { ref }),
+      ref,
       titles: JSON.stringify(coupleTitles),
     };
-
 
     try {
       setUploading(true);
       setProgress(0);
 
-      console.log(formData.titles);
-
       const res = await uploadVideo(formData, (progressEvent) => {
         if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setProgress(percentCompleted);
+          setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         }
       });
 
       toast.success("✅ Upload réussi !");
+      navigate("/videos");
       console.log("Video uploaded:", res.data);
-      navigate('/videos')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       toast.error("Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
@@ -194,185 +233,114 @@ const Upload = () => {
       setUploading(false);
       setProgress(0);
     }
-  };
+  }, [videoFile, coverFile, category, subcategory, coupleTitles, ref, navigate]);
 
   return (
     <div className="font-sans h-full antialiased">
-      {/* <Toaster position="top-center" /> */}
       <div className="flex flex-col flex-wrap md:flex-row gap-8 p-4 items-start justify-center w-full">
         <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-md p-8 border border-gray-200 w-full backdrop-blur-sm">
           <div className="space-y-6">
             <div>
-              <label className="font-sans block text-gray-700 font-medium mb-2 antialiased">
-                Ref
-              </label>
+              <label className="block text-gray-700 font-medium mb-2">Ref</label>
               <input
                 type="text"
                 value={ref || ""}
-                onChange={(e) => e.target.value !== ' ' ? setRef(e.target.value.trim()) : undefined}
-                maxLength={50}
-                placeholder=""
-                className="font-sans w-full border border-gray-300 rounded-md p-2 outline-none transition-colors focus:border-blue-500 antialiased"
+                disabled
+                className="w-full border border-gray-300 rounded-md p-2 outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="font-sans block text-gray-700 font-medium mb-2 antialiased">
-                Category
-              </label>
-              <CategoryAutoComplete onSelect={(cat) => setCategory(cat)} />
-            </div>
-            <div>
-              <label className="font-sans block text-gray-700 font-medium mb-2 antialiased">
-                SubCategory
-              </label>
-              <SubCategoryAutoComplete onSelect={(cat) => setSubCategory(cat)} categoryId={category?.id} />
+              <label className="block text-gray-700 font-medium mb-2">Category</label>
+              <CategoryAutoComplete onSelect={setCategory} />
             </div>
 
-            {/* Cover Image */}
             <div>
-              <label className="font-sans block text-gray-700 font-medium mb-2 antialiased">
-                Cover Image
-              </label>
-              <div
-                onClick={handleCoverClick}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file && file.type.startsWith("image/")) {
-                    setCoverFile(file);
-                    setCoverPreview(URL.createObjectURL(file));
-                  } else {
-                    toast.error("Invalid image format!");
-                  }
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onDragEnter={(e) => e.currentTarget.classList.add("border-blue-500", "bg-blue-50")}
-                onDragLeave={(e) => e.currentTarget.classList.remove("border-blue-500", "bg-blue-50")}
-                className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center 
-               hover:border-blue-500 transition cursor-pointer relative"
-              >
-                {coverPreview ? (
-                  <img
-                    src={coverPreview}
-                    alt="Preview"
-                    className="rounded-lg object-cover w-full h-52"
-                  />
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-gray-400 mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
-                      />
-                    </svg>
-                    <p className="font-sans text-gray-500 text-sm text-center antialiased">
-                      Click or drag an image (PNG, JPG, WEBP)
-                    </p>
-                  </>
-                )}
-                <input
-                  type="file"
-                  ref={coverInputRef}
-                  accept="image/*"
-                  onChange={handleCoverChange}
-                  className="hidden"
-                />
-              </div>
+              <label className="block text-gray-700 font-medium mb-2">SubCategory</label>
+              <SubCategoryAutoComplete onSelect={setSubCategory} categoryId={category?.id} />
             </div>
+
+            {/* Cover */}
+            <UploadBox
+              label="Cover Image"
+              onClick={handleCoverClick}
+              onDrop={(f) => handleFileChange(f, "cover")}
+              preview={coverPreview}
+              inputRef={coverInputRef}
+              accept="image/*"
+              onChange={handleCoverChange}
+              emptyMessage="Click or drag an image (PNG, JPG, WEBP)"
+            />
 
             {/* Video */}
-            <div>
-              <label className="font-sans block text-gray-700 font-medium mb-2 antialiased">
-                Video
-              </label>
-              <div
-                onClick={handleVideoClick}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file && file.type === "video/mp4") {
-                    setVideoFile(file);
-                    setVideoPreview(URL.createObjectURL(file));
-                  } else {
-                    toast.error("Only MP4 files are accepted!");
-                  }
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onDragEnter={(e) => e.currentTarget.classList.add("border-blue-500", "bg-blue-50")}
-                onDragLeave={(e) => e.currentTarget.classList.remove("border-blue-500", "bg-blue-50")}
-                className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center 
-               hover:border-blue-500 transition cursor-pointer"
-              >
-                {videoPreview ? (
-                  <video
-                    src={videoPreview}
-                    controls
-                    className="rounded-lg w-full max-h-56 object-cover"
-                  />
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-gray-400 mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14.752 11.168l-4.197-2.398A1 1 0 009 9.618v4.764a1 1 0 001.555.832l4.197-2.398a1 1 0 000-1.664z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p className="font-sans text-gray-500 text-sm text-center antialiased">
-                      Drag or select an MP4 file
-                    </p>
-                  </>
-                )}
-                <input
-                  type="file"
-                  ref={videoInputRef}
-                  accept="video/mp4"
-                  onChange={handleVideoChange}
-                  className="hidden"
-                />
-              </div>
-            </div>
+            <UploadBox
+              label="Video"
+              onClick={handleVideoClick}
+              onDrop={(f) => handleFileChange(f, "video")}
+              preview={videoPreview}
+              inputRef={videoInputRef}
+              accept="video/mp4"
+              onChange={handleVideoChange}
+              emptyMessage="Drag or select an MP4 file"
+            />
 
-
-            {/* Barre de progression */}
             {uploading && (
               <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                <div className="upload-progress-bar bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
+                <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
               </div>
             )}
           </div>
 
-          <TitlesForm coupleTitles={coupleTitles} setCoupleTitles={setCoupleTitles} progress={progress} uploading={uploading} handleSubmit={handleSubmit} />
-        </div>
-
-        <div className="w-full md:w-[35%] flex flex-col gap-4">
-
+          <TitlesForm
+            coupleTitles={coupleTitles}
+            setCoupleTitles={setCoupleTitles}
+            progress={progress}
+            uploading={uploading}
+            handleSubmit={handleSubmit}
+          />
         </div>
       </div>
     </div>
   );
 };
+
+// 🔹 Sous composant pour la DRYness (évite répétition du bloc Upload)
+type UploadBoxProps = {
+  label: string;
+  onClick: () => void;
+  onDrop: (file: File) => void;
+  preview: string | null;
+  inputRef: React.RefObject<HTMLInputElement>;
+  accept: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  emptyMessage: string;
+};
+
+const UploadBox = ({ label, onClick, onDrop, preview, inputRef, accept, onChange, emptyMessage }: UploadBoxProps) => (
+  <div>
+    <label className="block text-gray-700 font-medium mb-2">{label}</label>
+    <div
+      onClick={onClick}
+      onDrop={(e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files?.[0];
+        if (file) onDrop(file);
+      }}
+      onDragOver={(e) => e.preventDefault()}
+      className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
+    >
+      {preview ? (
+        accept.includes("video") ? (
+          <video src={preview} controls className="rounded-lg w-full max-h-56 object-cover" />
+        ) : (
+          <img src={preview} alt="Preview" className="rounded-lg object-cover w-full h-52" />
+        )
+      ) : (
+        <p className="text-gray-500 text-sm text-center">{emptyMessage}</p>
+      )}
+      <input type="file" ref={inputRef} accept={accept} onChange={onChange} className="hidden" />
+    </div>
+  </div>
+);
 
 export default Upload;
