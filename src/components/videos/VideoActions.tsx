@@ -25,14 +25,14 @@ const VideoActions = ({
             }
             onSend(video.id)
           }}
-          className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${video.processing === 'working'
+          className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2 font-medium text-sm rounded-md transition-all duration-300 ${video.processing === 'working'
             ? "cursor-not-allowed bg-gray-100 text-gray-500"
-            : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+            : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
             }`}
         >
           {video.processing === 'working' ? (
             <>
-              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-md animate-spin" />
               <span>processing...</span>
             </>
           ) : video.upload_status === 1 && video.transfer_status === 1 ? (
@@ -43,7 +43,14 @@ const VideoActions = ({
               Uploaded
             </span>
           ) : (
-            <span className="underline hover:text-blue-500">🚀 Send</span>
+            <span className="hover:text-blue-500 flex items-center gap-3 font-semibold">
+              <span className="">
+                🚀
+              </span>
+              <span className="">
+                Send
+              </span>
+            </span>
           )}
         </button>
       )}
