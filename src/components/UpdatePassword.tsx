@@ -1,8 +1,9 @@
 import toast, { Toaster } from "react-hot-toast"
 import randomPassword from "../utils/randomPassword"
 import { updatePassword } from "../api/auth"
+import type { User } from "../hooks/useVideos"
 
-function UpdatePassword({ u, self = false }: { u: any, self?: boolean }) {
+function UpdatePassword({ u, self = false }: { u: User, self?: boolean }) {
 
     const submit: React.FormEventHandler<HTMLFormElement> | undefined = async (e) => {
         e.preventDefault()
@@ -20,6 +21,7 @@ function UpdatePassword({ u, self = false }: { u: any, self?: boolean }) {
         try {
             await updatePassword(u.id, pass!, confirm!, old)
             toast.success('Updated!')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             toast.error(err?.response?.data?.message || err?.message || 'Error')
         } finally {

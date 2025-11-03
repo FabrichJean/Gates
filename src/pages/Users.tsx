@@ -194,7 +194,7 @@ const Users = () => {
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {data?.map((u: any) => (
+            {data?.map((u) => (
               <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                 {columns.find(c => c.key === 'name')?.visible && (
                   <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
@@ -262,7 +262,7 @@ const Users = () => {
       </div>
       
       {/* Modales UpdatePassword - placées en dehors du tableau */}
-      {data?.map((u: any) => (
+      {data?.map((u) => (
         <UpdatePassword key={`modal-${u.id}`} u={u} />
       ))}
     </div>
