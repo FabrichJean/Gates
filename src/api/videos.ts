@@ -105,3 +105,11 @@ export async function webApp() {
         }
     })
 }
+
+export async function cancelUpload(videoId: string | number): Promise<void> {
+    return await axios.put(`${apiURL}/videos/${videoId}/cancel-process`, null, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        }
+    });
+}
