@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { deleteUserApi, loginApi, registerApi, validateUserApi, getMeApi } from "../api/auth"; // 🔹 Appel backend centralisé
 import { getToken, setToken, removeToken } from "../utils/storage"; // 🔹 Gestion du localStorage
 import { AuthContext } from ".";
+import type { User } from "../hooks/useVideos";
 
 // Helper: decode JWT payload (returns claims or null)
 function parseJwt(token?: string | null) {
@@ -31,6 +33,7 @@ export interface AuthContextType {
   user: any;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: (email: string, password: string, username?: string) => Promise<any>;
   validateUser: (userId: number) => Promise<void>; // added·
   deleteUser: (userId: number) => Promise<void>; // added·
@@ -44,7 +47,7 @@ export interface AuthContextType {
 // 🔸 Fournisseur du contexte d’authentification
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<Partial<User> | null>();
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
