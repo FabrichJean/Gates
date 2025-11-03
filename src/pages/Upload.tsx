@@ -253,7 +253,7 @@ const Upload = () => {
                 type="text"
                 value={ref || ""}
                 onChange={(e) => setRef(e.currentTarget.value.trim())}
-                className="w-full border border-gray-300 rounded-md p-2 outline-none focus:border-blue-500"
+                className="w-full text-black border border-gray-300 rounded-md p-2 outline-none focus:border-blue-500"
               />
             </div>
 
