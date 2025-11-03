@@ -10,20 +10,6 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement | null>(null);
 
-    // user peut être une string (userType) ou un objet contenant email/name
-    let displayName = "Admin";
-    let seed = "Super Admin";
-
-    if (user) {
-        if (typeof user === "string") {
-            displayName = user;
-            seed = user;
-        } else if (typeof user === "object") {
-            displayName = (user.name || user.username || user.email || user.role) as string;
-            seed = displayName || seed;
-        }
-    }
-
     useEffect(() => {
         const onDocClick = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -51,7 +37,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 
     return (
         <div ref={ref} className="relative flex items-center gap-3">
-            <span className="text-gray-600 text-sm">{displayName}</span>
+            <span className="text-gray-600 text-sm">{user?.username}</span>
             <button
                 onClick={() => setOpen(o => !o)}
                 aria-haspopup="true"
@@ -60,7 +46,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
                 title="User menu"
             >
                 <img
-                    src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(seed)}`}
+                    src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(user?.username || '')}`}
                     alt="User avatar"
                     className="w-8 h-8 rounded-full"
                 />

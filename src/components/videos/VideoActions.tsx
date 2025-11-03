@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 interface VideoActionsProps {
   video: TVideo;
-  user: User;
+  user: User | Partial<User>;
   reFetch: () => void;
   onSend: (videoId: number) => void;
 }
@@ -26,7 +26,6 @@ const VideoActions = ({
         toast.error(err?.response?.data?.message);
       })
   }
-
 
   return (
     <div className="flex justify-center gap-2 flex-wrap">

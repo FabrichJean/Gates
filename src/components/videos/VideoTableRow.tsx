@@ -9,7 +9,7 @@ import type { User } from "../../hooks/useVideos";
 interface VideoTableRowProps {
   video: TVideo;
   index: number;
-  user: User;
+  user: User | Partial<User>;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
   reFetch: () => void;
