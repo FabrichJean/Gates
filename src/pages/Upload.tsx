@@ -87,11 +87,11 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
         onClick={handleSubmit}
         disabled={uploading}
         className={`font-sans relative flex items-center justify-center gap-2 px-6 py-2.5
-    font-medium text-sm rounded-sm transition-all duration-300
-    backdrop-blur-md border border-transparent cursor-pointer antialiased tracking-wide
+    font-medium text-sm rounded-md transition-all duration-300
+    backdrop-blur-md border border-gray-400 cursor-pointer antialiased tracking-wide
     ${uploading
             ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 border hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98]"
           } focus:outline-none focus:ring-2 focus:ring-blue-300`}
       >
         {uploading ? (
@@ -103,7 +103,7 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
           </>
         ) : (
           <>
-            <span className="font-sans underline hover:text-blue-500 antialiased font-medium">
+            <span className="font-sans hover:text-blue-500 antialiased font-medium">
               {btnSubmit ? btnSubmit : '🚀\u00A0\u00A0\u00A0Publish'}
             </span>
           </>
