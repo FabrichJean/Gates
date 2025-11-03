@@ -1,9 +1,9 @@
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { apiURL, server } from "../constant";
+import { server } from "../constant";
 import { getToken } from "../utils/storage";
 import { toast } from "react-hot-toast";
+import { useAuth } from "./useAuth";
 
 /**
  * Hook personnalisé pour gérer la connexion Socket.IO côté client.
@@ -12,27 +12,12 @@ import { toast } from "react-hot-toast";
  * - Déclenche un callback quand un upload est terminé (succès ou échec)
  */
 const useSocketSend = (onUploadFinished?: (videoId: string) => void) => {
-  const [userId, setUserId] = useState<string | null>(null);
+ const {user} = useAuth()
   const socketRef = useRef<Socket | null>(null);
-
-  // 🧠 Étape 1 — Authentification pour récupérer l'ID utilisateur
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await axios.get<{ role: string; id: number }>(
-          `${apiURL}/auth`,
-          { headers: { Authorization: `Bearer ${getToken()}` } }
-        );
-        setUserId(String(res.data.id));
-      } catch (err) {
-        console.error("❌ Erreur d’authentification :", err);
-      }
-    })();
-  }, []);
 
   // ⚙️ Étape 2 — Connexion socket dès que l'utilisateur est identifié
   useEffect(() => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     const socket = io(server, {
       transports: ["websocket"],
@@ -81,7 +66,7 @@ const useSocketSend = (onUploadFinished?: (videoId: string) => void) => {
       console.log("🔌 Déconnexion du serveur Socket.IO");
       socket.disconnect();
     };
-  }, [userId, onUploadFinished]);
+  }, [user, onUploadFinished]);
 
   return socketRef.current;
 };

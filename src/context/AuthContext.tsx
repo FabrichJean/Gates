@@ -30,7 +30,7 @@ function parseJwt(token?: string | null) {
 // 🔸 Interface du contexte d'authentification
 export interface AuthContextType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: any;
+  user: Partial<User>;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
