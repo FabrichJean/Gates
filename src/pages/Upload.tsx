@@ -43,7 +43,7 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
     <div onSubmit={handleSubmit} className="w-max md:min-w-xl p-4 space-y-4">
 
       <div className="flex items-center gap-3">
-        <label className="font-sans text-sm font-medium text-gray-700 tracking-wide antialiased">
+        <label className="font-sans text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide antialiased transition-colors duration-300">
           Titles
         </label>
 
@@ -51,10 +51,10 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
           type="button"
           onClick={addCouple}
           className="flex items-center justify-center w-8 h-8 rounded-xl 
-      bg-white border border-gray-200 shadow-sm 
-      hover:border-gray-300 hover:shadow-md 
+      bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm 
+      hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md 
       transition-all duration-200 ease-in-out 
-      text-gray-700 hover:text-blue-600 
+      text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 
       focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-pointer hover:scale-105"
         >
           <PlusIcon className="w-4 h-4" />
@@ -74,10 +74,10 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
             placeholder="Title"
             value={c.title}
             onChange={(e) => handleChange(i, 'title', e.target.value)}
-            className="font-sans flex-1 border-b-2 border-gray-300 focus:border-blue-500 outline-none p-2 bg-transparent antialiased transition-colors"
+            className="font-sans flex-1 border-b-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 outline-none p-2 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 antialiased transition-all duration-300"
             required
           />
-          <button type="button" onClick={() => removeCouple(i)} className="text-red-500 hover:text-red-700">
+          <button type="button" onClick={() => removeCouple(i)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300">
             <TrashIcon className="w-6 h-6" />
           </button>
         </div>
@@ -88,22 +88,22 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
         disabled={uploading}
         className={`font-sans relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border border-gray-400 cursor-pointer antialiased tracking-wide
+    backdrop-blur-md border cursor-pointer antialiased tracking-wide
     ${uploading
-            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-            : "bg-white/90 hover:bg-white text-gray-800 border-gray-200 border hover:border-gray-300 hover:scale-[1.02] active:scale-[0.98]"
-          } focus:outline-none focus:ring-2 focus:ring-blue-300`}
+            ? "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed"
+            : "bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:scale-[1.02] active:scale-[0.98]"
+          } focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500`}
       >
         {uploading ? (
           <>
-            <span className="font-sans flex items-center gap-2 text-gray-600 antialiased">
-              <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+            <span className="font-sans flex items-center gap-2 text-gray-600 dark:text-gray-400 antialiased">
+              <span className="inline-block w-4 h-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></span>
               progressing... {progress}%
             </span>
           </>
         ) : (
           <>
-            <span className="font-sans hover:text-blue-500 antialiased font-medium">
+            <span className="font-sans hover:text-blue-500 dark:hover:text-blue-400 antialiased font-medium transition-colors duration-300">
               {btnSubmit ? btnSubmit : '🚀\u00A0\u00A0\u00A0Publish'}
             </span>
           </>
@@ -113,17 +113,6 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
     </div>
   );
 }
-
-
-// import { useState, useRef, useMemo, useCallback, useReducer, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import toast from "react-hot-toast";
-// import Md5 from "ts-md5";
-// import { useAuthMe } from "../hooks/useAuthMe";
-// import { uploadVideo } from "../api/videos";
-// import CategoryAutoComplete from "../components/CategoryAutoComplete";
-// import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
-// import TitlesForm from "../components/TitlesForm";
 
 type UploadState = {
   videoFile: File | null;
@@ -243,27 +232,27 @@ const Upload = () => {
   }, [videoFile, coverFile, category, subcategory, coupleTitles, ref, navigate]);
 
   return (
-    <div className="font-sans h-full antialiased">
+    <div className="font-sans h-full antialiased bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
       <div className="flex flex-col flex-wrap md:flex-row gap-8 p-4 items-start justify-center w-full">
-        <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white rounded-md p-8 border border-gray-200 w-full backdrop-blur-sm">
+        <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white dark:bg-gray-800 rounded-md p-8 border border-gray-200 dark:border-gray-700 w-full backdrop-blur-sm transition-all duration-300">
           <div className="space-y-6">
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Ref</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Ref</label>
               <input
                 type="text"
                 value={ref || ""}
                 onChange={(e) => setRef(e.currentTarget.value.trim())}
-                className="w-full text-black border border-gray-300 rounded-md p-2 outline-none focus:border-blue-500"
+                className="w-full text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Category</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Category</label>
               <CategoryAutoComplete onSelect={setCategory} />
             </div>
 
             <div>
-              <label className="block text-gray-700 font-medium mb-2">SubCategory</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">SubCategory</label>
               <SubCategoryAutoComplete onSelect={setSubCategory} categoryId={category?.id} />
             </div>
 
@@ -292,8 +281,8 @@ const Upload = () => {
             />
 
             {uploading && (
-              <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${progress}%` }} />
+              <div className="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full overflow-hidden transition-colors duration-300">
+                <div className="bg-blue-600 dark:bg-blue-500 h-3 rounded-full transition-colors duration-300" style={{ width: `${progress}%` }} />
               </div>
             )}
           </div>
@@ -325,7 +314,7 @@ type UploadBoxProps = {
 
 const UploadBox = ({ label, onClick, onDrop, preview, inputRef, accept, onChange, emptyMessage }: UploadBoxProps) => (
   <div>
-    <label className="block text-gray-700 font-medium mb-2">{label}</label>
+    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">{label}</label>
     <div
       onClick={onClick}
       onDrop={(e) => {
@@ -334,7 +323,7 @@ const UploadBox = ({ label, onClick, onDrop, preview, inputRef, accept, onChange
         if (file) onDrop(file);
       }}
       onDragOver={(e) => e.preventDefault()}
-      className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center hover:border-blue-500 transition cursor-pointer"
+      className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-6 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer"
     >
       {preview ? (
         accept.includes("video") ? (
@@ -343,7 +332,7 @@ const UploadBox = ({ label, onClick, onDrop, preview, inputRef, accept, onChange
           <img src={preview} alt="Preview" className="rounded-lg object-cover w-full h-52" />
         )
       ) : (
-        <p className="text-gray-500 text-sm text-center">{emptyMessage}</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm text-center transition-colors duration-300">{emptyMessage}</p>
       )}
       <input type="file" ref={inputRef} accept={accept} onChange={onChange} className="hidden" />
     </div>

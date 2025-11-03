@@ -85,17 +85,17 @@ const Users = () => {
   if (loading) return <p className="text-center mt-8">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-6">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-4 sm:p-6 lg:p-6">
       {/* ✅ HEADER RESPONSIVE */}
       <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-500 flex items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-500 dark:text-gray-400 transition-colors duration-300 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="w-6 h-6 text-blue-600"
+            className="w-6 h-6 text-blue-600 dark:text-blue-400"
           >
             <path
               strokeLinecap="round"
@@ -119,10 +119,10 @@ const Users = () => {
           <div className="flex items-center justify-between w-full sm:w-auto">
             <Link
               to="/users/create"
-              className="flex items-center justify-center gap-2 p-3 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm hover:bg-blue-50 transition-all duration-200"
+              className="flex items-center justify-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all duration-200"
               aria-label="Create user"
             >
-              <TiUserAddOutline className="text-blue-400 size-4" />
+              <TiUserAddOutline className="text-blue-400 dark:text-blue-300 size-4" />
             </Link>
             {/* make input shrinkable with flex-1 and min-w-0 */}
             <input
@@ -130,20 +130,20 @@ const Users = () => {
               onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="🔍 Search..."
-              className="border border-gray-300 outline-none rounded-lg px-3 py-2 w-full sm:w-64 ml-2 flex-1 min-w-0"
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none rounded-lg px-3 py-2 w-full sm:w-64 ml-2 flex-1 min-w-0 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
             />
 
             {/* Column Filter Button */}
             <div className="relative ml-2">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsColumnMenuOpen(prev => !prev); }}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none transition-colors duration-300"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 mr-2 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
                 </svg>
                 Columns
-                <svg className={`w-4 h-4 ml-1 transition-transform ${isColumnMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-4 h-4 ml-1 transition-transform text-gray-600 dark:text-gray-400 ${isColumnMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -151,23 +151,23 @@ const Users = () => {
               {isColumnMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setIsColumnMenuOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-20 transition-colors duration-300">
                     <div className="py-2">
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100 flex items-center justify-between">
+                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <span>Show columns</span>
-                        <span className="text-xs text-gray-400">({visibleColumns.length}/{columns.length})</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">({visibleColumns.length}/{columns.length})</span>
                       </div>
-                      <div className="px-4 py-2 border-b border-gray-100 flex space-x-2">
-                        <button onClick={() => toggleAllColumns(true)} className="text-xs text-blue-600 hover:text-blue-800" disabled={visibleColumns.length === columns.length}>Tout</button>
-                        <span className="text-xs text-gray-300">|</span>
-                        <button onClick={() => toggleAllColumns(false)} className="text-xs text-gray-600 hover:text-gray-800" disabled={visibleColumns.length === 0}>Aucun</button>
+                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex space-x-2">
+                        <button onClick={() => toggleAllColumns(true)} className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-300" disabled={visibleColumns.length === columns.length}>Tout</button>
+                        <span className="text-xs text-gray-300 dark:text-gray-600">|</span>
+                        <button onClick={() => toggleAllColumns(false)} className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-300" disabled={visibleColumns.length === 0}>Aucun</button>
                       </div>
 
                       {columns.map((column) => (
-                        <div key={column.key} className="px-4 py-2 hover:bg-gray-50">
+                        <div key={column.key} className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
                           <label className="flex items-center cursor-pointer">
-                            <input type="checkbox" checked={column.visible} onChange={() => toggleColumn(column.key)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2" />
-                            <span className="ml-2 text-sm text-gray-700">{column.label}</span>
+                            <input type="checkbox" checked={column.visible} onChange={() => toggleColumn(column.key)} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 bg-white dark:bg-gray-700" />
+                            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{column.label}</span>
                           </label>
                         </div>
                       ))}
@@ -181,28 +181,28 @@ const Users = () => {
       </header>
 
       {/* ✅ TABLE RESPONSIVE */}
-      <div className="overflow-x-auto shadow-sm pb-20 rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto shadow-sm pb-20 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors duration-300">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm sm:text-base">
+          <thead className="bg-gray-50 dark:bg-gray-700 transition-colors duration-300">
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key} className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th key={col.key} className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   {col.label}
                 </th>
               ))}
             </tr>
           </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-300">
             {data?.map((u: any) => (
-              <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
                 {columns.find(c => c.key === 'name')?.visible && (
                   <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <img className="h-10 w-10 rounded-full" src={`https://api.dicebear.com/9.x/croodles/svg?seed=${u.username}`} alt={u.username} />
+                      <img className="h-10 w-10 rounded-full border border-gray-200 dark:border-gray-600" src={`https://api.dicebear.com/9.x/croodles/svg?seed=${u.username}`} alt={u.username} />
                       <div>
-                        <div className="font-medium text-gray-900">{u.username}</div>
-                        <div className="text-gray-500 text-xs sm:text-sm">{u.email}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{u.username}</div>
+                        <div className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">{u.email}</div>
                       </div>
                     </div>
                   </td>
@@ -211,18 +211,18 @@ const Users = () => {
                 {columns.find(c => c.key === 'status')?.visible && (
                   <td className="px-4 sm:px-6 py-3 text-left">
                     {u.isValidated ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="green" className="w-5 h-5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="green" className="w-5 h-5 text-green-600 dark:text-green-400">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75" />
                       </svg>
                     ) : (
-                      <span className="text-pink-400 text-xs sm:text-sm">Pending</span>
+                      <span className="text-pink-400 dark:text-pink-300 text-xs sm:text-sm">Pending</span>
                     )}
                   </td>
                 )}
 
                 {columns.find(c => c.key === 'role')?.visible && (
-                  <td className="px-4 sm:px-6 py-3 text-gray-600 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${u.role === "superadmin" ? "bg-purple-100 text-purple-700" : u.role === "admin" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                  <td className="px-4 sm:px-6 py-3 text-gray-600 dark:text-gray-400 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors duration-300 ${u.role === "superadmin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200" : u.role === "admin" ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200" : "bg-green-100 dark:bg-green-400 text-green-700 dark:text-green-200"}`}>
                       {u.role}
                     </span>
                   </td>
@@ -232,7 +232,7 @@ const Users = () => {
                   <td className="px-4 sm:px-6 py-3 relative text-right">
                     {u.role !== "superadmin" && (
                       <>
-                        <button onClick={(e) => { e.stopPropagation(); setOpenMenuId((prev) => (prev === u.id ? null : u.id)); }} className="text-gray-500 hover:text-gray-700 cursor-pointer">
+                        <button onClick={(e) => { e.stopPropagation(); setOpenMenuId((prev) => (prev === u.id ? null : u.id)); }} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer transition-colors duration-300">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <circle cx="5" cy="12" r="2" />
                             <circle cx="12" cy="12" r="2" />
@@ -241,14 +241,14 @@ const Users = () => {
                         </button>
 
                         {openMenuId === u.id && (
-                          <div className="absolute right-2  bg-white  border border-gray-200 shadow-lg rounded-lg z-50 min-w-28 w-max">
+                          <div className="absolute right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg z-50 min-w-28 w-max transition-colors duration-300">
                             {!u.isValidated && (
-                              <button onClick={() => handleValidate(u.id)} className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700">Validate</button>
+                              <button onClick={() => handleValidate(u.id)} className="block w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 dark:hover:bg-green-900 text-gray-700 dark:text-gray-300 transition-colors duration-300">Validate</button>
                             )}
                             {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                             {/* @ts-ignore */}
-                            <button className="block text-nowrap w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 text-gray-700" onClick={() => document.getElementById('modal_'+u.username).showModal()}>update password</button>
-                            <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 text-red-600">block</button>
+                            <button className="block text-nowrap w-full text-left px-4 cursor-pointer py-2 text-xs sm:text-sm hover:bg-green-50 dark:hover:bg-green-900 text-gray-700 dark:text-gray-300 transition-colors duration-300" onClick={() => document.getElementById('modal_' + u.username).showModal()}>update password</button>
+                            <button onClick={() => handleDelete(u.id)} className="block w-full text-left px-4 py-2 cursor-pointer text-xs sm:text-sm hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 transition-colors duration-300">block</button>
                           </div>
                         )}
                       </>
@@ -260,7 +260,7 @@ const Users = () => {
           </tbody>
         </table>
       </div>
-      
+
       {/* Modales UpdatePassword - placées en dehors du tableau */}
       {data?.map((u: any) => (
         <UpdatePassword key={`modal-${u.id}`} u={u} />

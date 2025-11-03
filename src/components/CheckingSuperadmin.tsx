@@ -24,9 +24,15 @@ function CheckingSuperadmin({ video, index, reFetch, user }: Props) {
       <div
         tabIndex={video.id}
         role="button"
-        className="flex items-center gap-2 text-xs hover:bg-gray-200 w-max p-1 px-2 rounded-md cursor-default m-auto"
+        className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-max p-1 px-2 rounded-md cursor-default m-auto transition-colors duration-300 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800"
       >
-        {video.checking === 'checked' ? <FaCheckDouble /> : <FiHexagon />} {video.checking === "null" ? "not ready" : video.checking}
+        {video.checking === 'checked' ? 
+          <FaCheckDouble className="text-green-600 dark:text-green-400" /> : 
+          <FiHexagon className="text-gray-500 dark:text-gray-400" />
+        } 
+        <span className="text-gray-700 dark:text-gray-300">
+          {video.checking === "null" ? "not ready" : video.checking}
+        </span>
       </div>
 
       {/* CheckerDrop seulement si la vidéo est vérifiable */}

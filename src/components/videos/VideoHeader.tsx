@@ -29,7 +29,7 @@ const VideoHeader = ({
 
   return (
     <header className="flex flex-wrap justify-start items-center">
-      <h1 className="text-3xl font-semibold pb-3 text-gray-500">
+      <h1 className="text-3xl font-semibold pb-3 text-gray-500 dark:text-gray-400 transition-colors duration-300">
         Video Management
       </h1>
 
@@ -50,9 +50,9 @@ const VideoHeader = ({
               ) as HTMLDialogElement | null;
               modal?.showModal();
             }}
-            className="input input-ghost hover:bg-base-200 cursor-pointer transition-colors bg-white rounded-lg"
+            className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
           >
-            {checkObjectContent(filters).allEmpty ? null : <div className="status status-info animate-bounce"></div>} <Filter className="w-3" /> filters
+            {checkObjectContent(filters).allEmpty ? null : <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>} <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
           </button>
 
           <SearchModal />
@@ -64,10 +64,10 @@ const VideoHeader = ({
               ) as HTMLDialogElement | null;
               modal?.showModal();
             }}
-            className="input input-ghost hover:bg-base-200 cursor-pointer transition-colors bg-white rounded-lg"
+            className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
           >
-            <span className="grow text-left">Search…</span>
-            <kbd className="kbd kbd-sm font-mono opacity-50">
+            <span className="grow text-left text-gray-600 dark:text-gray-300">Search…</span>
+            <kbd className="kbd kbd-sm font-mono opacity-50 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
               <span className="me-1 text-sm">⌘</span>K
             </kbd>
           </button>
@@ -77,19 +77,19 @@ const VideoHeader = ({
         <div className="flex gap-2">
           <Link
             to={"/videos/upload"}
-            className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 bg-white/90 text-gray-800 font-medium text-sm hover:bg-blue-50 transition-all"
+            className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all"
           >
-            <FilePlus className="w-5 h-auto text-blue-400" />
+            <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
           </Link>
 
           {user?.role === RoleEnum.SUPERADMIN && (
             <button
               disabled={loading?.type === "webapp"}
               onClick={onWebApp}
-              className="p-2.5 rounded-lg flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border bg-white/90 text-gray-800 border-gray-200 hover:border-gray-300 hover:bg-base-200 transition-all"
+              className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
             >
-              <SendIcon className="text-blue-400" />
-              <span className="md:inline hidden text-gray-600">
+              <SendIcon className="text-blue-400 dark:text-blue-300" />
+              <span className="md:inline hidden text-gray-600 dark:text-gray-400">
                 send to webApp
               </span>
             </button>
@@ -101,10 +101,10 @@ const VideoHeader = ({
           drag
           dragMomentum={false}
           onDragEnd={() => fabControls.start({ x: 0, y: 0 })}
-          className="md:hidden fixed z-40 bottom-5 right-5 flex items-center justify-center p-3 rounded-full border border-gray-200 bg-white/90 text-gray-800 shadow-sm hover:bg-blue-50 hover:shadow-md transition-all"
+          className="md:hidden fixed z-40 bottom-5 right-5 flex items-center justify-center p-3 rounded-full border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 shadow-sm dark:shadow-gray-800 hover:bg-blue-50 dark:hover:bg-gray-800 hover:shadow-md transition-all"
         >
           <Link to={"/videos/upload"}>
-            <FilePlus className="w-8 h-auto text-blue-400 animate-pulse" />
+            <FilePlus className="w-8 h-auto text-blue-400 dark:text-blue-300 animate-pulse" />
           </Link>
         </motion.div>
       </div>

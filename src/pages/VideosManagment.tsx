@@ -30,7 +30,7 @@ const VideosManagment = () => {
   } = useVideoManagement();
 
   return (
-    <div className="flex flex-col gap-2 min-h-screen bg-white p-6 pb-0">
+    <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6 pb-0">
       <VideoHeader
         user={user}
         filters={filters}
@@ -42,17 +42,17 @@ const VideosManagment = () => {
       />
 
       {checkObjectContent(filters).hasContent ? (
-        <span className="mb-3 text-xs font-bold">* videos filters</span>
+        <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* videos filters</span>
       ) : null}
 
       {/* ---- Table ---- */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm dark:shadow-gray-800 overflow-hidden">
         {loading?.type === "webapp" && <DeepLoader />}
 
         <div className="overflow-x-auto pb-[8rem]">
-          <table className="min-w-full w-max text-sm md:text-base ">
+          <table className="min-w-full w-max text-sm md:text-base bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
             <VideoTableHeader />
-            <tbody className="divide-y divide-gray-200 text-gray-700 pb-[8rem]">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300 pb-[8rem] transition-colors duration-300">
               {data?.videos?.map((video, index) =>
                 <VideoTableRow
                   key={video.id}

@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 const ThemeToggle  = () => {
     const [theme, setTheme] = useState(() => {
         if ( typeof window !== "undefined" ) { 
-            return localStorage.getItem("theme") || "system";
+            return localStorage.getItem("theme") || "dark"; // 🌙 Dark par défaut au lieu de "system"
         }
-        return "system";
+        return "dark"; // 🌙 Dark par défaut au lieu de "system"
     })
 
     useEffect(() => {
@@ -23,17 +23,17 @@ const ThemeToggle  = () => {
     }, [theme]);
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="mr-2">
             <select
                 id="theme-select"
                 value={theme}
                 onChange={e => setTheme(e.target.value)}
-                className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 appearance-none focus:outline-none focus:ring-0 cursor-pointer"
+                className="outline-none cursor-pointer bg-transparent text-gray-700 dark:text-gray-300 border-none focus:ring-0 transition-colors duration-300"
                 style={{ boxShadow: "none", backgroundImage: "none" }}
             >
-                <option value="light">☀️</option>
-                <option value="dark">🌙</option>
-                <option value="system">💻</option>
+                <option value="light" className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">☀️</option>
+                <option value="dark" className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">🌙</option>
+                <option value="system" className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">💻</option>
             </select>
         </div>
     )

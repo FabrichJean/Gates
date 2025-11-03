@@ -55,7 +55,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
 
     return (
         <aside
-            className={`h-screen border-r border-gray-200 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
+            className={`h-screen border-r border-gray-300 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
             ${isCollapsed ? "w-20" : "w-64"} `}
         >
             {/* Bouton de fermeture mobile */}

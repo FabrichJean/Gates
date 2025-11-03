@@ -24,13 +24,13 @@ const VideoTableRow = ({
   reFetch,
 }: VideoTableRowProps) => {
   return (
-    <tr className="hover:bg-gray-50 transition">
-      <td className="py-3 px-6 font-light">{video.ref}</td>
-      <td className="py-3 px-6 text-blue-600 underline">
+    <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
+      <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">{video.ref}</td>
+      <td className="py-3 px-6 text-blue-600 dark:text-blue-400 underline border-r border-gray-100 dark:border-gray-800">
         {user?.role === RoleEnum.SUPERADMIN ? (
           <Link
             to={`/users/${video.user?.id}`}
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-300"
           >
             {video.user?.username}
           </Link>
@@ -39,43 +39,43 @@ const VideoTableRow = ({
         )}
       </td>
 
-      <td className="py-3 px-6 font-light">
+      <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         {video.category?.name} / {video.subCategory?.name}
       </td>
 
-      <td className="py-3 px-6">
+      <td className="py-3 px-6 border-r border-gray-100 dark:border-gray-800">
         {video.upload_status === 1 ? (
-          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+          <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-300">
             uploaded
           </span>
         ) : video.transfer_status === 1 ? (
-          <span className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-semibold">
+          <span className="bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-300">
             waiting for Upload
           </span>
         ) : (
-          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+          <span className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-300">
             waiting for Transcode
           </span>
         )}
       </td>
 
-      <td className="py-3 px-6 text-center">
+      <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <img
           src={`${video.public_urls?.cover_url || ''}`}
           alt="cover"
-          className="w-20 h-12 object-cover rounded-lg mx-auto"
+          className="w-20 h-12 object-cover rounded-lg mx-auto border border-gray-200 dark:border-gray-600 shadow-sm"
         />
       </td>
 
-      <td className="py-3 px-6 text-center font-light">
+      <td className="py-3 px-6 text-center font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         {(Number(video.duration) / 1000).toFixed()} s
       </td>
 
-      <td className="py-3 px-6 text-center">
+      <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <input
           type="checkbox"
           checked={!video.isDeleted}
-          className="toggle"
+          className="toggle toggle-primary bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300"
           onChange={
             user?.role === RoleEnum.SUPERADMIN
               ? () => onActivate(video.id)
@@ -84,12 +84,12 @@ const VideoTableRow = ({
         />
       </td>
 
-      <td className="py-3 px-6 text-center">
+      <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         {/* @ts-ignore */}
         <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user} />
       </td>
 
-      <td className="py-3 px-6 text-center">
+      <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <VideoActions
           video={video}
           user={user}
@@ -97,7 +97,7 @@ const VideoTableRow = ({
         />
       </td>
 
-      <td className="py-3 px-6 text-center font-light">
+      <td className="py-3 px-6 text-center font-light text-gray-800 dark:text-gray-300">
         {video.createdAt ? new Date(video.createdAt).toLocaleDateString("fr-FR", {
           year: "numeric",
           month: "2-digit",

@@ -66,10 +66,8 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
             upload_status: mapStatus(filters.upload_status),
         };
 
-        // ✅ sauvegarde locale pour rechargement ultérieur
         localStorage.setItem('videos_filtered', JSON.stringify(data));
 
-        // ✅ fusion sécurisée des params (sans écraser les clés existantes)
         const safeParams = params || {};
         const finalQuery = { ...safeParams, ...data };
 
@@ -77,24 +75,23 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
             const fetched = await getFilteredVideos(finalQuery);
             onSubmit(fetched.data);
 
-            // ✅ feedback visuel (au choix)
             console.log("✅ Filtres appliqués :", finalQuery);
         } catch (error) {
-            console.error("❌ Erreur lors du filtrage :", error);
+            console.error(" Erreur lors du filtrage :", error);
         }
     };
 
 
     return (
         <dialog id="search_modal_52" className="modal">
-            <div className="flex flex-col gap-4 modal-box w-max">
+            <div className="flex flex-col gap-4 modal-box w-max bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
                 {/* Sélections principales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium">Category</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Category</label>
                         <select
-                            className="select select-bordered w-full outline-none"
+                            className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.category_id}
                             onChange={(e) => handleChange("category_id", e.target.value)}
                         >
@@ -106,9 +103,9 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium">SubCategory</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">SubCategory</label>
                         <select
-                            className="select select-bordered w-full"
+                            className="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.sub_category_id}
                             onChange={(e) => handleChange("sub_category_id", e.target.value)}
                         >
@@ -120,9 +117,9 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium">User</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">User</label>
                         <select
-                            className="select select-bordered w-full outline-none"
+                            className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.user_id}
                             onChange={(e) => handleChange("user_id", e.target.value)}
                         >
@@ -137,19 +134,19 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                 {/* 📅 Filtres de date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium">Start Date</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Start Date</label>
                         <input
                             type="date"
-                            className="input input-bordered w-full"
+                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.startedAt}
                             onChange={(e) => handleChange("startedAt", e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium">End Date</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">End Date</label>
                         <input
                             type="date"
-                            className="input input-bordered w-full"
+                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.endAt}
                             onChange={(e) => handleChange("endAt", e.target.value)}
                         />
@@ -164,19 +161,19 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                         { key: "cover_upload_status", label: "Cover Uploaded" },
                         { key: "transfer_status", label: "Transferred" },
                     ].map(({ key, label }) => (
-                        <div key={key} className="p-3 bg-base-100 rounded-lg">
-                            <p className="font-medium mb-2">{label}</p>
+                        <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+                            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
                             <div className="flex gap-3">
                                 {["all", "yes", "no"].map((option) => (
                                     <label key={option} className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="radio"
                                             name={key}
-                                            className="radio radio-sm"
+                                            className="radio radio-sm accent-blue-500 dark:accent-blue-400"
                                             checked={option === 'all' ? ( filters[key as keyof typeof filters] === 'all' || filters[key as keyof typeof filters] === '') : filters[key as keyof typeof filters] === option}
                                             onChange={() => handleChange(key, option)}
                                         />
-                                        <span className="text-sm capitalize">{option}</span>
+                                        <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{option}</span>
                                     </label>
                                 ))}
                             </div>
@@ -186,10 +183,10 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
 
                 {/* Boutons */}
                 <form method="dialog" className="pt-3 flex justify-end gap-3">
-                    <button className="btn btn-outline btn-sm">Close</button>
+                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">Close</button>
 
                     <div
-                        className="btn btn-outline btn-sm"
+                        className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
                         onClick={async () => {
                             setFilters({
                                 category_id: "",
@@ -209,7 +206,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                         Reset
                     </div>
 
-                    <button className="btn btn-primary btn-sm" onClick={submit}>
+                    <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300" onClick={submit}>
                         Apply
                     </button>
                 </form>

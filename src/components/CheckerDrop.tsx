@@ -26,7 +26,7 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
             reFetch();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-            toast.error("❌ Error: " + (err.response?.data?.message || err.message));
+            toast.error("Error: " + (err.response?.data?.message || err.message));
         }
     };
 
@@ -44,20 +44,27 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
                     }}>submit</button>
                 </div>
             </dialog> */}
-            <div tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-md z-100 w-52 p-2 border border-gray-300 shadow-sm">
+            <div tabIndex={-1} className="dropdown-content menu bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md z-100 w-52 p-2 shadow-sm dark:shadow-gray-700 transition-colors duration-300">
                 {
                     user.role === 'superadmin' ?
-                        ["refused", "checked"]?.map(check => <div key={check} onClick={() => update((check === 'go ready' ? 'null' : check))} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs hover:bg-gray-200 w-full p-2 rounded-md cursor-default m-auto">
-                            <span className="flex items-center gap-2"><FiHexagon /> {check}</span> {(check === 'go ready' ? 'null' : check) === video.checking ? <FaCheck /> : null}
+                        ["refused", "checked"]?.map(check => <div key={check} onClick={() => update((check === 'go ready' ? 'null' : check))} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300">
+                            <span className="flex items-center gap-2">
+                                <FiHexagon className="text-gray-500 dark:text-gray-400" /> 
+                                <span className="text-gray-700 dark:text-gray-300">{check}</span>
+                            </span> 
+                            {(check === 'go ready' ? 'null' : check) === video.checking ? <FaCheck className="text-green-600 dark:text-green-400" /> : null}
                         </div>)
                         :
                         <>
-                            {(video.checking === 'null' && <div onClick={() => update('waiting for checking')} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs hover:bg-gray-200 w-full p-2 rounded-md cursor-default m-auto">
-                                <span className="flex items-center gap-2"><FiHexagon /> ready</span>
+                            {(video.checking === 'null' && <div onClick={() => update('waiting for checking')} tabIndex={video.id} role="button" className="flex items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300">
+                                <span className="flex items-center gap-2">
+                                    <FiHexagon className="text-gray-500 dark:text-gray-400" /> 
+                                    <span className="text-gray-700 dark:text-gray-300">ready</span>
+                                </span>
                             </div>)}
-                            {(video.checking === 'refused' && <div className="flex flex-col items-center justify-between gap-2 text-xs hover:bg-gray-200 w-full p-2 rounded-md cursor-default m-auto">
-                                <Link to={'/touch/'+video.id} className="btn w-full">Touch again</Link>
-                                <p>{video.comment}</p>
+                            {(video.checking === 'refused' && <div className="flex flex-col items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300">
+                                <Link to={'/touch/'+video.id} className="btn bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none w-full transition-colors duration-300">Touch again</Link>
+                                <p className="text-gray-600 dark:text-gray-400 text-center">{video.comment}</p>
                             </div>)}
                         </>
                 }

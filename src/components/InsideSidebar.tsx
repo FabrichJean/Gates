@@ -3,14 +3,13 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { User as UserIcon, LogOut as LogOutIcon } from "lucide-react";
 
-// Inline component pour afficher le nom/email et l'avatar de l'utilisateur
+
 const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement | null>(null);
 
-    // user peut être une string (userType) ou un objet contenant email/name
     let displayName = "Admin";
     let seed = "Super Admin";
 
@@ -51,12 +50,13 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 
     return (
         <div ref={ref} className="relative flex items-center gap-3">
-            <span className="text-gray-600 text-sm">{displayName}</span>
+            <ThemeToggle />
+            <span className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">{displayName}</span>
             <button
                 onClick={() => setOpen(o => !o)}
                 aria-haspopup="true"
                 aria-expanded={open}
-                className="cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-sky-300"
+                className="cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-sky-300 dark:focus:ring-sky-600 transition-all duration-300"
                 title="User menu"
             >
                 <img
@@ -69,15 +69,15 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
             {open && (
                 <div className="absolute top-full left-1/2 mt-2 transform -translate-x-1/2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md z-50">
                     <div className="py-1">
-                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-white dark:hover:bg-gray-700 cursor-pointer">
-                            <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100">
-                                <UserIcon className="w-4 h-4 text-gray-600" />
-                                <span>Profil</span>
+                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                            <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
+                                <UserIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                                <span className="text-gray-800 dark:text-gray-200">Profil</span>
                             </div>
                         </button>
-                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:hover:bg-gray-700 cursor-pointer">
-                            <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 px-2 py-1">
-                                <LogOutIcon className="w-4 h-4 text-red-600" />
+                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:text-red-400 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                            <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 px-2 py-1 transition-colors duration-300">
+                                <LogOutIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                                 <span>Logout</span>
                             </div>
                         </button>
@@ -91,13 +91,11 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import useSocket from "../hooks/useSocket";
+import ThemeToggle from "./ThemeToggle";
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
     useSocket()
-    // Initialize synchronously from localStorage/window to avoid UI flicker on reload
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
-    // Do not auto-open mobile sidebar on initial load or on resize.
-    // Respect user's explicit choice only when they toggle the menu.
     const initialShowSidebar = false; // always start closed on load
     const initialIsMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
@@ -120,23 +118,16 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         return () => window.removeEventListener('confirm-logout', handler as EventListener);
     }, [logout, navigate]);
 
-    // ✅ Détecte la taille d’écran pour passer en mode mobile automatiquement
     useEffect(() => {
-        // Listen to resize and update isMobile without clobbering desktop collapse state.
         const handleResize = () => {
             const nowMobile = window.innerWidth < 1024;
             setIsMobile(nowMobile);
 
-            // If switching from mobile -> desktop, restore collapsed state from localStorage
             if (!nowMobile) {
                 const storedCollapsed = localStorage.getItem('is-collapsed') === 'true';
                 setIsCollapsed(storedCollapsed);
-                // when going to desktop, ensure sidebar overlay is closed
                 setShowSidebar(false);
             } else {
-                // when entering mobile, do NOT auto-open the overlay even if localStorage had a value.
-                // Keep the previous showSidebar only if it was explicitly set true by the user during this session.
-                // We intentionally avoid reading 'show-side' here to prevent automatic open on resize.
                 setShowSidebar(false);
             }
         };
@@ -158,7 +149,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     };
 
     return (
-        <div className="w-dvw h-dvh bg-gray-200 flex overflow-hidden relative">
+        <div className="w-dvw h-dvh bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative">
             <Toaster />
 
             {/* Desktop Sidebar */}
@@ -180,16 +171,16 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
             {/* Contenu principal */}
             <div
                 className={`
-                    flex flex-col bg-white h-full overflow-auto transition-all duration-300
+                    flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
                     ${isMobile ? "w-full" : isCollapsed ? "w-[calc(100%-5rem)]" : "w-[calc(100%-16rem)]"}
                 `}
             >
                 {/* Header */}
-                <header className="w-full bg-gray-50 shadow-sm px-6 py-4 flex justify-between items-center transition-all duration-300">
+                <header className="w-full  bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
-                        className="text-lg font-semibold cursor-pointer"
+                        className="text-lg font-semibold cursor-pointer text-gray-700 dark:text-gray-300 transition-colors duration-300"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +188,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
-                            className="size-6 hover:text-blue-400"
+                            className="size-6 hover:text-blue-400 dark:hover:text-blue-300 transition-colors duration-300"
                         >
                             <path
                                 strokeLinecap="round"
@@ -208,7 +199,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Affiche le nom/email de l'utilisateur si disponible, sinon fallback */}
                         <UserDisplayInline onLogoutRequest={openLogoutModal} />
                     </div>
                 </header>
@@ -224,20 +214,15 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    // perform logout by finding Auth context inside UserDisplayInline
-                                    // We'll import and call logout here through window event or navigate
-                                    // Simpler: trigger a custom event that the UserDisplayInline cannot listen to.
-                                    // We'll perform logout by calling logout through a small workaround: navigate to /login and clear token
-                                    // But better: dispatch a custom event and handle it here.
                                     window.dispatchEvent(new CustomEvent('confirm-logout'));
                                     closeLogoutModal();
                                 }}
                                 className="flex gap-4"
                             >
-                                <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
+                                <button className="btn bg-red-500 hover:bg-red-600 text-white border-none transition-colors duration-300" type="submit">
                                     logout
                                 </button>
-                                <button type="button" className="btn" onClick={closeLogoutModal}>
+                                <button type="button" className="btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition-colors duration-300" onClick={closeLogoutModal}>
                                     cancel
                                 </button>
                             </form>
@@ -245,7 +230,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                     </div>
                 </dialog>
 
-                <main className="flex-1 overflow-auto p-4">{children}</main>
+                <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">{children}</main>
             </div>
         </div>
     );

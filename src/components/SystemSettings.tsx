@@ -44,11 +44,11 @@ export default function SystemSettings() {
     }
   };
 
-  if (!settings) return <div>Chargement des paramètres...</div>;
+  if (!settings) return <div className="text-gray-600 dark:text-gray-400 transition-colors duration-300">Chargement des paramètres...</div>;
 
   return (
-    <div className="max-w-2xl w-full bg-white rounded-lg p-8 border border-gray-200">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+    <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-md p-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300 shadow-sm dark:shadow-gray-900">
+      <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 transition-colors duration-300">
         ⚙️ Paramètres du système
       </h1>
 
@@ -64,8 +64,8 @@ export default function SystemSettings() {
         <button
           onClick={submit}
           disabled={loading}
-          className={`px-6 py-2.5 rounded-xl border border-gray-300 text-sm font-medium 
-          transition-all duration-300 ${loading ? "opacity-70" : "hover:bg-gray-100"}`}
+          className={`px-6 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium 
+          transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
         >
           {loading ? "💾 Enregistrement..." : "💾 Sauvegarder"}
         </button>
@@ -87,13 +87,13 @@ function SettingField({
 }) {
   return (
     <div className="flex flex-col">
-      <label className="text-gray-700 font-medium mb-1">{label}</label>
+      <label className="text-gray-700 dark:text-gray-300 font-medium mb-1 transition-colors duration-300">{label}</label>
       <input
         type="text"
         name={name}
         value={value}
         onChange={onChange}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800 outline-none focus:ring focus:ring-blue-200"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors duration-300"
       />
     </div>
   );
