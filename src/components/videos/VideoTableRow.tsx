@@ -94,6 +94,7 @@ const VideoTableRow = ({
           video={video}
           user={user}
           onSend={onSend}
+          reFetch={reFetch}
         />
       </td>
 

@@ -32,18 +32,6 @@ function CheckerDrop({ video, reFetch, user, openRefuseModal }: Props) {
 
     return (
         <>
-            {/* <dialog id="my_modal_16354" className="modal">
-                <div className="modal-box flex flex-col gap-3 ">
-                    <textarea className="textarea w-full" placeholder="Comment" onChange={(e) => {
-                        setComment(e.currentTarget.value);
-                    }} required></textarea>
-                    <button className="btn" onClick={async () => {
-                        if (!comment)
-                            return;
-                        await update('refused', comment);
-                    }}>submit</button>
-                </div>
-            </dialog> */}
             <div tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-md z-100 w-52 p-2 border border-gray-300 shadow-sm">
                 {
                     user.role === 'superadmin' ?

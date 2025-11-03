@@ -145,7 +145,7 @@ export const useVideoManagement = () => {
   };
 
   const send = async (videoId: number) => {
-    if (sendingIds.includes(videoId) || processedIds.includes(videoId)) return;
+    // if (sendingIds.includes(videoId) || processedIds.includes(videoId)) return;
 
     addSendingId(videoId);
     setLoading({ id: videoId, type: "transc" });

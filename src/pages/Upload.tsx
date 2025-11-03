@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import toast from "react-hot-toast";
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -114,17 +114,6 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
   );
 }
 
-
-// import { useState, useRef, useMemo, useCallback, useReducer, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import toast from "react-hot-toast";
-// import Md5 from "ts-md5";
-// import { useAuthMe } from "../hooks/useAuthMe";
-// import { uploadVideo } from "../api/videos";
-// import CategoryAutoComplete from "../components/CategoryAutoComplete";
-// import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
-// import TitlesForm from "../components/TitlesForm";
-
 type UploadState = {
   videoFile: File | null;
   coverFile: File | null;
@@ -196,7 +185,7 @@ const Upload = () => {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) handleFileChange(file, "cover");
-    else toast.error("Invalid image format!");
+    else toast.error("Invalid image format !");
   };
 
   const handleCoverClick = () => coverInputRef.current?.click();
@@ -273,6 +262,7 @@ const Upload = () => {
               onClick={handleCoverClick}
               onDrop={(f) => handleFileChange(f, "cover")}
               preview={coverPreview}
+              // @ts-ignore
               inputRef={coverInputRef}
               accept="image/*"
               onChange={handleCoverChange}
@@ -285,6 +275,7 @@ const Upload = () => {
               onClick={handleVideoClick}
               onDrop={(f) => handleFileChange(f, "video")}
               preview={videoPreview}
+              // @ts-ignore
               inputRef={videoInputRef}
               accept="video/mp4"
               onChange={handleVideoChange}
