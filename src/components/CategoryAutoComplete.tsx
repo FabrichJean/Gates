@@ -83,11 +83,11 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
         }}
         onFocus={() => setShowDropdown(true)}
         placeholder="Enter category..."
-        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none transition"
+        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 text-black focus:ring-blue-400 outline-none transition"
       />
 
       {showDropdown && filtered.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg animate-fadeIn">
+        <ul className="absolute z-10 w-full text-black bg-white border border-gray-200 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg animate-fadeIn">
           {filtered.map((cat) => (
             <li
               key={cat.id}
