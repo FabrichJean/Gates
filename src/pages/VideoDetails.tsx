@@ -126,7 +126,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             {user?.role === RoleEnum.SUPERADMIN && (
               <div className="relative flex items-center gap-3">
                 <button
-                  // disabled={video.processing === 'working' || video.processing === 'done'}
+                  disabled={video.processing === 'working' || video.processing === 'done'}
                   onClick={() => {
                     if (video.checking !== 'checked') {
                       return alert("We need to check this video");
