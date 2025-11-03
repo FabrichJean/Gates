@@ -15,6 +15,7 @@ import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
+import CategoryManager from "../components/CategoryManager";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -109,11 +110,23 @@ const AppRoutes = () => (
         path="/archive"
         element={
           <ProtectedRoute>
-            {/* <SuperProtected> */}
+            <SuperProtected>
               <InsideSidebar>
                 <UsersArchives />
               </InsideSidebar>
-            {/* </SuperProtected> */}
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/category-management"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <CategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
           </ProtectedRoute>
         }
       />
