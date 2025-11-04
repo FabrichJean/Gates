@@ -82,7 +82,7 @@ function TouchVideo() {
             setUploading(false);
             setProgress(0);
         }
-    };
+    }; 
 
     return (
         <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
