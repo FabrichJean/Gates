@@ -6,8 +6,10 @@ import { getToken } from "../utils/storage";
 export type Category = {
   id: number;
   name: string;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
+  subcategories?: Partial<Category>[]
 };
 
 interface Props {
