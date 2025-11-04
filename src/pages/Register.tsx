@@ -22,7 +22,6 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
   useEffect(() => {
     if (loading) return;
 
@@ -61,17 +60,14 @@ const Register: React.FC = () => {
 
     try {
       const res = await register(email.trim(), password, username.trim());
-      // show backend message when available
       if (res && res.message) {
         toast.success(res.message);
       } else {
         toast.success("Inscription réussie !");
       }
-      // After register always send user to login so they can sign in after validation
       navigate('/login');
     } catch (err: any) {
       console.error(err);
-      // AuthContext/register throws Error or the api call returns an object with response
       toast.error("Erreur: " + (err?.response?.data?.message || err?.message || "Erreur lors de l'inscription"));
     }
   };
@@ -109,7 +105,6 @@ const Register: React.FC = () => {
             className="font-sans w-full rounded-sm bg-transparent p-2.5 placeholder:text-white text-white font-medium border border-white antialiased transition-all focus:border-white/80 focus:bg-white/5"
           />
 
-          {/* Password field with toggle visibility */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -142,7 +137,6 @@ const Register: React.FC = () => {
             </button>
           </div>
 
-          {/* Confirm Password field with toggle visibility */}
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -178,12 +172,10 @@ const Register: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="font-sans h-10 w-full cursor-pointer mt-2 rounded-sm bg-gradient-to-br from-[#7336FF] to-[#3269FF] text-white shadow-md shadow-blue-950 disabled:opacity-50 font-semibold antialiased tracking-wide transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+            className="font-sans h-10 w-full cursor-pointer mt-2 rounded-md bg-gradient-to-br from-[#3703b1] to-[#0479ff] text-white disabled:opacity-50 font-semibold antialiased tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? "Loading..." : "Sign Up"}
           </button>
-
-          {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
 
           <p className="font-sans text-center text-gray-200 mt-2 text-sm antialiased">
             Already have an account?{" "}
