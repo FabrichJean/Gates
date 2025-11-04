@@ -15,7 +15,7 @@ import { Md5 } from 'ts-md5';
 
 export type Couple = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  id: any; i18_language: string; title: string, name?: string;
+  id: any; i18_language: string; title: string, name?: string; description?: string
 };
 
 
@@ -65,17 +65,25 @@ export function TitlesForm({ progress, uploading, handleSubmit: submit, btnSubmi
       {coupleTitles?.map((c, i) => (
         <div
           key={i}
-          className="flex gap-2 items-center p-4 px-0"
+          className="flex flex-col justify-start gap-5 items-end p-4 px-0"
         >
-          {/* @ts-expect-error */}
-          <LanguageAutoComplete defaultValue={{ code: c?.language?.title, name: c?.language?.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
-          <input
-            type="text"
-            placeholder="Title"
-            value={c.title}
-            onChange={(e) => handleChange(i, 'title', e.target.value)}
-            className="font-sans flex-1 border-b-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 outline-none p-2 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 antialiased transition-all duration-300"
-            required
+          <div className="flex gap-2 items-center w-full">
+            {/* @ts-expect-error */}
+            <LanguageAutoComplete defaultValue={{ code: c?.language?.title, name: c?.language?.name! }} onSelect={(lang) => handleChange(i, 'i18_language', lang.code)} />
+            <input
+              type="text"
+              placeholder="Title"
+              value={c.title}
+              onChange={(e) => handleChange(i, 'title', e.target.value)}
+              className="font-sans flex-1 border-b-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 outline-none p-2 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 antialiased transition-all duration-300"
+              required
+            />
+          </div>
+          <textarea
+            placeholder="Description"
+            value={c.description}
+            onChange={(e) => handleChange(i, 'description', e.target.value)}
+            className="font-sans w-full border-b-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 outline-none p-2 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 antialiased transition-all duration-300"
           />
           <button type="button" onClick={() => removeCouple(i)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300">
             <TrashIcon className="w-6 h-6" />

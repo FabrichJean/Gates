@@ -89,7 +89,7 @@ function TouchVideo() {
             <Toaster position="top-right" />
             <div className="flex flex-col w-full">
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-                    Edit
+                    Touch video {video.id}
                 </h1>
                 <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
                     <div className="space-y-6">
