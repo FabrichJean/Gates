@@ -5,17 +5,17 @@ import SubCategoryPanel from "./SubCategoryPanel";
 import { type Category } from "./CategoryAutoComplete";
 import { motion, AnimatePresence } from "framer-motion";
 import UseCategory from "../hooks/useCategory";
-import { createCastegoryApi } from "../api/categories";
+import { createCastegoryApi, deleteCategoryApi } from "../api/categories";
 import toast from "react-hot-toast";
 
 export default function CategoryManager() {
     // In this manager we always keep categories with numeric ids, so narrow the type
-    const [categories, setCategories] = useState<(Partial<Category> & { id: number })[]>([
-        { id: 1, name: "Technologie", subcategories: [{ id: 11, name: "IA" }] },
-        { id: 2, name: "Musique", subcategories: [{ id: 21, name: "Guitare" }] },
-    ]);
+    // const [categories, setCategories] = useState<(Partial<Category> & { id: number })[]>([
+    //     { id: 1, name: "Technologie", subcategories: [{ id: 11, name: "IA" }] },
+    //     { id: 2, name: "Musique", subcategories: [{ id: 21, name: "Guitare" }] },
+    // ]);
 
-    const { data: cats, reFetch } = UseCategory()
+    const { data: categories, reFetch } = UseCategory()
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [newCat, setNewCat] = useState("");
@@ -24,31 +24,37 @@ export default function CategoryManager() {
         if (!newCat.trim()) return;
 
         await createCastegoryApi(newCat.trim())
-        .then(reFetch)
-        .catch(() => {
-            toast.error('err')
-        })
+            .then(reFetch)
+            .catch(() => {
+                toast.error('err')
+            })
         // setCategories([...categories, newCategory]);
         setNewCat("");
     };
 
-    const removeCategory = (id: number) => {
-        setCategories((prev) => prev.filter((c) => c.id !== id));
-        if (selectedId === id) setSelectedId(null);
+    const removeCategory = async (id: number) => {
+        await deleteCategoryApi(id)
+            .then(() => {
+                if (selectedId === id) setSelectedId(null);
+                reFetch()
+            })
+            .catch(() => {
+                toast.error('err')
+            })
     };
 
     // Accept partial updates from SubCategoryPanel and merge them into existing category
     const updateCategory = (updated: Partial<Category>) => {
-        setCategories((prev) =>
-            prev.map((c) =>
-                String(c.id) === String(updated.id)
-                    ? ({ ...c, ...updated } as Partial<Category> & { id: number })
-                    : c
-            )
-        );
+        // setCategories((prev) =>
+        //     prev.map((c) =>
+        //         String(c.id) === String(updated.id)
+        //             ? ({ ...c, ...updated } as Partial<Category> & { id: number })
+        //             : c
+        //     )
+        // );
     };
 
-    const selectedCategory = categories.find((c) => c.id === selectedId) ?? null;
+    const selectedCategory = categories?.find((c) => c.id === selectedId) ?? null;
 
     return (
         <div className="flex flex-col md:flex-row gap-10 transition-all duration-300">
@@ -61,7 +67,7 @@ export default function CategoryManager() {
                         type="text"
                         value={newCat}
                         onChange={(e) => setNewCat(e.target.value)}
-                        placeholder="Nouvelle catégorie..."
+                        placeholder="new category..."
                         className="border rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300"
                     />
                     <button
@@ -72,7 +78,7 @@ export default function CategoryManager() {
                     </button>
                 </div>
 
-                <AnimatedList items={cats}>
+                <AnimatedList items={categories}>
                     {(c) => (
                         <CategoryCard
                             key={c.id}
