@@ -119,7 +119,7 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/category-management"
+        path="/category-manager"
         element={
           <ProtectedRoute>
             <SuperProtected>
