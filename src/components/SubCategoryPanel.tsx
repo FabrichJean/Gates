@@ -60,7 +60,7 @@ export default function SubCategoryPanel({ category }: Props) {
 
   return (
     <motion.div layout className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold my-3">{category?.name}</h2>
+      <h2 className="text-xl font-semibold my-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">{category?.name}</h2>
 
       {/* Ajout d'une sous-catégorie */}
       <div className="flex gap-2 my-4">
@@ -69,11 +69,11 @@ export default function SubCategoryPanel({ category }: Props) {
           value={newSub}
           onChange={(e) => setNewSub(e.target.value)}
           placeholder="new sub-category..."
-          className="border rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-green-300"
+          className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 transition-all duration-300"
         />
         <button
           onClick={addSub}
-          className="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white px-4 py-1 rounded-lg transition-all duration-300"
         >
           +
         </button>
@@ -86,7 +86,7 @@ export default function SubCategoryPanel({ category }: Props) {
             <motion.div
               key={String(sub.id)}
               layout
-              className="bg-gray-50 border rounded-md p-2 mb-2 flex justify-between items-center group"
+              className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md p-2 mb-2 flex justify-between items-center group transition-all duration-300"
             >
               {editingId === sub.id ? (
                 <form
@@ -101,7 +101,7 @@ export default function SubCategoryPanel({ category }: Props) {
                     value={tempName}
                     onChange={(e) => setTempName(e.target.value)}
                     onBlur={() => saveEdit(sub.id, tempName)}
-                    className="border w-full p-1 rounded focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-full p-1 rounded focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-300"
                   />
                 </form>
               ) : (
@@ -110,7 +110,7 @@ export default function SubCategoryPanel({ category }: Props) {
                     setEditingId(sub.id);
                     setTempName(sub.name ?? "");
                   }}
-                  className="flex-1 p-1 cursor-pointer"
+                  className="flex-1 p-1 cursor-pointer text-gray-800 dark:text-gray-200 transition-colors duration-300"
                 >
                   {sub.name ?? ""}
                 </div>
@@ -123,7 +123,7 @@ export default function SubCategoryPanel({ category }: Props) {
                       setEditingId(sub.id);
                       setTempName(sub.name ?? "");
                     }}
-                    className="text-blue-500 hover:text-blue-600"
+                    className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-500 transition-colors duration-300"
                     title="Modifier"
                   >
                     ✎
@@ -131,7 +131,7 @@ export default function SubCategoryPanel({ category }: Props) {
                 )}
                 <button
                   onClick={() => removeSub(sub.id)}
-                  className="text-red-500 hover:text-red-600"
+                  className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 transition-colors duration-300"
                   title="Supprimer"
                 >
                   ✕
