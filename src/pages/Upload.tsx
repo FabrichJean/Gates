@@ -150,7 +150,7 @@ const Upload = () => {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // 🧠 Mémorisation du ref utilisateur
+  //  Mémorisation du ref utilisateur
   const [ref, setRef] = useState<string | null>(null);
 
   useEffect(() => {
@@ -161,7 +161,7 @@ const Upload = () => {
   }, [user]);
 
 
-  // 🧹 Libère les URLs temporaires pour éviter les fuites mémoire
+  //  Libère les URLs temporaires pour éviter les fuites mémoire
   useEffect(() => {
     return () => {
       if (coverPreview) URL.revokeObjectURL(coverPreview);
@@ -169,7 +169,7 @@ const Upload = () => {
     };
   }, [coverPreview, videoPreview]);
 
-  // 🧩 Gestion des fichiers
+  //  Gestion des fichiers
   const handleFileChange = useCallback((file: File, type: "video" | "cover") => {
     const preview = URL.createObjectURL(file);
     if (type === "video") dispatch({ videoFile: file, videoPreview: preview });
@@ -178,20 +178,20 @@ const Upload = () => {
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type === "video/mp4") handleFileChange(file, "video");
-    else toast.error("Only MP4 files are accepted!");
+    if (file && file.type.startsWith("video/")) handleFileChange(file, "video");
+    else toast.error("Only video files are accepted!");
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) handleFileChange(file, "cover");
-    else toast.error("Invalid image format !");
+    else toast.error("Only image files are accepted!");
   };
 
   const handleCoverClick = () => coverInputRef.current?.click();
   const handleVideoClick = () => videoInputRef.current?.click();
 
-  // 📨 Upload vidéo
+  // Upload vidéo
   const handleSubmit = useCallback(async () => {
     if (!videoFile || !coverFile || !category || !ref) {
       toast.error("Veuillez remplir tous les champs obligatoires !");
@@ -266,7 +266,7 @@ const Upload = () => {
               inputRef={coverInputRef}
               accept="image/*"
               onChange={handleCoverChange}
-              emptyMessage="Click or drag an image (PNG, JPG, WEBP)"
+              emptyMessage="Click or drag an image (PNG, JPG, WEBP, etc.)"
             />
 
             {/* Video */}
@@ -277,9 +277,9 @@ const Upload = () => {
               preview={videoPreview}
               // @ts-ignore
               inputRef={videoInputRef}
-              accept="video/mp4"
+              accept="video/*"
               onChange={handleVideoChange}
-              emptyMessage="Drag or select an MP4 file"
+              emptyMessage="Drag or select a video file"
             />
 
             {uploading && (
