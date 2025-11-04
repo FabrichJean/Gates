@@ -15,19 +15,16 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Verifier si l'utilisateur est deja connecté et rediger vers la page d'accueil "/"
   useEffect(() => {
     if (loading) return;
 
     if (!token && !user) return;
 
-    // If the user is present and not validated, send them to login page
     if (user && typeof user === 'object' && user.isValidated === false) {
       navigate("/login");
       return;
     }
 
-    // otherwise, go to home
     if (token) navigate("/");
   }, [token, user, loading, navigate]);
 
@@ -38,7 +35,6 @@ const Login: React.FC = () => {
       setEmail("");
     }
   }, [error]);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,20 +102,17 @@ const Login: React.FC = () => {
               )}
             </button>
           </div>
-          {/* Forget password */}
           <span className="font-sans text-[12px] text-[#228CE0] cursor-pointer hover:underline ml-1 font-medium antialiased transition-colors hover:text-blue-300">
             Forget Password?
           </span>
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="font-sans h-10 w-full cursor-pointer mt-2 rounded-sm bg-gradient-to-br from-[#7336FF] to-[#3269FF] text-white shadow-md shadow-blue-950 disabled:opacity-50 font-semibold antialiased tracking-wide transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+            className="font-sans h-10 w-full cursor-pointer mt-2 rounded-md bg-gradient-to-br from-[#3703b1] to-[#0479ff] text-white disabled:opacity-50 font-semibold antialiased tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? "Loading..." : "Sign In"}
           </button>
 
-          {/* Sign up */}
           <p className="font-sans text-center text-gray-200 mt-2 text-sm antialiased">
             Don&apos;t have an account?{" "}
             <span className="font-sans cursor-pointer text-teal-500 hover:underline font-semibold antialiased transition-colors hover:text-teal-300">
