@@ -21,10 +21,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
+  const [modifying, setModifying] = useState(false);
+
   const { data: video, reFetch } = UseVideo(videoId);
   const [videoPlayed, setVideoPlayed] = useState(false);
-
-  const [modifying, setModifying] = useState(false);
 
   const { nextVideo } = useNextVideo(routeId)
 
@@ -58,7 +58,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     }
   };
 
-
   const send = async (videoId: number) => {
 
     try {
@@ -78,7 +77,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         toast.error(err?.response?.data?.message);
       })
   }
-
 
   return (
     modifying ? <EditVideo video={video} onSubmit={() => {
@@ -279,6 +277,23 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             ))}
           </div>
 
+          <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
+            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Description</h1>
+            {video?.titles?.map((t, i) => (
+              <div
+                key={i}
+                className="flex gap-3 items-center p-2"
+              >
+                <span className="w-20 font-bold text-blue-600 dark:text-blue-400 uppercase text-sm tracking-wide">
+                  {t.i18_language} :
+                </span>
+                <span className="flex-1 text-gray-800 dark:text-gray-200 font-medium text-sm">
+                  {t.description}
+                </span>
+              </div>
+            ))}
+          </div>
+
           <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Category</h1>
             <span className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
@@ -363,7 +378,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       <Toaster position="top-right" />
       <div className="flex flex-col w-full">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-          Edit
+          Edit video {video.id}
         </h1>
         <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
           <div className="space-y-6">
