@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
@@ -13,6 +13,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
   const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Language[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Charger toutes les langues depuis iso-639-1
   useEffect(() => {
@@ -25,6 +26,20 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
       allLanguages.sort((a, b) => a.name.localeCompare(b.name));
       setLanguages(allLanguages);
     });
+  }, []);
+
+  // Fermer le dropdown quand on clique à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Filtrage auto-complete
@@ -52,7 +67,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={dropdownRef}>
       <input
         type="text"
         value={query}
@@ -62,15 +77,15 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
         }}
         onFocus={() => setShowDropdown(true)}
         placeholder="Enter a language..."
-        className="flex-1 border-b-2 border-gray-300 focus:border-blue-500 outline-none p-2 bg-transparent"
+        className="flex-1  border-b-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 outline-none p-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300"
       />
 
       {showDropdown && filtered.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg">
+        <ul className="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
           {filtered.map((lang) => (
             <li
               key={lang.code}
-              className="px-4 py-2 hover:bg-blue-100 cursor-pointer text-black"
+              className="px-4 py-2 hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer text-gray-900 dark:text-gray-100 transition-colors duration-200"
               onClick={() => handleSelect(lang)}
             >
               {lang.name} ({lang.code})
