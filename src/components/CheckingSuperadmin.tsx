@@ -20,7 +20,7 @@ function CheckingSuperadmin({ video, index, reFetch, user }: Props) {
   const closeModal = () => setShowModal(false);
 
   return (
-    <div className={"dropdown " + (index === 0 ? " dropdown-end" : "dropdown-top dropdown-end")}>
+    <div className={"dropdown " +  (index === 0 ? " dropdown-end" : "dropdown-top dropdown-end")}>
       <div
         tabIndex={video.id}
         role="button"
