@@ -32,7 +32,7 @@ const VideoActions = ({
       {user?.role === RoleEnum.SUPERADMIN && (
         <div className="relative flex items-center gap-3">
           <button
-            // disabled={video.processing === 'working' || video.processing === 'done'}
+            disabled={video.processing === 'working' || video.processing === 'done'}
             onClick={() => {
               if (video.checking !== 'checked') {
                 return alert("We need to check this video");
@@ -95,7 +95,7 @@ const VideoActions = ({
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
-              Annuler
+              Cancel
             </button>
           )}
         </div>

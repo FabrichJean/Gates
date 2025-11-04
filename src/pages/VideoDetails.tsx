@@ -188,7 +188,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
-                    Annuler
+                    Cancel
                   </button>
                 )}
               </div>
@@ -240,14 +240,14 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
           {video?.cdn_url && video?.s3_hls_path && <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">CDN playback URL</h1>
-            <a className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
+            <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
               {video?.cdn_url + video?.s3_hls_path}
             </a>
           </div>}
 
           {video?.cdn_url && video?.s3_cover_path && <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">CDN Cover URL</h1>
-            <a className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
+            <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
               {video?.cdn_url + video?.s3_cover_path}
             </a>
           </div>}
