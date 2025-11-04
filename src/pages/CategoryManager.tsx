@@ -57,10 +57,10 @@ export default function CategoryManager() {
     const selectedCategory = categories?.find((c) => c.id === selectedId) ?? null;
 
     return (
-        <div className="flex flex-col md:flex-row gap-10 transition-all duration-300">
+        <div className="flex flex-col md:flex-row gap-10 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
             {/* Liste des catégories */}
-            <div className="md:w-1/3 bg-white shadow rounded p-5">
-                <h1 className="text-2xl font-semibold mb-3 text-gray-800">Category </h1>
+            <div className="md:w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 transition-all duration-300">
+                <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Category </h1>
 
                 <div className="flex gap-2 my-4">
                     <input
@@ -68,11 +68,11 @@ export default function CategoryManager() {
                         value={newCat}
                         onChange={(e) => setNewCat(e.target.value)}
                         placeholder="new category..."
-                        className="border rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300"
+                        className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
                     />
                     <button
                         onClick={addCategory}
-                        className="bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-1 rounded-lg transition-all duration-300"
                     >
                         +
                     </button>
@@ -93,7 +93,7 @@ export default function CategoryManager() {
             </div>
 
             {/* Sous-catégories */}
-            <div className="flex-1 bg-white shadow rounded p-5 overflow-hidden">
+            <div className="flex-1 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 overflow-hidden transition-all duration-300">
                 <AnimatePresence mode="wait">
                     {selectedCategory ? (
                         <motion.div
@@ -111,7 +111,7 @@ export default function CategoryManager() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="text-gray-400 text-center py-20"
+                            className="text-gray-400 dark:text-gray-500 text-center py-20 transition-colors duration-300"
                         >
                             Sélectionne une catégorie à gauche pour voir ses sous-catégories.
                         </motion.p>
