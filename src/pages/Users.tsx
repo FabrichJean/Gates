@@ -37,15 +37,13 @@ const Users = () => {
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const fetchUsers = async () => reFetch();
-
   const handleValidate = async (userId: number) => {
     setLoading(true);
     try {
 
       await validateUserApi(userId)
       toast.success(`User ${userId} validated!`);
-      fetchUsers();
+      reFetch();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");
@@ -61,7 +59,7 @@ const Users = () => {
 
       await deleteUserApi(userId)
       toast.success(`User ${userId} deleted!`);
-      fetchUsers();
+      reFetch();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");

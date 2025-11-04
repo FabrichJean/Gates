@@ -10,19 +10,6 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement | null>(null);
 
-    let displayName = "Admin";
-    let seed = "Super Admin";
-
-    if (user) {
-        if (typeof user === "string") {
-            displayName = user;
-            seed = user;
-        } else if (typeof user === "object") {
-            displayName = (user.name || user.username || user.email || user.role) as string;
-            seed = displayName || seed;
-        }
-    }
-
     useEffect(() => {
         const onDocClick = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -51,7 +38,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
     return (
         <div ref={ref} className="relative flex items-center gap-3">
             <ThemeToggle />
-            <span className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">{displayName}</span>
+            <span className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">{user?.username}</span>
             <button
                 onClick={() => setOpen(o => !o)}
                 aria-haspopup="true"
