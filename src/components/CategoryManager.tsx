@@ -86,6 +86,7 @@ export default function CategoryManager() {
                             isSelected={selectedId === c.id}
                             onSelect={() => setSelectedId(c.id as number)}
                             onDelete={() => removeCategory(c.id as number)}
+                            onEdit={reFetch}
                         />
                     )}
                 </AnimatedList>
