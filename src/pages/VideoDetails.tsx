@@ -93,8 +93,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           <div className="flex justify-between gap-4 items-center w-full">
             <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">{formatDateFR(video?.createdAt)}</h1>
             <div className="flex gap-2">
-              <CheckingSuperadmin index={video.id} reFetch={reFetch} video={video} user={user} />
-              {/* <span className={`bg-zinc-500 font-bold text-white text-center py-1 px-2 text-xs rounded`}>{video.checking === 'null' ? 'not ready' : video.checking}</span> */}
+              <CheckingSuperadmin index={0} reFetch={reFetch} video={video} user={user} />
             </div>
           </div>
           <div
@@ -133,9 +132,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     }
                     send(video.id);
                   }}
-                  className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-xl transition-all duration-300 ${video.processing === 'working'
+                  className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === 'working'
                     ? "cursor-not-allowed bg-gray-100 text-gray-500"
-                    : "cursor-pointer bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     }`}
                 >
                   {video.processing === 'working' ? (
@@ -162,7 +161,14 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       Uploaded
                     </span>
                   ) : (
-                    <span className="underline hover:text-blue-500">🚀 Send</span>
+                    <span className="hover:text-blue-500 flex gap-3 items-center">
+                      <span>
+                        🚀
+                      </span>
+                      <span>
+                        Send
+                      </span>
+                    </span>
                   )}
                 </button>
 
@@ -201,7 +207,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               <span className="sm:hidden">←</span>
-              <span className="hidden sm:inline">Retour</span>
+              <span className="hidden sm:inline">Back</span>
               <span className="sm:hidden">Back</span>
             </Link>
 
