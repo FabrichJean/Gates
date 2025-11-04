@@ -97,7 +97,7 @@ const VideoActions = ({
 
       <Link
         to={`/videos/${video.id}`}
-        className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline font-light hover:text-blue-400 transition-all"
+        className="px-4 py-2 hover:bg-gray-100/10 cursor-pointer underline rounded-md font-light hover:text-blue-400 transition-all"
       >
         Details
       </Link>

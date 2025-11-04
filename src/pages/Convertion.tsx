@@ -133,22 +133,22 @@ const Conversion = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
             <div className="max-w-2xl mx-auto">
                 {/* Header */}
-                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900 p-6 mb-6 border border-gray-100 dark:border-gray-700 transition-colors duration-300">
                     <div className="flex items-center gap-3 mb-2">
-                        <FileSpreadsheet className="w-8 h-8 text-green-500" />
-                        <h1 className="text-3xl font-bold text-gray-800">Excel Conversion</h1>
+                        <FileSpreadsheet className="w-8 h-8 text-green-500 dark:text-green-400" />
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">Excel Conversion</h1>
                     </div>
-                    <p className="text-gray-600">Upload your Excel file</p>
+                    <p className="text-gray-600 dark:text-gray-400 transition-colors duration-300">Upload your Excel file</p>
                 </div>
 
                 {/* Main Form */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900 p-6 border border-gray-100 dark:border-gray-700 transition-colors duration-300">
                     {/* File Upload Section */}
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
                             Excel File
                         </label>
                         <div className="relative">
@@ -164,26 +164,26 @@ const Conversion = () => {
                                 htmlFor="file-input"
                                 className={`flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${
                                     loading 
-                                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
-                                        : 'border-gray-300 cursor-pointer hover:border-blue-400 hover:bg-blue-50'
+                                        ? 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 cursor-not-allowed' 
+                                        : 'border-gray-300 dark:border-gray-600 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700'
                                 }`}
                             >
                                 <div className="text-center">
-                                    <Upload className={`w-8 h-8 mx-auto mb-2 ${loading ? 'text-gray-300' : 'text-gray-400'}`} />
-                                    <p className={`text-sm ${loading ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    <Upload className={`w-8 h-8 mx-auto mb-2 ${loading ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400 dark:text-gray-500'}`} />
+                                    <p className={`text-sm ${loading ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'} transition-colors duration-300`}>
                                         {loading ? (
-                                            <span className="text-gray-400">
+                                            <span className="text-gray-400 dark:text-gray-500">
                                                 ⏳ Conversion in progress...
                                             </span>
                                         ) : file ? (
-                                            <span className="text-green-600 font-medium">
+                                            <span className="text-green-600 dark:text-green-400 font-medium">
                                                 📄 {file.name}
                                             </span>
                                         ) : (
                                             <>
                                                 Click to select an Excel file
                                                 <br />
-                                                <span className="text-xs text-gray-400">(.xlsx, .xls)</span>
+                                                <span className="text-xs text-gray-400 dark:text-gray-500">(.xlsx, .xls)</span>
                                             </>
                                         )}
                                     </p>
@@ -197,14 +197,14 @@ const Conversion = () => {
                         <button
                             onClick={handleConvert}
                             disabled={!file || loading}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all ${!file || loading
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all duration-300 ${!file || loading
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-md hover:shadow-lg'
                                 }`}
                         >
                             {loading ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-white dark:border-gray-300 border-t-transparent rounded-full animate-spin" />
                                     Converting...
                                 </>
                             ) : (
@@ -218,21 +218,20 @@ const Conversion = () => {
                         <button
                             onClick={resetForm}
                             disabled={loading}
-                            className={`px-6 py-3 border rounded-lg transition-colors ${
+                            className={`px-6 py-3 border rounded-lg transition-colors duration-300 ${
                                 loading 
-                                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50' 
-                                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    ? 'border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed bg-gray-50 dark:bg-gray-700' 
+                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800'
                             }`}
                         >
                             Reset
                         </button>
                     </div>
-
                     {/* Info Section */}
                     {file && (
-                        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                            <h4 className="font-medium text-blue-800 mb-2">File Information</h4>
-                            <div className="text-sm text-blue-700 space-y-1">
+                        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors duration-300">
+                            <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">File Information</h4>
+                            <div className="text-sm text-blue-700 dark:text-blue-200 space-y-1">
                                 <p><strong>Name:</strong> {file.name}</p>
                                 <p><strong>Size:</strong> {(file.size / 1024).toFixed(2)} KB</p>
                                 <p><strong>Type:</strong> {file.type}</p>
