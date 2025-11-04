@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
-import { useAuthMe } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { checkObjectContent } from "../utils/filter";
 import { useVideoManagement } from "../hooks/useVideoManagement";
 import VideoHeader from "../components/videos/VideoHeader";
@@ -13,7 +13,7 @@ import type { Video } from "../types/video";
 export type { Video };
 
 const VideosManagment = () => {
-  const { data: user } = useAuthMe();
+  const { user } = useAuth();
   const {
     page,
     setPage,

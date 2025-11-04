@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
-import { getToken } from "../utils/storage";
-import { apiURL } from "../constant";
 import { useUsers } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
-import { TiUserAddOutline } from 'react-icons/ti';
+import { TiUserAddOutline } from "react-icons/ti";
 import UpdatePassword from "../components/UpdatePassword";
+import { deleteUserApi, validateUserApi } from "../api/auth";
 
 interface ColumnConfig {
   key: string;
@@ -19,9 +17,8 @@ const Users = () => {
   const { data, reFetch } = useUsers(search);
   const [loading, setLoading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-
-  // Column filter state
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  
   const [columns, setColumns] = useState<ColumnConfig[]>([
     { key: 'name', label: 'Infos', visible: true },
     { key: 'status', label: 'Status', visible: true },
@@ -29,16 +26,11 @@ const Users = () => {
     { key: 'actions', label: 'Actions', visible: true },
   ]);
 
-  const toggleColumn = (key: string) => {
-    setColumns(prev => prev.map(col => col.key === key ? { ...col, visible: !col.visible } : col));
-  };
+  const visibleColumns = useMemo(() => columns.filter(c => c.visible), [columns]);
 
+  const toggleColumn = (key: string) => setColumns(prev => prev.map(col => col.key === key ? { ...col, visible: !col.visible } : col));
   const toggleAllColumns = (visible: boolean) => setColumns(prev => prev.map(col => ({ ...col, visible })));
 
-  const visibleColumns = columns.filter(c => c.visible);
-
-  useEffect(() => { reFetch(); }, [search]);
-  useEffect(() => { fetchUsers(); }, []);
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
     window.addEventListener("click", handleClickOutside);
@@ -48,15 +40,13 @@ const Users = () => {
   const fetchUsers = async () => reFetch();
 
   const handleValidate = async (userId: number) => {
+    setLoading(true);
     try {
-      const token = getToken();
-      if (!token) return toast.error("Unauthenticated user");
-      await axios.put(`${apiURL}/auth/validate/${userId}`, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      await validateUserApi(userId)
       toast.success(`User ${userId} validated!`);
       fetchUsers();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");
     } finally {
@@ -66,15 +56,13 @@ const Users = () => {
 
   const handleDelete = async (userId: number) => {
     setOpenMenuId(null);
+    setLoading(true);
     try {
-      const token = getToken();
-      if (!token) return toast.error("Unauthenticated user");
-      await axios.delete(`${apiURL}/auth/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      await deleteUserApi(userId)
       toast.success(`User ${userId} deleted!`);
       fetchUsers();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Error");
     } finally {
@@ -114,7 +102,6 @@ const Users = () => {
           <span>Users</span>
         </h1>
 
-        {/* Controls: keep in one row even on mobile */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="flex items-center justify-between w-full sm:w-auto">
             <Link
@@ -228,7 +215,7 @@ const Users = () => {
                   </td>
                 )}
 
-                {columns.find(c => c.key === 'actions')?.visible && (
+                {columns.find(c => c.key === 'actions')?.visible && u.role !== "superadmin" && (
                   <td className="px-4 sm:px-6 py-3 relative text-right">
                     {u.role !== "superadmin" && (
                       <>

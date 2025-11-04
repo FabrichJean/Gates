@@ -1,25 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useUsers } from "../hooks/useAuth";
 import { getToken } from "../utils/storage";
 import toast from "react-hot-toast";
-import { apiURL } from "../constant";
-import axios from "axios";
+import { validateUserApi } from "../api/auth";
 
 const UsersArchives = () => {
   const [search, setSearch] = useState("");
   const { data, reFetch } = useUsers(search, { isDeleted: 1 });
-
-  useEffect(() => {
-    reFetch();
-  }, [search]);
-
-  const fetchUsers = async () => {
-    reFetch();
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleValidate = async (userId: number) => {
     try {
@@ -28,11 +15,10 @@ const UsersArchives = () => {
         toast.error("Unauthenticated user");
         return;
       }
-      await axios.put(apiURL + "/auth/validate/" + userId, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await validateUserApi(userId);
       toast.success(`User ${userId} validated !`);
-      fetchUsers();
+      reFetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Fetch users error:", err);
       toast.error(err.response?.data?.message || "Error");

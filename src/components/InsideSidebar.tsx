@@ -60,7 +60,7 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
                 title="User menu"
             >
                 <img
-                    src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(seed)}`}
+                    src={`https://api.dicebear.com/9.x/croodles/svg?seed=${encodeURIComponent(user?.username || '')}`}
                     alt="User avatar"
                     className="w-8 h-8 rounded-full"
                 />

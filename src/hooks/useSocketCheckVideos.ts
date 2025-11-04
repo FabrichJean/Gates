@@ -1,9 +1,9 @@
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { apiURL, server } from "../constant";
+import { server } from "../constant";
 import { getToken } from "../utils/storage";
 import { toast } from "react-hot-toast";
+import { useAuth } from "./useAuth";
 
 /**
  * Hook personnalisé pour gérer la connexion Socket.IO pour les événements de checking des vidéos.
@@ -12,27 +12,12 @@ import { toast } from "react-hot-toast";
  * - Déclenche un callback pour rafraîchir les données quand l'état de checking change
  */
 const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => void) => {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+
+  const {user} = useAuth()
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await axios.get<{ role: string; id: number }>(
-          `${apiURL}/auth`,
-          { headers: { Authorization: `Bearer ${getToken()}` } }
-        );
-        setUserId(String(res.data.id));
-        setUserRole(res.data.role);
-      } catch (err) {
-        console.error("❌ Authentication error:", err);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     const socket = io(server, {
       transports: ["websocket"],
@@ -63,12 +48,12 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
     socket.on("checking", (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => {
       console.log("📋 Mise à jour checking reçue :", data);
       
-      const currentUserId = Number(userId);
+      const currentUserId = Number(user?.id);
       const isVideoOwner = data.user_id === currentUserId;
-      const isSuperadmin = userRole === 'superadmin';
+      const isSuperadmin = user?.role === 'superadmin';
       
       if (!isVideoOwner && !isSuperadmin) {
-        console.log(`🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${userRole})`);
+        console.log(`🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${user?.role})`);
         return;
       }
       
@@ -91,7 +76,7 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
       console.log("🔌 Disconnecting from Socket.IO checking server");
       socket.disconnect();
     };
-  }, [userId, userRole, onCheckingUpdated]);
+  }, [user, onCheckingUpdated]);
 
   return socketRef.current;
 };

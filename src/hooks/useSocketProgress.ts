@@ -12,11 +12,11 @@ export function useSocketProgress() {
 
     useEffect(() => {
         (async () => {
-            await axios.get<{ role: string, id: any }>(apiURL + '/auth', {
+            await axios.get<{ role: string, id: number }>(apiURL + '/auth', {
                 headers: { Authorization: `Bearer ${getToken()}` },
             })
                 .then((res) => {
-                    setId(res.data.id)
+                    setId(String(res.data.id))
                     console.log(res.data);
                 })
         })()
