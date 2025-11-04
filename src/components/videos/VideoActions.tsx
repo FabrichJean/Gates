@@ -39,8 +39,8 @@ const VideoActions = ({
               }
               onSend(video.id);
             }}
-            className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === 'working'
-              ? "cursor-not-allowed bg-gray-100 text-gray-500"
+            className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === 'working' || (video.upload_status === 1 && video.transfer_status === 1)
+              ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
               : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
               }`}
           >

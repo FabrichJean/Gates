@@ -15,7 +15,7 @@ import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
-import CategoryManager from "../components/CategoryManager";
+import CategoryManager from "../pages/CategoryManager";
 
 const AppRoutes = () => (
   <BrowserRouter>
