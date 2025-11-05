@@ -21,16 +21,24 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
-  const [modifying, setModifying] = useState(false);
-
   const { data: video, reFetch } = UseVideo(videoId);
   const [videoPlayed, setVideoPlayed] = useState(false);
+
+  const [modifying, setModifying] = useState(false);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   const { nextVideo } = useNextVideo(routeId)
 
   const navigate = useNavigate();
 
   useSocketSend(reFetch);
+
+  // Mettre à jour l'URL de cover quand les données vidéo changent
+  React.useEffect(() => {
+    if (video?.public_urls?.cover_url) {
+      setCurrentCoverUrl(video.public_urls.cover_url + '?t=' + Date.now());
+    }
+  }, [video?.public_urls?.cover_url]);
 
   console.log(video);
 
@@ -58,6 +66,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     }
   };
 
+
   const send = async (videoId: number) => {
 
     try {
@@ -78,9 +87,13 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       })
   }
 
+
   return (
-    modifying ? <EditVideo video={video} onSubmit={() => {
+    modifying ? <EditVideo video={video} onSubmit={(newCoverUrl?: string) => {
       setModifying(false);
+      if (newCoverUrl) {
+        setCurrentCoverUrl(newCoverUrl + '?t=' + Date.now());
+      }
       reFetch();
     }} /> :
       <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
@@ -103,7 +116,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 :
                 <>
                   <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
-                  <img src={video.public_urls.cover_url} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+                  <img src={currentCoverUrl || video.public_urls.cover_url} alt="cover" className="w-full h-auto object-cover rounded-lg" />
                 </>
             }
           </div>
@@ -277,23 +290,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             ))}
           </div>
 
-          <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Description</h1>
-            {video?.titles?.map((t, i) => (
-              <div
-                key={i}
-                className="flex gap-3 items-center p-2"
-              >
-                <span className="w-20 font-bold text-blue-600 dark:text-blue-400 uppercase text-sm tracking-wide">
-                  {t.i18_language} :
-                </span>
-                <span className="flex-1 text-gray-800 dark:text-gray-200 font-medium text-sm">
-                  {t.description}
-                </span>
-              </div>
-            ))}
-          </div>
-
           <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Category</h1>
             <span className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
@@ -310,7 +306,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
 export default VideoDetails;
 
-function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void }) {
+function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?: string) => void }) {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -362,7 +358,10 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
 
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
-      onSubmit();
+      
+      // Si une nouvelle cover a été uploadée, passer la nouvelle URL
+      const newCoverUrl = coverFile ? res.data?.public_urls?.cover_url || video.public_urls.cover_url : undefined;
+      onSubmit(newCoverUrl);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
@@ -378,7 +377,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: () => void })
       <Toaster position="top-right" />
       <div className="flex flex-col w-full">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-          Edit video {video.id}
+          Edit
         </h1>
         <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
           <div className="space-y-6">
