@@ -27,7 +27,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [modifying, setModifying] = useState(false);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
-  const { nextVideo } = useNextVideo(routeId)
+  const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId)
 
   const navigate = useNavigate();
 
@@ -127,10 +127,20 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 <button onClick={() => setModifying(true)} className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
     font-medium text-sm rounded-md transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
                   modify
                 </button>
                 :
-                <Link to={'/touch/' + videoId} className="btn flex-shrink-0">touch again</Link>
+                <Link to={'/touch/' + videoId} className="btn flex-shrink-0 relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+    font-medium text-sm rounded-md transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  touch again
+                </Link>
             }
 
             {user?.role === RoleEnum.SUPERADMIN && (
@@ -143,8 +153,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     }
                     send(video.id);
                   }}
-                  className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === 'working'
-                    ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                  className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === 'working' || (video.upload_status === 1 && video.transfer_status === 1)
+                    ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                     : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     }`}
                 >
@@ -205,17 +215,59 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </div>
             )}
 
-            <Link to={'/videos/' + nextVideo} className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+            {hasPrev ? (
+              <Link to={'/videos/' + prevVideo} className="relative flex items-center justify-center gap-2 px-4 py-2
     font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0">
-              next
-            </Link>
+    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
+    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
+    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                prev
+              </Link>
+            ) : (
+              <div className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-gray-100 dark:bg-gray-800 
+    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
+    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                prev
+              </div>
+            )}
+
+            {hasNext ? (
+              <Link to={'/videos/' + nextVideo} className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
+    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
+    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]">
+                next
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ) : (
+              <div className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-gray-100 dark:bg-gray-800 
+    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
+    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50">
+                next
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            )}
 
             <Link to={'/videos'} className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
         font-medium text-sm rounded-md transition-all duration-300
         backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
               </svg>
               <span className="sm:hidden">←</span>
               <span className="hidden sm:inline">Back</span>
@@ -358,7 +410,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
 
       toast.success("✅ successfull !");
       console.log("Video updated:", res.data);
-      
+
       // Si une nouvelle cover a été uploadée, passer la nouvelle URL
       const newCoverUrl = coverFile ? res.data?.public_urls?.cover_url || video.public_urls.cover_url : undefined;
       onSubmit(newCoverUrl);
