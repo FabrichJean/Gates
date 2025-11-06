@@ -102,21 +102,21 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         {/* Formulaire */}
         <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
           <div className="flex justify-between gap-4 items-center w-full">
-            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">{formatDateFR(video?.createdAt)}</h1>
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">{formatDateFR(video?.createdAt)}</h2>
             <div className="flex gap-2">
               <CheckingSuperadmin index={0} reFetch={reFetch} video={video} user={user} />
             </div>
           </div>
           <div
-            className="relative w-full h-max rounded-lg flex items-center justify-center"
+            className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black"
           >
             {
               videoPlayed ?
-                <video src={video.public_urls.temp_url} className="w-full h-auto object-cover rounded-lg" controls autoPlay></video>
+                <video src={video.public_urls.temp_url} className="w-full h-full object-cover rounded-lg" controls autoPlay></video>
                 :
                 <>
-                  <FaPlayCircle className="absolute text-8xl text-white cursor-pointer" onClick={() => setVideoPlayed(true)} />
-                  <img src={currentCoverUrl || video.public_urls.cover_url} alt="cover" className="w-full h-auto object-cover rounded-lg" />
+                  <FaPlayCircle className="absolute text-8xl text-white cursor-pointer z-10" onClick={() => setVideoPlayed(true)} />
+                  <img src={currentCoverUrl || video.public_urls.cover_url} alt="cover" className="w-full h-full object-cover rounded-lg" />
                 </>
             }
           </div>
