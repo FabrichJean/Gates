@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 
 interface Props {
   category: Category;
-  onUpdate: (cat: Category) => void;
 }
 
 export default function SubCategoryPanel({ category }: Props) {

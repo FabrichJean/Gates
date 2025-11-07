@@ -16,6 +16,7 @@ import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
+import Plateform from "../pages/Plateform";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -125,6 +126,18 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <CategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <Plateform />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>
