@@ -34,12 +34,12 @@ export default function PlateformCard({
 
   const handleSave = async () => {
     if (tempName.trim() && tempName !== plateform.name) {
-    //   await updatePlateformApi(plateform.id, tempName.trim())
-    //     .then(() => {
-    //       onEdit(tempName.trim());
-    //       toast.success("Plateforme mise à jour !");
-    //     })
-    //     .catch(() => toast.error("Erreur lors de la mise à jour"));
+      //   await updatePlateformApi(plateform.id, tempName.trim())
+      //     .then(() => {
+      //       onEdit(tempName.trim());
+      //       toast.success("Plateforme mise à jour !");
+      //     })
+      //     .catch(() => toast.error("Erreur lors de la mise à jour"));
     }
     setIsEditing(false);
   };
@@ -56,7 +56,7 @@ export default function PlateformCard({
   const handleRemoveCategory = async () => {
     try {
       await removePlateformFromCategoryApi(plateform.id, categoryId);
-      onDelete()
+      onDelete();
       toast.success("Catégorie retirée !");
     } catch {
       toast.error("Erreur lors de la suppression");
@@ -74,41 +74,24 @@ export default function PlateformCard({
       }`}
     >
       {/* --- Nom / Edition --- */}
-      {isEditing ? (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSave();
-          }}
+      <div
+        className="flex justify-between items-center"
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+      >
+        <span className="text-gray-800 dark:text-gray-100 font-medium">
+          {plateform.name ?? "Sans nom"}
+        </span>
+        <button
+          onClick={handleRemoveCategory}
+          className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 font-bold"
+          title="Supprimer la plateforme"
         >
-          <input
-            autoFocus
-            value={tempName}
-            onChange={(e) => setTempName(e.target.value)}
-            onBlur={handleSave}
-            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 w-full p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
-          />
-        </form>
-      ) : (
-        <div
-          className="flex justify-between items-center"
-          onDoubleClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-        >
-          <span className="text-gray-800 dark:text-gray-100 font-medium">
-            {plateform.name ?? "Sans nom"}
-          </span>
-          <button
-            onClick={handleRemoveCategory}
-            className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 font-bold"
-            title="Supprimer la plateforme"
-          >
-            ✕
-          </button>
-        </div>
-      )}
+          ✕
+        </button>
+      </div>
 
       {/* --- Gestion des catégories --- */}
       {/* <div className="mt-2">

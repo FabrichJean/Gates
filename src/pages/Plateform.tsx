@@ -12,7 +12,7 @@ export default function Plateform() {
           aria-label="Plateforms"
         />
         <div className="tab-content border-base-300 bg-base-100 p-10">
-          Tab content 1
+          
         </div>
 
         <input

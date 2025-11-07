@@ -17,6 +17,7 @@ import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
 import Plateform from "../pages/Plateform";
+import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -126,6 +127,18 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <CategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform-subcategories"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <PlateformSubCategoryManager />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>
