@@ -11,6 +11,8 @@ import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import { useAuthMe } from "../hooks/useAuth";
 import { Md5 } from 'ts-md5';
+import PlatformSelectComponent from "../components/PlatformSelectComponent";
+import type { Platform } from "../hooks/usePlatform";
 
 
 export type Couple = {
@@ -153,6 +155,7 @@ const Upload = () => {
   const [uploading, setUploading] = useState(false);
   const [category, setCategory] = useState<Category>();
   const [subcategory, setSubCategory] = useState<SubCategory>();
+  const [platform, setPlatform] = useState<Platform>();
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -210,11 +213,13 @@ const Upload = () => {
       video: videoFile,
       cover: coverFile,
       category_id: category.id,
+      platform_id: platform?.id,
       ...(subcategory && { sub_category_id: subcategory.id }),
+
       ref,
       titles: JSON.stringify(coupleTitles),
     };
-
+    
     try {
       setUploading(true);
       setProgress(0);
@@ -262,6 +267,10 @@ const Upload = () => {
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">SubCategory</label>
               <SubCategoryAutoComplete onSelect={setSubCategory} categoryId={category?.id} />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Platform</label>
+              <PlatformSelectComponent onSelect={setPlatform} />
             </div>
 
             {/* Cover */}
