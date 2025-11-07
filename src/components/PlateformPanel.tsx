@@ -30,10 +30,9 @@ export default function PlateformPanel({ categoryId }: Props) {
       .catch(() => {
         toast.error("err");
       });
-    // setCategories([...categories, newCategory]);
-    setNew(null);
+    setNew(undefined);
   };
-
+  
   return (
     <div className="md:w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 transition-all duration-300">
       <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">
@@ -49,6 +48,9 @@ export default function PlateformPanel({ categoryId }: Props) {
               // placeholder="select plateform"
               className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
             >
+              <option value={undefined}>
+                ---select-plateform---
+              </option>
               {allPlateforms?.map((allp) => (
                 <option value={allp.id} key={allp.id}>
                   {allp.name}
@@ -68,13 +70,10 @@ export default function PlateformPanel({ categoryId }: Props) {
               <PlateformCard
                 key={c.id}
                 plateform={c}
+                categoryId={categoryId}
                 isSelected={selectedId === c.id}
-                onDelete={function (): void {
-                  throw new Error("Function not implemented.");
-                }}
-                onEdit={function (newName: string): void {
-                  throw new Error("Function not implemented.");
-                }}
+                onDelete={reFetch}
+                onEdit={reFetch}
                 // isSelected={selectedId === c.id}
                 onSelect={() => setSelectedId(c.id as number)}
                 // onDelete={() => removeCategory(c.id as number)}

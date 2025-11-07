@@ -1,15 +1,17 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { type Plateform } from "../hooks/usePlateform";
-import UseCategory from "../hooks/useCategory";
+// import UseCategory from "../hooks/useCategory";
 import {
   addCategoryToPlateformApi,
   removeCategoryFromPlateformApi,
+  removePlateformFromCategoryApi,
 } from "../api/plateformCategory.ts";
 import toast from "react-hot-toast";
 
 interface Props {
   plateform: Plateform;
+  categoryId: number;
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
@@ -20,14 +22,15 @@ export default function PlateformCard({
   plateform,
   isSelected,
   onSelect,
+  categoryId,
   onDelete,
   onEdit,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(plateform.name ?? "");
-  const [showCategories, setShowCategories] = useState(false);
+  // const [showCategories, setShowCategories] = useState(false);
 
-  const { data: categories } = UseCategory();
+  // const { data: categories } = UseCategory();
 
   const handleSave = async () => {
     if (tempName.trim() && tempName !== plateform.name) {
@@ -41,18 +44,19 @@ export default function PlateformCard({
     setIsEditing(false);
   };
 
-  const handleAddCategory = async (categoryId: number) => {
-    try {
-      await addCategoryToPlateformApi(plateform.id, categoryId);
-      toast.success("Catégorie ajoutée !");
-    } catch {
-      toast.error("Erreur lors de l’ajout de la catégorie");
-    }
-  };
+  // const handleAddCategory = async (categoryId: number) => {
+  //   try {
+  //     await addCategoryToPlateformApi(plateform.id, categoryId);
+  //     toast.success("Catégorie ajoutée !");
+  //   } catch {
+  //     toast.error("Erreur lors de l’ajout de la catégorie");
+  //   }
+  // };
 
-  const handleRemoveCategory = async (categoryId: number) => {
+  const handleRemoveCategory = async () => {
     try {
-      await removeCategoryFromPlateformApi(categoryId, plateform.id);
+      await removePlateformFromCategoryApi(plateform.id, categoryId);
+      onDelete()
       toast.success("Catégorie retirée !");
     } catch {
       toast.error("Erreur lors de la suppression");
@@ -97,10 +101,7 @@ export default function PlateformCard({
             {plateform.name ?? "Sans nom"}
           </span>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
+            onClick={handleRemoveCategory}
             className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 font-bold"
             title="Supprimer la plateforme"
           >
@@ -110,7 +111,7 @@ export default function PlateformCard({
       )}
 
       {/* --- Gestion des catégories --- */}
-      <div className="mt-2">
+      {/* <div className="mt-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -141,7 +142,7 @@ export default function PlateformCard({
               </button>
             ))}
 
-            {/* Exemple de retrait */}
+            Exemple de retrait
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -154,7 +155,7 @@ export default function PlateformCard({
             </button>
           </motion.div>
         )}
-      </div>
+      </div> */}
     </motion.div>
   );
 }
