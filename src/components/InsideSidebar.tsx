@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { User as UserIcon, LogOut as LogOutIcon } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home } from "lucide-react";
 
 
 const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
@@ -79,6 +79,74 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import useSocket from "../hooks/useSocket";
 import ThemeToggle from "./ThemeToggle";
+
+// Composant Breadcrumb
+const Breadcrumb: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    // Mapping des routes vers des noms lisibles
+    const routeNames: Record<string, string> = {
+        '/': 'Home',
+        '/users': 'Users',
+        '/users-archive': 'Users Archive',
+        '/videos': 'Videos Management',
+        '/categories': 'Category Manager',
+        '/upload': 'Upload',
+        '/upload-post': 'Upload Post',
+        '/post-management': 'Post Management',
+        '/settings': 'Settings',
+        '/profil': 'Profile',
+        '/create-user': 'Create User',
+        '/convertion': 'Conversion',
+        '/touch-video': 'Touch Video'
+    };
+
+    const pathSegments = location.pathname.split('/').filter(segment => segment !== '');
+    
+    // Construire les breadcrumbs
+    const breadcrumbs = [
+        { name: 'Home', path: '/videos' }
+    ];
+    
+    let currentPath = '';
+    pathSegments.forEach(segment => {
+        currentPath += `/${segment}`;
+        const name = routeNames[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1);
+        breadcrumbs.push({ name, path: currentPath });
+    });
+
+    // Ne pas afficher si on est déjà sur Home/Dashboard
+    if (breadcrumbs.length <= 1) {
+        return null;
+    }
+
+    return (
+        <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            {breadcrumbs.map((breadcrumb, index) => (
+                <div key={breadcrumb.path} className="flex items-center">
+                    {index > 0 && (
+                        <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
+                    )}
+                    {index === 0 && (
+                        <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
+                    )}
+                    <button
+                        onClick={() => navigate(breadcrumb.path)}
+                        className={`text-sm transition-colors duration-200 ${
+                            index === breadcrumbs.length - 1
+                                ? 'text-gray-900 dark:text-white font-medium cursor-default'
+                                : 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer'
+                        }`}
+                        disabled={index === breadcrumbs.length - 1}
+                    >
+                        {breadcrumb.name}
+                    </button>
+                </div>
+            ))}
+        </nav>
+    );
+};
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
     useSocket()
@@ -216,6 +284,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                         </div>
                     </div>
                 </dialog>
+
+                {/* Breadcrumb Navigation */}
+                <Breadcrumb />
 
                 <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
                     {children}
