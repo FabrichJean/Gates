@@ -56,13 +56,13 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
             {open && (
                 <div className="absolute top-full left-1/2 mt-2 transform -translate-x-1/2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md z-50">
                     <div className="py-1">
-                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 cursor-pointer transition-colors duration-300">
                             <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
                                 <UserIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                                 <span className="text-gray-800 dark:text-gray-200">Profil</span>
                             </div>
                         </button>
-                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:text-red-400 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:text-red-400 cursor-pointer transition-colors duration-300">
                             <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 px-2 py-1 transition-colors duration-300">
                                 <LogOutIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                                 <span>Logout</span>
@@ -163,7 +163,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 `}
             >
                 {/* Header */}
-                <header className="w-full  bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                <header className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
@@ -217,7 +217,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                     </div>
                 </dialog>
 
-                <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">{children}</main>
+                <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
+                    {children}
+                </main>
             </div>
         </div>
     );

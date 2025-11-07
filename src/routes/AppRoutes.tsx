@@ -16,6 +16,8 @@ import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
+import PostManagement from "../pages/PostManagement";
+import UploadPost from "../pages/UploadPost";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -68,6 +70,26 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <Upload />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <PostManagement />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post/upload"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <UploadPost />
             </InsideSidebar>
           </ProtectedRoute>
         }
