@@ -48,6 +48,8 @@ export default function PlateformRelationsManager() {
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<any | null>(null);
   const [platformName, setPlatformName] = useState("");
+  const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
+  const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
   // Fetch Platforms (remplacer UsePlateform si besoin pour rafraîchir)
   const fetchPlatforms = async () => {
@@ -58,16 +60,25 @@ export default function PlateformRelationsManager() {
   const handleSavePlatform = async () => {
     if (!platformName.trim()) return toast.error("Enter a platform name");
     try {
+      const payload: any = {
+        name: platformName,
+      };
+      if (platformVideoSyncUrl) payload.video_sync_url = platformVideoSyncUrl;
+      if (platformPostSyncUrl) payload.post_sync_url = platformPostSyncUrl;
+
       if (editingPlatform) {
-        await updatePlateformApi(editingPlatform.id, { name: platformName });
+        await updatePlateformApi(editingPlatform.id, payload);
         toast.success("Platform updated");
       } else {
-        await createPlateformApi({ name: platformName });
+        await createPlateformApi(payload);
         toast.success("Platform created");
       }
+
       // reset modal state and refresh list
       setPlatformModalOpen(false);
       setPlatformName("");
+      setPlatformVideoSyncUrl("");
+      setPlatformPostSyncUrl("");
       setEditingPlatform(null);
       // refresh platforms list
       fetchPlatforms();
@@ -210,23 +221,23 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const handleCreateAndLinkSubcategory = async (name: string) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
-    if (!name.trim()) return toast.error("Name required");
-    try {
-      // create subcategory without category (category_id: 0) — adjust if your backend requires a valid category
-      const res = await createSubCategoryApi({ name: name.trim(), category_id: 0 });
-      const newSub = res.data?.data ?? res.data ?? res;
-      const id = newSub.id ?? newSub.subCategoryId ?? newSub._id;
-      if (!id) throw new Error("Invalid create response");
-      await handleAddSubcategory(id);
-      toast.success("Subcategory created and linked");
-      setSubCategoryModalOpen(false);
-      setSearch("");
-    } catch (err) {
-      toast.error("Error creating subcategory");
-    }
-  };
+//   const handleCreateAndLinkSubcategory = async (name: string) => {
+//     if (!selectedPlateform) return toast.error("Select a platform first");
+//     if (!name.trim()) return toast.error("Name required");
+//     try {
+//       // create subcategory without category (category_id: 0) — adjust if your backend requires a valid category
+//       const res = await createSubCategoryApi({ name: name.trim(), category_id: 0 });
+//       const newSub = res.data?.data ?? res.data ?? res;
+//       const id = newSub.id ?? newSub.subCategoryId ?? newSub._id;
+//       if (!id) throw new Error("Invalid create response");
+//       await handleAddSubcategory(id);
+//       toast.success("Subcategory created and linked");
+//       setSubCategoryModalOpen(false);
+//       setSearch("");
+//     } catch (err) {
+//       toast.error("Error creating subcategory");
+//     }
+//   };
 
   const handleRemoveCategory = async (categoryId: number) => {
     if (!selectedPlateform) return;
@@ -281,7 +292,14 @@ export default function PlateformRelationsManager() {
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
             <h2 className="font-semibold text-lg">WebApps</h2>
             <button
-              onClick={() => setPlatformModalOpen(true)}
+              onClick={() => {
+                // prepare modal for creating a new platform
+                setEditingPlatform(null);
+                setPlatformName("");
+                setPlatformVideoSyncUrl("");
+                setPlatformPostSyncUrl("");
+                setPlatformModalOpen(true);
+              }}
               className="btn rounded shadow btn-sm mt-2"
             >
               ➕ add
@@ -305,6 +323,8 @@ export default function PlateformRelationsManager() {
                     onClick={() => {
                       setEditingPlatform(p);
                       setPlatformName(p.name);
+                      setPlatformVideoSyncUrl(p.video_sync_url ?? "");
+                      setPlatformPostSyncUrl(p.post_sync_url ?? "");
                       setPlatformModalOpen(true);
                     }}
                     className="btn btn-xs btn-primary"
@@ -325,14 +345,31 @@ export default function PlateformRelationsManager() {
           <dialog className={`modal ${platformModalOpen ? "modal-open" : ""}`}>
             <div className="modal-box max-w-md">
               <h3 className="font-bold text-lg mb-3">
-                {editingPlatform ? "Edit Platform" : "Add Platform"}
+                {editingPlatform ? "Edit WebApp" : "Add WebApp"}
               </h3>
               <input
                 type="text"
-                placeholder="Platform name"
+                placeholder="WebApp name"
                 className="input input-bordered w-full mb-3"
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Video sync URL"
+                className="input input-bordered w-full mb-3"
+                value={platformVideoSyncUrl}
+                onChange={(e) => setPlatformVideoSyncUrl(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Post sync URL"
+                className="input input-bordered w-full mb-3"
+                value={platformPostSyncUrl}
+                onChange={(e) => setPlatformPostSyncUrl(e.target.value)}
+                required
               />
               <div className="modal-action">
                 <button
