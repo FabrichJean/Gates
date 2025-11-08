@@ -2,25 +2,27 @@ import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost } from "../hooks/usePost";
 import { Languages } from "lucide-react";
+import useCategoryPost from "../hooks/posts/useCategoryPost";
+import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 
 // data static for category
-const categories = [
-    { id: 1, name: "Category 1" },
-    { id: 2, name: "Category 2" },
-    { id: 3, name: "Category 3" },
-];
+// const categories = [
+//     { id: 1, name: "Category 1" },
+//     { id: 2, name: "Category 2" },
+//     { id: 3, name: "Category 3" },
+// ];
 
 // data static for sub category
-const subCategories = [
-    { id: 1, name: "Sub Category 1", categoryId: 1 },
-    { id: 2, name: "Sub Category 2", categoryId: 1 },
-    { id: 3, name: "Sub Category 3", categoryId: 1 },
-    { id: 4, name: "Sub Category 4", categoryId: 2 },
-    { id: 5, name: "Sub Category 5", categoryId: 2 },
-    { id: 6, name: "Sub Category 6", categoryId: 3 },
-    { id: 7, name: "Sub Category 7", categoryId: 3 },
-    { id: 8, name: "Sub Category 8", categoryId: 3 },
-];
+// const subCategories = [
+//     { id: 1, name: "Sub Category 1", categoryId: 1 },
+//     { id: 2, name: "Sub Category 2", categoryId: 1 },
+//     { id: 3, name: "Sub Category 3", categoryId: 1 },
+//     { id: 4, name: "Sub Category 4", categoryId: 2 },
+//     { id: 5, name: "Sub Category 5", categoryId: 2 },
+//     { id: 6, name: "Sub Category 6", categoryId: 3 },
+//     { id: 7, name: "Sub Category 7", categoryId: 3 },
+//     { id: 8, name: "Sub Category 8", categoryId: 3 },
+// ];
 
 const languages = [
     { id: 1, code: "zh", name: "中文" },
@@ -37,7 +39,7 @@ const PostEdit = () => {
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<{ id: number, name: string } | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<{ id: number, name: string } | null>();
     const [selectedSubCategory, setSelectedSubCategory] = useState<{ id: number, name: string, categoryId: number } | null>(null);
     const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
@@ -45,17 +47,24 @@ const PostEdit = () => {
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null, url?: string }[]>([{ id: 1, file: null }]);
     const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, url?: string }[]>([{ id: 1, file: null }]);
 
+    const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
+    const { data: subCategoriesResponse, loading: subCategoriesLoading, error: subCategoriesError } = useSubCategoryPost(selectedCategory?.id);
+    
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
 
-    const availableSubCategories = selectedCategory ? subCategories.filter(sub => sub.categoryId === selectedCategory.id) : [];
-
+    const availableSubCategories = subCategoriesResponse?.subCategories;
+    console.log("availableSubCategories", availableSubCategories);
+    
+    console.log("post", post);
     // Pré-remplir les champs avec les données du post
     useEffect(() => {
         if (post) {
-            const matchingCategory = categories.find(cat => cat.name === post.category.name);
+            const matchingCategory = categoriesResponse?.categories.find(cat => cat.id === post.category.id);
+            // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.subCategory_id);
             if (matchingCategory) {
                 setSelectedCategory(matchingCategory);
+                // setSelectedSubCategory(matchingSubCategory);
                 setSelectedOptions([matchingCategory.name]);
             }
             
@@ -275,7 +284,7 @@ const PostEdit = () => {
 
                             {open && (
                                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 shadow-lg ring-1 ring-black ring-opacity-5 overflow-auto">
-                                    {categories.map((cat) => (
+                                    {categoriesResponse?.categories.map((cat) => (
                                         <div 
                                             key={cat.id} 
                                             onClick={() => {
@@ -320,7 +329,7 @@ const PostEdit = () => {
                                         <div 
                                             key={subCat.id} 
                                             onClick={() => {
-                                                setSelectedSubCategory(subCat);
+                                                setSelectedSubCategory({ id: subCat.id, name: subCat.name, categoryId: subCat.category.id });
                                                 setSubOpen(false);
                                             }}
                                             className="cursor-pointer py-2 pl-3 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white"

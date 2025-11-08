@@ -13,6 +13,7 @@ export type TPost = {
     ref: string;
     username: string;
     category: Category;
+    subCategory_id: Number;
     status: PostStatus;
     images: string[];
     videos: string[];
@@ -22,23 +23,6 @@ export type TPost = {
     title :Array<{id : number, language : string, title : string, description : string}>;
 };
 
-const categories = [
-    { id: 1, name: "Category 1" },
-    { id: 2, name: "Category 2" },
-    { id: 3, name: "Category 3" },
-];
-
-// data static for sub category
-const subCategories = [
-    { id: 1, name: "Sub Category 1", categoryId: 1 },
-    { id: 2, name: "Sub Category 2", categoryId: 1 },
-    { id: 3, name: "Sub Category 3", categoryId: 1 },
-    { id: 4, name: "Sub Category 4", categoryId: 2 },
-    { id: 5, name: "Sub Category 5", categoryId: 2 },
-    { id: 6, name: "Sub Category 6", categoryId: 3 },
-    { id: 7, name: "Sub Category 7", categoryId: 3 },
-    { id: 8, name: "Sub Category 8", categoryId: 3 },
-];
 
 // Données statiques pour la table (temporaire - sera remplacé par API)
 export const staticPostData: TPost[] = [
@@ -46,7 +30,8 @@ export const staticPostData: TPost[] = [
         id: 1,
         ref: "POST-001",
         username: "john_doe",
-        category: {id : 1, name : "Education", createdAt : new Date(), updatedAt : new Date()},
+        category: {id : 1, name : "News", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "approved",
         images: ["/img static/3232.jpg"],
         videos: [
@@ -66,6 +51,7 @@ export const staticPostData: TPost[] = [
         ref: "POST-002",
         username: "jane_smith",
         category: {id: 2, name: "Entertainment", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "pending",
         images: ["/img static/3232.jpg"],
         videos: [
@@ -87,6 +73,7 @@ export const staticPostData: TPost[] = [
         ref: "POST-003",
         username: "mike_wilson",
         category: {id: 3, name: "Technology", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "rejected",
         images: ["/img static/3232.jpg"],
         videos: [
@@ -110,6 +97,7 @@ export const staticPostData: TPost[] = [
         ref: "POST-004",
         username: "sarah_jones",
         category: {id: 4, name: "Health", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "approved",
         images: ["/img static/3232.jpg"],
         videos: [
@@ -135,6 +123,7 @@ export const staticPostData: TPost[] = [
         ref: "POST-005",
         username: "alex_brown",
         category: {id: 5, name: "Sports", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "pending",
         images: ["/img static/3232.jpg"],
         videos: [
@@ -158,7 +147,8 @@ export const staticPostData: TPost[] = [
         id: 6,
         ref: "POST-006",
         username: "Dinosore",
-        category: {id: 6, name: "Dino", createdAt : new Date(), updatedAt : new Date()},
+        category: {id: 1, name: "News", createdAt : new Date(), updatedAt : new Date()},
+        subCategory_id: 1,
         status: "pending",
         images: [
             "/img static/dinosore.jpeg",
