@@ -20,6 +20,8 @@ import Plateform from "../pages/Plateform";
 import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
+import PostManagement from "../pages/PostManagement";
+import UploadPost from "../pages/UploadPost";
 
 const AppRoutes = () => (
   <BrowserRouter>

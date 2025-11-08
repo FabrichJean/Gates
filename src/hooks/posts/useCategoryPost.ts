@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+
 import { apiURL } from '../../constant';
 import useFetch from 'http-react';
 import { getToken } from '../../utils/storage';
