@@ -121,10 +121,20 @@ export const useVideoManagement = () => {
   });
 
   // 🔹 Actions
-  const toWebapp = async () => {
+  // selected platform ids for sending to webapp
+  const [selectedPlatformIds, setSelectedPlatformIds] = useState<number[]>([]);
+
+  const togglePlatformSelection = (id: number) => {
+    setSelectedPlatformIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toWebapp = async (platformIds?: number[]) => {
     setLoading({ id: 0, type: "webapp" });
     try {
-      await webApp();
+      const ids = platformIds ?? selectedPlatformIds;
+      await webApp(ids.length ? ids : null);
       toast.success("Envoyé avec succès vers le WebApp !");
       reFetch();
     } catch {
@@ -174,7 +184,11 @@ export const useVideoManagement = () => {
     loading,
     sendingIds,
     processedIds,
-    
+    // selected platform ids (for sending to webapp)
+    selectedPlatformIds,
+    setSelectedPlatformIds,
+    togglePlatformSelection,
+
     // Actions
     reFetch,
     mutate,

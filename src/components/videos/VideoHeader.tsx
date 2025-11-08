@@ -5,6 +5,9 @@ import VideoFilters, { type TFilter } from "../VideoFilters";
 import SearchModal from "../SearchModal";
 import RoleEnum from "../../utils/roleEnum";
 import { checkObjectContent } from "../../utils/filter";
+import UsePlateform from "../../hooks/usePlateform";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 interface VideoHeaderProps {
   user: any;
@@ -13,7 +16,7 @@ interface VideoHeaderProps {
   params: any;
   loading: { id: number | undefined; type: "transc" | "upload" | "cover" | "webapp" } | undefined;
   onMutate: (data: any) => void;
-  onWebApp: () => void;
+  onWebApp: (platformIds?: number[]) => void;
 }
 
 const VideoHeader = ({
@@ -26,6 +29,20 @@ const VideoHeader = ({
   onWebApp,
 }: VideoHeaderProps) => {
   const fabControls = useAnimation();
+  const { data: plateforms } = UsePlateform();
+  const [webappModalOpen, setWebappModalOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const toggle = (id: number) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const sendToWebapp = () => {
+    if (selectedIds.length === 0) return toast.error("Select at least one platform");
+    onWebApp(selectedIds);
+    setWebappModalOpen(false);
+    setSelectedIds([]);
+  };
 
   return (
     <header className="flex flex-wrap justify-start items-center">
@@ -83,16 +100,41 @@ const VideoHeader = ({
           </Link>
 
           {user?.role === RoleEnum.SUPERADMIN && (
-            <button
-              disabled={loading?.type === "webapp"}
-              onClick={onWebApp}
-              className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-            >
-              <SendIcon className="text-blue-400 dark:text-blue-300" />
-              <span className="md:inline hidden text-gray-600 dark:text-gray-400">
-                send to webApp
-              </span>
-            </button>
+            <>
+              <button
+                disabled={loading?.type === "webapp"}
+                onClick={() => setWebappModalOpen(true)}
+                className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                <SendIcon className="text-blue-400 dark:text-blue-300" />
+                <span className="md:inline hidden text-gray-600 dark:text-gray-400">
+                  send to webApp
+                </span>
+              </button>
+
+              <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
+                <div className="modal-box max-w-lg">
+                  <h3 className="font-bold text-lg">Select WebApp</h3>
+                  <div className="max-h-60 overflow-auto mt-3">
+                    {plateforms?.map((p: any) => (
+                      <label key={p.id} className="flex items-center gap-3 p-2 border-b">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(p.id)}
+                          onChange={() => toggle(p.id)}
+                          className="checkbox"
+                        />
+                        <span>{p.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="modal-action">
+                    <button className="btn btn-outline" onClick={() => setWebappModalOpen(false)}>Close</button>
+                    <button className="btn btn-primary" onClick={sendToWebapp}>Send</button>
+                  </div>
+                </div>
+              </dialog>
+            </>
           )}
         </div>
 
