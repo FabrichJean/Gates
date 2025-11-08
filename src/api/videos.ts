@@ -98,11 +98,13 @@ export async function toggleStatus(videoId: string | number): Promise<void> {
     });
 }
 
-export async function webApp() {
-    return await axios.post(`${apiURL}/videos/send-to-server`, null, {
+export async function webApp(plateformIds?: number[] | null) {
+    // send platform ids in request body (supports multiple)
+    const data = plateformIds ? { plateformIds } : {};
+    return await axios.post(`${apiURL}/videos/send-to-server`, data, {
         headers: {
             Authorization: `Bearer ${getToken()}`,
-        }
+        },
     })
 }
 
