@@ -38,7 +38,7 @@ export default function CategoryCard({
     <motion.div
       layout
       onClick={onSelect}
-      className={`p-3 mb-2 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-300 ${
+      className={`py-1 px-2 text-sm mb-2 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-300 ${
         isSelected 
           ? "bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700" 
           : "hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"

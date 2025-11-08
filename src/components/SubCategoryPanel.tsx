@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 
 interface Props {
   category: Category;
-  onUpdate: (cat: Category) => void;
 }
 
 export default function SubCategoryPanel({ category }: Props) {
@@ -24,7 +23,10 @@ export default function SubCategoryPanel({ category }: Props) {
   const addSub = async () => {
     if (!newSub.trim()) return;
     try {
-      await createSubCategoryApi({ category_id: category.id, name: newSub.trim() });
+      await createSubCategoryApi({
+        category_id: category.id,
+        name: newSub.trim(),
+      });
       toast.success("Sous-catégorie ajoutée !");
       reFetch();
       setNewSub("");
@@ -60,9 +62,10 @@ export default function SubCategoryPanel({ category }: Props) {
 
   return (
     <motion.div layout className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold my-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">{category?.name}</h2>
+      <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+        Sub Category
+      </h1>
 
-      {/* Ajout d'une sous-catégorie */}
       <div className="flex gap-2 my-4">
         <input
           type="text"

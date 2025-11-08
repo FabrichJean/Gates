@@ -180,6 +180,26 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                                 {!isCollapsed && <span className="ml-2">Category</span>}
                             </Link>
 
+                            {/* <Link to="/plateform" onClick={() => handleNav("plateform")} className={linkClass("plateform")}>
+                                <MdOutlineCategory className="w-6 h-6 text-current"/>
+                                {!isCollapsed && <span className="ml-2">Plateform</span>}
+                            </Link> */}
+
+                            {/* <Link to="/plateform-subcategories" onClick={() => handleNav("plateform-subcategories")} className={linkClass("plateform-subcategories")}>
+                                <MdOutlineCategory className="w-6 h-6 text-current"/>
+                                {!isCollapsed && <span className="ml-2">Plateform SubCat</span>}
+                            </Link> */}
+
+                            {/* <Link to="/plateform-categories" onClick={() => handleNav("plateform-categories")} className={linkClass("plateform-categories")}>
+                                <MdOutlineCategory className="w-6 h-6 text-current"/>
+                                {!isCollapsed && <span className="ml-2">Plateform Category</span>}
+                            </Link> */}
+
+                            <Link to="/plateform-relations" onClick={() => handleNav("plateform-relations")} className={linkClass("plateform-relations")}>
+                                <MdOutlineCategory className="w-6 h-6 text-current"/>
+                                {!isCollapsed && <span className="ml-2">WebApps</span>}
+                            </Link>
+
                             <Link to="/settings" onClick={() => handleNav("settings")} className={linkClass("settings")}>
                                 {/* <Settings className="min-w-5 h-5 text-zinc-400" /> */}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-current">

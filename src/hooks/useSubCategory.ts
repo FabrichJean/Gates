@@ -13,7 +13,7 @@ export type SubCategory = {
    updatedAt: Date;
 }
 
-export default function UseSubCategory(category_id: number) {
+export default function UseSubCategory(category_id?: number) {
    return useFetch<{ SubCategorys: SubCategory[] }>(apiURL + "/sub-categories", {
       headers: { Authorization: `Bearer ${getToken()}` },
       params: {
