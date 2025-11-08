@@ -59,6 +59,21 @@ export default function PlateformRelationsManager() {
   // Add / Edit Platform
   const handleSavePlatform = async () => {
     if (!platformName.trim()) return toast.error("Enter a platform name");
+    // validate URLs if provided
+    const isValidUrl = (u: string) => {
+      if (!u) return true;
+      try {
+        // will throw on invalid URLs
+        // allow relative URLs? currently require absolute
+        new URL(u);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    if (!isValidUrl(platformVideoSyncUrl)) return toast.error("Invalid Video sync URL");
+    if (!isValidUrl(platformPostSyncUrl)) return toast.error("Invalid Post sync URL");
     try {
       const payload: any = {
         name: platformName,
