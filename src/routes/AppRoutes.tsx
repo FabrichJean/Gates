@@ -18,6 +18,8 @@ import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
+import PostDetails from "../pages/PostDetails";
+import PostEdit from "../pages/PostEdit";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -90,6 +92,26 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <UploadPost />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <PostDetails />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post/edit/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <PostEdit />
             </InsideSidebar>
           </ProtectedRoute>
         }

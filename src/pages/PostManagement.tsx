@@ -1,66 +1,9 @@
 import { FilePlus, Eye, Columns } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Données statiques pour la table
-const staticPostData = [
-    {
-        id: 1,
-        ref: "POST-001",
-        username: "john_doe",
-        category: "Education",
-        status: "approved",
-        image: "/img static/3232.jpg",
-        duration: "05:30",
-        checking: "verified",
-        createdAt: "2024-11-01"
-    },
-    {
-        id: 2,
-        ref: "POST-002",
-        username: "jane_smith",
-        category: "Entertainment",
-        status: "pending",
-        image: "/img static/3232.jpg",
-        duration: "12:45",
-        checking: "pending",
-        createdAt: "2024-11-02"
-    },
-    {
-        id: 3,
-        ref: "POST-003",
-        username: "mike_wilson",
-        category: "Technology",
-        status: "rejected",
-        image: "/img static/3232.jpg",
-        duration: "08:15",
-        checking: "rejected",
-        createdAt: "2024-11-03"
-    },
-    {
-        id: 4,
-        ref: "POST-004",
-        username: "sarah_jones",
-        category: "Health",
-        status: "approved",
-        image: "/img static/3232.jpg",
-        duration: "15:22",
-        checking: "verified",
-        createdAt: "2024-11-04"
-    },
-    {
-        id: 5,
-        ref: "POST-005",
-        username: "alex_brown",
-        category: "Sports",
-        status: "pending",
-        image: "/img static/3232.jpg",
-        duration: "09:38",
-        checking: "pending",
-        createdAt: "2024-11-05"
-    }
-];
+import { staticPostData } from "../hooks/usePost";
 
 const PostManagement = () => {
+    
     return (
         <div className="h-screen w-full">
             <div className="">
@@ -140,7 +83,7 @@ const PostManagement = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                            {post.category}
+                                            {post.category.name}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
@@ -155,7 +98,7 @@ const PostManagement = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <img
-                                            src={post.image}
+                                            src={post.images[0]}
                                             alt="Post thumbnail"
                                             className="w-12 h-8 object-cover rounded"
                                             onError={(e) => {
