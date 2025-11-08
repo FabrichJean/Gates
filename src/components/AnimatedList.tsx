@@ -14,7 +14,7 @@ export default function AnimatedList<T extends { id: string | number }>({
 }: AnimatedListProps<T>) {
   return (
     <AnimatePresence>
-      {items?.map((item) => (
+      {items?.map?.((item) => (
         <motion.div
           key={item.id}
           initial={{ opacity: 0, y: 8 }}

@@ -348,7 +348,9 @@ const UploadBox = ({ label, onClick, onDrop, preview, inputRef, accept, onChange
         accept.includes("video") ? (
           <video src={preview} controls className="rounded-lg w-full max-h-56 object-cover" />
         ) : (
-          <img src={preview} alt="Preview" className="rounded-lg object-cover w-full h-52" />
+          <div className="w-full h-52 flex items-center justify-center">
+            <img src={preview} alt="Preview" className="rounded-lg object-cover w-full h-full shadow-md" />
+          </div>
         )
       ) : (
         <p className="text-gray-500 dark:text-gray-400 text-sm text-center transition-colors duration-300">{emptyMessage}</p>
