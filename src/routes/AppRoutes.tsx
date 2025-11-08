@@ -16,6 +16,10 @@ import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
+import Plateform from "../pages/Plateform";
+import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
+import PlateformCategoryManager from "../pages/PlateformCategoryManager";
+import PlateformRelationsManager from "../pages/PlateformRelationsManager";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -125,6 +129,54 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <CategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform-subcategories"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <PlateformSubCategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform-categories"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <PlateformCategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform-relations"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <PlateformRelationsManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/plateform"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <Plateform />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>
