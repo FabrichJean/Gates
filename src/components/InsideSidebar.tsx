@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { User as UserIcon, LogOut as LogOutIcon } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home } from "lucide-react";
 
 
 const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
@@ -56,13 +56,13 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
             {open && (
                 <div className="absolute top-full left-1/2 mt-2 transform -translate-x-1/2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md z-50">
                     <div className="py-1">
-                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                        <button onClick={handleProfile} className="w-full text-left px-3 py-2 cursor-pointer transition-colors duration-300">
                             <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
                                 <UserIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                                 <span className="text-gray-800 dark:text-gray-200">Profil</span>
                             </div>
                         </button>
-                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:text-red-400 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-300">
+                        <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 dark:text-red-400 cursor-pointer transition-colors duration-300">
                             <div className="flex items-center gap-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 px-2 py-1 transition-colors duration-300">
                                 <LogOutIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                                 <span>Logout</span>
@@ -79,6 +79,74 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import useSocket from "../hooks/useSocket";
 import ThemeToggle from "./ThemeToggle";
+
+// Composant Breadcrumb
+const Breadcrumb: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    // Mapping des routes vers des noms lisibles
+    const routeNames: Record<string, string> = {
+        '/': 'Home',
+        '/users': 'Users',
+        '/users-archive': 'Users Archive',
+        '/videos': 'Videos Management',
+        '/categories': 'Category Manager',
+        '/upload': 'Upload',
+        '/upload-post': 'Upload Post',
+        '/post-management': 'Post Management',
+        '/settings': 'Settings',
+        '/profil': 'Profile',
+        '/create-user': 'Create User',
+        '/convertion': 'Conversion',
+        '/touch-video': 'Touch Video'
+    };
+
+    const pathSegments = location.pathname.split('/').filter(segment => segment !== '');
+    
+    // Construire les breadcrumbs
+    const breadcrumbs = [
+        { name: 'Home', path: '/videos' }
+    ];
+    
+    let currentPath = '';
+    pathSegments.forEach(segment => {
+        currentPath += `/${segment}`;
+        const name = routeNames[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1);
+        breadcrumbs.push({ name, path: currentPath });
+    });
+
+    // Ne pas afficher si on est déjà sur Home/Dashboard
+    if (breadcrumbs.length <= 1) {
+        return null;
+    }
+
+    return (
+        <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            {breadcrumbs.map((breadcrumb, index) => (
+                <div key={breadcrumb.path} className="flex items-center">
+                    {index > 0 && (
+                        <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
+                    )}
+                    {index === 0 && (
+                        <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
+                    )}
+                    <button
+                        onClick={() => navigate(breadcrumb.path)}
+                        className={`text-sm transition-colors duration-200 ${
+                            index === breadcrumbs.length - 1
+                                ? 'text-gray-900 dark:text-white font-medium cursor-default'
+                                : 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer'
+                        }`}
+                        disabled={index === breadcrumbs.length - 1}
+                    >
+                        {breadcrumb.name}
+                    </button>
+                </div>
+            ))}
+        </nav>
+    );
+};
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
     useSocket()
@@ -163,7 +231,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 `}
             >
                 {/* Header */}
-                <header className="w-full  bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-6 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                <header className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
@@ -217,7 +285,12 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                     </div>
                 </dialog>
 
-                <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">{children}</main>
+                {/* Breadcrumb Navigation */}
+                <Breadcrumb />
+
+                <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
+                    {children}
+                </main>
             </div>
         </div>
     );
