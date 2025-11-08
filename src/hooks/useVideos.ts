@@ -99,8 +99,14 @@ export function useNextVideo(currentId: string | number | undefined) {
   const { data, loading } = UseVideosWithParams(params);
 
   const currentVideoIndex = data?.videos?.findIndex(vd => vd.id === Number(currentId));
+  const hasNext = currentVideoIndex !== undefined && currentVideoIndex < (data?.videos?.length || 0) - 1;
+  const hasPrev = currentVideoIndex !== undefined && currentVideoIndex > 0;
 
   return {
-    loading, nextVideo: data?.videos?.at(currentVideoIndex + 1)?.id || currentId
+    loading, 
+    nextVideo: data?.videos?.at(currentVideoIndex + 1)?.id || currentId,
+    prevVideo: currentVideoIndex > 0 ? data?.videos?.at(currentVideoIndex - 1)?.id : currentId,
+    hasNext,
+    hasPrev
   }
 }
