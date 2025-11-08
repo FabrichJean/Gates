@@ -1,10 +1,8 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { type Plateform } from "../hooks/usePlateform";
-// import UseCategory from "../hooks/useCategory";
+
 import {
-  addCategoryToPlateformApi,
-  removeCategoryFromPlateformApi,
   removePlateformFromCategoryApi,
 } from "../api/plateformCategory.ts";
 import toast from "react-hot-toast";
@@ -55,7 +53,7 @@ export default function PlateformCard({
 
   const handleRemoveCategory = async () => {
     try {
-      await removePlateformFromCategoryApi(plateform.id, categoryId);
+      await removePlateformFromCategoryApi(categoryId, plateform.id);
       onDelete();
       toast.success("Catégorie retirée !");
     } catch {

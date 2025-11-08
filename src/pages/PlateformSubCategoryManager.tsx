@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 export default function PlateformSubCategoryManager() {
   const { data: plateforms } = UsePlateform();
@@ -79,10 +79,9 @@ export default function PlateformSubCategoryManager() {
 
   return (
     <div className="p-6">
-      <Toaster position="top-right" />
       <h1 className="text-2xl font-semibold mb-4">Plateform ↔ SubCategory</h1>
-      <div className="flex gap-6">
-        <div className="w-1/3 bg-white dark:bg-gray-800 p-4 rounded border">
+      <div className="flex md:flex-row flex-col gap-6">
+        <div className="w-full md:w-1/3 bg-white dark:bg-gray-800 p-4 rounded border">
           <h2 className="font-medium mb-2">Plateforms</h2>
           <div className="flex flex-col gap-2">
             {plateforms?.map((p: any) => (
@@ -118,7 +117,7 @@ export default function PlateformSubCategoryManager() {
                   </div>
                   <div>
                     <button
-                      onClick={() => handleRemove(r.id)}
+                      onClick={() => handleRemove(r.PlateformSubCategory.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       ❌
@@ -132,10 +131,10 @@ export default function PlateformSubCategoryManager() {
           )}
         </div>
 
-        <div className="w-1/3 bg-white dark:bg-gray-800 p-4 rounded border">
-          <h2 className="font-medium mb-2">All SubCategories</h2>
+        <div className="w-full md:w-1/3 bg-white dark:bg-gray-800 p-4 rounded border">
+          <h2 className="font-medium mb-2">Select SubCategories</h2>
           <div className="flex flex-col gap-2 max-h-[60vh] overflow-auto">
-            {allSubCategories.map((s: any) => (
+            {allSubCategories?.filter(s => !relations.some(r => r.subCategoryId === s.id)).map((s: any) => (
               <div
                 key={s.id}
                 className="flex items-center justify-between p-2 border rounded"
@@ -146,7 +145,7 @@ export default function PlateformSubCategoryManager() {
                     onClick={() => handleAdd(s.id)}
                     className="bg-blue-600 text-white px-3 py-1 rounded"
                   >
-                    Ajouter
+                    add
                   </button>
                 </div>
               </div>

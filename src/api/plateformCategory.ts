@@ -18,6 +18,17 @@ export const addCategoryToPlateformApi = async (
   );
 
 export const removeCategoryFromPlateformApi = async (
+  plateformId: number,
+  categoryId: number
+) =>
+  await axios.delete(
+    `${apiURL}/plateform-category/${plateformId}/${categoryId}`,
+    {
+      headers,
+    }
+  );
+
+export const removePlateformFromCategoryApi = async (
   categoryId: number,
   plateformId: number
 ) =>
@@ -28,14 +39,17 @@ export const removeCategoryFromPlateformApi = async (
     }
   );
 
+export const getCategoriesByPlateformApi = async (plateformId: number) =>
+  await axios.get(`${apiURL}/plateform-category/plateform/${plateformId}`, {
+    headers,
+  });
 
-  export const removePlateformFromCategoryApi = async (
-  plateformId: number,
-  categoryId: number,
-) =>
-  await axios.delete(
-    `${apiURL}/plateform-category/${plateformId}/${categoryId}`,
-    {
-      headers,
-    }
-  );
+export const getPlateformsByCategoryApi = async (categoryId: number) =>
+  await axios.get(`${apiURL}/plateform-category/category/${categoryId}`, {
+    headers,
+  });
+
+export const clearCategoriesFromPlateformApi = async (plateformId: number) =>
+  await axios.delete(`${apiURL}/plateform-category/plateform/${plateformId}/clear`, {
+    headers,
+  });

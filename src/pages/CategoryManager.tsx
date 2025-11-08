@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import UseCategory from "../hooks/useCategory";
 import { createCastegoryApi, deleteCategoryApi } from "../api/categories";
 import toast from "react-hot-toast";
-import PlateformPanel from "../components/PlateformPanel";
 
 export default function CategoryManager() {
     // In this manager we always keep categories with numeric ids, so narrow the type
@@ -84,7 +83,7 @@ export default function CategoryManager() {
                 </AnimatedList>
             </div>
 
-            <PlateformPanel categoryId={selectedId}/>
+            {/* <PlateformPanel categoryId={selectedId}/> */}
 
             {/* Sous-catégories */}
             <div className="md:min-w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 overflow-hidden transition-all duration-300">
