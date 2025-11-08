@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import { useAuthMe } from "../hooks/useAuth";
+import UsePlateform from "../hooks/usePlateform";
 import { Md5 } from 'ts-md5';
 
 
@@ -153,6 +154,8 @@ const Upload = () => {
   const [uploading, setUploading] = useState(false);
   const [category, setCategory] = useState<Category>();
   const [subcategory, setSubCategory] = useState<SubCategory>();
+  const { data: plateforms } = UsePlateform();
+  const [platformId, setPlatformId] = useState<number | undefined>(undefined);
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -206,21 +209,25 @@ const Upload = () => {
       return;
     }
 
-    const formData = {
-      video: videoFile,
-      cover: coverFile,
-      category_id: category.id,
-      ...(subcategory && { sub_category_id: subcategory.id }),
-      ref,
-      titles: JSON.stringify(coupleTitles),
-    };
+    const fd = new FormData();
+    fd.append("video", videoFile as File);
+    fd.append("cover", coverFile as File);
+    fd.append("category_id", String(category.id));
+    fd.append("plateform_id", String(platformId));
+    if (subcategory) fd.append("sub_category_id", String(subcategory.id));
+    if (platformId) fd.append("plateform_id", String(platformId));
+    fd.append("ref", String(ref));
+    fd.append("titles", JSON.stringify(coupleTitles));
 
     try {
       setUploading(true);
       setProgress(0);
 
-      // @ts-ignore
-      const res = await uploadVideo(formData, (progressEvent) => {
+      console.log(fd.get("plateform_id"));
+      
+
+      // send FormData for multipart upload
+      const res = await uploadVideo(fd as unknown as FormData, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         }
@@ -262,6 +269,20 @@ const Upload = () => {
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">SubCategory</label>
               <SubCategoryAutoComplete onSelect={setSubCategory} categoryId={category?.id} />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Platform (optional)</label>
+              <select
+                value={platformId ?? ""}
+                onChange={(e) => setPlatformId(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
+              >
+                <option value="">-- none --</option>
+                {plateforms?.map((p: any) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </div>
 
             {/* Cover */}
