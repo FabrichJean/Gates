@@ -1,22 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
-
-const webApp = [
-    { id: 1, name: "Main Site" },
-    { id: 2, name: "Mobile App" },
-    { id: 3, name: "Desktop App" },
-    { id: 4, name: "Admin Panel" },
-];
+import UsePlateform from "../hooks/usePlateform";
+import { useNavigate } from "react-router-dom";
 
 const UploadPost = () => {
+    const navigate = useNavigate();
+    
     // Hook pour récupérer les catégories
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
-    
+
+    // Hook pour récupérer les plateformes (Web Apps)
+    const { data: plateformsData, loading: plateformsLoading, error: plateformsError } = UsePlateform();
+
     const [languages, setLanguages] = useState([
         { id: 1, name: "中文" },
         { id: 2, name: "English" },
@@ -25,10 +27,10 @@ const UploadPost = () => {
     const [subOpen, setSubOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<{ id: number, name: string } | null>(null);
-    
+
     // Hook pour récupérer les sous-catégories basées sur la catégorie sélectionnée
     const { data: subCategories, loading: subCategoriesLoading, error: subCategoriesError } = useSubCategoryPost(selectedCategory?.id);
-    
+
     const [selectedSubCategory, setSelectedSubCategory] = useState<{ id: number, name: string, categoryId: number } | null>(null);
     const [selectedWebApp, setSelectedWebApp] = useState<{ id: number, name: string } | null>(null);
     const [webAppOpen, setWebAppOpen] = useState(false);
@@ -94,6 +96,13 @@ const UploadPost = () => {
             setSelectedSubCategory(null);
         }
     }, [subCategoriesError, selectedCategory]);
+
+    // Effet pour réinitialiser la sélection Web App en cas d'erreur
+    useEffect(() => {
+        if (plateformsError) {
+            setSelectedWebApp(null);
+        }
+    }, [plateformsError]);
 
     // Fonctions pour gérer les titres et descriptions par langue
     const handleTitleChange = (languageId: number, value: string) => {
@@ -161,7 +170,7 @@ const UploadPost = () => {
             // Vérifier la taille du fichier vidéo (2GB max = 2 * 1024 * 1024 * 1024 bytes)
             const maxSize = 2 * 1024 * 1024 * 1024; // 2GB en bytes
             if (file.size > maxSize) {
-                alert(`⚠️ La vidéo est trop volumineuse !\n\nTaille du fichier: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\nTaille maximum autorisée: 2 GB\n\nVeuillez choisir une vidéo plus petite.`);
+                toast.error(`⚠️ La vidéo est trop volumineuse !\n\nTaille du fichier: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\nTaille maximum autorisée: 2 GB\n\nVeuillez choisir une vidéo plus petite.`);
                 return;
             }
 
@@ -171,22 +180,29 @@ const UploadPost = () => {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Fonction pour réinitialiser le formulaire
+    const handleResetForm = () => {
+        setSelectedCategory(null);
+        setSelectedSubCategory(null);
+        setSelectedWebApp(null);
+        setSelectedOptions([]);
+        setTitles({});
+        setDescriptions({});
+        setImageFields([{ id: 1, file: null }]);
+        setVideoFields([{ id: 1, file: null }]);
+        setOpen(false);
+        setSubOpen(false);
+        setWebAppOpen(false);
+        toast.success("Formulaire réinitialisé");
+    };
+
+    // Upload post avec useCallback
+    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
 
         // Validation des champs obligatoires
-        if (!selectedCategory) {
-            toast.error("Veuillez sélectionner une catégorie");
-            return;
-        }
-
-        if (!selectedSubCategory) {
-            toast.error("Veuillez sélectionner une sous-catégorie");
-            return;
-        }
-
-        if (!selectedWebApp) {
-            toast.error("Veuillez sélectionner une application web");
+        if (!selectedCategory || !selectedSubCategory || !selectedWebApp) {
+            toast.error("Veuillez remplir tous les champs obligatoires !");
             return;
         }
 
@@ -211,95 +227,86 @@ const UploadPost = () => {
             return;
         }
 
+        // Préparer les titres multilingues selon la nouvelle structure
+        const titlesArray: { title: string, i18_language: string, description?: string }[] = [];
+
+        languages.forEach(lang => {
+            if (titles[lang.id]?.trim()) {
+                // Utiliser le nom de la langue comme i18_language
+                const langCode = lang.name.toLowerCase() === 'english' ? 'en' : 
+                               lang.name.toLowerCase() === '中文' ? 'zh' : 
+                               lang.name.toLowerCase() === 'français' ? 'fr' : 
+                               lang.name.toLowerCase().substring(0, 2);
+                
+                titlesArray.push({
+                    title: titles[lang.id].trim(),
+                    i18_language: langCode,
+                    ...(descriptions[lang.id]?.trim() && { description: descriptions[lang.id].trim() })
+                });
+            }
+        });
+
+        const formData = {
+            category_id: selectedCategory.id,
+            sub_category_id: selectedSubCategory.id,
+            plateform_id: selectedWebApp.id,
+            titles: JSON.stringify(titlesArray),
+            videos: videoFields.filter(field => field.file).map(field => field.file),
+            images: imageFields.filter(field => field.file).map(field => field.file),
+        };
+
         try {
             setIsSubmitting(true);
 
-            // Créer le FormData pour l'upload
-            const formData = new FormData();
-
+            // Créer le FormData 
+            const fd = new FormData();
+            
             // Ajouter les données de base
-            formData.append('category_id', selectedCategory.id.toString());
-            formData.append('sub_category_id', selectedSubCategory.id.toString());
-            formData.append('web_app_id', selectedWebApp.id.toString());
+            fd.append('category_id', formData.category_id.toString());
+            fd.append('sub_category_id', formData.sub_category_id.toString());
+            fd.append('plateform_id', formData.plateform_id.toString());
+            fd.append('titles', formData.titles);
 
-            // Ajouter les titres et descriptions par langue
-            const titlesData: { [key: number]: string } = {};
-            const descriptionsData: { [key: number]: string } = {};
-
-            languages.forEach(lang => {
-                if (titles[lang.id]?.trim()) {
-                    titlesData[lang.id] = titles[lang.id].trim();
-                }
-                if (descriptions[lang.id]?.trim()) {
-                    descriptionsData[lang.id] = descriptions[lang.id].trim();
-                }
+            // Ajouter les fichiers vidéos
+            formData.videos.forEach((video) => {
+                if (video) fd.append('videos', video);
             });
 
-            formData.append('titles', JSON.stringify(titlesData));
-            formData.append('descriptions', JSON.stringify(descriptionsData));
-
-            // Ajouter les images
-            let imageIndex = 0;
-            imageFields.forEach(field => {
-                if (field.file) {
-                    formData.append(`images[${imageIndex}]`, field.file);
-                    imageIndex++;
-                }
+            // Ajouter les fichiers images
+            formData.images.forEach((image) => {
+                if (image) fd.append('images', image);
             });
 
-            // Ajouter les vidéos
-            let videoIndex = 0;
-            videoFields.forEach(field => {
-                if (field.file) {
-                    formData.append(`videos[${videoIndex}]`, field.file);
-                    videoIndex++;
-                }
-            });
-
-            // Effectuer la requête
-            const response = await axios.post(`${apiURL}/posts`, formData, {
+            // @ts-ignore
+            const response = await axios.post(`${apiURL}/posts/submit`, fd, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: `Bearer ${getToken()}`,
+                    'Authorization': `Bearer ${getToken()}`
                 },
+                timeout: 10 * 60 * 1000 // 10 minutes timeout
             });
 
-            if (response.data && response.data.success) {
-                toast.success("🎉 Post uploadé avec succès !");
-
-                // Réinitialiser le formulaire
-                setSelectedCategory(null);
-                setSelectedSubCategory(null);
-                setSelectedWebApp(null);
-                setTitles({});
-                setDescriptions({});
-                setImageFields([{ id: 1, file: null }]);
-                setVideoFields([{ id: 1, file: null }]);
-                setSelectedOptions([]);
-            } else {
-                toast.error(response.data?.message || "Erreur lors de l'upload du post");
-            }
-
-        } catch (error: any) {
-            console.error("Erreur lors de l'upload:", error);
-
-            if (error.response) {
-                // Erreur de la réponse du serveur
-                const message = error.response.data?.message ||
-                    error.response.data?.error ||
-                    `Erreur ${error.response.status}: ${error.response.statusText}`;
-                toast.error(message);
-            } else if (error.request) {
-                // Erreur de réseau
-                toast.error("Erreur de réseau: Impossible de joindre le serveur");
-            } else {
-                // Autre erreur
-                toast.error(`Erreur: ${error.message}`);
-            }
+            toast.success("✅ Post uploadé avec succès !");
+            navigate("/post");
+            console.log("Post uploaded:", response.data);
+            
+            // Réinitialiser le formulaire
+            setSelectedCategory(null);
+            setSelectedSubCategory(null);
+            setSelectedWebApp(null);
+            setTitles({});
+            setDescriptions({});
+            setImageFields([{ id: 1, file: null }]);
+            setVideoFields([{ id: 1, file: null }]);
+            setSelectedOptions([]);
+            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            console.error(err);
+            toast.error("Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [selectedCategory, selectedSubCategory, selectedWebApp, titles, descriptions, imageFields, videoFields, languages, navigate]);
 
     return (
         <div className="min-h-screen flex items-start pb-6">
@@ -324,22 +331,21 @@ const UploadPost = () => {
                                     </div>
                                 )}
                                 <div className="mt-1 relative w-full">
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         onClick={() => !categoriesLoading && setOpen(!open)}
                                         disabled={categoriesLoading}
-                                        className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${
-                                            categoriesLoading 
-                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed' 
+                                        className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${categoriesLoading
+                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                                                 : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
-                                        }`}>
+                                            }`}>
                                         <span className="block truncate">
-                                            {categoriesLoading 
-                                                ? 'Chargement des catégories...' 
-                                                : categoriesError 
-                                                    ? 'Erreur lors du chargement' 
-                                                    : selectedOptions.length 
-                                                        ? selectedOptions[0] 
+                                            {categoriesLoading
+                                                ? 'Chargement des catégories...'
+                                                : categoriesError
+                                                    ? 'Erreur lors du chargement'
+                                                    : selectedOptions.length
+                                                        ? selectedOptions[0]
                                                         : 'Select category'
                                             }
                                         </span>
@@ -369,27 +375,27 @@ const UploadPost = () => {
                                                 </div>
                                             ) : (
                                                 categoriesResponse?.categories?.map((cat) => (
-                                                <div key={cat.id} onClick={() => {
-                                                    setSelectedOptions([cat.name]);
-                                                    setSelectedCategory({ id: cat.id, name: cat.name });
-                                                    setSelectedSubCategory(null); // Reset sub-category when category changes
-                                                    setOpen(false);
-                                                }}
-                                                    className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
-                                                    <span className={`block truncate ${selectedOptions[0] === cat.name ? 'font-semibold' : ''}`}>
-                                                        {cat.name}
-                                                    </span>
-                                                    {selectedOptions[0] === cat.name && (
-                                                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
-                                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                                fill="currentColor">
-                                                                <path fillRule="evenodd"
-                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                    clipRule="evenodd" />
-                                                            </svg>
+                                                    <div key={cat.id} onClick={() => {
+                                                        setSelectedOptions([cat.name]);
+                                                        setSelectedCategory({ id: cat.id, name: cat.name });
+                                                        setSelectedSubCategory(null); // Reset sub-category when category changes
+                                                        setOpen(false);
+                                                    }}
+                                                        className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
+                                                        <span className={`block truncate ${selectedOptions[0] === cat.name ? 'font-semibold' : ''}`}>
+                                                            {cat.name}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                        {selectedOptions[0] === cat.name && (
+                                                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
+                                                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                    fill="currentColor">
+                                                                    <path fillRule="evenodd"
+                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                        clipRule="evenodd" />
+                                                                </svg>
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 ))
                                             )}
                                         </div>
@@ -415,9 +421,9 @@ const UploadPost = () => {
                                         <span className="block truncate">
                                             {selectedSubCategory ? selectedSubCategory.name :
                                                 !selectedCategory ? 'Please select a category first' :
-                                                subCategoriesLoading ? 'Chargement des sous-catégories...' :
-                                                subCategoriesError ? 'Erreur lors du chargement' :
-                                                'Select sub category'}
+                                                    subCategoriesLoading ? 'Chargement des sous-catégories...' :
+                                                        subCategoriesError ? 'Erreur lors du chargement' :
+                                                            'Select sub category'}
                                         </span>
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                             <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -445,25 +451,29 @@ const UploadPost = () => {
                                                 </div>
                                             ) : (
                                                 availableSubCategories?.subCategories?.map((subCat) => (
-                                                <div key={subCat.id} onClick={() => {
-                                                    setSelectedSubCategory(subCat.subCategories ? { id: subCat.id, name: subCat.name, categoryId: subCat.category.id } : null);
-                                                    setSubOpen(false);
-                                                }}
-                                                    className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
-                                                    <span className={`block truncate ${selectedSubCategory?.id === subCat.id ? 'font-semibold' : ''}`}>
-                                                        {subCat.name}
-                                                    </span>
-                                                    {selectedSubCategory?.id === subCat.id && (
-                                                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
-                                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                                fill="currentColor">
-                                                                <path fillRule="evenodd"
-                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                    clipRule="evenodd" />
-                                                            </svg>
+                                                    <div key={subCat.id} onClick={() => {
+                                                        setSelectedSubCategory({ 
+                                                            id: subCat.id, 
+                                                            name: subCat.name, 
+                                                            categoryId: subCat.category?.id || selectedCategory?.id || 0
+                                                        });
+                                                        setSubOpen(false);
+                                                    }}
+                                                        className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
+                                                        <span className={`block truncate ${selectedSubCategory?.id === subCat.id ? 'font-semibold' : ''}`}>
+                                                            {subCat.name}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                        {selectedSubCategory?.id === subCat.id && (
+                                                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
+                                                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                    fill="currentColor">
+                                                                    <path fillRule="evenodd"
+                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                        clipRule="evenodd" />
+                                                                </svg>
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 ))
                                             )}
                                         </div>
@@ -477,11 +487,34 @@ const UploadPost = () => {
                             {/* champ de sélection de l'application web */}
                             <div className="relative w-full" ref={webAppDropdownRef}>
                                 <label htmlFor="webapp-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Web Application:</label>
+                                {plateformsError && (
+                                    <div className="mb-2 text-sm text-red-600 dark:text-red-400">
+                                        <span className="flex items-center">
+                                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                            </svg>
+                                            Erreur lors du chargement des plateformes: {plateformsError}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="mt-1 relative w-full">
-                                    <button type="button" onClick={() => setWebAppOpen(!webAppOpen)}
-                                        className="relative w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm text-gray-900 dark:text-white">
+                                    <button
+                                        type="button"
+                                        onClick={() => !plateformsLoading && setWebAppOpen(!webAppOpen)}
+                                        disabled={plateformsLoading}
+                                        className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${plateformsLoading
+                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            }`}>
                                         <span className="block truncate">
-                                            {selectedWebApp ? selectedWebApp.name : 'Select web application'}
+                                            {plateformsLoading
+                                                ? 'Chargement des plateformes...'
+                                                : plateformsError
+                                                    ? 'Erreur lors du chargement'
+                                                    : selectedWebApp
+                                                        ? selectedWebApp.name
+                                                        : 'Select web application'
+                                            }
                                         </span>
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                             <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -495,33 +528,45 @@ const UploadPost = () => {
 
                                     {webAppOpen && (
                                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
-                                            {webApp.map((app) => (
-                                                <div key={app.id} onClick={() => {
-                                                    setSelectedWebApp(app);
-                                                    setWebAppOpen(false);
-                                                }}
-                                                    className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
-                                                    <span className={`block truncate ${selectedWebApp?.id === app.id ? 'font-semibold' : ''}`}>
-                                                        {app.name}
-                                                    </span>
-                                                    {selectedWebApp?.id === app.id && (
-                                                        <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
-                                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                                fill="currentColor">
-                                                                <path fillRule="evenodd"
-                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                    clipRule="evenodd" />
-                                                            </svg>
-                                                        </span>
-                                                    )}
+                                            {plateformsLoading ? (
+                                                <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
+                                                    Chargement des plateformes...
                                                 </div>
-                                            ))}
+                                            ) : plateformsError ? (
+                                                <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">
+                                                    Erreur: {plateformsError}
+                                                </div>
+                                            ) : plateformsData?.length === 0 ? (
+                                                <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
+                                                    Aucune plateforme disponible
+                                                </div>
+                                            ) : (
+                                                plateformsData?.map((platform) => (
+                                                    <div key={platform.id} onClick={() => {
+                                                        setSelectedWebApp({ id: platform.id, name: platform.name });
+                                                        setWebAppOpen(false);
+                                                    }}
+                                                        className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500">
+                                                        <span className={`block truncate ${selectedWebApp?.id === platform.id ? 'font-semibold' : ''}`}>
+                                                            {platform.name}
+                                                        </span>
+                                                        {selectedWebApp?.id === platform.id && (
+                                                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-indigo-600 dark:text-indigo-400 hover:text-white">
+                                                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                    fill="currentColor">
+                                                                    <path fillRule="evenodd"
+                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                        clipRule="evenodd" />
+                                                                </svg>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                            </div>
-
-                            {/* Divider */}
+                            </div>                            {/* Divider */}
                             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
 
                             {/* champ de titre avec onglets de langues */}
@@ -769,14 +814,31 @@ const UploadPost = () => {
                             {/* Divider */}
                             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
 
-                            {/* bouton upload */}
-                            <div className="flex justify-center sm:justify-end w-full">
+                            {/* boutons upload et reset */}
+                            <div className="flex justify-center sm:justify-end w-full gap-3">
+                                {/* Bouton Reset Form */}
+                                <button
+                                    type="button"
+                                    onClick={handleResetForm}
+                                    disabled={isSubmitting}
+                                    className={`flex items-center justify-center px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 w-full sm:w-auto ${isSubmitting
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-gray-500 hover:bg-gray-600 text-white cursor-pointer'
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span>Reset Form</span>
+                                </button>
+
+                                {/* Bouton Upload */}
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
                                     className={`flex items-center justify-center px-4 py-2 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full sm:w-auto ${isSubmitting
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                                         }`}
                                 >
                                     {isSubmitting ? (

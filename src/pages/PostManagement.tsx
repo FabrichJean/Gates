@@ -1,66 +1,74 @@
 import { FilePlus, Eye, Columns } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// Données statiques pour la table
-const staticPostData = [
-    {
-        id: 1,
-        ref: "POST-001",
-        username: "john_doe",
-        category: "Education",
-        status: "approved",
-        image: "/img static/3232.jpg",
-        duration: "05:30",
-        checking: "verified",
-        createdAt: "2024-11-01"
-    },
-    {
-        id: 2,
-        ref: "POST-002",
-        username: "jane_smith",
-        category: "Entertainment",
-        status: "pending",
-        image: "/img static/3232.jpg",
-        duration: "12:45",
-        checking: "pending",
-        createdAt: "2024-11-02"
-    },
-    {
-        id: 3,
-        ref: "POST-003",
-        username: "mike_wilson",
-        category: "Technology",
-        status: "rejected",
-        image: "/img static/3232.jpg",
-        duration: "08:15",
-        checking: "rejected",
-        createdAt: "2024-11-03"
-    },
-    {
-        id: 4,
-        ref: "POST-004",
-        username: "sarah_jones",
-        category: "Health",
-        status: "approved",
-        image: "/img static/3232.jpg",
-        duration: "15:22",
-        checking: "verified",
-        createdAt: "2024-11-04"
-    },
-    {
-        id: 5,
-        ref: "POST-005",
-        username: "alex_brown",
-        category: "Sports",
-        status: "pending",
-        image: "/img static/3232.jpg",
-        duration: "09:38",
-        checking: "pending",
-        createdAt: "2024-11-05"
-    }
-];
+import { useEffect, useState } from "react";
+import { getPosts } from "../api/posts";
+import type { Post, PostsResponse } from "../types/post";
+import Loader from "../components/Loader";
 
 const PostManagement = () => {
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const fetchPosts = async () => {
+        try {
+            setLoading(true);
+            const response = await getPosts();
+            const data: PostsResponse = response.data;
+            setPosts(data.posts);
+        } catch (err) {
+            setError("Erreur lors du chargement des posts");
+            console.error("Error fetching posts:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('fr-FR');
+    };
+
+
+    const getMainTitle = (post: Post) => {
+        return post.titles.find(title => title.i18_language === "fr")?.title || 
+               post.titles[0]?.title || 
+               "Sans titre";
+    };
+
+    const filteredPosts = posts.filter(post =>
+        getMainTitle(post).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.postSubCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.plateform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        formatDate(post.createdAt).toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return <Loader />;
+    }
+
+    if (error) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                <div className="text-red-500 text-center">
+                    <p className="text-xl mb-2">Erreur</p>
+                    <p>{error}</p>
+                    <button 
+                        onClick={fetchPosts}
+                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Réessayer
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="h-screen w-full">
             <div className="">
@@ -85,6 +93,8 @@ const PostManagement = () => {
                                 <input
                                     type="text"
                                     placeholder="Search posts..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
                                 />
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -104,25 +114,22 @@ const PostManagement = () => {
                         <thead className="text-xs text-gray-700 uppercase bg-blue-500/5 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" className="px-6 py-3">
-                                    Ref
+                                    ID
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Username
+                                    Titre
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Category
+                                    Catégorie
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Status
+                                    Sous-catégorie
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Image
+                                    Plateforme
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Duration
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Checking
+                                    Date de création
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left">
                                     Actions
@@ -130,76 +137,55 @@ const PostManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {staticPostData.map((post) => (
-                                <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {post.ref}
-                                    </th>
-                                    <td className="px-6 py-4">
-                                        {post.username}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                            {post.category}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.status === 'approved'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                            : post.status === 'pending'
-                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                            }`}>
-                                            {post.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <img
-                                            src={post.image}
-                                            alt="Post thumbnail"
-                                            className="w-12 h-8 object-cover rounded"
-                                            onError={(e) => {
-                                                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNiAxNkwyNCAxNkwyNCAyNEwxNiAyNFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
-                                            }}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {post.duration}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.checking === 'verified'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                            : post.checking === 'pending'
-                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                            }`}>
-                                            {post.checking}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center text-center gap-2">
-                                            <Link
-                                                to={`/post/${post.id}`}
-                                                className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </Link>
-                                            {/* {post.status === 'pending' && (
-                                                <>
-                                                    <button className="p-1.5 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">
-                                                        <Check className="w-4 h-4" />
-                                                    </button>
-                                                    <button className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </>
-                                            )} */}
-                                        </div>
-                                    </td>
-                                </tr>
+                            {filteredPosts.map((post) => (
+                                    <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {post.id}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            <div className="max-w-xs truncate" title={getMainTitle(post)}>
+                                                {getMainTitle(post)}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
+                                                {post.postCategory.name}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
+                                                {post.postSubCategory.name}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
+                                                {post.plateform.name}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {formatDate(post.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center text-center gap-2">
+                                                <Link
+                                                    to={`/post/${post.id}`}
+                                                    className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    title="Voir les détails"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
                             ))}
                         </tbody>
                     </table>
+                    
+                    {filteredPosts.length === 0 && (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                            {searchTerm ? "Aucun post trouvé pour cette recherche" : "Aucun post disponible"}
+                        </div>
+                    )}
                 </div>
             </div>
 
