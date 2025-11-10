@@ -1,6 +1,6 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { UsePost, UsePosts, getPrevPost, getNextPost, hasPrevPost, hasNextPost } from "../hooks/usePost";
-import { ArrowLeft, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { UsePost, useNextPost } from "../hooks/usePost";
+import { ArrowLeft, Edit } from "lucide-react";
 import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
@@ -9,9 +9,7 @@ const PostDetails = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { data: post, loading, error} = UsePost(id);
-    const { data: allPosts } = UsePosts();
-    
-    const currentId = parseInt(id || "1");
+    const { nextPost, prevPost, hasNext, hasPrev } = useNextPost(id);
     
     const handleBack = () => {
         navigate("/post");
@@ -21,20 +19,6 @@ const PostDetails = () => {
         // Navigation vers la page de modification
         navigate(`/post/edit/${id}`);
     };
-    
-    // const handlePrev = () => {
-    //     const prevPost = getPrevPost(currentId, allPosts);
-    //     if (prevPost) {
-    //         navigate(`/post/${prevPost.id}`);
-    //     }
-    // };
-    
-    // const handleNext = () => {
-    //     const nextPost = getNextPost(currentId, allPosts);
-    //     if (nextPost) {
-    //         navigate(`/post/${nextPost.id}`);
-    //     }
-    // };
     
     if (loading) {
         return (
@@ -61,31 +45,72 @@ const PostDetails = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={handleBack}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                        className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+        font-medium text-sm rounded-md transition-all duration-300
+        backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
                     >
-                        <ArrowLeft size={18} />
-                        Back
+                        <ArrowLeft size={16} />
+                        <span className="sm:hidden">←</span>
+                        <span className="hidden sm:inline">Back</span>
+                        <span className="sm:hidden">Back</span>
                     </button>
                     <button
                         onClick={handleModify}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                        className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+    font-medium text-sm rounded-md transition-all duration-300
+    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
                     >
-                        <Edit size={18} />
+                        <Edit size={16} />
+                        modify
                     </button>
-                    <button
-                        // onClick={handlePrev}
-                        // disabled={!hasPrevPost(currentId, allPosts)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ChevronLeft size={18} />
-                    </button>
-                    <button
-                        // onClick={handleNext}
-                        // disabled={!hasNextPost(currentId, allPosts)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ChevronRight size={18} />
-                    </button>
+
+                    {hasPrev ? (
+                        <Link to={'/post/' + prevPost} className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
+    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
+    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            prev
+                        </Link>
+                    ) : (
+                        <div className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-gray-100 dark:bg-gray-800 
+    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
+    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            prev
+                        </div>
+                    )}
+
+                    {hasNext ? (
+                        <Link to={'/post/' + nextPost} className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
+    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
+    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]">
+                            next
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
+                    ) : (
+                        <div className="relative flex items-center justify-center gap-2 px-4 py-2
+    font-medium text-sm rounded-md transition-all duration-300
+    bg-gray-100 dark:bg-gray-800 
+    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
+    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50">
+                            next
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -140,7 +165,7 @@ const PostDetails = () => {
                     </div>
                 </div>
 
-                <GetPostTitles postTitles={post.titles} />                
+                <GetPostTitles postTitles={post.titles} />             
                 <GetImagePost images={post.images} />
                 <GetVideoPost videos={post.videos} />
             </div>

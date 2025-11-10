@@ -1,36 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost } from "../hooks/usePost";
-import { Languages } from "lucide-react";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
+import toast from "react-hot-toast";
+import LanguageAutoComplete from "../components/LanguageAutoComplete";
 
-// data static for category
-// const categories = [
-//     { id: 1, name: "Category 1" },
-//     { id: 2, name: "Category 2" },
-//     { id: 3, name: "Category 3" },
-// ];
+type Language = {
+    code: string;
+    name: string;
+};
 
-// data static for sub category
-// const subCategories = [
-//     { id: 1, name: "Sub Category 1", categoryId: 1 },
-//     { id: 2, name: "Sub Category 2", categoryId: 1 },
-//     { id: 3, name: "Sub Category 3", categoryId: 1 },
-//     { id: 4, name: "Sub Category 4", categoryId: 2 },
-//     { id: 5, name: "Sub Category 5", categoryId: 2 },
-//     { id: 6, name: "Sub Category 6", categoryId: 3 },
-//     { id: 7, name: "Sub Category 7", categoryId: 3 },
-//     { id: 8, name: "Sub Category 8", categoryId: 3 },
-// ];
-
-const languages = [
-    { id: 1, code: "zh", name: "中文" },
-    { id: 2, code: "en", name: "English" },
-    { id: 3, code: "fr", name: "Français" },
-    { id: 4, code: "ar", name: "العربية" },
-    { id: 5, code: "mg", name: "Malagasy" },
-];
 
 const PostEdit = () => {
     const { id } = useParams<{ id: string }>();
@@ -41,14 +21,17 @@ const PostEdit = () => {
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<{ id: number, name: string } | null>();
     const [selectedSubCategory, setSelectedSubCategory] = useState<{ id: number, name: string, categoryId: number } | null>(null);
-    const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+    const [languages, setLanguages] = useState<{ id: number, name: string, code: string }[]>([]);
+    const [selectedLanguage, setSelectedLanguage] = useState<{ id: number, name: string, code: string } | null>(null);
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
     const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null, url?: string }[]>([{ id: 1, file: null }]);
     const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, url?: string }[]>([{ id: 1, file: null }]);
+    const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
+    const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
-    const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
-    const { data: subCategoriesResponse, loading: subCategoriesLoading, error: subCategoriesError } = useSubCategoryPost(selectedCategory?.id);
+    const { data: categoriesResponse } = useCategoryPost();
+    const { data: subCategoriesResponse } = useSubCategoryPost(selectedCategory?.id);
     
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -60,47 +43,67 @@ const PostEdit = () => {
     // Pré-remplir les champs avec les données du post
     useEffect(() => {
         if (post) {
-            const matchingCategory = categoriesResponse?.categories.find(cat => cat.id === post.category.id);
-            // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.subCategory_id);
+            const matchingCategory = categoriesResponse?.categories.find(cat => cat.id === post.postCategory.id);
+            // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
             if (matchingCategory) {
                 setSelectedCategory(matchingCategory);
                 // setSelectedSubCategory(matchingSubCategory);
                 setSelectedOptions([matchingCategory.name]);
             }
             
-            if (post.title && post.title.length > 0) {
+            if (post.titles && post.titles.length > 0) {
                 const titlesMap: { [key: number]: string } = {};
                 const descriptionsMap: { [key: number]: string } = {};
+                const postLanguages: { id: number, name: string, code: string }[] = [];
                 
-                post.title.forEach((item) => {
-                    const language = languages.find(lang => lang.code === item.language);
-                    if (language) {
-                        titlesMap[language.id] = item.title;
-                        descriptionsMap[language.id] = item.description;
-                    }
+                post.titles.forEach((item, index) => {
+                    const languageId = index + 1;
+                    // Créer l'objet langue basé sur les données du post
+                    const postLanguage = {
+                        id: languageId,
+                        name: item.language?.name || item.i18_language.toUpperCase(),
+                        code: item.i18_language
+                    };
+                    
+                    postLanguages.push(postLanguage);
+                    titlesMap[languageId] = item.title;
+                    descriptionsMap[languageId] = item.description || '';
                 });
                 
+                setLanguages(postLanguages);
                 setTitles(titlesMap);
                 setDescriptions(descriptionsMap);
+                
+                // Sélectionner la première langue par défaut
+                if (postLanguages.length > 0) {
+                    setSelectedLanguage(postLanguages[0]);
+                }
             }
 
             if (post.images && post.images.length > 0) {
-                setImageFields(post.images.map((url, index) => ({
+                setImageFields(post.images.map((image, index) => ({
                     id: index + 1,
                     file: null,
-                    url: url
+                    url: image.public_urls.local_image_url || ''
                 })));
             }
 
             if (post.videos && post.videos.length > 0) {
-                setVideoFields(post.videos.map((url, index) => ({
+                setVideoFields(post.videos.map((video, index) => ({
                     id: index + 1,
                     file: null,
-                    url: url
+                    url: video.public_urls.local_mp4_url || ''
                 })));
             }
         }
-    }, [post]);
+    }, [post, categoriesResponse]);
+
+    // Effet pour s'assurer que selectedLanguage est toujours valide
+    useEffect(() => {
+        if (languages.length > 0 && (!selectedLanguage || !languages.find(lang => lang.id === selectedLanguage.id))) {
+            setSelectedLanguage(languages[0]);
+        }
+    }, [languages, selectedLanguage]);
     
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -122,6 +125,35 @@ const PostEdit = () => {
 
     const handleDescriptionChange = (languageId: number, value: string) => {
         setDescriptions(prev => ({ ...prev, [languageId]: value }));
+    };
+
+    // Fonction pour ajouter une nouvelle langue
+    const handleAddLanguage = () => {
+        if (selectedLanguageFromBackend) {
+            // Vérifier si la langue n'existe pas déjà
+            const existingLanguage = languages.find(lang => lang.code === selectedLanguageFromBackend.code);
+            if (existingLanguage) {
+                toast.error("This language is already added!");
+                return;
+            }
+
+            const newId = Math.max(0, ...languages.map(lang => lang.id)) + 1;
+            const newLanguage = { 
+                id: newId, 
+                name: selectedLanguageFromBackend.name,
+                code: selectedLanguageFromBackend.code
+            };
+            setLanguages(prev => [...prev, newLanguage]);
+            setSelectedLanguageFromBackend(null);
+            setShowAddLanguageModal(false);
+            setSelectedLanguage(newLanguage); // Sélectionner automatiquement la nouvelle langue
+        }
+    };
+
+    // Fonction pour annuler l'ajout de langue
+    const handleCancelAddLanguage = () => {
+        setSelectedLanguageFromBackend(null);
+        setShowAddLanguageModal(false);
     };
 
     const addImageField = () => {
@@ -173,7 +205,6 @@ const PostEdit = () => {
 
         const formData = {
             id: post?.id,
-            ref: post?.ref,
             category: selectedCategory,
             subCategory: selectedSubCategory,
             titles: Object.entries(titles).map(([langId, title]) => {
@@ -197,7 +228,7 @@ const PostEdit = () => {
         };
 
         console.log('📊 Données de mise à jour:', formData);
-        alert(`✅ Post ${post?.ref} mis à jour!\n\nVoir la console pour les détails.`);
+        alert(`✅ Post ${post?.id} mis à jour!\n\nVoir la console pour les détails.`);
     };
 
     if (loading) {
@@ -249,7 +280,7 @@ const PostEdit = () => {
                 <div className="w-full">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                            Modify: {post.ref}
+                            Modify: POST-{String(post.id).padStart(3, '0')}
                         </h2>
                         <button
                             onClick={() => navigate(`/post/${id}`)}
@@ -273,7 +304,7 @@ const PostEdit = () => {
                                 className="relative w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm text-gray-900 dark:text-white"
                             >
                                 <span className="block truncate">
-                                    {selectedOptions.length ? selectedOptions[0] : post.category.name }
+                                    {selectedOptions.length ? selectedOptions[0] : post.postCategory.name }
                                 </span>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -319,7 +350,8 @@ const PostEdit = () => {
                             >
                                 <span className="block truncate">
                                     {/* {selectedSubCategory ? selectedSubCategory.name : post.category.subCategory.name */}
-                                    {selectedSubCategory ? selectedSubCategory.name : 'Sélectionner'}
+                                    
+                                    {selectedSubCategory ? selectedSubCategory.name : post.postSubCategory.name}
                                 </span>
                             </button>
 
@@ -341,82 +373,83 @@ const PostEdit = () => {
                             )}
                         </div>
 
-                        {/* Titres et descriptions */}
+                        {/* Titres et descriptions avec système de langues dynamique */}
                         <div className="space-y-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                                 Titres et descriptions par langue:
                             </label>
-                            
-                            {/* Sélecteur de langue */}
-                            {post.title.length > 0 && (
-                                <div className="flex items-center gap-4 mb-4">
-                                    <Languages size={20} className="text-gray-700 dark:text-gray-300" />
-                                    <div className="flex gap-2 flex-wrap">
-                                        {post.title.map((item) => (
-                                            <button
-                                                key={item.language}
-                                                type="button"
-                                                onClick={() => setSelectedLanguage(item.language)}
-                                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                                                    selectedLanguage === item.language
-                                                        ? 'bg-blue-500 text-white shadow-md'
-                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                                                }`}
-                                            >
-                                                {item.language.toUpperCase()}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
-                            {/* Champs d'édition pour chaque langue */}
-                            {languages.map((lang) => (
-                                <div 
-                                    key={lang.id} 
-                                    className={`space-y-3 p-4 rounded-lg border-2 border-gray-800 transition-all ${
-                                        selectedLanguage === lang.code
-                                            ? 'border-blue-500'
-                                            : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800'
-                                    }`}
-                                    style={{ display: selectedLanguage === lang.code ? 'block' : 'none' }}
+                            {/* Onglets des langues */}
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                                {languages.length > 0 && languages.map((language) => (
+                                    <button
+                                        key={language.id}
+                                        type="button"
+                                        onClick={() => setSelectedLanguage(language)}
+                                        className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors border-b-2 ${selectedLanguage?.id === language.id
+                                            ? 'bg-transparent border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold'
+                                            : 'bg-gray-100 dark:bg-gray-700 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white'
+                                            }`}
+                                    >
+                                        {language.name}
+                                    </button>
+                                ))}
+
+                                {/* Bouton Add Title */}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddLanguageModal(true)}
+                                    className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1"
+                                    title="Add new title"
                                 >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                                            {lang.name}
-                                        </span>
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                                            ({lang.code.toUpperCase()})
-                                        </span>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    <span>Add Title</span>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4 w-full">
+                                {languages.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <p className="text-sm">No titles created yet. Click "Add Title" to create your first title.</p>
                                     </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Titre:
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={titles[lang.id] || ''}
-                                            onChange={(e) => handleTitleChange(lang.id, e.target.value)}
-                                            placeholder={`Titre en ${lang.name}`}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Description:
-                                        </label>
-                                        <textarea
-                                            value={descriptions[lang.id] || ''}
-                                            onChange={(e) => handleDescriptionChange(lang.id, e.target.value)}
-                                            placeholder={`Description en ${lang.name}`}
-                                            rows={4}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                                ) : (
+                                    <>
+                                        {/* Champ titre */}
+                                        {selectedLanguage && (
+                                            <div className="w-full">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Title ({selectedLanguage.name})
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={titles[selectedLanguage.id] || ''}
+                                                    onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
+                                                    placeholder={`Enter title in ${selectedLanguage.name}`}
+                                                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Champ description */}
+                                        {selectedLanguage && (
+                                            <div className="w-full">
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Description ({selectedLanguage.name})
+                                                </label>
+                                                <textarea
+                                                    value={descriptions[selectedLanguage.id] || ''}
+                                                    onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
+                                                    placeholder={`Enter description in ${selectedLanguage.name}`}
+                                                    rows={4}
+                                                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
 
 
@@ -572,6 +605,47 @@ const PostEdit = () => {
                     </form>
                 </div>
             </div>
+
+            {/* Modal Add Language */}
+            {showAddLanguageModal && (
+                <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                            New Title
+                        </h3>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Select Language
+                            </label>
+                            <div className="">
+                                <LanguageAutoComplete 
+                                    onSelect={(lang) => setSelectedLanguageFromBackend(lang)}
+                                    defaultValue={selectedLanguageFromBackend || undefined}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                onClick={handleCancelAddLanguage}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleAddLanguage}
+                                disabled={!selectedLanguageFromBackend}
+                                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
+                            >
+                                Add Title
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
