@@ -126,7 +126,7 @@ export type TPost = {
     published_at: string;
     createdAt: string;
     updatedAt: string;
-    postTitles: PostTitle[];
+    titles: PostTitle[];
     contents: PostContent[];
     postCategory: PostCategory;
     postSubCategory: PostSubCategory;
@@ -170,7 +170,7 @@ export const staticPostData: TPost[] = [
         published_at: "2024-11-01",
         createdAt: "2024-11-01",
         updatedAt: "2024-11-01",
-        postTitles: [
+        titles: [
             {
                 id: 1,
                 title: "Breaking News",
@@ -262,7 +262,7 @@ export const staticPostData: TPost[] = [
         published_at: "2024-11-02",
         createdAt: "2024-11-02",
         updatedAt: "2024-11-02",
-        postTitles: [
+        titles: [
             { id: 1, title: "Behind the Scenes", description: "A deep dive into filmmaking.", post_id: 2, i18_language: "en", language: { code: "en", name: "English" } },
             { id: 2, title: "Dans les coulisses", description: "Aperçu du monde du cinéma.", post_id: 2, i18_language: "fr", language: { code: "fr", name: "French" } },
             { id: 3, title: "Ao ambadiky ny sehatra", description: "Fijerena akaiky ny famoronana.", post_id: 2, i18_language: "mg", language: { code: "mg", name: "Malagasy" } }
