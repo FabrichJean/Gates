@@ -33,15 +33,7 @@ const PostManagement = () => {
         return new Date(dateString).toLocaleDateString('fr-FR');
     };
 
-
-    const getMainTitle = (post: Post) => {
-        return post.titles.find(title => title.i18_language === "fr")?.title || 
-               post.titles[0]?.title || 
-               "Sans titre";
-    };
-
     const filteredPosts = posts.filter(post =>
-        getMainTitle(post).toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.postSubCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.plateform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,9 +109,6 @@ const PostManagement = () => {
                                     ID
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Titre
-                                </th>
-                                <th scope="col" className="px-6 py-3">
                                     Catégorie
                                 </th>
                                 <th scope="col" className="px-6 py-3">
@@ -127,6 +116,12 @@ const PostManagement = () => {
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Plateforme
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Videos
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Images
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Date de création
@@ -143,11 +138,6 @@ const PostManagement = () => {
                                             {post.id}
                                         </th>
                                         <td className="px-6 py-4">
-                                            <div className="max-w-xs truncate" title={getMainTitle(post)}>
-                                                {getMainTitle(post)}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
                                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
                                                 {post.postCategory.name}
                                             </span>
@@ -161,6 +151,55 @@ const PostManagement = () => {
                                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
                                                 {post.plateform.name}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {post.videos?.slice(0, 2).map((video) => (
+                                                    <div key={video.id} className="relative group">
+                                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                            <svg className="w-4 h-4 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10">
+                                                            {Math.floor(video.duration / 1000)}s
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {post.videos?.length > 2 && (
+                                                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-300">+{post.videos.length - 2}</span>
+                                                    </div>
+                                                )}
+                                                {post.videos?.length === 0 && (
+                                                    <span className="text-xs text-gray-400">Aucune vidéo</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {post.images?.slice(0, 2).map((image, index) => (
+                                                    <div key={image.id} className="relative group">
+                                                        <img 
+                                                            src={image.public_urls.local_image_url}
+                                                            alt={`Image ${index + 1}`}
+                                                            className="w-8 h-8 object-cover rounded"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                                {post.images?.length > 2 && (
+                                                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-300">+{post.images.length - 2}</span>
+                                                    </div>
+                                                )}
+                                                {post.images?.length === 0 && (
+                                                    <span className="text-xs text-gray-400">Aucune image</span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             {formatDate(post.createdAt)}

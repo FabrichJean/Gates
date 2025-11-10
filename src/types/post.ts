@@ -10,6 +10,8 @@ export interface Post {
   postCategory: PostCategory;
   postSubCategory: PostSubCategory;
   plateform: Plateform;
+  videos: PostVideo[];
+  images: PostImage[];
 }
 
 export interface PostTitle {
@@ -41,6 +43,48 @@ export interface Plateform {
   name: string;
   video_sync_url: string;
   post_sync_url: string;
+}
+
+export interface PostVideo {
+  id: number;
+  checking: string;
+  processing: string;
+  post_id: number;
+  thumbnail_url: string | null;
+  duration: number;
+  s3_hls_path: string | null;
+  cdn_url: string | null;
+  local_mp4_path: string;
+  hash: string;
+  sys_code: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  public_urls: {
+    local_mp4_url: string;
+    hls_url: string;
+    local_hls_url: string | null;
+  };
+  s3_urls: {
+    hlsUrl: string | null;
+    cdnUrl: string | null;
+  };
+}
+
+export interface PostImage {
+  id: number;
+  post_id: number;
+  s3_image_path: string | null;
+  image_upload_status: number;
+  local_image_path: string;
+  createdAt: string;
+  updatedAt: string;
+  public_urls: {
+    local_image_url: string;
+  };
+  s3_urls: {
+    imageUrl: string | null;
+  };
 }
 
 export interface PostsResponse {
