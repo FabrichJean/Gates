@@ -296,7 +296,7 @@ const PostEdit = () => {
                         {/* Catégorie */}
                         <div className="relative w-full" ref={categoryDropdownRef}>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Catégorie:
+                                Category:
                             </label>
                             <button 
                                 type="button" 
@@ -336,7 +336,7 @@ const PostEdit = () => {
                         {/* Sous-catégorie */}
                         <div className="relative w-full" ref={subCategoryDropdownRef}>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Sous-catégorie:
+                                Sub-Category:
                             </label>
                             <button
                                 type="button"
@@ -376,7 +376,7 @@ const PostEdit = () => {
                         {/* Titres et descriptions avec système de langues dynamique */}
                         <div className="space-y-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Titres et descriptions par langue:
+                                Title and description by language:
                             </label>
 
                             {/* Onglets des langues */}

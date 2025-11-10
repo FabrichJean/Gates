@@ -51,7 +51,7 @@ const PostDetails = () => {
                     >
                         <ArrowLeft size={16} />
                         <span className="sm:hidden">←</span>
-                        <span className="hidden sm:inline">Back</span>
+                        <span className="hidden sm:inline">back</span>
                         <span className="sm:hidden">Back</span>
                     </button>
                     <button
@@ -61,7 +61,6 @@ const PostDetails = () => {
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
                     >
                         <Edit size={16} />
-                        modify
                     </button>
 
                     {hasPrev ? (

@@ -46,7 +46,7 @@ const GetImagePost = ({ images }: GetImagePostProps) => {
         <div className="modal-box max-w-6xl w-11/12 max-h-[90vh]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-2xl">
-              Toutes les images ({images.length})
+              Images ({images.length})
             </h3>
             <button
               onClick={() => setIsModalOpen(false)}
