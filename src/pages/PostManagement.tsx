@@ -50,7 +50,7 @@ const PostManagement = () => {
                 <div className="text-red-500 text-center">
                     <p className="text-xl mb-2">Erreur</p>
                     <p>{error}</p>
-                    <button 
+                    <button
                         onClick={fetchPosts}
                         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
