@@ -9,7 +9,7 @@ interface GetPostTitlesProps {
 const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
-  if (postTitles.length === 0) {
+  if (postTitles?.length === 0) {
     return null;
   }
 
@@ -18,7 +18,7 @@ const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
       <div className="flex items-center gap-4 mb-4">
         <Languages size={20} className="text-gray-700 dark:text-gray-300" />
         <div className="flex gap-2 flex-wrap">
-          {postTitles.map((item) => (
+          {postTitles?.map((item) => (
             <button
               key={item.i18_language}
               onClick={() => setSelectedLanguage(item.i18_language)}
@@ -35,11 +35,11 @@ const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
         <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          {postTitles.find((t) => t.i18_language === selectedLanguage)?.title}
+          {postTitles?.find((t) => t.i18_language === selectedLanguage)?.title}
         </h4>
         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
           {
-            postTitles.find((t) => t.i18_language === selectedLanguage)
+            postTitles?.find((t) => t.i18_language === selectedLanguage)
               ?.description
           }
         </p>
