@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
-// import useFetch from "http-react";
-// import { apiURL } from "../constant";
-// import { getToken } from "../utils/storage";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
+import axios from "axios";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
 export type postID = number | string | undefined;
 
-export type TPost = {
+export type TPostBck = {
     id: number;
     ref: string;
     username: string;
@@ -23,160 +23,322 @@ export type TPost = {
     title :Array<{id : number, language : string, title : string, description : string}>;
 };
 
+export type Language = {
+    code: string;
+    name: string;
+};
+
+export type PostTitle = {
+    id: number;
+    title: string;
+    description: string | null;
+    post_id: number;
+    i18_language: string;
+    language: Language;
+};
+
+export type PostContent = {
+    id: number;
+    content: string;
+    post_id: number;
+    i18_language: string;
+    language: Language;
+};
+
+export type PostCategory = {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type PostSubCategory = {
+    id: number;
+    name: string;
+    category_id: number;
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type Plateform = {
+    id: number;
+    name: string;
+    video_sync_url: string;
+    post_sync_url: string;
+};
+
+export type VideoPublicUrls = {
+    local_mp4_url: string | null;
+    hls_url: string | null;
+    local_hls_url: string | null;
+};
+
+export type VideoS3Urls = {
+    hlsUrl: string | null;
+    cdnUrl: string | null;
+};
+
+export type Video = {
+    id: number;
+    checking: string | null;
+    processing: string | null;
+    post_id: number;
+    thumbnail_url: string | null;
+    duration: number;
+    s3_hls_path: string | null;
+    cdn_url: string | null;
+    local_mp4_path: string | null;
+    hash: string;
+    sys_code: string;
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    public_urls: VideoPublicUrls;
+    s3_urls: VideoS3Urls;
+};
+
+export type ImagePublicUrls = {
+    local_image_url: string | null;
+};
+
+export type ImageS3Urls = {
+    imageUrl: string | null;
+};
+
+export type Image = {
+    id: number;
+    post_id: number;
+    s3_image_path: string | null;
+    image_upload_status: number;
+    local_image_path: string | null;
+    createdAt: string;
+    updatedAt: string;
+    public_urls: ImagePublicUrls;
+    s3_urls: ImageS3Urls;
+};
+
+export type TPost = {
+    id: number;
+    category_id: number;
+    sub_category_id: number;
+    plateform_id: number;
+    published_at: string;
+    createdAt: string;
+    updatedAt: string;
+    postTitles: PostTitle[];
+    contents: PostContent[];
+    postCategory: PostCategory;
+    postSubCategory: PostSubCategory;
+    plateform: Plateform;
+    videos: Video[];
+    images: Image[];
+};
+
 
 // Données statiques pour la table (temporaire - sera remplacé par API)
+// Pour récupérer les données de l'API, décommenter le code ci-dessous:
+/*
+export const getPostsFromAPI = async (): Promise<TPost[]> => {
+    try {
+        const response = await fetch(`${apiURL}/posts`, {
+            headers: { 
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const posts = await response.json();
+        return posts;
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        return [];
+    }
+};
+*/
+
 export const staticPostData: TPost[] = [
     {
         id: 1,
-        ref: "POST-001",
-        username: "john_doe",
-        category: {id : 1, name : "News", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "approved",
-        images: ["/img static/3232.jpg"],
-        videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
-        ],
-        duration: "05:30",
-        checking: "verified",
+        category_id: 1,
+        sub_category_id: 1,
+        plateform_id: 1,
+        published_at: "2024-11-01",
         createdAt: "2024-11-01",
-        title: []
+        updatedAt: "2024-11-01",
+        postTitles: [
+            {
+                id: 1,
+                title: "Breaking News",
+                description: "Latest updates from around the world.",
+                post_id: 1,
+                i18_language: "en",
+                language: { code: "en", name: "English" }
+            }
+        ],
+        contents: [
+            {
+                id: 1,
+                content: "Detailed content for the breaking news.",
+                post_id: 1,
+                i18_language: "en",
+                language: { code: "en", name: "English" }
+            }
+        ],
+        postCategory: {
+            id: 1,
+            name: "News",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        postSubCategory: {
+            id: 1,
+            name: "International",
+            category_id: 1,
+            isDeleted: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        plateform: {
+            id: 1,
+            name: "Main Platform",
+            video_sync_url: "video_sync_url",
+            post_sync_url: "post_sync_url"
+        },
+        videos: [
+            {
+                id: 1,
+                checking: null,
+                processing: null,
+                post_id: 1,
+                thumbnail_url: null,
+                duration: 330,
+                s3_hls_path: null,
+                cdn_url: null,
+                local_mp4_path: "/video static/video.mp4",
+                hash: "hash1",
+                sys_code: "SYS001",
+                isDeleted: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                public_urls: {
+                    local_mp4_url: "/video static/video.mp4",
+                    hls_url: null,
+                    local_hls_url: null
+                },
+                s3_urls: {
+                    hlsUrl: null,
+                    cdnUrl: null
+                }
+            }
+        ],
+        images: [
+            {
+                id: 1,
+                post_id: 1,
+                s3_image_path: null,
+                image_upload_status: 1,
+                local_image_path: "/img static/3232.jpg",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                public_urls: {
+                    local_image_url: "/img static/3232.jpg"
+                },
+                s3_urls: {
+                    imageUrl: null
+                }
+            }
+        ]
     },
     {
         id: 2,
-        ref: "POST-002",
-        username: "jane_smith",
-        category: {id: 2, name: "Entertainment", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "pending",
-        images: ["/img static/3232.jpg"],
-        videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
-        ],
-        duration: "12:45",
-        checking: "pending",
+        category_id: 2,
+        sub_category_id: 1,
+        plateform_id: 1,
+        published_at: "2024-11-02",
         createdAt: "2024-11-02",
-        title: [
-            { id : 1, language: "en", title: "Behind the Scenes", description: "A deep dive into the creative process of filmmaking and music." },
-            { id : 2, language: "fr", title: "Dans les coulisses", description: "Un aperçu exclusif du monde du cinéma et de la musique." },
-            { id : 3, language: "mg", title: "Ao ambadiky ny sehatra", description: "Fijerena akaiky ny famoronana amin’ny sarimihetsika sy mozika." }
-        ]
-    },
-    {
-        id: 3,
-        ref: "POST-003",
-        username: "mike_wilson",
-        category: {id: 3, name: "Technology", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "rejected",
-        images: ["/img static/3232.jpg"],
-        videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
+        updatedAt: "2024-11-02",
+        postTitles: [
+            { id: 1, title: "Behind the Scenes", description: "A deep dive into filmmaking.", post_id: 2, i18_language: "en", language: { code: "en", name: "English" } },
+            { id: 2, title: "Dans les coulisses", description: "Aperçu du monde du cinéma.", post_id: 2, i18_language: "fr", language: { code: "fr", name: "French" } },
+            { id: 3, title: "Ao ambadiky ny sehatra", description: "Fijerena akaiky ny famoronana.", post_id: 2, i18_language: "mg", language: { code: "mg", name: "Malagasy" } }
         ],
-        duration: "08:15",
-        checking: "rejected",
-        createdAt: "2024-11-03",
-        title: [
-            { id : 1, language: "en", title: "AI in Everyday Life", description: "From smartphones to cars — how AI simplifies our world." },
-            { id : 2, language: "fr", title: "L’IA au quotidien", description: "Comment l’intelligence artificielle facilite notre vie chaque jour." },
-            { id : 3, language: "ar", title: "الذكاء الاصطناعي في الحياة اليومية", description: "كيف يجعل الذكاء الاصطناعي حياتنا أسهل في كل المجالات." }
-        ]
-    },
-    {
-        id: 4,
-        ref: "POST-004",
-        username: "sarah_jones",
-        category: {id: 4, name: "Health", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "approved",
-        images: ["/img static/3232.jpg"],
-        videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
+        contents: [
+            { id: 1, content: "Behind-the-scenes content.", post_id: 2, i18_language: "en", language: { code: "en", name: "English" } }
         ],
-        duration: "15:22",
-        checking: "verified",
-        createdAt: "2024-11-04",
-        title: [
-            { id : 1, language: "en", title: "Healthy Habits for Life", description: "Tips and strategies to build long-lasting physical and mental wellness." },
-            { id : 2, language: "fr", title: "Les habitudes saines", description: "Des conseils pour entretenir un corps et un esprit en pleine forme." },
-            { id : 3, language: "ar", title: "العادات الصحية للحياة", description: "نصائح للحفاظ على صحة الجسم والعقل مدى الحياة." },
-            { id : 4, language: "es", title: "Hábitos saludables", description: "Consejos para una vida equilibrada y saludable." },
-            { id : 5, language: "mg", title: "Fomba fiaina ara-pahasalamana", description: "Torohevitra ho an’ny fahasalamana ara-batana sy ara-tsaina maharitra." }
-        ]
-    },
-    {
-        id: 5,
-        ref: "POST-005",
-        username: "alex_brown",
-        category: {id: 5, name: "Sports", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "pending",
-        images: ["/img static/3232.jpg"],
+        postCategory: {
+            id: 2,
+            name: "Entertainment",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        postSubCategory: {
+            id: 1,
+            name: "Movies",
+            category_id: 2,
+            isDeleted: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        plateform: {
+            id: 1,
+            name: "Main Platform",
+            video_sync_url: "video_sync_url",
+            post_sync_url: "post_sync_url"
+        },
         videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
+            {
+                id: 1,
+                checking: null,
+                processing: null,
+                post_id: 2,
+                thumbnail_url: null,
+                duration: 765,
+                s3_hls_path: null,
+                cdn_url: null,
+                local_mp4_path: "/video static/video.mp4",
+                hash: "hash2",
+                sys_code: "SYS002",
+                isDeleted: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                public_urls: {
+                    local_mp4_url: "/video static/video.mp4",
+                    hls_url: null,
+                    local_hls_url: null
+                },
+                s3_urls: {
+                    hlsUrl: null,
+                    cdnUrl: null
+                }
+            }
         ],
-        duration: "09:38",
-        checking: "pending",
-        createdAt: "2024-11-05",
-        title: [
-            { id : 1, language: "en", title: "The Spirit of Competition", description: "Discover what drives athletes to push beyond their limits." },
-            { id : 2, language: "fr", title: "L’esprit de compétition", description: "Plongée dans la motivation et la passion du sport." },
-            { id : 3, language: "ar", title: "روح المنافسة", description: "ما الذي يدفع الرياضيين لتجاوز حدودهم؟" },
-            { id : 4, language: "mg", title: "Fanahin’ny fifaninanana", description: "Ny antony manosika ny atleta hanao ezaka mihoatra." }
-        ]
-    },
-    {
-        id: 6,
-        ref: "POST-006",
-        username: "Dinosore",
-        category: {id: 1, name: "News", createdAt : new Date(), updatedAt : new Date()},
-        subCategory_id: 1,
-        status: "pending",
         images: [
-            "/img static/dinosore.jpeg",
-            "/img static/dinosore2.jpeg",
-            "/img static/dinosore3.jpeg",
-            "/img static/dinosore4.jpeg"
-        ],
-        videos: [
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4",
-            "/video static/video.mp4"
-        ],
-        duration: "09:38",
-        checking: "pending",
-        createdAt: "2024-11-05",
-        title: [
-            { id : 1, language: "en", title: "The Age of Dinosaurs", description: "Exploring the fascinating world of ancient reptiles that ruled Earth." },
-            { id : 2, language: "fr", title: "L’ère des dinosaures", description: "Un voyage à travers le temps pour découvrir les géants de la préhistoire." },
-            { id : 3, language: "ar", title: "عصر الديناصورات", description: "نظرة على الكائنات العملاقة التي سيطرت على الأرض قديماً." },
-            { id : 4, language: "mg", title: "Andron’ny Dinosaures", description: "Fandalinana ny fiainan’ny biby goavam-be taloha." }
+            {
+                id: 1,
+                post_id: 2,
+                s3_image_path: null,
+                image_upload_status: 1,
+                local_image_path: "/img static/3232.jpg",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                public_urls: {
+                    local_image_url: "/img static/3232.jpg"
+                },
+                s3_urls: {
+                    imageUrl: null
+                }
+            }
         ]
     }
 ];
 
 
-// Hook pour récupérer un post par ID (actuellement statique, prêt pour API)
+// Hook pour récupérer un post par ID
 export function UsePost(id: postID) {
     const [data, setData] = useState<TPost | null>(null);
     const [loading, setLoading] = useState(true);
@@ -184,31 +346,55 @@ export function UsePost(id: postID) {
 
     useEffect(() => {
         if (!id) {
-            setError(new Error("L'Id n'est pas trouver"));
+            setError(new Error("L'Id n'est pas trouvé"));
+            setLoading(false);
+            return;
+        }
+
+        const fetchPost = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
+                    headers: { 
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                setData(response.data);
+                setLoading(false);
+            } catch (err) {
+                if (axios.isAxiosError(err)) {
+                    setError(new Error(err.response?.data?.message || err.message));
+                } else {
+                    setError(err instanceof Error ? err : new Error('Failed to fetch post'));
+                }
+                setLoading(false);
+            }
+        };
+
+        fetchPost();
+    }, [id]);
+
+    return { data, loading, error };
+
+    // Alternative: Utiliser les données statiques (décommenter si besoin)
+    /*
+    useEffect(() => {
+        if (!id) {
+            setError(new Error("L'Id n'est pas trouvé"));
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        
-        // Simulation d'un appel API
         setTimeout(() => {
             const post = staticPostData.find(p => p.id === Number(id));
             setData(post || null);
             setLoading(false);
         }, 100);
-
-        // TODO: Remplacer par un vrai appel API plus tard
-        // return useFetch<TPost>(
-        //     `${apiURL}/posts/${id}`,
-        //     {
-        //         headers: { Authorization: `Bearer ${getToken()}` }
-        //     }
-        // );
-
     }, [id]);
-
-    return { data, loading, error };
+    */
 }
 // Hook pour récupérer tous les posts
 export function UsePosts() {
@@ -221,30 +407,38 @@ export function UsePosts() {
             try {
                 setLoading(true);
                 
-                // TODO: Remplacer par un vrai appel API
-                // const response = await fetch(`${apiURL}/posts`, {
-                //     headers: { 
-                //         'Authorization': `Bearer ${getToken()}`,
-                //         'Content-Type': 'application/json'
-                //     }
-                // });
-                // const posts = await response.json();
-                // setData(posts);
+                const response = await axios.get<TPost[]>(`${apiURL}/posts`, {
+                    headers: { 
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 
-                // Simulation d'un appel API avec les données statiques
-                setTimeout(() => {
-                    setData(staticPostData);
-                    setLoading(false);
-                }, 100);
+                setData(response.data);
+                setLoading(false);
                 
             } catch (err) {
-                setError(err instanceof Error ? err : new Error('Failed to fetch posts'));
+                if (axios.isAxiosError(err)) {
+                    setError(new Error(err.response?.data?.message || err.message));
+                } else {
+                    setError(err instanceof Error ? err : new Error('Failed to fetch posts'));
+                }
                 setLoading(false);
             }
         };
 
         fetchPosts();
     }, []);
+
+    // Alternative: Utiliser les données statiques (décommenter si besoin)
+    /*
+    useEffect(() => {
+        setTimeout(() => {
+            setData(staticPostData);
+            setLoading(false);
+        }, 100);
+    }, []);
+    */
 
     return { data, loading, error };
 }

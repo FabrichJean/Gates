@@ -73,74 +73,75 @@ const PostManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {staticPostData.map((post) => (
-                                <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {post.ref}
-                                    </th>
-                                    <td className="px-6 py-4">
-                                        {post.username}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                            {post.category.name}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.status === 'approved'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                            : post.status === 'pending'
-                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                            {staticPostData.map((post) => {
+                                const firstTitle = post.postTitles.find(t => t.i18_language === 'en') || post.postTitles[0];
+                                const firstImage = post.images[0];
+                                const firstVideo = post.videos[0];
+                                const imageUrl = firstImage?.public_urls?.local_image_url || firstImage?.s3_urls?.imageUrl;
+                                const duration = firstVideo ? `${Math.floor(firstVideo.duration / 60)}:${String(firstVideo.duration % 60).padStart(2, '0')}` : 'N/A';
+                                const checking = firstVideo?.checking || 'pending';
+                                
+                                return (
+                                    <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            POST-{String(post.id).padStart(3, '0')}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            {firstTitle?.title || 'No title'}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                                {post.postCategory.name}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                published
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {imageUrl ? (
+                                                <img
+                                                    src={imageUrl}
+                                                    alt="Post thumbnail"
+                                                    className="w-12 h-8 object-cover rounded"
+                                                    onError={(e) => {
+                                                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNiAxNkwyNCAxNkwyNCAyNEwxNiAyNFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-8 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                                    <span className="text-xs text-gray-400">N/A</span>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {duration}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                                checking === 'verified'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                    : checking === 'pending'
+                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                                             }`}>
-                                            {post.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <img
-                                            src={post.images[0]}
-                                            alt="Post thumbnail"
-                                            className="w-12 h-8 object-cover rounded"
-                                            onError={(e) => {
-                                                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNiAxNkwyNCAxNkwyNCAyNEwxNiAyNFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
-                                            }}
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {post.duration}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.checking === 'verified'
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                            : post.checking === 'pending'
-                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                            }`}>
-                                            {post.checking}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center text-center gap-2">
-                                            <Link
-                                                to={`/post/${post.id}`}
-                                                className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </Link>
-                                            {/* {post.status === 'pending' && (
-                                                <>
-                                                    <button className="p-1.5 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">
-                                                        <Check className="w-4 h-4" />
-                                                    </button>
-                                                    <button className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </>
-                                            )} */}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                                {checking}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center text-center gap-2">
+                                                <Link
+                                                    to={`/post/${post.id}`}
+                                                    className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
