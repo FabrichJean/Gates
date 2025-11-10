@@ -9,6 +9,12 @@ import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import UsePlateform from "../hooks/usePlateform";
 import { useNavigate } from "react-router-dom";
+import LanguageAutoComplete from "../components/LanguageAutoComplete";
+
+type Language = {
+    code: string;
+    name: string;
+};
 
 const UploadPost = () => {
     const navigate = useNavigate();
@@ -19,10 +25,7 @@ const UploadPost = () => {
     // Hook pour récupérer les plateformes (Web Apps)
     const { data: plateformsData, loading: plateformsLoading, error: plateformsError } = UsePlateform();
 
-    const [languages, setLanguages] = useState([
-        { id: 1, name: "中文" },
-        { id: 2, name: "English" },
-    ]);
+    const [languages, setLanguages] = useState<{ id: number, name: string, code: string }[]>([]);
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -34,13 +37,13 @@ const UploadPost = () => {
     const [selectedSubCategory, setSelectedSubCategory] = useState<{ id: number, name: string, categoryId: number } | null>(null);
     const [selectedWebApp, setSelectedWebApp] = useState<{ id: number, name: string } | null>(null);
     const [webAppOpen, setWebAppOpen] = useState(false);
-    const [selectedLanguage, setSelectedLanguage] = useState<{ id: number, name: string }>({ id: 1, name: "中文" }); // Default to first language
+    const [selectedLanguage, setSelectedLanguage] = useState<{ id: number, name: string, code: string } | null>(null);
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
     const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
     const [videoFields, setVideoFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
     const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-    const [newLanguageName, setNewLanguageName] = useState("");
+    const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Refs pour détecter les clics à l'extérieur
@@ -76,10 +79,10 @@ const UploadPost = () => {
 
     // Effet pour s'assurer que selectedLanguage est toujours valide
     useEffect(() => {
-        if (!languages.find(lang => lang.id === selectedLanguage.id)) {
+        if (languages.length > 0 && (!selectedLanguage || !languages.find(lang => lang.id === selectedLanguage.id))) {
             setSelectedLanguage(languages[0]);
         }
-    }, [languages, selectedLanguage.id]);
+    }, [languages, selectedLanguage]);
 
     // Effet pour réinitialiser les sélections si les catégories changent ou en cas d'erreur
     useEffect(() => {
@@ -115,11 +118,22 @@ const UploadPost = () => {
 
     // Fonction pour ajouter une nouvelle langue
     const handleAddLanguage = () => {
-        if (newLanguageName.trim()) {
-            const newId = Math.max(...languages.map(lang => lang.id)) + 1;
-            const newLanguage = { id: newId, name: newLanguageName.trim() };
+        if (selectedLanguageFromBackend) {
+            // Vérifier si la langue n'existe pas déjà
+            const existingLanguage = languages.find(lang => lang.code === selectedLanguageFromBackend.code);
+            if (existingLanguage) {
+                toast.error("This language is already added!");
+                return;
+            }
+
+            const newId = Math.max(0, ...languages.map(lang => lang.id)) + 1;
+            const newLanguage = { 
+                id: newId, 
+                name: selectedLanguageFromBackend.name,
+                code: selectedLanguageFromBackend.code
+            };
             setLanguages(prev => [...prev, newLanguage]);
-            setNewLanguageName("");
+            setSelectedLanguageFromBackend(null);
             setShowAddLanguageModal(false);
             setSelectedLanguage(newLanguage); // Sélectionner automatiquement la nouvelle langue
         }
@@ -127,7 +141,7 @@ const UploadPost = () => {
 
     // Fonction pour annuler l'ajout de langue
     const handleCancelAddLanguage = () => {
-        setNewLanguageName("");
+        setSelectedLanguageFromBackend(null);
         setShowAddLanguageModal(false);
     };
 
@@ -232,15 +246,9 @@ const UploadPost = () => {
 
         languages.forEach(lang => {
             if (titles[lang.id]?.trim()) {
-                // Utiliser le nom de la langue comme i18_language
-                const langCode = lang.name.toLowerCase() === 'english' ? 'en' : 
-                               lang.name.toLowerCase() === '中文' ? 'zh' : 
-                               lang.name.toLowerCase() === 'français' ? 'fr' : 
-                               lang.name.toLowerCase().substring(0, 2);
-                
                 titlesArray.push({
                     title: titles[lang.id].trim(),
-                    i18_language: langCode,
+                    i18_language: lang.code, // Utiliser directement le code de langue du backend
                     ...(descriptions[lang.id]?.trim() && { description: descriptions[lang.id].trim() })
                 });
             }
@@ -575,12 +583,12 @@ const UploadPost = () => {
 
                                 {/* Onglets des langues */}
                                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                                    {languages.map((language) => (
+                                    {languages.length > 0 && languages.map((language) => (
                                         <button
                                             key={language.id}
                                             type="button"
                                             onClick={() => setSelectedLanguage(language)}
-                                            className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors border-b-2 ${selectedLanguage.id === language.id
+                                            className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors border-b-2 ${selectedLanguage?.id === language.id
                                                 ? 'bg-transparent border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold'
                                                 : 'bg-gray-100 dark:bg-gray-700 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white'
                                                 }`}
@@ -589,47 +597,59 @@ const UploadPost = () => {
                                         </button>
                                     ))}
 
-                                    {/* Bouton Add Language */}
+                                    {/* Bouton Add Title */}
                                     <button
                                         type="button"
                                         onClick={() => setShowAddLanguageModal(true)}
                                         className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1"
-                                        title="Add new language"
+                                        title="Add new title"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
-                                        <span>Add Language</span>
+                                        <span>Add Title</span>
                                     </button>
                                 </div>
                                 <div className="space-y-4 w-full">
-                                    {/* Champ titre */}
-                                    <div className="w-full">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Title ({selectedLanguage.name})
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={titles[selectedLanguage.id] || ''}
-                                            onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
-                                            placeholder={`Enter title in ${selectedLanguage.name}`}
-                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
-                                        />
-                                    </div>
+                                    {languages.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                            <p className="text-sm">No titles created yet. Click "Add Title" to create your first title.</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Champ titre */}
+                                            {selectedLanguage && (
+                                                <div className="w-full">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Title ({selectedLanguage.name})
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={titles[selectedLanguage.id] || ''}
+                                                        onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
+                                                        placeholder={`Enter title in ${selectedLanguage.name}`}
+                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                                    />
+                                                </div>
+                                            )}
 
-                                    {/* Champ description */}
-                                    <div className="w-full">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Description ({selectedLanguage.name})
-                                        </label>
-                                        <textarea
-                                            value={descriptions[selectedLanguage.id] || ''}
-                                            onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
-                                            placeholder={`Enter description in ${selectedLanguage.name}`}
-                                            rows={4}
-                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
-                                        />
-                                    </div>
+                                            {/* Champ description */}
+                                            {selectedLanguage && (
+                                                <div className="w-full">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        Description ({selectedLanguage.name})
+                                                    </label>
+                                                    <textarea
+                                                        value={descriptions[selectedLanguage.id] || ''}
+                                                        onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
+                                                        placeholder={`Enter description in ${selectedLanguage.name}`}
+                                                        rows={4}
+                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -866,29 +886,22 @@ const UploadPost = () => {
 
             {/* Modal Add Language */}
             {showAddLanguageModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                            Add New Language
+                            New Title
                         </h3>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Language Name
+                                Select Language
                             </label>
-                            <input
-                                type="text"
-                                value={newLanguageName}
-                                onChange={(e) => setNewLanguageName(e.target.value)}
-                                placeholder="Enter language name"
-                                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handleAddLanguage();
-                                    }
-                                }}
-                                autoFocus
-                            />
+                            <div className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md">
+                                <LanguageAutoComplete 
+                                    onSelect={(lang) => setSelectedLanguageFromBackend(lang)}
+                                    defaultValue={selectedLanguageFromBackend || undefined}
+                                />
+                            </div>
                         </div>
 
                         <div className="flex justify-end space-x-3">
@@ -902,10 +915,10 @@ const UploadPost = () => {
                             <button
                                 type="button"
                                 onClick={handleAddLanguage}
-                                disabled={!newLanguageName.trim()}
+                                disabled={!selectedLanguageFromBackend}
                                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
                             >
-                                Add Language
+                                Add Title
                             </button>
                         </div>
                     </div>
