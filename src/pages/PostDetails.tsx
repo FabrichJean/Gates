@@ -140,7 +140,7 @@ const PostDetails = () => {
                     </div>
                 </div>
 
-                <GetPostTitles postTitles={post.postTitles} />                
+                <GetPostTitles postTitles={post.titles} />                
                 <GetImagePost images={post.images} />
                 <GetVideoPost videos={post.videos} />
             </div>
