@@ -4,6 +4,8 @@ import type { TVideo } from "../../hooks/useVideos";
 import type { User } from "../../hooks/useVideos";
 import { cancelUpload } from "../../api/videos";
 import toast from "react-hot-toast";
+import AnimatedAlert from "../AnimatedAlert";
+import { useAnimatedAlert, createQuickAlert } from "../../hooks/useAnimatedAlert";
 
 interface VideoActionsProps {
   video: TVideo;
@@ -19,6 +21,9 @@ const VideoActions = ({
   onSend,
 }: VideoActionsProps) => {
 
+  const { showAlert, alertProps } = useAnimatedAlert();
+  const alert = createQuickAlert(showAlert);
+
   const cancel = async () => {
     await cancelUpload(video.id)
       .then(reFetch)
@@ -28,14 +33,16 @@ const VideoActions = ({
   }
 
   return (
-    <div className="flex justify-center gap-2 flex-wrap">
-      {user?.role === RoleEnum.SUPERADMIN && (
+    <>
+      <AnimatedAlert {...alertProps} />
+      <div className="flex justify-center gap-2 flex-wrap">
+        {user?.role === RoleEnum.SUPERADMIN && (
         <div className="relative flex items-center gap-3">
           <button
             disabled={video.processing === 'working' || video.processing === 'done'}
             onClick={() => {
               if (video.checking !== 'checked') {
-                return alert("We need to check this video");
+                return alert.warning("We need to check this video", "Video Check Required");
               }
               onSend(video.id);
             }}
@@ -102,13 +109,14 @@ const VideoActions = ({
       )}
 
 
-      <Link
-        to={`/videos/${video.id}`}
-        className="px-4 py-2 hover:bg-gray-100/10 cursor-pointer underline rounded-md font-light hover:text-blue-400 transition-all"
-      >
-        Details
-      </Link>
-    </div>
+        <Link
+          to={`/videos/${video.id}`}
+          className="px-4 py-2 hover:bg-gray-100/10 cursor-pointer underline rounded-md font-light hover:text-blue-400 transition-all"
+        >
+          Details
+        </Link>
+      </div>
+    </>
   );
 };
 

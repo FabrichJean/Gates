@@ -20,6 +20,8 @@ import Plateform from "../pages/Plateform";
 import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
+import PostManagement from "../pages/PostManagement";
+import UploadPost from "../pages/UploadPost";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -72,6 +74,26 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <Upload />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <PostManagement />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post/upload"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <UploadPost />
             </InsideSidebar>
           </ProtectedRoute>
         }
