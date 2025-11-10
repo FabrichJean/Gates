@@ -1,9 +1,66 @@
 import { FilePlus, Eye, Columns } from "lucide-react";
 import { Link } from "react-router-dom";
-import { staticPostData } from "../hooks/usePost";
+import { useEffect, useState } from "react";
+import { getPosts } from "../api/posts";
+import type { Post, PostsResponse } from "../types/post";
+import Loader from "../components/Loader";
 
 const PostManagement = () => {
-    
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const fetchPosts = async () => {
+        try {
+            setLoading(true);
+            const response = await getPosts();
+            const data: PostsResponse = response.data;
+            setPosts(data.posts);
+        } catch (err) {
+            setError("Erreur lors du chargement des posts");
+            console.error("Error fetching posts:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('fr-FR');
+    };
+
+    const filteredPosts = posts.filter(post =>
+        post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.postSubCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.plateform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        formatDate(post.createdAt).toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return <Loader />;
+    }
+
+    if (error) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                <div className="text-red-500 text-center">
+                    <p className="text-xl mb-2">Erreur</p>
+                    <p>{error}</p>
+                    <button 
+                        onClick={fetchPosts}
+                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Réessayer
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="h-screen w-full">
             <div className="">
@@ -28,6 +85,8 @@ const PostManagement = () => {
                                 <input
                                     type="text"
                                     placeholder="Search posts..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
                                 />
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -47,25 +106,25 @@ const PostManagement = () => {
                         <thead className="text-xs text-gray-700 uppercase bg-blue-500/5 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" className="px-6 py-3">
-                                    Ref
+                                    ID
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Username
+                                    Catégorie
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Category
+                                    Sous-catégorie
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Status
+                                    Plateforme
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Image
+                                    Videos
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Duration
+                                    Images
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Checking
+                                    Date de création
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left">
                                     Actions
@@ -73,77 +132,99 @@ const PostManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {staticPostData.map((post) => {
-                                const firstTitle = post.postTitles.find(t => t.i18_language === 'en') || post.postTitles[0];
-                                const firstImage = post.images[0];
-                                const firstVideo = post.videos[0];
-                                const imageUrl = firstImage?.public_urls?.local_image_url || firstImage?.s3_urls?.imageUrl;
-                                const duration = firstVideo ? `${Math.floor(firstVideo.duration / 60)}:${String(firstVideo.duration % 60).padStart(2, '0')}` : 'N/A';
-                                const checking = firstVideo?.checking || 'pending';
-                                
-                                return (
+                            {filteredPosts.map((post) => (
                                     <tr key={post.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            POST-{String(post.id).padStart(3, '0')}
+                                            {post.id}
                                         </th>
                                         <td className="px-6 py-4">
-                                            {firstTitle?.title || 'No title'}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
                                                 {post.postCategory.name}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                published
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
+                                                {post.postSubCategory.name}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {imageUrl ? (
-                                                <img
-                                                    src={imageUrl}
-                                                    alt="Post thumbnail"
-                                                    className="w-12 h-8 object-cover rounded"
-                                                    onError={(e) => {
-                                                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNiAxNkwyNCAxNkwyNCAyNEwxNiAyNFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div className="w-12 h-8 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
-                                                    <span className="text-xs text-gray-400">N/A</span>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {duration}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                checking === 'verified'
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                    : checking === 'pending'
-                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                            }`}>
-                                                {checking}
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
+                                                {post.plateform.name}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {post.videos?.slice(0, 2).map((video) => (
+                                                    <div key={video.id} className="relative group">
+                                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                            <svg className="w-4 h-4 text-blue-600 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10">
+                                                            {Math.floor(video.duration / 1000)}s
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {post.videos?.length > 2 && (
+                                                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-300">+{post.videos.length - 2}</span>
+                                                    </div>
+                                                )}
+                                                {post.videos?.length === 0 && (
+                                                    <span className="text-xs text-gray-400">Aucune vidéo</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {post.images?.slice(0, 2).map((image, index) => (
+                                                    <div key={image.id} className="relative group">
+                                                        <img 
+                                                            src={image.public_urls.local_image_url}
+                                                            alt={`Image ${index + 1}`}
+                                                            className="w-8 h-8 object-cover rounded"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                                {post.images?.length > 2 && (
+                                                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-300">+{post.images.length - 2}</span>
+                                                    </div>
+                                                )}
+                                                {post.images?.length === 0 && (
+                                                    <span className="text-xs text-gray-400">Aucune image</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {formatDate(post.createdAt)}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center text-center gap-2">
                                                 <Link
                                                     to={`/post/${post.id}`}
                                                     className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                    title="Voir les détails"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
                                             </div>
                                         </td>
                                     </tr>
-                                );
-                            })}
+                            ))}
                         </tbody>
                     </table>
+                    
+                    {filteredPosts.length === 0 && (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                            {searchTerm ? "Aucun post trouvé pour cette recherche" : "Aucun post disponible"}
+                        </div>
+                    )}
                 </div>
             </div>
 
