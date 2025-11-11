@@ -225,11 +225,11 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
-      console.log(fd.get("plateform_id"));
+      // console.log(formData.get("platform_id"));
       
 
       // send FormData for multipart upload
-      const res = await uploadVideo(fd as unknown as FormData, (progressEvent) => {
+      const res = await uploadVideo(formData as unknown as FormData, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         }
