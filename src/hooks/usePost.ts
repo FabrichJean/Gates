@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
 import axios from "axios";
+import useFetch from "http-react";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
@@ -127,6 +128,7 @@ export type TPost = {
     createdAt: string;
     updatedAt: string;
     titles: PostTitle[];
+    processing: string | null;
     contents: PostContent[];
     postCategory: PostCategory;
     postSubCategory: PostSubCategory;
@@ -164,43 +166,47 @@ export const getPostsFromAPI = async (): Promise<TPost[]> => {
 
 // Hook pour récupérer un post par ID
 export function UsePost(id: postID) {
-    const [data, setData] = useState<TPost | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
-        if (!id) {
-            setError(new Error("L'Id n'est pas trouvé"));
-            setLoading(false);
-            return;
-        }
+    return useFetch<TPost>(apiURL + '/posts/' + id, {
+        headers: { Authorization: `Bearer ${token()}` },
+    })
+    // const [data, setData] = useState<TPost | null>(null);
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState<Error | null>(null);
 
-        const fetchPost = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${getToken()}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+    // useEffect(() => {
+    //     if (!id) {
+    //         setError(new Error("L'Id n'est pas trouvé"));
+    //         setLoading(false);
+    //         return;
+    //     }
+
+    //     const fetchPost = async () => {
+    //         try {
+    //             setLoading(true);
+    //             const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
+    //                 headers: { 
+    //                     'Authorization': `Bearer ${getToken()}`,
+    //                     'Content-Type': 'application/json'
+    //                 }
+    //             });
                 
-                setData(response.data);
-                setLoading(false);
-            } catch (err) {
-                if (axios.isAxiosError(err)) {
-                    setError(new Error(err.response?.data?.message || err.message));
-                } else {
-                    setError(err instanceof Error ? err : new Error('Failed to fetch post'));
-                }
-                setLoading(false);
-            }
-        };
+    //             setData(response.data);
+    //             setLoading(false);
+    //         } catch (err) {
+    //             if (axios.isAxiosError(err)) {
+    //                 setError(new Error(err.response?.data?.message || err.message));
+    //             } else {
+    //                 setError(err instanceof Error ? err : new Error('Failed to fetch post'));
+    //             }
+    //             setLoading(false);
+    //         }
+    //     };
 
-        fetchPost();
-    }, [id]);
+    //     fetchPost();
+    // }, [id]);
 
-    return { data, loading, error };
+    // return { data, loading, error };
 
    
 }
@@ -280,3 +286,8 @@ export function useNextPost(currentId: string | number | undefined) {
         hasPrev
     };
 }
+
+export function usePostProcessing() {
+    
+}
+

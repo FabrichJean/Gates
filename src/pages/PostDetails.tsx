@@ -4,11 +4,12 @@ import { ArrowLeft, Edit } from "lucide-react";
 import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
+import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 
 const PostDetails = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { data: post, loading, error} = UsePost(id);
+    const { data: post, loading, error, reFetch} = UsePost(id);
     const { nextPost, prevPost, hasNext, hasPrev } = useNextPost(id);
     
     const handleBack = () => {
@@ -62,6 +63,7 @@ const PostDetails = () => {
                     >
                         <Edit size={16} />
                     </button>
+                    <BtnTranscodeComponent post={post} reFetch={reFetch} />
 
                     {hasPrev ? (
                         <Link to={'/post/' + prevPost} className="relative flex items-center justify-center gap-2 px-4 py-2
