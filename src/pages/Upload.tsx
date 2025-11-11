@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import { useAuthMe } from "../hooks/useAuth";
+import UsePlateform from "../hooks/usePlateform";
 import { Md5 } from 'ts-md5';
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import type { Platform } from "../hooks/usePlatform";
@@ -224,8 +225,11 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
-      // @ts-ignore
-      const res = await uploadVideo(formData, (progressEvent) => {
+      // console.log(formData.get("platform_id"));
+      
+
+      // send FormData for multipart upload
+      const res = await uploadVideo(formData as unknown as FormData, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         }

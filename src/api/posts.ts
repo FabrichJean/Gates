@@ -36,6 +36,15 @@ export async function getPosts(params?: any) {
     });
 } 
 
+export async function sendPostsToWebApp(plateformIds?: number[] | null) {
+    const data = plateformIds ? { plateformIds } : {};
+    return await axios.post(`${apiURL}/posts/send-to-server`, data, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+    });
+}
+
 
 export async function usePostProcessing({id}: {id: number}) {
     return await axios.post(`${apiURL}/posts/${id}/deep-upload`, null, {
