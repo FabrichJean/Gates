@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
-import { apiURL } from "../constant";
+import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
 import axios from "axios";
+import useFetch from "http-react";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
@@ -126,7 +127,8 @@ export type TPost = {
     published_at: string;
     createdAt: string;
     updatedAt: string;
-    postTitles: PostTitle[];
+    titles: PostTitle[];
+    processing: string | null;
     contents: PostContent[];
     postCategory: PostCategory;
     postSubCategory: PostSubCategory;
@@ -161,240 +163,52 @@ export const getPostsFromAPI = async (): Promise<TPost[]> => {
 };
 */
 
-export const staticPostData: TPost[] = [
-    {
-        id: 1,
-        category_id: 1,
-        sub_category_id: 1,
-        plateform_id: 1,
-        published_at: "2024-11-01",
-        createdAt: "2024-11-01",
-        updatedAt: "2024-11-01",
-        postTitles: [
-            {
-                id: 1,
-                title: "Breaking News",
-                description: "Latest updates from around the world.",
-                post_id: 1,
-                i18_language: "en",
-                language: { code: "en", name: "English" }
-            }
-        ],
-        contents: [
-            {
-                id: 1,
-                content: "Detailed content for the breaking news.",
-                post_id: 1,
-                i18_language: "en",
-                language: { code: "en", name: "English" }
-            }
-        ],
-        postCategory: {
-            id: 1,
-            name: "News",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        postSubCategory: {
-            id: 1,
-            name: "International",
-            category_id: 1,
-            isDeleted: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        plateform: {
-            id: 1,
-            name: "Main Platform",
-            video_sync_url: "video_sync_url",
-            post_sync_url: "post_sync_url"
-        },
-        videos: [
-            {
-                id: 1,
-                checking: null,
-                processing: null,
-                post_id: 1,
-                thumbnail_url: null,
-                duration: 330,
-                s3_hls_path: null,
-                cdn_url: null,
-                local_mp4_path: "/video static/video.mp4",
-                hash: "hash1",
-                sys_code: "SYS001",
-                isDeleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                public_urls: {
-                    local_mp4_url: "/video static/video.mp4",
-                    hls_url: null,
-                    local_hls_url: null
-                },
-                s3_urls: {
-                    hlsUrl: null,
-                    cdnUrl: null
-                }
-            }
-        ],
-        images: [
-            {
-                id: 1,
-                post_id: 1,
-                s3_image_path: null,
-                image_upload_status: 1,
-                local_image_path: "/img static/3232.jpg",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                public_urls: {
-                    local_image_url: "/img static/3232.jpg"
-                },
-                s3_urls: {
-                    imageUrl: null
-                }
-            }
-        ]
-    },
-    {
-        id: 2,
-        category_id: 2,
-        sub_category_id: 1,
-        plateform_id: 1,
-        published_at: "2024-11-02",
-        createdAt: "2024-11-02",
-        updatedAt: "2024-11-02",
-        postTitles: [
-            { id: 1, title: "Behind the Scenes", description: "A deep dive into filmmaking.", post_id: 2, i18_language: "en", language: { code: "en", name: "English" } },
-            { id: 2, title: "Dans les coulisses", description: "Aperçu du monde du cinéma.", post_id: 2, i18_language: "fr", language: { code: "fr", name: "French" } },
-            { id: 3, title: "Ao ambadiky ny sehatra", description: "Fijerena akaiky ny famoronana.", post_id: 2, i18_language: "mg", language: { code: "mg", name: "Malagasy" } }
-        ],
-        contents: [
-            { id: 1, content: "Behind-the-scenes content.", post_id: 2, i18_language: "en", language: { code: "en", name: "English" } }
-        ],
-        postCategory: {
-            id: 2,
-            name: "Entertainment",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        postSubCategory: {
-            id: 1,
-            name: "Movies",
-            category_id: 2,
-            isDeleted: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        plateform: {
-            id: 1,
-            name: "Main Platform",
-            video_sync_url: "video_sync_url",
-            post_sync_url: "post_sync_url"
-        },
-        videos: [
-            {
-                id: 1,
-                checking: null,
-                processing: null,
-                post_id: 2,
-                thumbnail_url: null,
-                duration: 765,
-                s3_hls_path: null,
-                cdn_url: null,
-                local_mp4_path: "/video static/video.mp4",
-                hash: "hash2",
-                sys_code: "SYS002",
-                isDeleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                public_urls: {
-                    local_mp4_url: "/video static/video.mp4",
-                    hls_url: null,
-                    local_hls_url: null
-                },
-                s3_urls: {
-                    hlsUrl: null,
-                    cdnUrl: null
-                }
-            }
-        ],
-        images: [
-            {
-                id: 1,
-                post_id: 2,
-                s3_image_path: null,
-                image_upload_status: 1,
-                local_image_path: "/img static/3232.jpg",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                public_urls: {
-                    local_image_url: "/img static/3232.jpg"
-                },
-                s3_urls: {
-                    imageUrl: null
-                }
-            }
-        ]
-    }
-];
-
 
 // Hook pour récupérer un post par ID
 export function UsePost(id: postID) {
-    const [data, setData] = useState<TPost | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
-        if (!id) {
-            setError(new Error("L'Id n'est pas trouvé"));
-            setLoading(false);
-            return;
-        }
+    return useFetch<TPost>(apiURL + '/posts/' + id, {
+        headers: { Authorization: `Bearer ${token()}` },
+    })
+    // const [data, setData] = useState<TPost | null>(null);
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState<Error | null>(null);
 
-        const fetchPost = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
-                    headers: { 
-                        'Authorization': `Bearer ${getToken()}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+    // useEffect(() => {
+    //     if (!id) {
+    //         setError(new Error("L'Id n'est pas trouvé"));
+    //         setLoading(false);
+    //         return;
+    //     }
+
+    //     const fetchPost = async () => {
+    //         try {
+    //             setLoading(true);
+    //             const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
+    //                 headers: { 
+    //                     'Authorization': `Bearer ${getToken()}`,
+    //                     'Content-Type': 'application/json'
+    //                 }
+    //             });
                 
-                setData(response.data);
-                setLoading(false);
-            } catch (err) {
-                if (axios.isAxiosError(err)) {
-                    setError(new Error(err.response?.data?.message || err.message));
-                } else {
-                    setError(err instanceof Error ? err : new Error('Failed to fetch post'));
-                }
-                setLoading(false);
-            }
-        };
+    //             setData(response.data);
+    //             setLoading(false);
+    //         } catch (err) {
+    //             if (axios.isAxiosError(err)) {
+    //                 setError(new Error(err.response?.data?.message || err.message));
+    //             } else {
+    //                 setError(err instanceof Error ? err : new Error('Failed to fetch post'));
+    //             }
+    //             setLoading(false);
+    //         }
+    //     };
 
-        fetchPost();
-    }, [id]);
+    //     fetchPost();
+    // }, [id]);
 
-    return { data, loading, error };
+    // return { data, loading, error };
 
-    // Alternative: Utiliser les données statiques (décommenter si besoin)
-    /*
-    useEffect(() => {
-        if (!id) {
-            setError(new Error("L'Id n'est pas trouvé"));
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        setTimeout(() => {
-            const post = staticPostData.find(p => p.id === Number(id));
-            setData(post || null);
-            setLoading(false);
-        }, 100);
-    }, [id]);
-    */
+   
 }
 // Hook pour récupérer tous les posts
 export function UsePosts() {
@@ -407,14 +221,25 @@ export function UsePosts() {
             try {
                 setLoading(true);
                 
-                const response = await axios.get<TPost[]>(`${apiURL}/posts`, {
+                const response = await axios.get(`${apiURL}/posts`, {
                     headers: { 
                         'Authorization': `Bearer ${getToken()}`,
                         'Content-Type': 'application/json'
                     }
                 });
                 
-                setData(response.data);
+                // Gérer différents formats de réponse API
+                const responseData = response.data;
+                if (Array.isArray(responseData)) {
+                    setData(responseData);
+                } else if (responseData?.data && Array.isArray(responseData.data)) {
+                    setData(responseData.data);
+                } else if (responseData?.posts && Array.isArray(responseData.posts)) {
+                    setData(responseData.posts);
+                } else {
+                    console.warn('Format de réponse API inattendu:', responseData);
+                    setData([]);
+                }
                 setLoading(false);
                 
             } catch (err) {
@@ -430,37 +255,39 @@ export function UsePosts() {
         fetchPosts();
     }, []);
 
-    // Alternative: Utiliser les données statiques (décommenter si besoin)
-    /*
-    useEffect(() => {
-        setTimeout(() => {
-            setData(staticPostData);
-            setLoading(false);
-        }, 100);
-    }, []);
-    */
-
     return { data, loading, error };
 }
 
-// Fonction utilitaire pour obtenir le post précédent
-export function getPrevPost(currentId: number, posts: TPost[]): TPost | undefined {
-    return posts.find(p => p.id === currentId - 1);
+
+// Hook pour navigation entre posts
+export function useNextPost(currentId: string | number | undefined) {
+    const { data: posts, loading } = UsePosts();
+
+    // Vérifier si posts est un tableau, sinon retourner des valeurs par défaut
+    if (!posts || !Array.isArray(posts)) {
+        return {
+            loading,
+            nextPost: currentId,
+            prevPost: currentId,
+            hasNext: false,
+            hasPrev: false
+        };
+    }
+
+    const currentPostIndex = posts.findIndex(post => post.id === Number(currentId));
+    const hasNext = currentPostIndex !== -1 && currentPostIndex < (posts.length - 1);
+    const hasPrev = currentPostIndex !== -1 && currentPostIndex > 0;
+
+    return {
+        loading,
+        nextPost: hasNext ? posts[currentPostIndex + 1]?.id || currentId : currentId,
+        prevPost: hasPrev ? posts[currentPostIndex - 1]?.id || currentId : currentId,
+        hasNext,
+        hasPrev
+    };
 }
 
-// Fonction utilitaire pour obtenir le post suivant
-export function getNextPost(currentId: number, posts: TPost[]): TPost | undefined {
-    return posts.find(p => p.id === currentId + 1);
+export function usePostProcessing() {
+    
 }
 
-// Fonction utilitaire pour vérifier si un post précédent existe
-export function hasPrevPost(currentId: number, posts: TPost[]): boolean {
-    const prevPost = posts.find(p => p.id === currentId - 1);
-    return prevPost !== undefined;
-}
-
-// Fonction utilitaire pour vérifier si un post suivant existe
-export function hasNextPost(currentId: number, posts: TPost[]): boolean {
-    const nextPost = posts.find(p => p.id === currentId + 1);
-    return nextPost !== undefined;
-}

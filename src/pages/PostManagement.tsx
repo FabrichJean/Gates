@@ -1,4 +1,4 @@
-import { FilePlus, Eye, Columns, SendIcon } from "lucide-react";
+import { FilePlus, Eye, Columns, MoreVertical, SendIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UsePlateform from "../hooks/usePlateform";
@@ -8,12 +8,14 @@ import { getPosts } from "../api/posts";
 import type { Post, PostsResponse } from "../types/post";
 import Loader from "../components/Loader";
 import { webAppPlateform } from "../api/plateforms";
+import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 
 const PostManagement = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -152,6 +154,9 @@ const PostManagement = () => {
                 <th scope="col" className="px-6 py-3">
                   Date de création
                 </th>
+                <th scope="col" className="px-6 py-3">
+                  Transcode
+                </th>
                 <th scope="col" className="px-6 py-3 text-left">
                   Actions
                 </th>
@@ -202,6 +207,7 @@ const PostManagement = () => {
                           </div>
                         </div>
                       ))}
+
                       {post.videos?.length > 2 && (
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
                           <span className="text-xs text-gray-600 dark:text-gray-300">
@@ -248,14 +254,40 @@ const PostManagement = () => {
                   </td>
                   <td className="px-6 py-4">{formatDate(post.createdAt)}</td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center text-center gap-2">
-                      <Link
-                        to={`/post/${post.id}`}
-                        className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        title="Voir les détails"
+                    <BtnTranscodeComponent
+                      post={post as any}
+                      reFetch={fetchPosts}
+                    />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenuId(openMenuId === post.id ? null : post.id)
+                        }
+                        className="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                        title="Actions"
                       >
-                        <Eye className="w-4 h-4" />
-                      </Link>
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      {openMenuId === post.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setOpenMenuId(null)}
+                          />
+                          <div className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+                            <Link
+                              to={`/post/${post.id}`}
+                              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              onClick={() => setOpenMenuId(null)}
+                            >
+                              <Eye className="w-4 h-4" />
+                              <span>Details</span>
+                            </Link>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

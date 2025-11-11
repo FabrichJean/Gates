@@ -44,3 +44,19 @@ export async function sendPostsToWebApp(plateformIds?: number[] | null) {
         },
     });
 }
+
+
+export async function usePostProcessing({id}: {id: number}) {
+    return await axios.post(`${apiURL}/posts/${id}/deep-upload`, null, {
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+    });
+}
+export async function cancelPostProcessing({id}: {id: number}) {
+    return await axios.post(`${apiURL}/posts/${id}/deep-upload/cancel`, null, {
+        headers: {
+            'Authorization': `Bearer ${getToken()}`
+        },
+    });
+}

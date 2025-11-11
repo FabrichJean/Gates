@@ -46,7 +46,7 @@ const GetVideoPost = ({ videos }: GetVideoPostProps) => {
         <div className="modal-box max-w-6xl w-11/12 max-h-[90vh]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-2xl">
-              Toutes les vidéos ({videos.length})
+              Videos ({videos.length})
             </h3>
             <button
               onClick={() => setIsVideoModalOpen(false)}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Languages } from "lucide-react";
 import type { PostTitle } from "../../hooks/usePost";
 
@@ -7,11 +7,14 @@ interface GetPostTitlesProps {
 }
 
 const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>();
 
   if (postTitles?.length === 0) {
     return null;
   }
+  useEffect(() => {
+    setSelectedLanguage(postTitles?.[0]?.i18_language);
+  }, [postTitles]);
 
   return (
     <div className="mt-6">
