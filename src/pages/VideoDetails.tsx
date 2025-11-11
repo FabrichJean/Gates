@@ -15,6 +15,8 @@ import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
+import AnimatedAlert from "../components/AnimatedAlert";
+import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -30,6 +32,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId)
 
   const navigate = useNavigate();
+
+  const { showAlert, alertProps } = useAnimatedAlert();
+  const alert = createQuickAlert(showAlert);
 
   useSocketSend(reFetch);
 
@@ -89,15 +94,17 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
 
   return (
-    modifying ? <EditVideo video={video} onSubmit={(newCoverUrl?: string) => {
-      setModifying(false);
-      if (newCoverUrl) {
-        setCurrentCoverUrl(newCoverUrl + '?t=' + Date.now());
-      }
-      reFetch();
-    }} /> :
-      <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-        <Toaster position="top-right" />
+    <>
+      <AnimatedAlert {...alertProps} />
+      {modifying ? <EditVideo video={video} onSubmit={(newCoverUrl?: string) => {
+        setModifying(false);
+        if (newCoverUrl) {
+          setCurrentCoverUrl(newCoverUrl + '?t=' + Date.now());
+        }
+        reFetch();
+      }} /> :
+        <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
+          <Toaster position="top-right" />
 
         {/* Formulaire */}
         <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
@@ -149,7 +156,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   disabled={video.processing === 'working' || video.processing === 'done'}
                   onClick={() => {
                     if (video.checking !== 'checked') {
-                      return alert("We need to check this video");
+                      return alert.warning("We need to check this video", "Video Check Required");
                     }
                     send(video.id);
                   }}
@@ -351,8 +358,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
         </div>
 
-        <div className="w-full md:w-[35%] flex flex-col gap-4" />
-      </div>
+          <div className="w-full md:w-[35%] flex flex-col gap-4" />
+        </div>}
+    </>
   );
 };
 
