@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home } from "lucide-react";
+import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home, Download as DownloadIcon } from "lucide-react";
 
 
 const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
@@ -79,12 +79,13 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import useSocket from "../hooks/useSocket";
 import ThemeToggle from "./ThemeToggle";
+import ProcessModal from "./ProcessModal";
 
 // Composant Breadcrumb
 const Breadcrumb: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    
+
     // Mapping des routes vers des noms lisibles
     const routeNames: Record<string, string> = {
         '/': 'Home',
@@ -103,12 +104,12 @@ const Breadcrumb: React.FC = () => {
     };
 
     const pathSegments = location.pathname.split('/').filter(segment => segment !== '');
-    
+
     // Construire les breadcrumbs
     const breadcrumbs = [
         { name: 'Home', path: '/videos' }
     ];
-    
+
     let currentPath = '';
     pathSegments.forEach(segment => {
         currentPath += `/${segment}`;
@@ -121,30 +122,56 @@ const Breadcrumb: React.FC = () => {
         return null;
     }
 
+    const [showProcessModal, setShowProcessModal] = useState(false);
     return (
-        <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-            {breadcrumbs.map((breadcrumb, index) => (
-                <div key={breadcrumb.path} className="flex items-center">
-                    {index > 0 && (
-                        <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
-                    )}
-                    {index === 0 && (
-                        <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
-                    )}
+        <>
+            <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 relative min-h-[48px]">
+                {/* Home icon at the very start */}
+                <div className="flex items-center">
+                    <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
                     <button
-                        onClick={() => navigate(breadcrumb.path)}
-                        className={`text-sm transition-colors duration-200 ${
-                            index === breadcrumbs.length - 1
-                                ? 'text-gray-900 dark:text-white font-medium cursor-default'
-                                : 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer'
-                        }`}
-                        disabled={index === breadcrumbs.length - 1}
+                        onClick={() => navigate(breadcrumbs[0].path)}
+                        className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
+                            ? 'text-gray-900 dark:text-white font-medium cursor-default'
+                            : 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer'
+                            }`}
+                        disabled={breadcrumbs.length === 1}
                     >
-                        {breadcrumb.name}
+                        {breadcrumbs[0].name}
                     </button>
                 </div>
-            ))}
-        </nav>
+                {breadcrumbs.slice(1).map((breadcrumb, index) => (
+                    <div key={breadcrumb.path} className="flex items-center">
+                        <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
+                        <button
+                            onClick={() => navigate(breadcrumb.path)}
+                            className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
+                                ? 'text-gray-900 dark:text-white font-medium cursor-default'
+                                : 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer'
+                                }`}
+                            disabled={index === breadcrumbs.length - 2}
+                        >
+                            {breadcrumb.name}
+                        </button>
+                    </div>
+                ))}
+                {/* Download icon (votre SVG) en bouton interactif */}
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+                    <button
+                        type="button"
+                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                        title="Télécharger"
+                        onClick={() => setShowProcessModal(true)}
+                    >
+                        <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M12 4v12m0 0l-4-4m4 4l4-4" strokeLinecap="round" strokeLinejoin="round" />
+                            <rect x="4" y="18" width="16" height="2" rx="1" />
+                        </svg>
+                    </button>
+                </span>
+            </nav>
+            <ProcessModal open={showProcessModal} onClose={() => setShowProcessModal(false)} />
+        </>
     );
 };
 
@@ -260,7 +287,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
 
                 {/* MODAL LOGOUT */}
                 <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
-                    <div className="modal-box dark:bg-gray-900 dark:text-white">
+                    <div className="modal-box bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
                         <h3 className="font-bold text-lg">Disconnect</h3>
                         <p className="py-4">
                             Are you sure you want to log out? <span>😞</span>
@@ -277,7 +304,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                                 <button className="btn bg-red-500 hover:bg-red-600 text-white border-none transition-colors duration-300" type="submit">
                                     logout
                                 </button>
-                                <button type="button" className="btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white transition-colors duration-300" onClick={closeLogoutModal}>
+                                <button type="button" className="btn bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 border-none transition-colors duration-300" onClick={closeLogoutModal}>
                                     cancel
                                 </button>
                             </form>
