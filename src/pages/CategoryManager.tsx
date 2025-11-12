@@ -59,6 +59,7 @@ export default function CategoryManager() {
                         value={newCat}
                         onChange={(e) => setNewCat(e.target.value)}
                         placeholder="new category..."
+                        maxLength={500}
                         className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
                     />
                     <button
