@@ -210,26 +210,21 @@ const Upload = () => {
       return;
     }
 
-    const formData = {
-      video: videoFile,
-      cover: coverFile,
-      category_id: category.id,
-      platform_id: platform?.id,
-      ...(subcategory && { sub_category_id: subcategory.id }),
-
-      ref,
-      titles: JSON.stringify(coupleTitles),
-    };
-    
+    const fd = new FormData();
+    fd.append("video", videoFile as File);
+    fd.append("cover", coverFile as File);
+    fd.append("category_id", String(category.id));
+    if (subcategory) fd.append("sub_category_id", String(subcategory.id));
+    // backend expects 'plateform_id' (single id)
+    if (platform?.id) fd.append("plateform_id", String(platform.id));
+    fd.append("ref", String(ref));
+    fd.append("titles", JSON.stringify(coupleTitles));
     try {
       setUploading(true);
       setProgress(0);
 
-      // console.log(formData.get("platform_id"));
-      
-
       // send FormData for multipart upload
-      const res = await uploadVideo(formData as unknown as FormData, (progressEvent) => {
+      const res = await uploadVideo(fd, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         }
