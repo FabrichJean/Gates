@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home, Download as DownloadIcon } from "lucide-react";
+import { User as UserIcon, LogOut as LogOutIcon, ChevronRight, Home } from "lucide-react";
 
 
 const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogoutRequest }) => {
