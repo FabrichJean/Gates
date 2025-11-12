@@ -24,6 +24,7 @@ import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
+import UserDetails from "../pages/UserDetails";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -143,12 +144,12 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/users/:1"
+        path="/users/:id"
         element={
           <ProtectedRoute>
             <SuperProtected>
               <InsideSidebar>
-                <Profil />
+                <UserDetails />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>

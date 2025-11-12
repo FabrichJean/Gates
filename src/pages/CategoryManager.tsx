@@ -21,6 +21,33 @@ export default function CategoryManager() {
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [newCat, setNewCat] = useState("");
+    const NON_SPACE_LIMIT = 324;
+
+    const handleNewCatChange = (value: string) => {
+        // If under the limit, accept directly
+        const nonSpaceCount = value.replace(/\s/g, '').length;
+        if (nonSpaceCount <= NON_SPACE_LIMIT) {
+            setNewCat(value);
+            return;
+        }
+
+        // Otherwise trim to the limit while preserving spaces and original order
+        let count = 0;
+        let out = '';
+        for (const ch of value) {
+            if (/\s/.test(ch)) {
+                out += ch;
+            } else {
+                if (count < NON_SPACE_LIMIT) {
+                    out += ch;
+                    count++;
+                } else {
+                    // skip remaining non-space characters
+                }
+            }
+        }
+        setNewCat(out);
+    };
 
     const addCategory = async () => {
         if (!newCat.trim()) return;
@@ -57,11 +84,13 @@ export default function CategoryManager() {
                     <input
                         type="text"
                         value={newCat}
-                        onChange={(e) => setNewCat(e.target.value)}
+                        onChange={(e) => handleNewCatChange(e.target.value)}
                         placeholder="new category..."
-                        maxLength={500}
+                        // keep a generous hard limit so browser stop long inputs, enforcement is done by the handler
+                        maxLength={1000}
                         className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
                     />
+                    <div className="text-sm text-gray-500 dark:text-gray-400 px-1">Max {NON_SPACE_LIMIT} caractères (hors espaces)</div>
                     <button
                         onClick={addCategory}
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-1 rounded-lg transition-all duration-300"
