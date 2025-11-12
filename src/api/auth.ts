@@ -81,16 +81,12 @@ export const deleteUserApi = async (userId: number) => {
 };
 
 export const createUser = async (data: {username: string, email: string, password: string}) => {
-  try {
-    const res = await api.post("/auth/create", data);
-    return res.data; // ➜ { token, userType }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    if (error.response && error.response.data?.message) {
-      throw new Error(error.response.data.message);
-    }
-    throw new Error("Erreur de connexion au serveur");
-  }
+  return await api.post("/auth/create", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    }, 
+  });
 };
 
 // 🔸 Récupérer l'utilisateur courant (réhydratation)
