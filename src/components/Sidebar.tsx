@@ -238,7 +238,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
 
             {/* MODAL LOGOUT */}
             <dialog ref={dialogRef} id="my_modal_5" className="modal modal-bottom sm:modal-middle">
-                <div className="modal-box dark:bg-gray-900 dark:text-white">
+                <div className="modal-box bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
                     <h3 className="font-bold text-lg">Disconnect</h3>
                     <p className="py-4">
                         Are you sure you want to log out? <span>😞</span>
@@ -255,7 +255,7 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
                             <button className="btn bg-red-500 hover:bg-red-600 text-white border-none" type="submit">
                                 logout
                             </button>
-                            <button type="button" className="btn" onClick={closeLogoutModal}>
+                            <button type="button" className="btn bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 border-none" onClick={closeLogoutModal}>
                                 cancel
                             </button>
                         </form>

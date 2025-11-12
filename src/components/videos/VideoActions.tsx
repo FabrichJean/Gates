@@ -6,7 +6,7 @@ import { cancelUpload } from "../../api/videos";
 import toast from "react-hot-toast";
 import AnimatedAlert from "../AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../../hooks/useAnimatedAlert";
-import { useState } from "react";
+import { useProcessingCount } from "./useProcessingCount";
 
 interface VideoActionsProps {
   video: TVideo;
@@ -24,6 +24,7 @@ const VideoActions = ({
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
+  const { count: processingCount } = useProcessingCount();
 
   const cancel = async () => {
     await cancelUpload(video.id)
@@ -61,6 +62,10 @@ const VideoActions = ({
             onClick={() => {
               if (video.checking !== 'checked') {
                 return alert.warning("We need to check this video", "Video Check Required");
+              }
+              if (processingCount >= 5) {
+                toast.error("The maximum number of videos in process (5) has been reached. Please wait until a video finishes processing before sending another.");
+                return;
               }
               onSend(video.id);
             }}
