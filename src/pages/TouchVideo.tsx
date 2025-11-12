@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { UseVideo } from "../hooks/useVideos";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
 import { updateVideo } from "../api/videos";
@@ -20,19 +20,41 @@ function TouchVideo() {
     const [progress, setProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
 
-    const [coverPreview, setCoverPreview] = useState<string | null>(video.public_urls.cover_url);
+    const [coverPreview, setCoverPreview] = useState<string | null>(video?.public_urls.cover_url || video?.cover);
     const coverInputRef = useRef<HTMLInputElement>(null);
 
     const [videoFile, setVideoFile] = useState<File | null>(null);
-    const [videoPreview, setVideoPreview] = useState<string | null>(video.public_urls.temp_url);
+    const [videoPreview, setVideoPreview] = useState<string | null>(video?.public_urls.temp_url || video?.local_mp4_path);
     const videoInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (video?.public_urls.cover_url) {
+            setCoverPreview(video.public_urls.cover_url);
+        } else if (video?.cover) {
+            setCoverPreview(video.cover);
+        }
+
+        if (video?.public_urls.temp_url) {
+            setVideoPreview(video.public_urls.temp_url);
+        } else if (video?.local_mp4_path) {
+            setVideoPreview(video.local_mp4_path);
+        }
+    }, [video]);
+
+    useEffect(() => {
+        if (video?.public_urls.temp_url) {
+            setVideoPreview(video.public_urls.temp_url);
+        } else if (video?.local_mp4_path) {
+            setVideoPreview(video.local_mp4_path);
+        }
+    }, [video]);
 
     const [duration, setDuration] = useState<number | null>(video?.duration);
 
     const [category, setCategory] = useState<Category>(video?.category);
     const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-ignorefpublicjzzz
     const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
 
     const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +111,7 @@ function TouchVideo() {
             <Toaster position="top-right" />
             <div className="flex flex-col w-full">
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-                    Touch video {video.id}
+                    Touch video {video?.id}
                 </h1>
                 <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
                     <div className="space-y-6">
