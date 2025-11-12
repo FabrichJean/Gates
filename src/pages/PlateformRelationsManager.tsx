@@ -9,6 +9,7 @@ import {
   removeCategoryFromPlateformApi,
   getCategoriesByPlateformApi,
   clearCategoriesFromPlateformApi,
+  clearSubCategoriesFromPlateformApi,
 } from "../api/plateformCategory";
 import { createCastegoryApi, createSubCategoryApi } from "../api/categories";
 import {
@@ -257,6 +258,18 @@ export default function PlateformRelationsManager() {
     }
   };
 
+    const handleClearSubCategories = async () => {
+    if (!selectedPlateform) return;
+    if (!confirm("Remove all categories from this platform?")) return;
+    try {
+      await clearSubCategoriesFromPlateformApi(selectedPlateform);
+      toast.success("All categories removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error clearing categories");
+    }
+  };
+
   const filteredCategories = allCategories?.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -444,7 +457,7 @@ export default function PlateformRelationsManager() {
                       ➕ link Subcategory
                     </button>
                     <button
-                      onClick={handleClearCategories}
+                      onClick={handleClearSubCategories}
                       className="btn rounded shadow btn-sm text-red-500"
                     >
                       🗑️ Clear All
