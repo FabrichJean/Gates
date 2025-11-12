@@ -336,6 +336,7 @@ export default function PlateformRelationsManager() {
                 type="text"
                 placeholder="WebApp name"
                 className="input input-bordered w-full mb-3"
+                maxLength={20}
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
                 required
