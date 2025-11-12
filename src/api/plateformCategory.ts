@@ -53,3 +53,8 @@ export const clearCategoriesFromPlateformApi = async (plateformId: number) =>
   await axios.delete(`${apiURL}/plateform-category/plateform/${plateformId}/clear`, {
     headers,
   });
+
+  export const clearSubCategoriesFromPlateformApi = async (plateformId: number) =>
+  await axios.delete(`${apiURL}/plateform-subcategory/plateform/${plateformId}/clear`, {
+    headers,
+  });
