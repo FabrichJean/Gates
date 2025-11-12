@@ -31,18 +31,17 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const {data: allSubCategories, reFetch: reFetchSubCategories } = UseSubCategory()
+  const { data: allSubCategories } =
+    UseSubCategory();
   const [catRelations, setCatRelations] = useState<any[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<any[]>([]);
-//   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
+  //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-//   console.log('categories', categories);
-  console.log('allcat', allCategories);
-  
-  
+  //   console.log('categories', categories);
+  console.log("allcat", allCategories);
 
   // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
@@ -72,8 +71,10 @@ export default function PlateformRelationsManager() {
       }
     };
 
-    if (!isValidUrl(platformVideoSyncUrl)) return toast.error("Invalid Video sync URL");
-    if (!isValidUrl(platformPostSyncUrl)) return toast.error("Invalid Post sync URL");
+    if (!isValidUrl(platformVideoSyncUrl))
+      return toast.error("Invalid Video sync URL");
+    if (!isValidUrl(platformPostSyncUrl))
+      return toast.error("Invalid Post sync URL");
     try {
       const payload: any = {
         name: platformName,
@@ -120,26 +121,7 @@ export default function PlateformRelationsManager() {
       toast.error("Error deleting platform");
     }
   };
-
-  const headers = { Authorization: `Bearer ${getToken()}` };
-
-//   useEffect(() => {
-//     const fetchAll = async () => {
-//       try {
-//         const [subsRes] = await Promise.all([
-//         //   axios.get(`${apiURL}/categories`, { headers }),
-//           axios.get(`${apiURL}/sub-categories`, { headers }),
-//         ]);
-//         // setAllCategories(catsRes.data ?? []);
-//         const subs = subsRes.data?.SubCategorys ?? subsRes.data ?? [];
-//         setAllSubCategories(subs);
-//       } catch (err) {
-//         toast.error("Failed to load categories/subcategories");
-//       }
-//     };
-//     fetchAll();
-//   }, []);
-
+  
   const fetchRelations = async (plateformId: number | null) => {
     if (!plateformId) return;
     try {
@@ -165,9 +147,12 @@ export default function PlateformRelationsManager() {
         const payload = res?.data ?? res;
         let list: any[] = [];
         if (Array.isArray(payload)) list = payload;
-        else if (Array.isArray(payload.SubCategorys)) list = payload.SubCategorys;
-        else if (Array.isArray(payload.subcategories)) list = payload.subcategories;
-        else if (Array.isArray(payload.SubCategories)) list = payload.SubCategories;
+        else if (Array.isArray(payload.SubCategorys))
+          list = payload.SubCategorys;
+        else if (Array.isArray(payload.subcategories))
+          list = payload.subcategories;
+        else if (Array.isArray(payload.SubCategories))
+          list = payload.SubCategories;
         else {
           const arr = Object.values(payload).find((v) => Array.isArray(v));
           list = Array.isArray(arr) ? arr : [];
@@ -178,7 +163,10 @@ export default function PlateformRelationsManager() {
           id: item.id ?? item.subCategoryId ?? item.SubCategoryId,
           name: item.name ?? item.title ?? item.label,
           relationId:
-            item.PlateformSubCategory?.id || item.Plateform_SubCategory?.id || item.relationId || null,
+            item.PlateformSubCategory?.id ||
+            item.Plateform_SubCategory?.id ||
+            item.relationId ||
+            null,
         }));
       };
 
@@ -200,7 +188,7 @@ export default function PlateformRelationsManager() {
       toast.success("Category linked");
       reFetchCategories();
       fetchRelations(selectedPlateform);
-      setCategoryModalOpen(false);
+      // setCategoryModalOpen(false);
     } catch {
       toast.error("Error adding category");
     }
@@ -215,8 +203,8 @@ export default function PlateformRelationsManager() {
       const id = newCat.category.id;
       if (!id) throw new Error("Invalid create response");
       await handleAddCategory(id);
-      
-    //   toast.success("Category created and linked");
+
+      //   toast.success("Category created and linked");
       setCategoryModalOpen(false);
       setSearch("");
     } catch (err) {
@@ -230,29 +218,11 @@ export default function PlateformRelationsManager() {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
       toast.success("Subcategory linked");
       fetchRelations(selectedPlateform);
-      setSubCategoryModalOpen(false);
+      // setSubCategoryModalOpen(false);
     } catch {
       toast.error("Error adding subcategory");
     }
   };
-
-//   const handleCreateAndLinkSubcategory = async (name: string) => {
-//     if (!selectedPlateform) return toast.error("Select a platform first");
-//     if (!name.trim()) return toast.error("Name required");
-//     try {
-//       // create subcategory without category (category_id: 0) — adjust if your backend requires a valid category
-//       const res = await createSubCategoryApi({ name: name.trim(), category_id: 0 });
-//       const newSub = res.data?.data ?? res.data ?? res;
-//       const id = newSub.id ?? newSub.subCategoryId ?? newSub._id;
-//       if (!id) throw new Error("Invalid create response");
-//       await handleAddSubcategory(id);
-//       toast.success("Subcategory created and linked");
-//       setSubCategoryModalOpen(false);
-//       setSearch("");
-//     } catch (err) {
-//       toast.error("Error creating subcategory");
-//     }
-//   };
 
   const handleRemoveCategory = async (categoryId: number) => {
     if (!selectedPlateform) return;
@@ -301,9 +271,9 @@ export default function PlateformRelationsManager() {
         🧩 WebApp Relations Manager
       </h1>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col gap-6">
         {/* Sidebar - Platforms */}
-        <div className="md:w-1/4 w-full bg-base-100 shadow rounded-xl p-4">
+        <div className="w-full bg-base-100 shadow rounded-xl p-4">
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
             <h2 className="font-semibold text-lg">WebApps</h2>
             <button
@@ -323,17 +293,7 @@ export default function PlateformRelationsManager() {
           <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
             {plateforms?.map((p: any) => (
               <div key={p.id} className="flex justify-between items-center">
-                <button
-                  onClick={() => setSelectedPlateform(p.id)}
-                  className={`btn btn-sm flex-1 justify-start ${
-                    selectedPlateform === p.id
-                      ? "bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
-                  }`}
-                >
-                  {p.name}
-                </button>
-                <div className="flex gap-1 ml-2">
+                <div className="flex gap-1 mr-2">
                   <button
                     onClick={() => {
                       setEditingPlatform(p);
@@ -353,6 +313,16 @@ export default function PlateformRelationsManager() {
                     🗑️
                   </button>
                 </div>
+                <button
+                  onClick={() => setSelectedPlateform(p.id)}
+                  className={`btn btn-sm flex-1 justify-start text-nowrap ${
+                    selectedPlateform === p.id
+                      ? "bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
+                  }`}
+                >
+                  {p.name}
+                </button>
               </div>
             ))}
           </div>
@@ -366,6 +336,7 @@ export default function PlateformRelationsManager() {
                 type="text"
                 placeholder="WebApp name"
                 className="input input-bordered w-full mb-3"
+                maxLength={20}
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
                 required
@@ -405,37 +376,44 @@ export default function PlateformRelationsManager() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-base-100 shadow rounded-xl p-4">
+        <div className="flex-1 bg-base-100 shadow rounded-xl p-4 w-full">
           {selectedPlateform ? (
             <>
               <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">
-                {/* <h2 className="font-semibold text-lg">
-                  Relations for Platform #{selectedPlateform}
-                </h2> */}
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => setCategoryModalOpen(true)}
-                    className="btn rounded shadow btn-sm"
-                  >
-                    ➕ link Category
-                  </button>
-                  <button
-                    onClick={() => setSubCategoryModalOpen(true)}
-                    className="btn rounded shadow btn-sm"
-                  >
-                    ➕ link Subcategory
-                  </button>
-                  <button
-                    onClick={handleClearCategories}
-                    className="btn rounded shadow btn-sm text-red-500"
-                  >
-                    🗑️ Clear All
-                  </button>
+                <div className="flex gap-2 flex-wrap justify-between w-full">
+                  {/* <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setSubCategoryModalOpen(true)}
+                      className="btn rounded shadow btn-sm"
+                    >
+                      ➕ link Subcategory
+                    </button>
+                    <button
+                      onClick={handleClearCategories}
+                      className="btn rounded shadow btn-sm text-red-500"
+                    >
+                      🗑️ Clear All
+                    </button>
+                  </div> */}
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6">
-                <div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setCategoryModalOpen(true)}
+                      className="btn rounded shadow btn-sm"
+                    >
+                      ➕ link Category
+                    </button>
+                    <button
+                      onClick={handleClearCategories}
+                      className="btn rounded shadow btn-sm text-red-500"
+                    >
+                      🗑️ Clear All
+                    </button>
+                  </div>
                   <h3 className="font-medium mb-2">Linked Categories</h3>
                   {catRelations.length === 0 ? (
                     <p className="text-gray-500">No categories linked</p>
@@ -457,7 +435,21 @@ export default function PlateformRelationsManager() {
                   )}
                 </div>
 
-                <div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setSubCategoryModalOpen(true)}
+                      className="btn rounded shadow btn-sm"
+                    >
+                      ➕ link Subcategory
+                    </button>
+                    <button
+                      onClick={handleClearCategories}
+                      className="btn rounded shadow btn-sm text-red-500"
+                    >
+                      🗑️ Clear All
+                    </button>
+                  </div>
                   <h3 className="font-medium mb-2">Linked Subcategories</h3>
                   {subcatRelations?.length === 0 ? (
                     <p className="text-gray-500">No subcategories linked</p>
@@ -506,7 +498,9 @@ export default function PlateformRelationsManager() {
           <div className="max-h-60 overflow-auto">
             {filteredCategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b py-2">
-                <span className="italic text-gray-500">Create new category "{search}"</span>
+                <span className="italic text-gray-500">
+                  Create new category "{search}"
+                </span>
                 <button
                   onClick={() => handleCreateAndLinkCategory(search)}
                   className="btn btn-xs btn-success"
@@ -516,25 +510,27 @@ export default function PlateformRelationsManager() {
               </div>
             ) : (
               filteredCategories?.map((cat) => {
-              const isLinked = catRelations.some((rc) => rc.id === cat.id);
-              return (
-                <div
-                  key={cat.id}
-                  className="flex justify-between items-center border-b py-2"
-                >
-                  <span>{cat.name}</span>
-                  {isLinked ? (
-                    <button className="btn btn-xs btn-disabled">Linked</button>
-                  ) : (
-                    <button
-                      onClick={() => handleAddCategory(cat.id)}
-                      className="btn btn-xs btn-primary"
-                    >
-                      Add
-                    </button>
-                  )}
-                </div>
-              );
+                const isLinked = catRelations.some((rc) => rc.id === cat.id);
+                return (
+                  <div
+                    key={cat.id}
+                    className="flex justify-between items-center border-b py-2"
+                  >
+                    <span>{cat.name}</span>
+                    {isLinked ? (
+                      <button className="btn btn-xs btn-disabled">
+                        Linked
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleAddCategory(cat.id)}
+                        className="btn btn-xs btn-primary"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                );
               })
             )}
           </div>
@@ -578,7 +574,9 @@ export default function PlateformRelationsManager() {
                   >
                     <span>{sub.name}</span>
                     {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">Linked</button>
+                      <button className="btn btn-xs btn-disabled">
+                        Linked
+                      </button>
                     ) : (
                       <button
                         onClick={() => handleAddSubcategory(sub.id)}

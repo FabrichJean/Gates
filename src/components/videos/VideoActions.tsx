@@ -34,6 +34,23 @@ const VideoActions = ({
       })
   }
 
+  const [resending, setResending] = useState(false);
+
+  const resend = async () => {
+    if (resending) return;
+    setResending(true);
+    try {
+      // first cancel the current processing
+      await cancelUpload(video.id);
+      // then immediately send again
+      onSend(video.id);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error during resend');
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <>
       <AnimatedAlert {...alertProps} />
@@ -109,6 +126,23 @@ const VideoActions = ({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
               Cancel
+            </button>
+          )}
+          {video.processing === 'working' && (
+            <button
+              onClick={resend}
+              disabled={resending}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 rounded-xl shadow-md transition-all duration-200"
+            >
+              {resending ? (
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-9-9" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 3v6h-6" />
+                </svg>
+              )}
+              <span>{resending ? 'Resending...' : 'Resend'}</span>
             </button>
           )}
         </div>
