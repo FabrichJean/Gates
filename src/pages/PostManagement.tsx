@@ -190,7 +190,7 @@ const PostManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex gap-1">
                       {post.videos?.slice(0, 2).map((video) => (
                         <div key={video.id} className="relative group">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
