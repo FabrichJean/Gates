@@ -114,7 +114,7 @@ function TouchVideo() {
 
     return (
         <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
-            <Toaster position="top-right" />
+            {/* <Toaster position="top-right" /> */}
             <div className="flex flex-col w-full">
                 <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
                     Touch video {video?.id}

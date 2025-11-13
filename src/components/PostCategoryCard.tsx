@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { type Category } from "./CategoryAutoComplete";
+type PostCategory = Category & { creator?: string | null };
 import { updatePostCategoryApi } from "../api/postCategories";
 
 interface Props {
@@ -20,6 +21,7 @@ export default function PostCategoryCard({
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(category.name ?? "");
+  const postCat = category as PostCategory;
 
   const handleSave = async () => {
     if (tempName.trim() && tempName !== category.name) {
@@ -66,7 +68,10 @@ export default function PostCategoryCard({
             setIsEditing(true);
           }}
         >
-          {category.name ?? "Sans nom"}
+          <div className="flex items-center justify-between">
+            <div>{postCat.name ?? "Sans nom"}</div>
+            {postCat.creator ? <div className="text-xs text-gray-500 ml-2">{postCat.creator}</div> : null}
+          </div>
         </div>
       )}
 

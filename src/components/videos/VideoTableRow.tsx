@@ -5,24 +5,25 @@ import VideoActions from "./VideoActions";
 import RoleEnum from "../../utils/roleEnum";
 import type { TVideo } from "../../hooks/useVideos";
 import type { User } from "../../hooks/useVideos";
+import { useAuth } from "../../hooks/useAuth";
 
 interface VideoTableRowProps {
   video: TVideo;
   index: number;
-  user: User | Partial<User>;
+  // user: User | Partial<User>;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
-  reFetch: () => void;
 }
 
 const VideoTableRow = ({
   video,
   index,
-  user,
+  // user,
   onActivate,
   onSend,
-  reFetch,
 }: VideoTableRowProps) => {
+
+  const {user} = useAuth()
   
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
@@ -90,8 +91,15 @@ const VideoTableRow = ({
       </td>
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
-        {/* @ts-ignore */}
-        <CheckingSuperadmin index={index} reFetch={reFetch} video={video} user={user} />
+        {/* Pass a wrapper that requests a debounced list refresh instead of the raw reFetch
+            This avoids child components directly triggering immediate /videos reFetch storms.
+        */}
+        <CheckingSuperadmin
+          index={index}
+          reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}
+          video={video}
+          user={user}
+        />
       </td>
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
@@ -99,7 +107,6 @@ const VideoTableRow = ({
           video={video}
           user={user}
           onSend={onSend}
-          reFetch={reFetch}
         />
       </td>
 

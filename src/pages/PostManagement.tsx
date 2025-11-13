@@ -2,7 +2,6 @@ import { FilePlus, Eye, Columns, MoreVertical, SendIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UsePlateform from "../hooks/usePlateform";
-import { webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import { getPosts } from "../api/posts";
 import type { Post, PostsResponse } from "../types/post";

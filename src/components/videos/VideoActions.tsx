@@ -6,34 +6,52 @@ import { cancelUpload } from "../../api/videos";
 import toast from "react-hot-toast";
 import AnimatedAlert from "../AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../../hooks/useAnimatedAlert";
-import { useProcessingCount } from "./useProcessingCount";
+import { useProcessingCount } from "../useProcessingCount";
 import { useState } from "react";
+import { useVideosContext } from "../../context/VideosContext";
 
 interface VideoActionsProps {
   video: TVideo;
   user: User | Partial<User>;
-  reFetch: () => void;
   onSend: (videoId: number) => void;
 }
 
 const VideoActions = ({
   video,
   user,
-  reFetch,
   onSend,
 }: VideoActionsProps) => {
 
-  const { showAlert, alertProps } = useAnimatedAlert();
+  const { showAlert } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
   const { count: processingCount } = useProcessingCount();
+  // // use videos context for debounced refresh
+  const ctx = useVideosContext();
+
+  const extractErrorMessage = (err: unknown) => {
+    try {
+      if (!err) return 'Error';
+      if (typeof err === 'string') return err;
+      if (typeof err === 'object' && err !== null) {
+        // try common axios shape
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (err as any)?.response?.data?.message ?? (err as any)?.message ?? 'Error';
+      }
+      return String(err);
+    } catch {
+      return 'Error';
+    }
+  };
 
   const cancel = async () => {
-    await cancelUpload(video.id)
-      .then(reFetch)
-      .catch((err) => {
-        toast.error(err?.response?.data?.message);
-      })
-  }
+    try {
+      await cancelUpload(video.id);
+      // request a debounced list refresh
+      ctx.reFetch?.(500);
+    } catch (err) {
+      toast.error(extractErrorMessage(err));
+    }
+  };
 
   const [resending, setResending] = useState(false);
 
@@ -45,16 +63,19 @@ const VideoActions = ({
       await cancelUpload(video.id);
       // then immediately send again
       onSend(video.id);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Error during resend');
+      // schedule a debounced refresh
+      ctx.reFetch?.(500);
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || 'Error during resend');
     } finally {
       setResending(false);
     }
   };
+  
 
   return (
     <>
-      <AnimatedAlert {...alertProps} />
+      {/* <AnimatedAlert {...alertProps} /> */}
       <div className="flex justify-center gap-2 flex-wrap">
         {user?.role === RoleEnum.SUPERADMIN && (
         <div className="relative flex items-center gap-3">

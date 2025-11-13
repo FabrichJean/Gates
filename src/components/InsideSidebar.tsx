@@ -77,7 +77,6 @@ const UserDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({ onLogou
 
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
-import useSocket from "../hooks/useSocket";
 import ThemeToggle from "./ThemeToggle";
 import ProcessModal from "./ProcessModal";
 
@@ -177,7 +176,9 @@ const Breadcrumb: React.FC = () => {
 };
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-    useSocket()
+    console.log("InsideSidebar mounted")
+    // Avoid creating an extra global socket connection here.
+    // Socket connections for video events are handled by specialized hooks (useSocketSend / useSocketCheckVideos)
     const initialIsCollapsed = typeof window !== 'undefined' && localStorage.getItem('is-collapsed') === 'true';
     const initialShowSidebar = false; // always start closed on load
     const initialIsMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;

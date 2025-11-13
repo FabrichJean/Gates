@@ -1,19 +1,21 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+import type { TVideo } from "../hooks/useVideos";
 import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
-import { useAuth } from "../hooks/useAuth";
 import { checkObjectContent } from "../utils/filter";
-import { useVideoManagement } from "../hooks/useVideoManagement";
+import { useVideosContext } from "../context/VideosContext";
+import { useAuth } from "../hooks/useAuth";
 import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
-import type { Video } from "../types/video";
-
-// Re-export du type pour la compatibilité
-export type { Video };
+import { useEffect } from "react";
 
 const VideosManagment = () => {
+  // console.log('cid mababsia');
+  
   const { user } = useAuth();
+  const ctx = useVideosContext();
+  if (!ctx) return null;
+
   const {
     page,
     setPage,
@@ -22,12 +24,20 @@ const VideosManagment = () => {
     params,
     data,
     loading,
-    reFetch,
+    // reFetch is available in context but we avoid calling it directly from rows
     mutate,
     toWebapp,
     activate,
     send,
-  } = useVideoManagement();
+    reFetch
+  } = ctx;
+
+  useEffect(reFetch, [])
+
+  const headerLoading = loading && (['transc', 'upload', 'cover', 'webapp'].includes(String(loading.type))
+    ? { id: loading?.id ?? undefined, type: loading.type as 'transc' | 'upload' | 'cover' | 'webapp' }
+    : undefined
+  );
 
   return (
     <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6 pb-0">
@@ -35,8 +45,8 @@ const VideosManagment = () => {
         user={user}
         filters={filters}
         setFilters={setFilters}
-        params={{ status: 'all', page, ...params }}
-        loading={loading}
+        params={{ status: "all", page, ...params }}
+        loading={headerLoading}
         onMutate={mutate}
         onWebApp={toWebapp}
       />
@@ -45,7 +55,6 @@ const VideosManagment = () => {
         <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* videos filters</span>
       ) : null}
 
-      {/* ---- Table ---- */}
       <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm dark:shadow-gray-800 overflow-hidden">
         {loading?.type === "webapp" && <DeepLoader />}
 
@@ -53,16 +62,16 @@ const VideosManagment = () => {
           <table className="min-w-full w-max text-sm md:text-base bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
             <VideoTableHeader />
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300 pb-[8rem] transition-colors duration-300">
-              {data?.videos?.map((video, index) =>
+              {data?.videos?.map((video: TVideo, index: number) => (
                 <VideoTableRow
                   key={video.id}
                   video={video}
                   index={index}
-                  user={user}
+                  // user={video.user}
                   onActivate={activate}
                   onSend={send}
-                  reFetch={reFetch}
-                />)}
+                />
+              ))}
             </tbody>
           </table>
         </div>
