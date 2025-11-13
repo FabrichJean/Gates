@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import UseCreators, { type Creator } from '../hooks/useCreators';
 
 interface Props {
-  value?: string | null;
+  /** value can be a free-text name or a Creator object for preselection */
+  value?: string | Creator | null;
   onChange: (v: string | null) => void;
   /** called when a creator from the list is explicitly selected */
   onSelect?: (creator: Creator | null) => void;
@@ -12,13 +13,16 @@ interface Props {
 
 const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled }: Props) => {
   const { data: creators } = UseCreators();
-  const [query, setQuery] = useState<string>(value || '');
+  const [query, setQuery] = useState<string>(typeof value === 'string' ? value : (value as Creator)?.name ?? '');
   const [filtered, setFiltered] = useState<Creator[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
+  // keep query in sync when parent passes a new value (string or Creator)
   useEffect(() => {
-    setQuery(value || '');
+    if (!value) setQuery('');
+    else if (typeof value === 'string') setQuery(value);
+    else setQuery((value as Creator).name || '');
   }, [value]);
 
   useEffect(() => {
@@ -38,6 +42,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
 
   const handleSelect = (c: Creator) => {
     setQuery(c.name);
+    // when a creator is selected, notify both callbacks: string value and object selection
     onChange(c.name);
     onSelect?.(c);
     setOpen(false);

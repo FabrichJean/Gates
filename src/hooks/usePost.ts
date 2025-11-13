@@ -4,6 +4,7 @@ import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
 import axios from "axios";
 import useFetch from "http-react";
+import type { Creator } from "./useCreators";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
@@ -125,6 +126,7 @@ export type TPost = {
     sub_category_id: number;
     plateform_id: number;
     published_at: string;
+    creatorObj: Creator
     createdAt: string;
     updatedAt: string;
     // optional creator free-text

@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import UseCreators, { type Creator } from '../hooks/useCreators';
 import { createCreator, updateCreator, deleteCreator } from '../api/creators';
 import toast from 'react-hot-toast';
 
 export default function CreatorManager() {
   const { data: creators, reFetch } = UseCreators();
+  const [query, setQuery] = useState<string>("");
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -145,7 +146,7 @@ export default function CreatorManager() {
                 <input
                   placeholder="Search creators..."
                   className={`flex-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${isLoading ? 'opacity-60' : ''}`}
-                  onChange={() => { /* optional: wire search later */ }}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
                   disabled={isLoading}
                 />
                 <button
@@ -158,7 +159,9 @@ export default function CreatorManager() {
               </div>
 
               <div className="flex flex-wrap gap-3 max-h-[65vh] overflow-auto">
-                {creators?.map((c: Creator) => (
+                {(
+                  creators ? creators.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase())) : []
+                ).map((c: Creator) => (
                   <div key={c.id} className="w-max p-3 px-10 rounded-lg border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition">
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
