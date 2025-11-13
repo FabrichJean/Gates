@@ -35,7 +35,7 @@ function CreateUser() {
 
     return (
         <div>
-            <Toaster/>
+            {/* <Toaster/> */}
             <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-4 sm:p-6 lg:p-6 transition-all duration-300">
                 <div className="w-full max-w-md space-y-8">
                     <div className="bg-white dark:bg-gray-800 shadow-b-md rounded-md p-6 border border-gray-100 dark:border-gray-700 transition-all duration-300">
