@@ -6,6 +6,7 @@ import { getToken } from '../../utils/storage';
 interface Category {
     id: number;
     name: string;
+    creator?: string | null;
 }
 
 interface CategoryResponse {

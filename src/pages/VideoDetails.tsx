@@ -21,6 +21,10 @@ import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  
+  console.log('details kbfjkdffkj,n');
+  
+
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
@@ -105,7 +109,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         reFetch();
       }} /> :
         <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-          <Toaster position="top-right" />
+          {/* <Toaster position="top-right" /> */}
 
         {/* Formulaire */}
         <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
@@ -442,7 +446,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
-      <Toaster position="top-right" />
+      {/* <Toaster position="top-right" /> */}
       <div className="flex flex-col w-full">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
           Edit

@@ -144,6 +144,8 @@ function uploadReducer(state: UploadState, action: Partial<UploadState>): Upload
 }
 
 const Upload = () => {
+  console.log('uload hfbdjfbdjfgkdkj');
+  
 
   const { data: user } = useAuthMe();
   const navigate = useNavigate();

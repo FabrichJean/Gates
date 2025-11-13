@@ -8,7 +8,7 @@ import { FaCheckDouble } from "react-icons/fa6";
 
 interface Props {
   video: TVideo;
-  user: User;
+  user: User | Partial<User>;
   index: number;
   reFetch: () => void;
 }

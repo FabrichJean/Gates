@@ -39,7 +39,7 @@ function UpdatePassword({ u, self = false }: { u: User, self?: boolean }) {
 
     return (
         <dialog id={'modal_' + u.username} className="modal modal-bottom sm:modal-middle inset-0 backdrop-blur-md bg-black/70 dark:bg-black/80" aria-labelledby={`update_pw_${u.username}`}>
-            <Toaster />
+            {/* <Toaster /> */}
             <form onSubmit={submit} className="modal-box bg-white dark:bg-gray-800 text-start w-full max-w-lg mx-4 sm:mx-auto p-6 relative border border-gray-200 dark:border-gray-700 transition-all duration-300" role="dialog" aria-modal="true">
                 <button type="button" aria-label="Close dialog" className="absolute right-3 top-3 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-300" onClick={() => {
                     const dialog = document.getElementById('modal_' + u.username)
