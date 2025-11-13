@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import AnimatedAlert from "../AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../../hooks/useAnimatedAlert";
 import { useProcessingCount } from "./useProcessingCount";
+import { useState } from "react";
 
 interface VideoActionsProps {
   video: TVideo;

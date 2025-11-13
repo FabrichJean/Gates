@@ -23,6 +23,7 @@ const VideoTableRow = ({
   onSend,
   reFetch,
 }: VideoTableRowProps) => {
+  
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">{video.ref}</td>
