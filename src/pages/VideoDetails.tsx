@@ -12,6 +12,7 @@ import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import { archiveVideo, cancelUpload, deletePerm, sendProcessing, updateVideo } from "../api/videos";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 // creator is an optional string attribute on video; no creators fetch here
 import { useAuthMe } from "../hooks/useAuth";
@@ -337,10 +338,20 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             </Link>
           </div>
 
-          {video.creator && (
+          {(video as any)?.creatorObj && (
             <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
               <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Creator</h1>
-              <div className="text-gray-800 dark:text-gray-200 font-medium">{video.creator}</div>
+              <div className="flex items-center gap-3">
+                {(video as any).creatorObj.avatar ? (
+                  <img src={(video as any).creatorObj.avatar} alt={(video as any).creatorObj.name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">No</div>
+                )}
+                <div>
+                  <div className="text-gray-800 dark:text-gray-200 font-medium">{(video as any).creatorObj.name}</div>
+                  {(video as any).creatorObj.gender && <div className="text-xs text-gray-500">{(video as any).creatorObj.gender}</div>}
+                </div>
+              </div>
             </div>
           )}
 
@@ -393,7 +404,11 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
   const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
   // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
-  const [creator, setCreator] = useState<string | null>(((video as any)?.creator) || null);
+  // prefer creatorObj when available; keep both creator name and possible id
+  const initialCreatorName = (video as any)?.creatorObj?.name ?? (typeof (video as any)?.creator === 'string' ? (video as any).creator : (video as any)?.creator?.name) ?? null;
+  const initialCreatorId = (video as any)?.creatorObj?.id ?? (video as any)?.creator?.id ?? (video as any)?.creator_id ?? null;
+  const [creator, setCreator] = useState<string | null>(initialCreatorName);
+  const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -410,7 +425,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
       ...(coverFile && { cover: coverFile }),
   ...(category && { category_id: category.id }),
   ...(subcategory && { sub_category_id: subcategory.id }),
-  ...(creator && { creator }),
+  ...(creatorId ? { creator_id: creatorId } : (creator ? { creator } : {})),
       titles: JSON.stringify(coupleTitles),
       duration
     };
@@ -465,13 +480,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
-              <input
-                type="text"
-                value={creator || ""}
-                onChange={(e) => setCreator(e.currentTarget.value)}
-                placeholder="Creator name (optional)"
-                className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
-              />
+              <CreatorAutoComplete value={creator} onChange={(v: string | null) => setCreator(v)} onSelect={(c) => setCreatorId(c?.id ?? null)} />
             </div>
 
             <div>

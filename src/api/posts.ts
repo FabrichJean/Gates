@@ -28,6 +28,8 @@ export async function uploadPost(formData: FormData, onUploadProgress: ((progres
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getPosts(params?: any) {
+    console.log('params post', params);
+    
     return await axios.get(`${apiURL}/posts`, {
         headers: {
             'Authorization': `Bearer ${getToken()}`

@@ -6,6 +6,8 @@ export interface Post {
   published_at: string | null;
   createdAt: string;
   updatedAt: string;
+  // optional free-text creator name
+  creator?: string | null;
   titles: PostTitle[];
   postCategory: PostCategory;
   postSubCategory: PostSubCategory;

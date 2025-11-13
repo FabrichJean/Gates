@@ -10,6 +10,7 @@ import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import UsePlateform from "../hooks/usePlateform";
 import { useNavigate } from "react-router-dom";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 
 type Language = {
     code: string;
@@ -45,6 +46,8 @@ const UploadPost = () => {
     const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
     const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [creator, setCreator] = useState<string | null>(null);
+    const [creatorId, setCreatorId] = useState<number | null>(null);
 
     // Refs pour détecter les clics à l'extérieur
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -280,6 +283,11 @@ const UploadPost = () => {
                 if (video) fd.append('videos', video);
             });
 
+            // prefer sending creator_id when an existing creator is selected,
+            // otherwise fall back to free-text creator name for backward compatibility
+            if (creatorId) fd.append('creator_id', String(creatorId));
+            else if (creator) fd.append('creator', String(creator));
+
             // Ajouter les fichiers images
             formData.images.forEach((image) => {
                 if (image) fd.append('images', image);
@@ -314,7 +322,7 @@ const UploadPost = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [selectedCategory, selectedSubCategory, selectedWebApp, titles, descriptions, imageFields, videoFields, languages, navigate]);
+    }, [selectedCategory, selectedSubCategory, selectedWebApp, titles, descriptions, imageFields, videoFields, languages, navigate, creator, creatorId]);
 
     return (
         <div className="min-h-screen flex items-start pb-6">
@@ -828,6 +836,24 @@ const UploadPost = () => {
                                         </svg>
                                         <span>New video field</span>
                                     </button>
+                                </div>
+
+                                {/* Creator (optional) */}
+                                <div className="w-full mt-4">
+                                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
+                                    <CreatorAutoComplete
+                                        value={creator}
+                                        onChange={(v: string | null) => {
+                                            // free-text typed -> clear selected id
+                                            setCreator(v);
+                                            setCreatorId(null);
+                                        }}
+                                        onSelect={(c) => {
+                                            // existing creator selected
+                                            setCreator(c?.name ?? null);
+                                            setCreatorId(c?.id ?? null);
+                                        }}
+                                    />
                                 </div>
                             </div>
 

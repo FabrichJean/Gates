@@ -127,6 +127,8 @@ export type TPost = {
     published_at: string;
     createdAt: string;
     updatedAt: string;
+    // optional creator free-text
+    creator?: string | null;
     titles: PostTitle[];
     processing: string | null;
     contents: PostContent[];

@@ -1,0 +1,55 @@
+import { useState } from "react";
+// support both Post and TPost shapes (loose typing below)
+import { FaCheckDouble } from "react-icons/fa6";
+import { FiHexagon } from "react-icons/fi";
+import RefuseModal from "./RefuseModal";
+import CheckerDrop from "./CheckerDrop";
+import { useAuth } from "../hooks/useAuth";
+
+interface Props {
+  // Accept a loose post shape to support both Post and TPost types used across the app
+  post: any;
+  index?: number;
+  reFetch: () => void;
+}
+
+export default function PostChecking({ post, index = 0, reFetch }: Props) {
+  const [showModal, setShowModal] = useState(false);
+  const { user } = useAuth();
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
+  const firstVideo = post.videos?.[0];
+
+  if (!firstVideo) return <span className="text-xs text-gray-400">-</span>;
+
+  return (
+    <div className={"dropdown " + (index === 0 ? " dropdown-end" : "dropdown-top dropdown-end")}>
+      <div tabIndex={firstVideo.id} role="button" className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-max p-1 px-2 rounded-md cursor-default m-auto transition-colors duration-300 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800">
+        {firstVideo.checking === "refused" ? (
+          <FiHexagon className="text-red-500" />
+        ) : firstVideo.checking === "verified" ? (
+          <FaCheckDouble className="text-green-600 dark:text-green-400" />
+        ) : (
+          <FiHexagon className="text-gray-500 dark:text-gray-400" />
+        )}
+        <span className="text-gray-700 dark:text-gray-300">{firstVideo.checking || 'pending'}</span>
+      </div>
+
+      {/* Refuse modal (if needed) */}
+      {showModal && (
+        <RefuseModal
+          onClose={closeModal}
+          onSubmit={async () => {
+            // RefuseModal handling: actual update happens through CheckerDrop call path.
+            closeModal();
+            reFetch();
+          }}
+        />
+      )}
+
+      <CheckerDrop video={firstVideo as any} reFetch={reFetch} user={user} openRefuseModal={openModal} />
+    </div>
+  );
+}
