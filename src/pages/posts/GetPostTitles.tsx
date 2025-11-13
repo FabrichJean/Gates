@@ -39,26 +39,19 @@ const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
         </div>
       </div>
   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 relative">
-
-        
-
-        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          {(() => {
-            const selectedPost = postTitles?.find((t) => t.i18_language === selectedLanguage);
-            if (!selectedPost?.title) return '';
-            return selectedPost.title.length > 50
-              ? selectedPost.title.substring(0, 50) + "..." 
-              : selectedPost.title;
-          })()}
+        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">
+          {postTitles?.find((t) => t.i18_language === selectedLanguage)?.title ?? ''}
         </h4>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-          {(() => {
-            const selectedPost = postTitles?.find((t) => t.i18_language === selectedLanguage);
-            if (!selectedPost?.description) return '';
-            return selectedPost.description.length > 150
-              ? selectedPost.description.substring(0, 150) + "..." 
-              : selectedPost.description;
-          })()}
+        <p
+          className="text-gray-700 dark:text-gray-300 leading-relaxed"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          } as any}
+        >
+          {postTitles?.find((t) => t.i18_language === selectedLanguage)?.description ?? ''}
         </p>
         {/* Floating button to view full title & description */}
         <button
