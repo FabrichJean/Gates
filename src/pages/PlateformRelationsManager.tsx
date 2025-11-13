@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import UsePlateform from "../hooks/usePlateform";
-import axios from "axios";
-import { apiURL } from "../constant";
-import { getToken } from "../utils/storage";
 import toast from "react-hot-toast";
 import {
   addCategoryToPlateformApi,
@@ -11,12 +8,25 @@ import {
   clearCategoriesFromPlateformApi,
   clearSubCategoriesFromPlateformApi,
 } from "../api/plateformCategory";
-import { createCastegoryApi, createSubCategoryApi } from "../api/categories";
+import { createCastegoryApi } from "../api/categories";
 import {
   createPlateformSubCategoryApi,
   getSubCategoriesForPlateformApi,
   deletePlateformSubCategoryApi,
 } from "../api/plateformSubCategory";
+import {
+  addPostCategoryToPlateformApi,
+  removePostCategoryFromPlateformApi,
+  getPostCategoriesByPlateformApi,
+  clearPostCategoriesFromPlateformApi,
+} from "../api/plateformPostCategory";
+import {
+  createPlateformPostSubCategoryApi,
+  getPostSubCategoriesForPlateformApi,
+  deletePlateformPostSubCategoryApi,
+  clearPostSubCategoriesFromPlateformApi,
+} from "../api/plateformPostSubCategory";
+import { createPostCategoryApi } from "../api/postCategories";
 import {
   createPlateformApi,
   updatePlateformApi,
@@ -24,6 +34,12 @@ import {
 } from "../api/plateforms";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
+import useCategoryPost from "../hooks/posts/useCategoryPost";
+import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
+
+// Local types
+type RelationItem = { id: number; name?: string; relationId?: number | null };
+type Platform = { id: number; name: string; video_sync_url?: string; post_sync_url?: string };
 
 export default function PlateformRelationsManager() {
   const { data: plateforms, reFetch: reFetchPlateform } = UsePlateform();
@@ -32,10 +48,10 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const { data: allSubCategories } =
-    UseSubCategory();
-  const [catRelations, setCatRelations] = useState<any[]>([]);
-  const [subcatRelations, setSubcatRelations] = useState<any[]>([]);
+  const { data: allSubCategories } = UseSubCategory();
+  const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
+  const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
+  const [relationMode, setRelationMode] = useState<'video' | 'post'>('video');
   //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
@@ -46,7 +62,7 @@ export default function PlateformRelationsManager() {
 
   // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
-  const [editingPlatform, setEditingPlatform] = useState<any | null>(null);
+  const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState("");
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
@@ -77,7 +93,7 @@ export default function PlateformRelationsManager() {
     if (!isValidUrl(platformPostSyncUrl))
       return toast.error("Invalid Post sync URL");
     try {
-      const payload: any = {
+      const payload: { name: string; video_sync_url?: string; post_sync_url?: string } = {
         name: platformName,
       };
       if (platformVideoSyncUrl) payload.video_sync_url = platformVideoSyncUrl;
@@ -123,52 +139,78 @@ export default function PlateformRelationsManager() {
     }
   };
   
-  const fetchRelations = async (plateformId: number | null) => {
+  const fetchRelations = useCallback(async (plateformId: number | null) => {
     if (!plateformId) return;
     try {
-      const [catsRes, subsRes] = await Promise.all([
-        getCategoriesByPlateformApi(plateformId),
-        getSubCategoriesForPlateformApi(plateformId),
-      ]);
+      const [catsRes, subsRes] = relationMode === 'post'
+        ? await Promise.all([
+            getPostCategoriesByPlateformApi(plateformId),
+            getPostSubCategoriesForPlateformApi(plateformId),
+          ])
+        : await Promise.all([
+            getCategoriesByPlateformApi(plateformId),
+            getSubCategoriesForPlateformApi(plateformId),
+          ]);
       // Normalize categories response (backend may return different shapes)
-      const normalizeCategories = (res: any) => {
-        const payload = res?.data ?? res;
-        if (Array.isArray(payload)) return payload;
-        if (!payload) return [];
-        if (Array.isArray(payload.Categories)) return payload.Categories;
-        if (Array.isArray(payload.Categorys)) return payload.Categorys;
-        if (Array.isArray(payload.categories)) return payload.categories;
-        // try to find first array value
-        const arr = Object.values(payload).find((v) => Array.isArray(v));
-        return Array.isArray(arr) ? arr : [];
+      const normalizeCategories = (res: unknown): RelationItem[] => {
+        const payload = ((res as unknown) && (res as Record<string, unknown>)['data']) ?? res;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload as unknown[];
+        else {
+          const p = payload as Record<string, unknown>;
+          if (Array.isArray(p['Categories'])) list = p['Categories'] as unknown[];
+          else if (Array.isArray(p['Categorys'])) list = p['Categorys'] as unknown[];
+          else if (Array.isArray(p['categories'])) list = p['categories'] as unknown[];
+          else {
+            const arr = Object.values(p).find((v) => Array.isArray(v));
+            list = Array.isArray(arr) ? (arr as unknown[]) : [];
+          }
+        }
+        return list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.id ?? it.categoryId ?? it.CategoryId) as unknown;
+          const name = (it.name ?? it.title ?? it.label) as unknown;
+          return {
+            id: typeof id === 'number' ? id : Number(id ?? 0),
+            name: typeof name === 'string' ? name : String(name ?? ''),
+          };
+        });
       };
 
       // Normalize subcategories and extract possible relation id (PlateformSubCategory.id)
-      const normalizeSubcategories = (res: any) => {
-        const payload = res?.data ?? res;
-        let list: any[] = [];
-        if (Array.isArray(payload)) list = payload;
-        else if (Array.isArray(payload.SubCategorys))
-          list = payload.SubCategorys;
-        else if (Array.isArray(payload.subcategories))
-          list = payload.subcategories;
-        else if (Array.isArray(payload.SubCategories))
-          list = payload.SubCategories;
+      const normalizeSubcategories = (res: unknown) => {
+        const payload = ((res as unknown) && (res as Record<string, unknown>)['data']) ?? res;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload as unknown[];
         else {
-          const arr = Object.values(payload).find((v) => Array.isArray(v));
-          list = Array.isArray(arr) ? arr : [];
+          const p = payload as Record<string, unknown>;
+          if (Array.isArray(p['SubCategorys'])) list = p['SubCategorys'] as unknown[];
+          else if (Array.isArray(p['subcategories'])) list = p['subcategories'] as unknown[];
+          else if (Array.isArray(p['SubCategories'])) list = p['SubCategories'] as unknown[];
+          else {
+            const arr = Object.values(p).find((v) => Array.isArray(v));
+            list = Array.isArray(arr) ? (arr as unknown[]) : [];
+          }
         }
 
-        // map to unified shape: { id, name, relationId }
-        return list.map((item: any) => ({
-          id: item.id ?? item.subCategoryId ?? item.SubCategoryId,
-          name: item.name ?? item.title ?? item.label,
-          relationId:
-            item.PlateformSubCategory?.id ||
-            item.Plateform_SubCategory?.id ||
-            item.relationId ||
-            null,
-        }));
+        return list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.id ?? it.subCategoryId ?? it.SubCategoryId) as unknown;
+          const name = (it.name ?? it.title ?? it.label) as unknown;
+          const relationId = (() => {
+            const p1 = it.PlateformSubCategory as Record<string, unknown> | undefined;
+            if (p1 && typeof p1.id === 'number') return p1.id;
+            const p2 = it.Plateform_SubCategory as Record<string, unknown> | undefined;
+            if (p2 && typeof p2.id === 'number') return p2.id;
+            if (typeof it.relationId === 'number') return it.relationId as number;
+            return null;
+          })();
+          return {
+            id: typeof id === 'number' ? id : Number(id ?? 0),
+            name: typeof name === 'string' ? name : String(name ?? ''),
+            relationId: relationId as number | null,
+          };
+        });
       };
 
       setCatRelations(normalizeCategories(catsRes));
@@ -176,11 +218,15 @@ export default function PlateformRelationsManager() {
     } catch {
       toast.error("Error loading relations");
     }
-  };
+  }, [relationMode]);
 
   useEffect(() => {
     fetchRelations(selectedPlateform);
-  }, [selectedPlateform]);
+  }, [selectedPlateform, fetchRelations]);
+
+  // post hooks
+  const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
+  const { data: allPostSubCategories } = useSubCategoryPost();
 
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -192,6 +238,18 @@ export default function PlateformRelationsManager() {
       // setCategoryModalOpen(false);
     } catch {
       toast.error("Error adding category");
+    }
+  };
+
+  const handleAddPostCategory = async (categoryId: number) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    try {
+      await addPostCategoryToPlateformApi(selectedPlateform, categoryId);
+      toast.success("Post Category linked");
+      reFetchPostCategories?.();
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error adding post category");
     }
   };
 
@@ -213,6 +271,22 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  const handleCreateAndLinkPostCategory = async (name: string) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!name.trim()) return toast.error("Name required");
+    try {
+      const res = await createPostCategoryApi(name.trim());
+      const newCat = res.data;
+      const id = newCat.category?.id ?? newCat.id ?? null;
+      if (!id) throw new Error("Invalid create response");
+      await handleAddPostCategory(id);
+      setCategoryModalOpen(false);
+      setSearch("");
+    } catch (err) {
+      toast.error(JSON.stringify(err));
+    }
+  };
+
   const handleAddSubcategory = async (subId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
@@ -222,6 +296,17 @@ export default function PlateformRelationsManager() {
       // setSubCategoryModalOpen(false);
     } catch {
       toast.error("Error adding subcategory");
+    }
+  };
+
+  const handleAddPostSubcategory = async (subId: number) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    try {
+      await createPlateformPostSubCategoryApi(selectedPlateform, subId);
+      toast.success("Post subcategory linked");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error adding post subcategory");
     }
   };
 
@@ -236,6 +321,17 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  const handleRemovePostCategory = async (categoryId: number) => {
+    if (!selectedPlateform) return;
+    try {
+      await removePostCategoryFromPlateformApi(selectedPlateform, categoryId);
+      toast.success("Post Category removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error removing post category");
+    }
+  };
+
   const handleRemoveSubcategory = async (relationId: number) => {
     try {
       await deletePlateformSubCategoryApi(relationId);
@@ -243,6 +339,16 @@ export default function PlateformRelationsManager() {
       fetchRelations(selectedPlateform);
     } catch {
       toast.error("Error removing subcategory");
+    }
+  };
+
+  const handleRemovePostSubcategory = async (relationId: number) => {
+    try {
+      await deletePlateformPostSubCategoryApi(relationId);
+      toast.success("Post subcategory removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error removing post subcategory");
     }
   };
 
@@ -257,7 +363,6 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
-
     const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -270,13 +375,49 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const filteredCategories = allCategories?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleClearPostCategories = async () => {
+    if (!selectedPlateform) return;
+    if (!confirm("Remove all post categories from this platform?")) return;
+    try {
+      await clearPostCategoriesFromPlateformApi(selectedPlateform);
+      toast.success("All post categories removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error clearing post categories");
+    }
+  };
 
-  const filteredSubcategories = allSubCategories?.SubCategorys?.filter((s) =>
+  const handleClearPostSubCategories = async () => {
+    if (!selectedPlateform) return;
+    if (!confirm("Remove all post subcategories from this platform?")) return;
+    try {
+      // new clear endpoint for post subcategories
+      await clearPostSubCategoriesFromPlateformApi(selectedPlateform);
+      toast.success("All post subcategories removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error clearing post subcategories");
+    }
+  };
+
+  const videoFilteredCategories = allCategories?.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  ) || [];
+
+  const postCategoriesList = allPostCategories?.categories || [];
+  const filteredCategories = (relationMode === 'post' ? postCategoriesList : videoFilteredCategories).filter((c: unknown) => {
+    const cat = c as { name?: string };
+    return (cat.name ?? '').toLowerCase().includes(search.toLowerCase());
+  });
+
+  const videoFilteredSubcategories = allSubCategories?.SubCategorys?.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  ) || [];
+  const postSubcategoriesList = (allPostSubCategories?.subCategories) || [];
+  const filteredSubcategories = (relationMode === 'post' ? postSubcategoriesList : videoFilteredSubcategories).filter((s: unknown) => {
+    const sub = s as { name?: string };
+    return (sub.name ?? '').toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">
@@ -304,7 +445,7 @@ export default function PlateformRelationsManager() {
             </button>
           </div>
           <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
-            {plateforms?.map((p: any) => (
+            {plateforms?.map((p: Platform) => (
               <div key={p.id} className="flex justify-between items-center">
                 <div className="flex gap-1 mr-2">
                   <button
@@ -411,6 +552,11 @@ export default function PlateformRelationsManager() {
                 </div>
               </div>
 
+              <div className="mb-4 flex gap-2">
+                <button className={`btn btn-sm ${relationMode === 'video' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setRelationMode('video')}>Video</button>
+                <button className={`btn btn-sm ${relationMode === 'post' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setRelationMode('post')}>Post</button>
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
@@ -418,34 +564,34 @@ export default function PlateformRelationsManager() {
                       onClick={() => setCategoryModalOpen(true)}
                       className="btn rounded shadow btn-sm"
                     >
-                      ➕ link Category
+                      ➕ link {relationMode === 'post' ? 'Post Category' : 'Category'}
                     </button>
                     <button
-                      onClick={handleClearCategories}
+                      onClick={relationMode === 'post' ? handleClearPostCategories : handleClearCategories}
                       className="btn rounded shadow btn-sm text-red-500"
                     >
                       🗑️ Clear All
                     </button>
                   </div>
                   <h3 className="font-medium mb-2">Linked Categories</h3>
-                  {catRelations.length === 0 ? (
-                    <p className="text-gray-500">No categories linked</p>
-                  ) : (
-                    catRelations.map((c) => (
-                      <div
-                        key={c.id}
-                        className="flex items-center justify-between p-2 border rounded-lg mb-2"
-                      >
-                        <span>{c.name}</span>
-                        <button
-                          onClick={() => handleRemoveCategory(c.id)}
-                          className="btn rounded shadow btn-sm text-red-500"
+                    {catRelations.length === 0 ? (
+                      <p className="text-gray-500">No categories linked</p>
+                    ) : (
+                      catRelations.map((c) => (
+                        <div
+                          key={c.id}
+                          className="flex items-center justify-between p-2 border rounded-lg mb-2"
                         >
-                          Remove
-                        </button>
-                      </div>
-                    ))
-                  )}
+                          <span>{c.name}</span>
+                          <button
+                            onClick={() => relationMode === 'post' ? handleRemovePostCategory(c.id) : handleRemoveCategory(c.id)}
+                            className="btn rounded shadow btn-sm text-red-500"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -454,10 +600,10 @@ export default function PlateformRelationsManager() {
                       onClick={() => setSubCategoryModalOpen(true)}
                       className="btn rounded shadow btn-sm"
                     >
-                      ➕ link Subcategory
+                      ➕ link {relationMode === 'post' ? 'Post Subcategory' : 'Subcategory'}
                     </button>
                     <button
-                      onClick={handleClearSubCategories}
+                      onClick={relationMode === 'post' ? handleClearPostSubCategories : handleClearSubCategories}
                       className="btn rounded shadow btn-sm text-red-500"
                     >
                       🗑️ Clear All
@@ -474,7 +620,11 @@ export default function PlateformRelationsManager() {
                       >
                         <span>{s.name}</span>
                         <button
-                          onClick={() => handleRemoveSubcategory(s.relationId)}
+                          onClick={() => {
+                            if (!s.relationId) return;
+                            if (relationMode === 'post') return handleRemovePostSubcategory(s.relationId);
+                            return handleRemoveSubcategory(s.relationId);
+                          }}
                           className="btn rounded shadow btn-sm text-red-500"
                           disabled={!s.relationId}
                         >
@@ -512,10 +662,10 @@ export default function PlateformRelationsManager() {
             {filteredCategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b py-2">
                 <span className="italic text-gray-500">
-                  Create new category "{search}"
+                  Create new {relationMode === 'post' ? 'post category' : 'category'} "{search}"
                 </span>
                 <button
-                  onClick={() => handleCreateAndLinkCategory(search)}
+                  onClick={() => relationMode === 'post' ? handleCreateAndLinkPostCategory(search) : handleCreateAndLinkCategory(search)}
                   className="btn btn-xs btn-success"
                 >
                   Create & Link
@@ -536,7 +686,7 @@ export default function PlateformRelationsManager() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleAddCategory(cat.id)}
+                        onClick={() => relationMode === 'post' ? handleAddPostCategory(cat.id) : handleAddCategory(cat.id)}
                         className="btn btn-xs btn-primary"
                       >
                         Add
@@ -592,7 +742,7 @@ export default function PlateformRelationsManager() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleAddSubcategory(sub.id)}
+                        onClick={() => relationMode === 'post' ? handleAddPostSubcategory(sub.id) : handleAddSubcategory(sub.id)}
                         className="btn btn-xs btn-secondary"
                       >
                         Add

@@ -17,7 +17,7 @@ interface SubCategoryResponse {
     message?: string;
 }
 
-const useSubCategoryPost = (categoryId?: number) => useFetch<SubCategoryResponse>(`${apiURL}/post-sub-categories?category_id=${categoryId}`, {
+const useSubCategoryPost = (categoryId?: number) => useFetch<SubCategoryResponse>(`${apiURL}/post-sub-categories`, {
     headers: {
        'Authorization': `Bearer ${getToken()}`
     },
