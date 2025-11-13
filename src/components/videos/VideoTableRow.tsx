@@ -41,6 +41,10 @@ const VideoTableRow = ({
       </td>
 
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
+        {video.creator || '-' }
+      </td>
+
+      <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         {video.category?.name} / {video.subCategory?.name}
       </td>
 

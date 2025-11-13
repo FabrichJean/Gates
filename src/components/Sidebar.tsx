@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
 import { LogOut, X } from "lucide-react";
@@ -177,7 +176,12 @@ function Sidebar({ isCollapsed, onCloseMobile, isMobile = false }: SidebarProps)
 
                             <Link to="/category-manager" onClick={() => handleNav("category-manager")} className={linkClass("category-manager")}>
                                 <MdOutlineCategory className="w-6 h-6 text-current"/>
-                                {!isCollapsed && <span className="ml-2">Category</span>}
+                                {!isCollapsed && <span className="ml-2">Category Video</span>}
+                            </Link>
+
+                            <Link to="/post-categories" onClick={() => handleNav("post-categories")} className={linkClass("post-categories")}>
+                                <MdOutlineCategory className="w-6 h-6 text-current"/>
+                                {!isCollapsed && <span className="ml-2">Post Categories</span>}
                             </Link>
 
                             {/* <Link to="/plateform" onClick={() => handleNav("plateform")} className={linkClass("plateform")}>

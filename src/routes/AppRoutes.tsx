@@ -20,6 +20,7 @@ import Plateform from "../pages/Plateform";
 import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
+import PostCategoryManager from "../pages/PostCategoryManager";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
@@ -210,6 +211,18 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <PlateformRelationsManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/post-categories"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <PostCategoryManager />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>
