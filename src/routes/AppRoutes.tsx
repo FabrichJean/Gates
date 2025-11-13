@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { VideosProvider } from "../context/VideosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
@@ -29,6 +30,7 @@ import UserDetails from "../pages/UserDetails";
 
 const AppRoutes = () => (
   <BrowserRouter>
+    <VideosProvider>
     <Routes>
       <Route
         path="/login"
@@ -68,8 +70,8 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <VideosManagment />
-            </InsideSidebar>
-          </ProtectedRoute>
+             </InsideSidebar>
+           </ProtectedRoute>
         }
       />
       <Route
@@ -286,6 +288,7 @@ const AppRoutes = () => (
       />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </VideosProvider>
   </BrowserRouter>
 );
 

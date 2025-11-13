@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { sendProcessing, toggleStatus, webApp } from "../api/videos";
 import toast from "react-hot-toast";
 import { UseVideosWithParams } from "./useVideos";
@@ -7,10 +7,21 @@ import useSocketCheckVideos from "./useSocketCheckVideos";
 import { mapStatus } from "../utils/filter";
 import { PROCESSED_STORAGE_KEY, SENDING_STORAGE_KEY } from "../constant";
 import type { TFilter } from "../components/VideoFilters";
+import isEqual from "lodash.isequal"; // Deep compare
 
 export const useVideoManagement = () => {
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<TFilter>({
+  // initialize from cached video_params when available so the list displays accordingly
+  const savedParams = (() => {
+    try {
+      const s = localStorage.getItem("video_params");
+      return s && s !== "undefined" ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [page, setPage] = useState<number>(() => savedParams?.page ?? 1);
+  const defaultFilters: TFilter = {
     category_id: "",
     sub_category_id: "",
     user_id: "",
@@ -20,161 +31,161 @@ export const useVideoManagement = () => {
     transfer_status: "",
     startedAt: "",
     endAt: "",
-  });
+  };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [params, setParams] = useState<any>(null);
+  const [filters, setFilters] = useState<TFilter>(() => ({
+    ...defaultFilters,
+    ...(savedParams ? Object.keys(defaultFilters).reduce((acc, k) => {
+      // copy only known filter keys from saved params
+      // @ts-ignore
+      if (savedParams[k] !== undefined) acc[k] = savedParams[k];
+      return acc;
+    }, {} as any) : {})
+  }));
+
+  const [params, setParams] = useState<any>(() => savedParams ?? null);
   const { data, reFetch, mutate } = UseVideosWithParams(params);
 
-  const [loading, setLoading] = useState<{
-    id: number | undefined;
-    type: "transc" | "upload" | "cover" | "webapp";
-  }>();
-
-  // 🔹 États persistants
-  const [sendingIds, setSendingIds] = useState<Array<number>>(() => {
+  const [loading, setLoading] = useState<{ id?: number; type: string }>();
+  const [sendingIds, setSendingIds] = useState<number[]>(() => {
     try {
-      const raw = localStorage.getItem(SENDING_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      return JSON.parse(localStorage.getItem(SENDING_STORAGE_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [processedIds, setProcessedIds] = useState<number[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROCESSED_STORAGE_KEY) || "[]");
     } catch {
       return [];
     }
   });
 
-  const [processedIds, setProcessedIds] = useState<Array<number>>(() => {
-    try {
-      const raw = localStorage.getItem(PROCESSED_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // 🔹 Lecture initiale du filtre sauvegardé
+  // --- Lecture initiale des filtres sauvegardés
   useEffect(() => {
     const saved = localStorage.getItem("videos_filtered");
     if (!saved || saved === "undefined") return;
     try {
-      const parsed = JSON.parse(saved);
-      setFilters((prev) => ({ ...prev, ...parsed }));
-    } catch (e) {
-      console.warn("⚠️ Filtres corrompus :", e);
+      setFilters(prev => ({ ...prev, ...JSON.parse(saved) }));
+    } catch {
       localStorage.removeItem("videos_filtered");
     }
   }, []);
 
-  // 🔹 Création mémoïsée des params
-  const computedParams = useMemo(() => {
-    const _ = {
-      ...filters,
-      isDeleted: mapStatus(filters.isDeleted),
-      upload_status: mapStatus(filters.upload_status),
-      cover_upload_status: mapStatus(filters.cover_upload_status),
-      transfer_status: mapStatus(filters.transfer_status),
-    };
+  // --- Params optimisés
+  const computedParams = useMemo(() => ({
+    ...filters,
+    isDeleted: mapStatus(filters.isDeleted),
+    upload_status: mapStatus(filters.upload_status),
+    cover_upload_status: mapStatus(filters.cover_upload_status),
+    transfer_status: mapStatus(filters.transfer_status),
+    status: "all",
+    page,
+  }), [filters, page]);
 
-    return { status: "all", page, ..._ };
-  }, [filters, page]);
-
-  // 🔹 Mise à jour de params quand computedParams change
+  // --- Sauvegarde conditionnelle avec deep compare
   useEffect(() => {
-    setParams(computedParams);
-    localStorage.setItem('video_params', JSON.stringify(computedParams))
+    const saved = localStorage.getItem("video_params");
+    const parsed = saved ? JSON.parse(saved) : null;
+
+    if (!isEqual(parsed, computedParams)) {
+      setParams(computedParams);
+      localStorage.setItem("video_params", JSON.stringify(computedParams));
+    }
   }, [computedParams]);
 
-  // 🔹 Gestion des IDs
-  const addSendingId = (id: number) => {
-    setSendingIds((prev) => {
-      const next = Array.from(new Set([...prev, id]));
-      localStorage.setItem(SENDING_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
+  // --- Refetch Manager
+  const refetching = useRef(false);
+  const refetchTimeout = useRef<number | null>(null);
+  const pendingRefetch = useRef(false);
 
-  const removeSendingId = (id: number) => {
-    setSendingIds((prev) => {
-      const next = prev.filter((x) => x !== id);
-      localStorage.setItem(SENDING_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
+  const safeRefetch = useCallback((delay = 500) => {
+    if (refetching.current) {
+      pendingRefetch.current = true;
+      return;
+    }
 
-  const addProcessedId = (id: number) => {
-    setProcessedIds((prev) => {
-      const next = Array.from(new Set([...prev, id]));
-      localStorage.setItem(PROCESSED_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
+    if (refetchTimeout.current) clearTimeout(refetchTimeout.current);
 
-  // 🔹 Sockets
+    refetchTimeout.current = window.setTimeout(async () => {
+      if (refetching.current) return;
+
+      try {
+        refetching.current = true;
+        await reFetch();
+      } finally {
+        refetching.current = false;
+        if (pendingRefetch.current) {
+          pendingRefetch.current = false;
+          safeRefetch(delay);
+        }
+      }
+    }, delay);
+  }, [reFetch]);
+
+  // --- Premier refetch uniquement si pas de data
+  useEffect(() => {
+    if (!data) safeRefetch(500);
+    return () => {
+      if (refetchTimeout.current) clearTimeout(refetchTimeout.current);
+    };
+  }, [data, safeRefetch]);
+
+  // --- Gestion des IDs persistants
+  const persist = (key: string, val: any) => localStorage.setItem(key, JSON.stringify(val));
+  const addSendingId = (id: number) =>
+    setSendingIds(prev => { const next = Array.from(new Set([...prev, id])); persist(SENDING_STORAGE_KEY, next); return next; });
+  const removeSendingId = (id: number) =>
+    setSendingIds(prev => { const next = prev.filter(x => x !== id); persist(SENDING_STORAGE_KEY, next); return next; });
+  const addProcessedId = (id: number) =>
+    setProcessedIds(prev => { const next = Array.from(new Set([...prev, id])); persist(PROCESSED_STORAGE_KEY, next); return next; });
+
+  // --- WebSockets
   useSocketSend((videoId) => {
     const id = Number(videoId);
     removeSendingId(id);
     addProcessedId(id);
-    reFetch();
+    safeRefetch(700);
   });
 
-  useSocketCheckVideos((data) => {
-    console.log("📋 Checking mis à jour pour la vidéo :", data.video_id);
-    reFetch();
-  });
+  useSocketCheckVideos(() => safeRefetch(800));
 
-  // 🔹 Actions
-  // selected platform ids for sending to webapp
+  // --- Actions
   const [selectedPlatformIds, setSelectedPlatformIds] = useState<number[]>([]);
-
-  const togglePlatformSelection = (id: number) => {
-    setSelectedPlatformIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+  const togglePlatformSelection = (id: number) =>
+    setSelectedPlatformIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   const toWebapp = async (platformIds?: number[]) => {
     setLoading({ id: 0, type: "webapp" });
     try {
       const ids = platformIds ?? selectedPlatformIds;
       await webApp(ids.length ? ids : null);
-      toast.success("Envoyé avec succès vers le WebApp !");
-      reFetch();
-    } catch {
-      toast.error("Erreur lors de l'envoi !");
-    } finally {
-      setLoading(undefined);
-    }
+      toast.success("✅ Envoyé vers WebApp !");
+      safeRefetch(400);
+    } catch { toast.error("❌ Erreur d’envoi !"); } 
+    finally { setLoading(undefined); }
   };
 
   const activate = async (videoId: number) => {
-    try {
-      await toggleStatus(videoId);
-      reFetch();
-      toast.success("Statut modifié !");
-    } catch {
-      toast.error("Erreur lors du changement de statut");
-    }
+    try { await toggleStatus(videoId); toast.success("Statut mis à jour !"); safeRefetch(400); }
+    catch { toast.error("Erreur lors du changement de statut"); }
   };
 
   const send = async (videoId: number) => {
-    // if (sendingIds.includes(videoId) || processedIds.includes(videoId)) return;
-
     addSendingId(videoId);
     setLoading({ id: videoId, type: "transc" });
-
     try {
       const res = await sendProcessing(videoId);
-      toast.success(res?.data?.message || "Deep upload workflow started");
-      reFetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toast.success(res?.data?.message || "🚀 Upload démarré !");
+      safeRefetch(500);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ Erreur d'envoi !");
+      toast.error(err?.response?.data?.message || "Erreur d’envoi !");
       removeSendingId(videoId);
-    } finally {
-      setLoading(undefined);
-    }
+    } finally { setLoading(undefined); }
   };
 
   return {
-    // États
     page,
     setPage,
     filters,
@@ -184,13 +195,10 @@ export const useVideoManagement = () => {
     loading,
     sendingIds,
     processedIds,
-    // selected platform ids (for sending to webapp)
     selectedPlatformIds,
     setSelectedPlatformIds,
     togglePlatformSelection,
-
-    // Actions
-    reFetch,
+    reFetch: safeRefetch,
     mutate,
     toWebapp,
     activate,

@@ -9,6 +9,7 @@ interface SubCategory {
     name: string;
     subCategories: number;
     category: Category;
+    creator?: string | null;
 }
 
 interface SubCategoryResponse {
@@ -17,10 +18,13 @@ interface SubCategoryResponse {
     message?: string;
 }
 
-const useSubCategoryPost = (categoryId?: number) => useFetch<SubCategoryResponse>(`${apiURL}/post-sub-categories`, {
+const useSubCategoryPost = (categoryId?: number) => useFetch<SubCategoryResponse>(
+        `${apiURL}/post-sub-categories${typeof categoryId === 'number' ? `?category_id=${categoryId}` : ''}`,
+    {
     headers: {
        'Authorization': `Bearer ${getToken()}`
     },
-});
+    }
+);
 
 export default useSubCategoryPost;

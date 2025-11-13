@@ -15,20 +15,22 @@ interface Props {
 }
 
 export default function PostSubCategoryPanel({ category }: Props) {
-  interface SubCategory { id: number; name?: string }
+  interface SubCategory { id: number; name?: string; creator?: string | null }
   const { data: subResp, reFetch } = useSubCategoryPost(category?.id);
   const subcategories = (subResp?.subCategories as SubCategory[]) || [];
   const [newSub, setNewSub] = useState("");
+  const [newCreator, setNewCreator] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tempName, setTempName] = useState("");
 
   const addSub = async () => {
     if (!newSub.trim()) return;
     try {
-      await createPostSubCategoryApi({ category_id: category.id, name: newSub.trim() });
+      await createPostSubCategoryApi({ category_id: category.id, name: newSub.trim(), creator: newCreator?.trim() || undefined });
       toast.success("Sous-catégorie ajoutée !");
       reFetch?.();
       setNewSub("");
+      setNewCreator("");
     } catch {
       toast.error("Erreur lors de l’ajout");
     }
@@ -71,6 +73,13 @@ export default function PostSubCategoryPanel({ category }: Props) {
           placeholder="new sub-category..."
           className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 transition-all duration-300"
         />
+        <input
+          type="text"
+          value={newCreator}
+          onChange={(e) => setNewCreator(e.target.value)}
+          placeholder="creator (optional)"
+          className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-2 py-1 w-48 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 transition-all duration-300"
+        />
         <button onClick={addSub} className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white px-4 py-1 rounded-lg transition-all duration-300">+</button>
       </div>
 
@@ -83,7 +92,10 @@ export default function PostSubCategoryPanel({ category }: Props) {
                   <input autoFocus value={tempName} onChange={(e) => setTempName(e.target.value)} onBlur={() => saveEdit(sub.id, tempName)} className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-full p-1 rounded focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-300" />
                 </form>
               ) : (
-                <div onDoubleClick={() => { setEditingId(sub.id); setTempName(sub.name ?? ""); }} className="flex-1 p-1 cursor-pointer text-gray-800 dark:text-gray-200 transition-colors duration-300">{sub.name ?? ""}</div>
+                <div onDoubleClick={() => { setEditingId(sub.id); setTempName(sub.name ?? ""); }} className="flex-1 p-1 cursor-pointer text-gray-800 dark:text-gray-200 transition-colors duration-300">
+                  <div className="font-medium">{sub.name ?? ""}</div>
+                  {sub.creator ? <div className="text-xs text-gray-500">{sub.creator}</div> : null}
+                </div>
               )}
 
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

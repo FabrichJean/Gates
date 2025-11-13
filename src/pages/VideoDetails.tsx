@@ -21,6 +21,10 @@ import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  
+  console.log('details kbfjkdffkj,n');
+  
+
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
