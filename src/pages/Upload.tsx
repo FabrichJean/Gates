@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import { useAuthMe } from "../hooks/useAuth";
-import UsePlateform from "../hooks/usePlateform";
+// removed creators fetch: creator is now an optional string attribute on video
 import { Md5 } from 'ts-md5';
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import type { Platform } from "../hooks/usePlatform";
@@ -157,6 +157,7 @@ const Upload = () => {
   const [category, setCategory] = useState<Category>();
   const [subcategory, setSubCategory] = useState<SubCategory>();
   const [platform, setPlatform] = useState<Platform>();
+  const [creator, setCreator] = useState<string | null>(null);
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -217,6 +218,7 @@ const Upload = () => {
     if (subcategory) fd.append("sub_category_id", String(subcategory.id));
     // backend expects 'plateform_id' (single id)
     if (platform?.id) fd.append("plateform_id", String(platform.id));
+    if (creator) fd.append("creator", String(creator));
     fd.append("ref", String(ref));
     fd.append("titles", JSON.stringify(coupleTitles));
     try {
@@ -241,7 +243,7 @@ const Upload = () => {
       setUploading(false);
       setProgress(0);
     }
-  }, [videoFile, coverFile, category, subcategory, coupleTitles, ref, navigate]);
+  }, [videoFile, coverFile, category, subcategory, coupleTitles, ref, navigate, creator, platform]);
 
   return (
     <div className="font-sans h-full antialiased bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
@@ -270,6 +272,16 @@ const Upload = () => {
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Platform</label>
               <PlatformSelectComponent onSelect={setPlatform} />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
+              <input
+                type="text"
+                value={creator || ""}
+                onChange={(e) => setCreator(e.currentTarget.value)}
+                placeholder="Creator name (optional)"
+                className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
+              />
             </div>
 
             {/* Cover */}

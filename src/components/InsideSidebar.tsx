@@ -231,7 +231,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     };
 
     return (
-        <div className="w-dvw h-dvh bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative">
+        <div className="w-dvw h-dvh  from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative bg-[url('https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg')]">
             <Toaster />
 
             {/* Desktop Sidebar */}

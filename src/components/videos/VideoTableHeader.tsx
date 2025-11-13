@@ -4,6 +4,7 @@ const VideoTableHeader = () => {
       <tr>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">Ref</th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">Username</th>
+  <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">Creator</th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">Category</th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">Status</th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">Cover</th>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -12,6 +13,7 @@ import { archiveVideo, cancelUpload, deletePerm, sendProcessing, updateVideo } f
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
+// creator is an optional string attribute on video; no creators fetch here
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
@@ -77,8 +79,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     try {
       await sendProcessing(videoId);
       toast.success("✅ upload workflow started");
-      reFetch();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reFetch();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "❌ Erreur d’envoi !");
     }
@@ -332,6 +333,13 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             </Link>
           </div>
 
+          {video.creator && (
+            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
+              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Creator</h1>
+              <div className="text-gray-800 dark:text-gray-200 font-medium">{video.creator}</div>
+            </div>
+          )}
+
           <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Titles</h1>
             {video?.titles?.map((t, i) => (
@@ -381,6 +389,7 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
   const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
   // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
+  const [creator, setCreator] = useState<string | null>(((video as any)?.creator) || null);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -393,11 +402,11 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
   const handleCoverClick = () => coverInputRef.current?.click();
 
   const handleSubmit = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formData: any = {
+  const formData: any = {
       ...(coverFile && { cover: coverFile }),
-      ...(category && { category_id: category.id }),
-      ...(subcategory && { sub_category_id: subcategory.id }),
+  ...(category && { category_id: category.id }),
+  ...(subcategory && { sub_category_id: subcategory.id }),
+  ...(creator && { creator }),
       titles: JSON.stringify(coupleTitles),
       duration
     };
@@ -422,7 +431,6 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
       // Si une nouvelle cover a été uploadée, passer la nouvelle URL
       const newCoverUrl = coverFile ? res.data?.public_urls?.cover_url || video.public_urls.cover_url : undefined;
       onSubmit(newCoverUrl);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       toast.error("❌ Error: " + (err.response?.data?.message || err.message));
@@ -449,6 +457,17 @@ function EditVideo({ video, onSubmit }: { video: TVideo, onSubmit: (newCoverUrl?
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Sub Category</label>
               <SubCategoryAutoComplete categoryId={category?.id} defaultValue={subcategory} onSelect={(cat) => setSubCategory(cat)} />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
+              <input
+                type="text"
+                value={creator || ""}
+                onChange={(e) => setCreator(e.currentTarget.value)}
+                placeholder="Creator name (optional)"
+                className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
+              />
             </div>
 
             <div>

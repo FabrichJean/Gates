@@ -60,6 +60,8 @@ export type TVideo = {
     local_cover_url: string,
     local_hls_url: string
   };
+  // optional creator string (free text)
+  creator?: string | null;
 };
 
 export type User = {
