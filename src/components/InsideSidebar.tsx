@@ -92,7 +92,8 @@ const Breadcrumb: React.FC = () => {
         '/users': 'Users',
         '/users-archive': 'Users Archive',
         '/videos': 'Videos Management',
-        '/categories': 'Category Manager',
+        '/category-manager': 'Category Video',
+        '/post-categories': 'Post Categories',
         '/upload': 'Upload',
         '/upload-post': 'Upload Post',
         '/post-management': 'Post Management',
@@ -117,12 +118,12 @@ const Breadcrumb: React.FC = () => {
         breadcrumbs.push({ name, path: currentPath });
     });
 
+    const [showProcessModal, setShowProcessModal] = useState(false);
+
     // Ne pas afficher si on est déjà sur Home/Dashboard
     if (breadcrumbs.length <= 1) {
         return null;
     }
-
-    const [showProcessModal, setShowProcessModal] = useState(false);
     return (
         <>
             <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 relative min-h-[48px]">
