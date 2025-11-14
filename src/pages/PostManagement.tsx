@@ -14,6 +14,7 @@ import { webAppPlateform } from "../api/plateforms";
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
   const { page, setPage, data, loading, reFetch } = usePostsContext();
+  
   const posts = data?.posts || [];
   const total = data?.total || 0;
   const limit = data?.limit || 10;
