@@ -27,7 +27,7 @@ const PostManagement = () => {
       const data: PostsResponse = response.data;
       setPosts(data.posts);
     } catch (err) {
-      setError("Erreur lors du chargement des posts");
+      setError("Error fetching posts");
       console.error("Error fetching posts:", err);
     } finally {
       setLoading(false);
