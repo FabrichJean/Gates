@@ -22,6 +22,7 @@ import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
 import PostCategoryManager from "../pages/PostCategoryManager";
+import CreatorManager from "../pages/CreatorManager";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
@@ -225,6 +226,18 @@ const AppRoutes = () => (
             <SuperProtected>
               <InsideSidebar>
                 <PostCategoryManager />
+              </InsideSidebar>
+            </SuperProtected>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/creators"
+        element={
+          <ProtectedRoute>
+            <SuperProtected>
+              <InsideSidebar>
+                <CreatorManager />
               </InsideSidebar>
             </SuperProtected>
           </ProtectedRoute>

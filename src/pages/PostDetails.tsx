@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { UsePost, useNextPost } from "../hooks/usePost";
+import PostChecking from "../components/PostChecking";
 import { ArrowLeft, Edit } from "lucide-react";
 import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
@@ -124,6 +125,34 @@ const PostDetails = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">Platform</p>
                         <p className="font-medium text-gray-900 dark:text-white">{post.plateform.name}</p>
                     </div>
+                    {
+                        // prefer showing creatorObj (with avatar) when available
+                        ((post as any).creatorObj ? (
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Creator</p>
+                                <div className="flex items-center gap-3">
+                                    <img
+                                        src={(post as any).creatorObj.avatar}
+                                        alt={(post as any).creatorObj.name}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                        onError={(e) => {
+                                            const t = e.target as HTMLImageElement;
+                                            t.src = '';
+                                        }}
+                                    />
+                                    <div>
+                                        <p className="font-medium text-gray-900 dark:text-white">{(post as any).creatorObj.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{(post as any).creatorObj.gender || ''}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : post.creator ? (
+                            <div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Creator</p>
+                                <p className="font-medium text-gray-900 dark:text-white">{post.creator}</p>
+                            </div>
+                        ) : null)
+                    }
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
                         <p className="font-medium text-gray-900 dark:text-white">{post.postCategory.name}</p>
@@ -144,18 +173,14 @@ const PostDetails = () => {
                             published
                         </span>
                     </div>
-                    <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Verification</p>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            post.videos[0]?.checking === 'verified'
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                : post.videos[0]?.checking === 'pending'
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        }`}>
-                            {post.videos[0]?.checking || 'pending'}
-                        </span>
-                    </div>
+                                        <div>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">Verification</p>
+                                                {post.videos[0] ? (
+                                                    <PostChecking index={0} reFetch={reFetch} post={post} />
+                                                ) : (
+                                                    <span className={`px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300`}>No video</span>
+                                                )}
+                                        </div>
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Published</p>
                         <p className="font-medium text-gray-900 dark:text-white">{new Date(post.published_at).toLocaleDateString()}</p>
