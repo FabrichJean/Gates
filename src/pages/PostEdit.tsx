@@ -8,7 +8,7 @@ import useUpdatePost from "../hooks/useUpdatePost";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { Trash2 } from "lucide-react";
-import { deletePostImage, deletePostVideo } from "../api/posts";
+import { deleteManyImages, deleteManyVideos } from "../api/posts";
 
 type Language = {
   code: string;
@@ -18,10 +18,30 @@ type Language = {
 const PostEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const { data: post, loading, error } = UsePost(id);
-  const [localImages, setLocalImages] = useState<Image[]>(post?.images || []);
-    const [localVideos, setLocalVideos] = useState<Video[]>(post?.videos || []);
-  
+
+  const [{ images, videos }, setMedia] = useState<{
+    images: Image[];
+    videos: Video[];
+  }>({
+    images: [],
+    videos: [],
+  });
+
+  // store ids of media to delete on next update (deferred deletion)
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
+  const [deletedVideoIds, setDeletedVideoIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (post) {
+      setMedia({
+        images: post.images || [],
+        videos: post.videos || [],
+      });
+    }
+  }, [post]);
+
   const [open, setOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -69,9 +89,7 @@ const PostEdit = () => {
   const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
 
   const availableSubCategories = subCategoriesResponse?.subCategories;
-  console.log("availableSubCategories", availableSubCategories);
 
-  console.log("post", post);
   // Pré-remplir les champs avec les données du post
   useEffect(() => {
     if (post) {
@@ -115,31 +133,9 @@ const PostEdit = () => {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-
-      //   if (post.images && post.images.length > 0) {
-      //     setImageFields(
-      //       post.images.map((image, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: image.public_urls.local_image_url || "",
-      //       }))
-      //     );
-      //   }
-
-      //   if (post.videos && post.videos.length > 0) {
-      //     setVideoFields(
-      //       post.videos.map((video, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: video.public_urls.local_mp4_url || "",
-      //       }))
-      //     );
-      //   }
       // Prefill creator fields if available on post
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
-        // setCreator(((post as any).creatorObj.name) || null);
-        // setCreatorId((post as any).creatorObj.id || null);
         setCreatorObj((post as any).creatorObj || null);
       }
     }
@@ -301,6 +297,9 @@ const PostEdit = () => {
           fileName: field.file?.name || field.url,
           isNew: !!field.file,
         })),
+      // include deferred deletions so backend can remove them as part of the update
+      // deleted_image_ids: deletedImageIds,
+      // deleted_video_ids: deletedVideoIds,
     };
     // include creator or creator_id in payload
     if (creatorObj) {
@@ -312,6 +311,13 @@ const PostEdit = () => {
       imageFields.some((f) => f.file) || videoFields.some((f) => f.file);
 
     try {
+      if (deletedImageIds.length > 0) {
+        await deleteManyImages(deletedImageIds);
+      }
+      if (deletedVideoIds.length > 0) {
+        await deleteManyVideos(deletedVideoIds);
+      }
+
       if (hasNewFiles) {
         const fd = new FormData();
         // Keep the same metadata structure by sending it as JSON in a field
@@ -651,22 +657,20 @@ const PostEdit = () => {
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {localImages.map((image, index) => {
+                {images?.map((image, index) => {
                   const imageUrl = image.public_urls?.local_image_url;
-                  const handleDelete = async () => {
+                  const handleDelete = () => {
                     const confirmed = window.confirm("Supprimer cette image ?");
                     if (!confirmed) return;
-                    try {
-                      await deletePostImage(image.id);
-                      toast.success("Image supprimée");
-                      // remove from local list
-                      setLocalImages((prev) =>
-                        prev.filter((i) => i.id !== image.id)
-                      );
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Erreur lors de la suppression");
-                    }
+                    // mark for deletion and remove locally; actual delete performed on update
+                    setDeletedImageIds((prev) => [...prev, image.id]);
+                    setMedia((prev) => ({
+                      ...prev,
+                      images: prev.images.filter((i) => i.id !== image.id),
+                    }));
+                    // toast(
+                    //   "Image marquée pour suppression (sera appliqué à l'enregistrement)"
+                    // );
                   };
 
                   return (
@@ -677,7 +681,7 @@ const PostEdit = () => {
                         className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
                       />
                       <div className="absolute top-2 right-2 badge badge-neutral">
-                        {index + 1}/{localImages.length}
+                        {index + 1}/{images.length}
                       </div>
                       <button
                         title="Supprimer"
@@ -783,23 +787,21 @@ const PostEdit = () => {
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {localVideos.map((video, index) => {
+                {videos?.map((video, index) => {
                   const videoUrl =
                     video.public_urls?.local_mp4_url || video.cdn_url;
 
-                  const handleDelete = async () => {
+                  const handleDelete = () => {
                     const confirmed = window.confirm("Supprimer cette vidéo ?");
                     if (!confirmed) return;
-                    try {
-                      await deletePostVideo(video.id);
-                      toast.success("Vidéo supprimée");
-                      setLocalVideos((prev) =>
-                        prev.filter((v) => v.id !== video.id)
-                      );
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Erreur lors de la suppression");
-                    }
+                    setDeletedVideoIds((prev) => [...prev, video.id]);
+                    setMedia((prev) => ({
+                      ...prev,
+                      videos: prev.videos.filter((v) => v.id !== video.id),
+                    }));
+                    // toast(
+                    //   "Vidéo marquée pour suppression (sera appliqué à l'enregistrement)"
+                    // );
                   };
 
                   return (
@@ -810,7 +812,7 @@ const PostEdit = () => {
                         className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
                       />
                       <div className="absolute top-2 right-2 badge badge-neutral">
-                        {index + 1}/{localVideos.length}
+                        {index + 1}/{videos.length}
                       </div>
                       <button
                         title="Supprimer"
