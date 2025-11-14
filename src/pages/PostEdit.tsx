@@ -4,6 +4,7 @@ import { UsePost } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import toast from "react-hot-toast";
+import useUpdatePost from "../hooks/useUpdatePost";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 
 type Language = {
@@ -200,13 +201,15 @@ const PostEdit = () => {
         }
     };
 
+    const { updatePost, loading: updating } = useUpdatePost();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const formData = {
+        const payload = {
             id: post?.id,
-            category: selectedCategory,
-            subCategory: selectedSubCategory,
+            category_id: selectedCategory?.id ?? post?.postCategory?.id,
+            sub_category_id: selectedSubCategory?.id ?? post?.postSubCategory?.id,
             titles: Object.entries(titles).map(([langId, title]) => {
                 const lang = languages.find(l => l.id === parseInt(langId));
                 return {
@@ -227,8 +230,40 @@ const PostEdit = () => {
             }))
         };
 
-        console.log('📊 Données de mise à jour:', formData);
-        alert(`✅ Post ${post?.id} mis à jour!\n\nVoir la console pour les détails.`);
+        // If there are newly added files (file objects), send a FormData so the files are transmitted.
+        const hasNewFiles = imageFields.some(f => f.file) || videoFields.some(f => f.file);
+
+        try {
+            let res;
+            if (hasNewFiles) {
+                const fd = new FormData();
+                // Keep the same metadata structure by sending it as JSON in a field
+                fd.append('payload', JSON.stringify(payload));
+
+                // Append new image files (backend expects multiple 'images' fields similar to upload)
+                imageFields.filter(f => f.file).forEach((f) => {
+                    if (f.file) fd.append('images', f.file, f.file.name);
+                });
+
+                // Append new video files
+                videoFields.filter(f => f.file).forEach((f) => {
+                    if (f.file) fd.append('videos', f.file, f.file.name);
+                });
+
+                res = await updatePost(post?.id, fd);
+            } else {
+                // No files to upload — send JSON payload as before
+                res = await updatePost(post?.id, payload);
+            }
+
+            toast.success("Post updated successfully");
+            // navigate to post details or refresh
+            navigate(`/post/${id}`);
+            console.log('Update response:', payload);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update post. See console for details.");
+        }
     };
 
     if (loading) {
@@ -594,12 +629,13 @@ const PostEdit = () => {
                             </button>
                             <button
                                 type="submit"
-                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-2"
+                                disabled={updating}
+                                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
-                                Update
+                                {updating ? 'Updating...' : 'Update'}
                             </button>
                         </div>
                     </form>
