@@ -230,19 +230,19 @@ const UploadPost = () => {
             return;
         }
 
-        // Vérifier qu'au moins une image est sélectionnée
-        const hasImages = imageFields.some(field => field.file !== null);
-        if (!hasImages) {
-            toast.error("Veuillez sélectionner au moins une image");
-            return;
-        }
+        // // Vérifier qu'au moins une image est sélectionnée
+        // const hasImages = imageFields.some(field => field.file !== null);
+        // if (!hasImages) {
+        //     toast.error("Veuillez sélectionner au moins une image");
+        //     return;
+        // }
 
         // Vérifier qu'au moins une vidéo est sélectionnée
-        const hasVideos = videoFields.some(field => field.file !== null);
-        if (!hasVideos) {
-            toast.error("Veuillez sélectionner au moins une vidéo");
-            return;
-        }
+        // const hasVideos = videoFields.some(field => field.file !== null);
+        // if (!hasVideos) {
+        //     toast.error("Veuillez sélectionner au moins une vidéo");
+        //     return;
+        // }
 
         // Préparer les titres multilingues selon la nouvelle structure
         const titlesArray: { title: string, i18_language: string, description?: string }[] = [];

@@ -28,8 +28,6 @@ export async function uploadPost(formData: FormData, onUploadProgress: ((progres
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getPosts(params?: any) {
-    console.log('params post', params);
-    
     return await axios.get(`${apiURL}/posts`, {
         headers: {
             'Authorization': `Bearer ${getToken()}`
@@ -38,12 +36,17 @@ export async function getPosts(params?: any) {
     });
 } 
 
-export async function sendPostsToWebApp(plateformIds?: number[] | null) {
-    const data = plateformIds ? { plateformIds } : {};
-    return await axios.post(`${apiURL}/posts/send-to-server`, data, {
-        headers: {
-            Authorization: `Bearer ${getToken()}`,
-        },
+// Delete a post image by postId and imageId
+export async function deletePostImage(imageId: number | string) {
+    return await axios.delete(`${apiURL}/post-images/${imageId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+    });
+}
+
+// Delete a post video by postId and videoId
+export async function deletePostVideo(videoId: number | string) {
+    return await axios.delete(`${apiURL}/post-videos/${videoId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
     });
 }
 
@@ -59,6 +62,16 @@ export async function cancelPostProcessing({id}: {id: number}) {
     return await axios.post(`${apiURL}/posts/${id}/deep-upload/cancel`, null, {
         headers: {
             'Authorization': `Bearer ${getToken()}`
+        },
+    });
+}
+
+
+export async function sendPostsToWebApp(plateformIds?: number[] | null) {
+    const data = plateformIds ? { plateformIds } : {};
+    return await axios.post(`${apiURL}/posts/send-to-server`, data, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
         },
     });
 }

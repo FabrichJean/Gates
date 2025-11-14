@@ -1,31 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { UsePost, type Image, type Video } from "../hooks/usePost";
+import { UsePost } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import toast from "react-hot-toast";
 import useUpdatePost from "../hooks/useUpdatePost";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
-import { Trash2 } from "lucide-react";
-import { deletePostImage, deletePostVideo } from "../api/posts";
 
 type Language = {
   code: string;
   name: string;
 };
 
-const PostEdit = () => {
+export default function TouchPost() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error } = UsePost(id);
-  const [localImages, setLocalImages] = useState<Image[]>(post?.images || []);
-    const [localVideos, setLocalVideos] = useState<Video[]>(post?.videos || []);
-  
   const [open, setOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-
   const [selectedCategory, setSelectedCategory] = useState<{
     id: number;
     name: string;
@@ -47,7 +41,6 @@ const PostEdit = () => {
   const [descriptions, setDescriptions] = useState<{ [key: number]: string }>(
     {}
   );
-
   const [imageFields, setImageFields] = useState<
     { id: number; file: File | null; url?: string }[]
   >([{ id: 1, file: null }]);
@@ -57,7 +50,8 @@ const PostEdit = () => {
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
     useState<Language | null>(null);
-
+  const [creator, setCreator] = useState<string | null>(null);
+  const [creatorId, setCreatorId] = useState<number | null>(null);
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
   const { data: categoriesResponse } = useCategoryPost();
@@ -93,12 +87,10 @@ const PostEdit = () => {
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
           // Créer l'objet langue basé sur les données du post
-          // prefer explicit i18_language, otherwise fallback to language.code if available
-          const code = item.i18_language || item.language?.code || "";
           const postLanguage = {
             id: languageId,
-            name: item.language?.name || (code ? code.toUpperCase() : ""),
-            code: code,
+            name: item.language?.name || item.i18_language.toUpperCase(),
+            code: item.i18_language,
           };
 
           postLanguages.push(postLanguage);
@@ -116,31 +108,35 @@ const PostEdit = () => {
         }
       }
 
-      //   if (post.images && post.images.length > 0) {
-      //     setImageFields(
-      //       post.images.map((image, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: image.public_urls.local_image_url || "",
-      //       }))
-      //     );
-      //   }
+      if (post.images && post.images.length > 0) {
+        setImageFields(
+          post.images.map((image, index) => ({
+            id: index + 1,
+            file: null,
+            url: image.public_urls.local_image_url || "",
+          }))
+        );
+      }
 
-      //   if (post.videos && post.videos.length > 0) {
-      //     setVideoFields(
-      //       post.videos.map((video, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: video.public_urls.local_mp4_url || "",
-      //       }))
-      //     );
-      //   }
+      if (post.videos && post.videos.length > 0) {
+        setVideoFields(
+          post.videos.map((video, index) => ({
+            id: index + 1,
+            file: null,
+            url: video.public_urls.local_mp4_url || "",
+          }))
+        );
+      }
       // Prefill creator fields if available on post
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
-        // setCreator(((post as any).creatorObj.name) || null);
-        // setCreatorId((post as any).creatorObj.id || null);
+        setCreator((post as any).creatorObj.name || null);
+        setCreatorId((post as any).creatorObj.id || null);
         setCreatorObj((post as any).creatorObj || null);
+      } else if (post.creator) {
+        setCreator(post.creator);
+        setCreatorId(null);
+        setCreatorObj(null);
       }
     }
   }, [post, categoriesResponse]);
@@ -282,7 +278,7 @@ const PostEdit = () => {
       titles: Object.entries(titles).map(([langId, title]) => {
         const lang = languages.find((l) => l.id === parseInt(langId));
         return {
-          i18_language: lang?.code,
+          language: lang?.code,
           title: title,
           description: descriptions[parseInt(langId)] || "",
         };
@@ -303,8 +299,10 @@ const PostEdit = () => {
         })),
     };
     // include creator or creator_id in payload
-    if (creatorObj) {
-      (payload as any).creator_id = creatorObj.id;
+    if (creatorId) {
+      (payload as any).creator_id = creatorId;
+    } else if (creator) {
+      (payload as any).creator = creator;
     }
 
     // If there are newly added files (file objects), send a FormData so the files are transmitted.
@@ -400,7 +398,7 @@ const PostEdit = () => {
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-              Modify: POST-{String(post.id).padStart(3, "0")}
+              Touch: POST-{String(post.id).padStart(3, "0")}
             </h2>
             <button
               onClick={() => navigate(`/post/${id}`)}
@@ -630,15 +628,15 @@ const PostEdit = () => {
                 Creator (optional)
               </label>
               <CreatorAutoComplete
-                value={creatorObj?.name}
-                //   onChange={(v: string | null) => {
-                //     // setCreator(v);
-                //     setCreatorObj(null);
-                //     // setCreatorId(null);
-                //   }}
+                value={creatorObj ?? creator}
+                onChange={(v: string | null) => {
+                  setCreator(v);
+                  setCreatorObj(null);
+                  setCreatorId(null);
+                }}
                 onSelect={(c) => {
-                  // setCreator(c?.name ?? null);
-                  // setCreatorId(c?.id ?? null);
+                  setCreator(c?.name ?? null);
+                  setCreatorId(c?.id ?? null);
                   setCreatorObj(c ?? null);
                 }}
               />
@@ -651,44 +649,6 @@ const PostEdit = () => {
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {localImages.map((image, index) => {
-                  const imageUrl = image.public_urls?.local_image_url;
-                  const handleDelete = async () => {
-                    const confirmed = window.confirm("Supprimer cette image ?");
-                    if (!confirmed) return;
-                    try {
-                      await deletePostImage(image.id);
-                      toast.success("Image supprimée");
-                      // remove from local list
-                      setLocalImages((prev) =>
-                        prev.filter((i) => i.id !== image.id)
-                      );
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Erreur lors de la suppression");
-                    }
-                  };
-
-                  return (
-                    <div key={image.id} className="relative group">
-                      <img
-                        src={imageUrl || ""}
-                        alt={`image-${index}`}
-                        className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                      />
-                      <div className="absolute top-2 right-2 badge badge-neutral">
-                        {index + 1}/{localImages.length}
-                      </div>
-                      <button
-                        title="Supprimer"
-                        onClick={handleDelete}
-                        className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  );
-                })}
                 {imageFields.map((field) => (
                   <div key={field.id} className="space-y-2">
                     <div className="relative">
@@ -783,45 +743,6 @@ const PostEdit = () => {
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {localVideos.map((video, index) => {
-                  const videoUrl =
-                    video.public_urls?.local_mp4_url || video.cdn_url;
-
-                  const handleDelete = async () => {
-                    const confirmed = window.confirm("Supprimer cette vidéo ?");
-                    if (!confirmed) return;
-                    try {
-                      await deletePostVideo(video.id);
-                      toast.success("Vidéo supprimée");
-                      setLocalVideos((prev) =>
-                        prev.filter((v) => v.id !== video.id)
-                      );
-                    } catch (err) {
-                      console.error(err);
-                      toast.error("Erreur lors de la suppression");
-                    }
-                  };
-
-                  return (
-                    <div key={video.id} className="relative group">
-                      <video
-                        src={videoUrl || ""}
-                        controls
-                        className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                      />
-                      <div className="absolute top-2 right-2 badge badge-neutral">
-                        {index + 1}/{localVideos.length}
-                      </div>
-                      <button
-                        title="Supprimer"
-                        onClick={handleDelete}
-                        className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  );
-                })}
                 {videoFields.map((field) => (
                   <div key={field.id} className="space-y-2">
                     <div className="relative">
@@ -1010,6 +931,4 @@ const PostEdit = () => {
       )}
     </div>
   );
-};
-
-export default PostEdit;
+}

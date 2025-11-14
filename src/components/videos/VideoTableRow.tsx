@@ -4,7 +4,6 @@ import CheckingSuperadmin from "../CheckingSuperadmin";
 import VideoActions from "./VideoActions";
 import RoleEnum from "../../utils/roleEnum";
 import type { TVideo } from "../../hooks/useVideos";
-import type { User } from "../../hooks/useVideos";
 import { useAuth } from "../../hooks/useAuth";
 
 interface VideoTableRowProps {

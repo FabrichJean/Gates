@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { Video, X } from "lucide-react";
+import { Video, X, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { deletePostVideo } from "../../api/posts";
 import type { Video as VideoType } from "../../hooks/usePost";
 
 interface GetVideoPostProps {
   videos: VideoType[];
+  reFetch?: () => void;
 }
 
-const GetVideoPost = ({ videos }: GetVideoPostProps) => {
+const GetVideoPost = ({ videos, reFetch }: GetVideoPostProps) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [localVideos, setLocalVideos] = useState<VideoType[]>(videos || []);
 
   return (
     <>
@@ -57,19 +61,41 @@ const GetVideoPost = ({ videos }: GetVideoPostProps) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {videos.map((video, index) => {
+            {localVideos.map((video, index) => {
               const videoUrl =
                 video.public_urls?.local_mp4_url || video.cdn_url;
+
+              const handleDelete = async () => {
+                const confirmed = window.confirm("Supprimer cette vidéo ?");
+                if (!confirmed) return;
+                try {
+                  await deletePostVideo(video.id);
+                  toast.success("Vidéo supprimée");
+                  setLocalVideos((prev) => prev.filter((v) => v.id !== video.id));
+                  reFetch && reFetch();
+                } catch (err) {
+                  console.error(err);
+                  toast.error("Erreur lors de la suppression");
+                }
+              };
+
               return (
-                <div key={index} className="relative group">
+                <div key={video.id} className="relative group">
                   <video
                     src={videoUrl || ""}
                     controls
                     className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
                   />
                   <div className="absolute top-2 right-2 badge badge-neutral">
-                    {index + 1}/{videos.length}
+                    {index + 1}/{localVideos.length}
                   </div>
+                  <button
+                    title="Supprimer"
+                    onClick={handleDelete}
+                    className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               );
             })}

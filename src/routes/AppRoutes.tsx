@@ -15,6 +15,7 @@ import UsersArchives from "../pages/UsersArchive";
 import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
+import TouchPost from "../pages/TouchPost";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
 import Plateform from "../pages/Plateform";
@@ -290,11 +291,21 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/touch/:id"
+        path="/touch/video/:id"
         element={
           <ProtectedRoute>
             <InsideSidebar>
               <TouchVideo />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/touch/post/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <TouchPost />
             </InsideSidebar>
           </ProtectedRoute>
         }
