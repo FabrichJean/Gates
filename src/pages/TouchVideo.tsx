@@ -9,6 +9,7 @@ import toast, { Toaster } from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 // creator removed as object; it's an optional string attribute on video
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { TitlesForm } from "./Upload";
 
 
@@ -60,7 +61,11 @@ function TouchVideo() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignorefpublicjzzz
     const [coupleTitles, setCoupleTitles] = useState<Couple[]>(video?.titles || []);
-    const [creator, setCreator] = useState<string | null>(((video as any)?.creator) || null);
+    // creatorObj is provided as an object on the video; prefer it when available
+    const initialCreatorName = (video as any)?.creatorObj?.name ?? (typeof (video as any)?.creator === 'string' ? (video as any).creator : (video as any)?.creator?.name) ?? null;
+    const initialCreatorId = (video as any)?.creatorObj?.id ?? (video as any)?.creator?.id ?? (video as any)?.creator_id ?? null;
+    const [creator, setCreator] = useState<string | null>(initialCreatorName);
+    const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
 
     const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -79,7 +84,7 @@ function TouchVideo() {
             ...(videoFile && { video: videoFile }), // ✅ Ajout du fichier vidéo
             ...(category && { category_id: category.id }),
             ...(subcategory && { sub_category_id: subcategory.id }),
-            ...(creator && { creator }),
+            ...(creatorId ? { creator_id: creatorId } : (creator ? { creator } : {})),
             titles: JSON.stringify(coupleTitles),
             duration,
             touching: true
@@ -132,13 +137,7 @@ function TouchVideo() {
                         </div>
                         <div>
                             <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
-                            <input
-                                type="text"
-                                value={creator || ""}
-                                onChange={(e) => setCreator(e.currentTarget.value)}
-                                placeholder="Creator name (optional)"
-                                className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
-                            />
+                            <CreatorAutoComplete value={creator} onChange={(v: string | null) => setCreator(v)} onSelect={(c) => setCreatorId(c?.id ?? null)} />
                         </div>
 
                         <div>

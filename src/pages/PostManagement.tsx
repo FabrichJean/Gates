@@ -2,6 +2,8 @@ import { FilePlus, Eye, Columns, MoreVertical, SendIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UsePlateform from "../hooks/usePlateform";
+import PostChecking from "../components/PostChecking";
+import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import { getPosts } from "../api/posts";
 import type { Post, PostsResponse } from "../types/post";
@@ -15,6 +17,7 @@ const PostManagement = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  useAuth();
 
   useEffect(() => {
     fetchPosts();
@@ -23,11 +26,11 @@ const PostManagement = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await getPosts();
+      const response = await getPosts({});
       const data: PostsResponse = response.data;
       setPosts(data.posts);
     } catch (err) {
-      setError("Erreur lors du chargement des posts");
+      setError("Error fetching posts");
       console.error("Error fetching posts:", err);
     } finally {
       setLoading(false);
@@ -49,6 +52,9 @@ const PostManagement = () => {
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
+
+  console.log('post', filteredPosts);
+  
 
   if (loading) {
     return <Loader />;
@@ -136,13 +142,16 @@ const PostManagement = () => {
                   ID
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Catégorie
+                  Category
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Sous-catégorie
+                  Creator
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Plateforme
+                  Platform
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Checking
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Videos
@@ -162,7 +171,7 @@ const PostManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPosts.map((post) => (
+              {filteredPosts.map((post, idx) => (
                 <tr
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
@@ -175,13 +184,29 @@ const PostManagement = () => {
                   </th>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post.postCategory.name}
+                      {post.postCategory.name} / {post.postSubCategory.name}
                     </span>
                   </td>
+
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post.postSubCategory.name}
-                    </span>
+                    {((post as any).creatorObj ? (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={(post as any).creatorObj.avatar}
+                          alt={(post as any).creatorObj.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            const t = e.target as HTMLImageElement;
+                            t.src = '';
+                          }}
+                        />
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">{(post as any).creatorObj.name}</span>
+                      </div>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                        {post.creator || '-'}
+                      </span>
+                    ))}
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
@@ -189,7 +214,14 @@ const PostManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-1">
+                      {post.videos && post.videos[0] ? (
+                      <PostChecking index={idx} reFetch={fetchPosts} post={post} />
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-nowrap gap-1">
                       {post.videos?.slice(0, 2).map((video) => (
                         <div key={video.id} className="relative group">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
@@ -222,13 +254,13 @@ const PostManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-nowrap gap-1">
                       {post.images?.slice(0, 2).map((image, index) => (
                         <div key={image.id} className="relative group">
                           <img
                             src={image.public_urls.local_image_url}
                             alt={`Image ${index + 1}`}
-                            className="w-8 h-8 object-cover rounded"
+                            className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src =

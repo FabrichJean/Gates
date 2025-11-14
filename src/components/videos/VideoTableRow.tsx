@@ -42,7 +42,14 @@ const VideoTableRow = ({
       </td>
 
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
-        {video.creator || '-' }
+        <div className="flex items-center gap-2">
+          {((video as any)?.creatorObj?.avatar) ? (
+            <img src={(video as any).creatorObj.avatar} alt={(video as any).creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">No</div>
+          )}
+          <div>{(video as any)?.creatorObj?.name ?? video.creator ?? '-'}</div>
+        </div>
       </td>
 
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">

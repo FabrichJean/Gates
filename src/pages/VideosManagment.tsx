@@ -7,7 +7,6 @@ import { useAuth } from "../hooks/useAuth";
 import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
-import { useEffect } from "react";
 
 const VideosManagment = () => {
   // console.log('cid mababsia');
@@ -29,10 +28,7 @@ const VideosManagment = () => {
     toWebapp,
     activate,
     send,
-    reFetch
   } = ctx;
-
-  useEffect(reFetch, [])
 
   const headerLoading = loading && (['transc', 'upload', 'cover', 'webapp'].includes(String(loading.type))
     ? { id: loading?.id ?? undefined, type: loading.type as 'transc' | 'upload' | 'cover' | 'webapp' }
