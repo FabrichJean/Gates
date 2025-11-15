@@ -73,7 +73,7 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <img
-          src={`${video.public_urls?.cover_url || ''}`}
+          src={`${video.public_urls?.cover_url || (video as any).s3_urls?.coverUrl || ''}`}
           alt="cover"
           className="w-20 h-12 object-cover rounded-lg mx-auto border border-gray-200 dark:border-gray-600 shadow-sm"
         />

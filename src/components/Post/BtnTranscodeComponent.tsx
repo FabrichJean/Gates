@@ -2,6 +2,8 @@ import { Video, Loader2, CheckCircle } from "lucide-react";
 import { type TPost } from "../../hooks/usePost";
 import { cancelPostProcessing, usePostProcessing } from "../../api/posts";
 import useSocketProcessing from "../../hooks/useSocketProcessing";
+import { ImUpload } from "react-icons/im";
+
 
 const BtnTranscodeComponent = ({
   post,
@@ -51,7 +53,7 @@ const BtnTranscodeComponent = ({
     if (post.processing === "done") {
       return <CheckCircle size={16} />;
     }
-    return <Video size={16} />;
+    return <ImUpload size={16} />;
   };
 
 

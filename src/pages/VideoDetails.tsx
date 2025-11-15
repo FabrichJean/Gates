@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useState, useRef } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import React, { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from "./Upload";
 import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
@@ -51,13 +51,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   useSocketSend(reFetch);
 
   // Mettre à jour l'URL de cover quand les données vidéo changent
-  React.useEffect(() => {
-    if (video?.public_urls?.cover_url) {
-      setCurrentCoverUrl(video.public_urls.cover_url + "?t=" + Date.now());
-    }
-  }, [video?.public_urls?.cover_url]);
-
-  console.log(video);
+  useEffect(() => {
+    setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover)+ "?t=" + Date.now());
+  }, [video]);
 
   if (!video)
     return (
@@ -140,7 +136,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
               {videoPlayed ? (
                 <video
-                  src={video.public_urls.temp_url}
+                  src={video.s3_cover_path || video.public_urls.temp_url}
                   className="w-full h-full object-cover rounded-lg"
                   controls
                   autoPlay

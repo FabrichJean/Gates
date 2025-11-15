@@ -6,7 +6,7 @@ import type { SubCategory } from "./useSubCategory";
 
 export type Checking = "null" | "waiting for checking" | "refused" | "checked";
 
-export type TVideo = {
+export type TVideo  ={
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
@@ -59,6 +59,11 @@ export type TVideo = {
     local_mp4_url: string,
     local_cover_url: string,
     local_hls_url: string
+  };
+
+  s3_urls: {
+    coverUrl: string
+    hlsUrl: string
   };
   // optional creator string (free text)
   creator?: string | null;

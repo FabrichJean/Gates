@@ -32,7 +32,7 @@ const GetVideoPost = ({ videos, reFetch }: GetVideoPostProps) => {
         </div>
         <div className="flex flex-wrap gap-4">
           {videos.slice(0, 3).map((video, index) => {
-            const videoUrl = video.public_urls?.local_mp4_url || video.cdn_url;
+            const videoUrl = video.s3_urls?.hlsUrl || video.public_urls?.local_mp4_url || video.cdn_url;
             return (
               <video
                 key={index}
