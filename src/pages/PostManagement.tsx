@@ -1,46 +1,30 @@
 import { FilePlus, Eye, Columns, MoreVertical, SendIcon } from "lucide-react";
+import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UsePlateform from "../hooks/usePlateform";
 import PostChecking from "../components/PostChecking";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
-import { getPosts } from "../api/posts";
-import type { Post, PostsResponse } from "../types/post";
 import Loader from "../components/Loader";
-import { webAppPlateform } from "../api/plateforms";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
+import { PostsProvider, usePostsContext } from "../context/PostsContext";
+import { webAppPlateform } from "../api/plateforms";
 
-const PostManagement = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Inner component consumes PostsContext
+const PostManagementInner = () => {
+  const { page, setPage, data, loading, reFetch } = usePostsContext();
+  
+  const posts = data?.posts || [];
+  const total = data?.total || 0;
+  const limit = data?.limit || 10;
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  useAuth();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const response = await getPosts({});
-      const data: PostsResponse = response.data;
-      setPosts(data.posts);
-    } catch (err) {
-      setError("Error fetching posts");
-      console.error("Error fetching posts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR");
-  };
-
+  // client-side filtering of current page
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("fr-FR");
   const filteredPosts = posts.filter(
     (post) =>
       post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,29 +37,7 @@ const PostManagement = () => {
         .includes(searchTerm.toLowerCase())
   );
 
-  console.log('post', filteredPosts);
-  
-
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="text-red-500 text-center">
-          <p className="text-xl mb-2">Erreur</p>
-          <p>{error}</p>
-          <button
-            onClick={fetchPosts}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loader />;
 
   return (
     <div className="h-screen w-full">
@@ -99,10 +61,7 @@ const PostManagement = () => {
               </button>
               <SendToWebApp />
             </div>
-            {/* <div className="flex items-center gap-3">
-              Send to WebApp button with platform selection modal
-              <SendToWebApp />
-            </div> */}
+
             <div className="flex items-center gap-2">
               <div className="relative">
                 <input
@@ -132,7 +91,7 @@ const PostManagement = () => {
           </div>
         </header>
       </div>
-      {/* tableau post videos */}
+
       <div className="w-full mt-4">
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left border-t-3 border-blue-500 dark:border-blue-500 rtl:text-right text-gray-500 dark:text-gray-400">
@@ -148,6 +107,9 @@ const PostManagement = () => {
                   Creator
                 </th>
                 <th scope="col" className="px-6 py-3">
+                  User
+                </th>
+                <th scope="col" className="px-6 py-3">
                   Platform
                 </th>
                 <th scope="col" className="px-6 py-3">
@@ -161,9 +123,6 @@ const PostManagement = () => {
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Date de création
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Transcode
                 </th>
                 <th scope="col" className="px-6 py-3 text-left">
                   Actions
@@ -187,9 +146,8 @@ const PostManagement = () => {
                       {post.postCategory.name} / {post.postSubCategory.name}
                     </span>
                   </td>
-
                   <td className="px-6 py-4">
-                    {((post as any).creatorObj ? (
+                    {(post as any).creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
                           src={(post as any).creatorObj.avatar}
@@ -197,16 +155,23 @@ const PostManagement = () => {
                           className="w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;
-                            t.src = '';
+                            t.src = "";
                           }}
                         />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">{(post as any).creatorObj.name}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                          {(post as any).creatorObj.name}
+                        </span>
                       </div>
                     ) : (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                        {post.creator || '-'}
+                        {post.creator || "-"}
                       </span>
-                    ))}
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                      {(post as any)?.user?.username || "-"}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
@@ -214,11 +179,7 @@ const PostManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                      {post.videos && post.videos[0] ? (
-                      <PostChecking index={idx} reFetch={fetchPosts} post={post} />
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
+                    <PostChecking index={idx} reFetch={reFetch} post={post} />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
@@ -238,7 +199,6 @@ const PostManagement = () => {
                           </div>
                         </div>
                       ))}
-
                       {post.videos?.length > 2 && (
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
                           <span className="text-xs text-gray-600 dark:text-gray-300">
@@ -283,48 +243,33 @@ const PostManagement = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">{formatDate(post.createdAt)}</td>
                   <td className="px-6 py-4">
-                    <BtnTranscodeComponent
-                      post={post as any}
-                      reFetch={fetchPosts}
-                    />
+                    {new Date(post.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setOpenMenuId(openMenuId === post.id ? null : post.id)
-                        }
-                        className="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                        title="Actions"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                      {openMenuId === post.id && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setOpenMenuId(null)}
-                          />
-                          <div className="absolute right-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
-                            <Link
-                              to={`/post/${post.id}`}
-                              className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                              onClick={() => setOpenMenuId(null)}
-                            >
-                              <Eye className="w-4 h-4" />
-                              <span>Details</span>
-                            </Link>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                  <td className="flex justify-center gap-2 px-6 py-4">
+                    {user?.role === 'superadmin' ? <BtnTranscodeComponent
+                      post={post as any}
+                      reFetch={reFetch}
+                    /> : null}
+                    <Link
+                      to={`/post/${post.id}`}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Details</span>
+                    </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          <Pagination
+            totalItems={total}
+            pageSize={limit}
+            currentPage={page}
+            onPageChange={(p) => setPage(p)}
+          />
 
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -338,6 +283,14 @@ const PostManagement = () => {
     </div>
   );
 };
+
+const PostManagement = () => (
+  <PostsProvider>
+    <PostManagementInner />
+  </PostsProvider>
+);
+
+// export default PostManagement; (export already defined above)
 
 // --- SendToWebApp component ---
 function SendToWebApp() {

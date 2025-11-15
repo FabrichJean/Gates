@@ -73,13 +73,13 @@ export default function PostSubCategoryPanel({ category }: Props) {
           placeholder="new sub-category..."
           className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 transition-all duration-300"
         />
-        <input
+        {/* <input
           type="text"
           value={newCreator}
           onChange={(e) => setNewCreator(e.target.value)}
           placeholder="creator (optional)"
           className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-2 py-1 w-48 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 transition-all duration-300"
-        />
+        /> */}
         <button onClick={addSub} className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white px-4 py-1 rounded-lg transition-all duration-300">+</button>
       </div>
 
