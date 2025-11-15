@@ -260,7 +260,12 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                 `}
             >
                 {/* Header */}
-                <header className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                <header className="relative w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                    {/* Neon decorative background (subtle, smooth pulse) */}
+                    <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
+                        <div className="neon-blob neon-cyan absolute -left-16 top-2 w-64 h-40" />
+                        <div className="neon-blob neon-purple absolute -right-12 -bottom-6 w-56 h-32" />
+                    </div>
                     {/* Bouton menu */}
                     <div
                         onClick={toggleSidebar}
