@@ -7,7 +7,7 @@ import type { Creator } from "./useCreators";
 
 export type Checking = "null" | "waiting for checking" | "refused" | "checked";
 
-export type TVideo  ={
+export type TVideo = {
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
