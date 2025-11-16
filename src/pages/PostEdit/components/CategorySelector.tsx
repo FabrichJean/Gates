@@ -38,6 +38,10 @@ export default function CategorySelector(props: {
     postCategoryName,
   } = props;
 
+  const filteredSubCategories = Array.isArray(availableSubCategories)
+    ? availableSubCategories.filter((sc) => sc && sc.category && selectedCategory && sc.category.id === selectedCategory.id)
+    : [];
+
   return (
     <>
       <div className="relative w-full" ref={categoryDropdownRef}>
@@ -92,20 +96,24 @@ export default function CategorySelector(props: {
           <span className="block truncate">{selectedSubCategory ? selectedSubCategory.name : ""}</span>
         </button>
 
-        {subOpen && selectedCategory && availableSubCategories && availableSubCategories.length > 0 && (
+        {subOpen && selectedCategory && (
           <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 shadow-lg overflow-auto">
-            {availableSubCategories.map((subCat) => (
-              <div
-                key={subCat.id}
-                onClick={() => {
-                  setSelectedSubCategory({ id: subCat.id, name: subCat.name, categoryId: subCat.category.id });
-                  setSubOpen(false);
-                }}
-                className="cursor-pointer py-2 pl-3 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white"
-              >
-                {subCat.name}
-              </div>
-            ))}
+            {filteredSubCategories.length > 0 ? (
+              filteredSubCategories.map((subCat) => (
+                <div
+                  key={subCat.id}
+                  onClick={() => {
+                    setSelectedSubCategory({ id: subCat.id, name: subCat.name, categoryId: subCat.category?.id ?? selectedCategory.id });
+                    setSubOpen(false);
+                  }}
+                  className="cursor-pointer py-2 pl-3 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white"
+                >
+                  {subCat.name}
+                </div>
+              ))
+            ) : (
+              <div className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">No sub-categories found</div>
+            )}
           </div>
         )}
       </div>
