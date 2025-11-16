@@ -111,7 +111,7 @@ const VideoTableRow = ({
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <VideoActions
           video={video}
-          user={user}
+          user={user!}
           onSend={onSend}
         />
       </td>

@@ -25,11 +25,7 @@ function Sidebar({
   const asideRef = useRef<HTMLDivElement | null>(null);
 
   // Cursor-following decorative motifs (only visible in light mode)
-  const [isDarkTheme, setIsDarkTheme] = useState(() =>
-    typeof window !== "undefined"
-      ? document.documentElement.classList.contains("dark")
-      : true
-  );
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const pendingRef = useRef<{ x: number; y: number } | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -42,11 +38,13 @@ function Sidebar({
 
   // Particle type defined inline below to avoid unused-type warnings
 
+  // Observe theme class changes
   useEffect(() => {
-    // Observe theme changes on <html> class attribute
-    const obs = new MutationObserver(() => {
+    const updateTheme = () => {
       setIsDarkTheme(document.documentElement.classList.contains("dark"));
-    });
+    };
+    updateTheme(); // initial sync
+    const obs = new MutationObserver(updateTheme);
     obs.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
