@@ -655,7 +655,6 @@ const PostEdit = () => {
                     image.public_urls?.local_image_url;
                   const handleDelete = () => {
                     const confirmed = window.confirm("Supprimer cette image ?");
-                    alert(confirmed);
                     if (!Boolean(confirmed)) return;
                     // mark for deletion and remove locally; actual delete performed on update
                     setDeletedImageIds((prev) => [...prev, image.id]);
