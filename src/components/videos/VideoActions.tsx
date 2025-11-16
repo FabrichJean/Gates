@@ -4,7 +4,6 @@ import type { TVideo } from "../../hooks/useVideos";
 import type { User } from "../../hooks/useVideos";
 import { cancelUpload } from "../../api/videos";
 import toast from "react-hot-toast";
-import AnimatedAlert from "../AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../../hooks/useAnimatedAlert";
 import { useProcessingCount } from "../useProcessingCount";
 import { useState } from "react";
@@ -12,7 +11,7 @@ import { useVideosContext } from "../../context/VideosContext";
 
 interface VideoActionsProps {
   video: TVideo;
-  user: User | Partial<User>;
+  user: User | Partial<User> | null;
   onSend: (videoId: number) => void;
 }
 

@@ -1,6 +1,5 @@
-import React from 'react'
 import { createUser } from '../api/auth';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 function CreateUser() {

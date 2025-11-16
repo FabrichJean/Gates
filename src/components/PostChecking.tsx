@@ -4,7 +4,6 @@ import { FaCheckDouble } from "react-icons/fa6";
 import { FiHexagon } from "react-icons/fi";
 import RefuseModal from "./RefuseModal";
 import CheckerDrop from "./CheckerDrop";
-import { updateVideo } from "../api/videos";
 import { useAuth } from "../hooks/useAuth";
 import useUpdatePost from "../hooks/useUpdatePost";
 

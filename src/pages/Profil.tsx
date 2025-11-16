@@ -5,9 +5,9 @@ import { useAuth } from "../hooks/useAuth";
 
 const Profil: React.FC = () => {
   const { user } = useAuth();
+  if (!user) return null;
 
   const avatarSeed = encodeURIComponent(user.username || "user");
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 py-10 px-4 transition-all duration-300">
       <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6 transition-all duration-300">

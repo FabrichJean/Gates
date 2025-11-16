@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiURL, server } from "../constant";
+import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import type { TVideo } from "../hooks/useVideos";
 import { useNavigate } from "react-router-dom";

@@ -9,7 +9,7 @@ import {
   getCategoriesByPlateformApi,
   clearCategoriesFromPlateformApi,
 } from "../api/plateformCategory";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 export default function PlateformCategoryManager() {
   const { data: plateforms } = UsePlateform();
