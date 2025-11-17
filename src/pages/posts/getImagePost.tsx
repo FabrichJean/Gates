@@ -33,7 +33,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
         </div>
         <div className="flex flex-wrap gap-4">
           {images.slice(0, 3).map((image, index) => {
-            const imageUrl = image.public_urls?.local_image_url;
+            const imageUrl = image.s3_urls?.imageUrl || image.public_urls.local_image_url;
             return (
               <img
                 key={index}

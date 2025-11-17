@@ -9,7 +9,6 @@ import { useAuth } from "../../hooks/useAuth";
 interface VideoTableRowProps {
   video: TVideo;
   index: number;
-  // user: User | Partial<User>;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
 }
@@ -17,7 +16,6 @@ interface VideoTableRowProps {
 const VideoTableRow = ({
   video,
   index,
-  // user,
   onActivate,
   onSend,
 }: VideoTableRowProps) => {
@@ -42,12 +40,12 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          {((video as any)?.creatorObj?.avatar) ? (
-            <img src={(video as any).creatorObj.avatar} alt={(video as any).creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
+          {(video?.creatorObj?.avatar) ? (
+            <img src={video?.creatorObj.avatar} alt={video?.creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">No</div>
           )}
-          <div>{(video as any)?.creatorObj?.name ?? video.creator ?? '-'}</div>
+          <div>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</div>
         </div>
       </td>
 
@@ -73,7 +71,7 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <img
-          src={`${video.public_urls?.cover_url || ''}`}
+          src={`${video.public_urls?.cover_url || video.s3_urls?.coverUrl || ''}`}
           alt="cover"
           className="w-20 h-12 object-cover rounded-lg mx-auto border border-gray-200 dark:border-gray-600 shadow-sm"
         />

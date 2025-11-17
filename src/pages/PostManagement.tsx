@@ -1,4 +1,4 @@
-import { FilePlus, Eye, Columns, MoreVertical, SendIcon } from "lucide-react";
+import { FilePlus, Eye, Columns, SendIcon } from "lucide-react";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -218,7 +218,7 @@ const PostManagementInner = () => {
                       {post.images?.slice(0, 2).map((image, index) => (
                         <div key={image.id} className="relative group">
                           <img
-                            src={image.public_urls.local_image_url}
+                            src={image.s3_urls?.imageUrl || image.public_urls.local_image_url}
                             alt={`Image ${index + 1}`}
                             className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
                             onError={(e) => {

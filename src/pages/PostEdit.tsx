@@ -346,7 +346,6 @@ const PostEdit = () => {
       toast.success("Post updated successfully");
       // navigate to post details or refresh
       navigate(`/post/${id}`);
-      console.log("Update response:", payload);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update post. See console for details.");
@@ -637,14 +636,7 @@ const PostEdit = () => {
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}
-                //   onChange={(v: string | null) => {
-                //     // setCreator(v);
-                //     setCreatorObj(null);
-                //     // setCreatorId(null);
-                //   }}
                 onSelect={(c) => {
-                  // setCreator(c?.name ?? null);
-                  // setCreatorId(c?.id ?? null);
                   setCreatorObj(c ?? null);
                 }}
               />
@@ -658,19 +650,18 @@ const PostEdit = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {images?.map((image, index) => {
-                  const imageUrl = image.public_urls?.local_image_url;
+                  const imageUrl =
+                    image.s3_urls?.imageUrl ||
+                    image.public_urls?.local_image_url;
                   const handleDelete = () => {
                     const confirmed = window.confirm("Supprimer cette image ?");
-                    if (!confirmed) return;
+                    if (!Boolean(confirmed)) return;
                     // mark for deletion and remove locally; actual delete performed on update
                     setDeletedImageIds((prev) => [...prev, image.id]);
                     setMedia((prev) => ({
                       ...prev,
                       images: prev.images.filter((i) => i.id !== image.id),
                     }));
-                    // toast(
-                    //   "Image marquée pour suppression (sera appliqué à l'enregistrement)"
-                    // );
                   };
 
                   return (
@@ -789,19 +780,18 @@ const PostEdit = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {videos?.map((video, index) => {
                   const videoUrl =
-                    video.public_urls?.local_mp4_url || video.cdn_url;
+                    video.s3_urls?.hlsUrl ||
+                    video.public_urls?.local_mp4_url ||
+                    video.cdn_url;
 
                   const handleDelete = () => {
                     const confirmed = window.confirm("Supprimer cette vidéo ?");
-                    if (!confirmed) return;
+                    if (!Boolean(confirmed)) return;
                     setDeletedVideoIds((prev) => [...prev, video.id]);
                     setMedia((prev) => ({
                       ...prev,
                       videos: prev.videos.filter((v) => v.id !== video.id),
                     }));
-                    // toast(
-                    //   "Vidéo marquée pour suppression (sera appliqué à l'enregistrement)"
-                    // );
                   };
 
                   return (
@@ -951,24 +941,6 @@ const PostEdit = () => {
           </form>
         </div>
       </div>
-
-      {/* Creator field for editing */}
-      {/* <div className="w-full p-4">
-                <div className="w-full mt-4">
-                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
-                    <CreatorAutoComplete
-                        value={creator}
-                        onChange={(v: string | null) => {
-                            setCreator(v);
-                            setCreatorId(null);
-                        }}
-                        onSelect={(c) => {
-                            setCreator(c?.name ?? null);
-                            setCreatorId(c?.id ?? null);
-                        }}
-                    />
-                </div>
-            </div> */}
 
       {/* Modal Add Language */}
       {showAddLanguageModal && (

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
 import { updateVideo } from "../api/videos";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 // creator removed as object; it's an optional string attribute on video
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
@@ -31,25 +31,8 @@ function TouchVideo() {
     const videoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (video?.public_urls.cover_url) {
-            setCoverPreview(video.public_urls.cover_url);
-        } else if (video?.cover) {
-            setCoverPreview(video.cover);
-        }
-
-        if (video?.public_urls.temp_url) {
-            setVideoPreview(video.public_urls.temp_url);
-        } else if (video?.local_mp4_path) {
-            setVideoPreview(video.local_mp4_path);
-        }
-    }, [video]);
-
-    useEffect(() => {
-        if (video?.public_urls.temp_url) {
-            setVideoPreview(video.public_urls.temp_url);
-        } else if (video?.local_mp4_path) {
-            setVideoPreview(video.local_mp4_path);
-        }
+        setVideoPreview(video?.s3_urls?.hlsUrl || video?.public_urls.temp_url || video?.local_mp4_path);
+        setCoverPreview(video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover);
     }, [video]);
 
     const [duration, setDuration] = useState<number | null>(video?.duration);

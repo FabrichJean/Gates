@@ -116,25 +116,6 @@ const TouchPost = () => {
         }
       }
 
-      //   if (post.images && post.images.length > 0) {
-      //     setImageFields(
-      //       post.images.map((image, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: image.public_urls.local_image_url || "",
-      //       }))
-      //     );
-      //   }
-
-      //   if (post.videos && post.videos.length > 0) {
-      //     setVideoFields(
-      //       post.videos.map((video, index) => ({
-      //         id: index + 1,
-      //         file: null,
-      //         url: video.public_urls.local_mp4_url || "",
-      //       }))
-      //     );
-      //   }
       // Prefill creator fields if available on post
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
@@ -631,14 +612,7 @@ const TouchPost = () => {
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}
-                //   onChange={(v: string | null) => {
-                //     // setCreator(v);
-                //     setCreatorObj(null);
-                //     // setCreatorId(null);
-                //   }}
                 onSelect={(c) => {
-                  // setCreator(c?.name ?? null);
-                  // setCreatorId(c?.id ?? null);
                   setCreatorObj(c ?? null);
                 }}
               />
@@ -652,7 +626,7 @@ const TouchPost = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {localImages.map((image, index) => {
-                  const imageUrl = image.public_urls?.local_image_url;
+                  const imageUrl = image.s3_urls?.imageUrl || image.public_urls?.local_image_url;
                   const handleDelete = async () => {
                     const confirmed = window.confirm("Supprimer cette image ?");
                     if (!confirmed) return;
@@ -785,7 +759,7 @@ const TouchPost = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {localVideos.map((video, index) => {
                   const videoUrl =
-                    video.public_urls?.local_mp4_url || video.cdn_url;
+                    video.s3_urls?.hlsUrl || video.public_urls?.local_mp4_url;
 
                   const handleDelete = async () => {
                     const confirmed = window.confirm("Supprimer cette vidéo ?");
