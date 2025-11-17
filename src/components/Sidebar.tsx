@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
 import { LogOut, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import useParticles from "../hooks/useParticles";
 import { MdOutlineCategory } from "react-icons/md";
 
 interface SidebarProps {
@@ -20,6 +22,81 @@ function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const asideRef = useRef<HTMLDivElement | null>(null);
+
+  // Cursor-following decorative motifs (only visible in light mode)
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+  const pendingRef = useRef<{ x: number; y: number } | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mouseRef = useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
+
+  // ----- Particle configuration & types -----
+  const PARTICLE_MIN = 200;
+  const PARTICLE_DENSITY = 0.005; // per px^2
+
+  // Particle type defined inline below to avoid unused-type warnings
+
+  // Observe theme class changes
+  useEffect(() => {
+    const updateTheme = () => {
+      setIsDarkTheme(document.documentElement.classList.contains("dark"));
+    };
+    updateTheme(); // initial sync
+    const obs = new MutationObserver(updateTheme);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  // Use the reusable particle hook (keeps the canvas animation logic centralized)
+  useParticles(canvasRef, asideRef, mouseRef, {
+    isDark: isDarkTheme,
+    minCount: PARTICLE_MIN,
+    density: PARTICLE_DENSITY,
+    // color: light = blue, dark = softer slate-blue
+    color: isDarkTheme ? "147,197,253" : "59,130,246",
+    centerBoost: 0.18,
+  });
+
+  useEffect(() => {
+    const el = asideRef.current;
+    if (!el) return;
+
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      pendingRef.current = { x, y };
+      // feed particle system
+      mouseRef.current.x = x;
+      mouseRef.current.y = y;
+      if (rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(() => {
+          pendingRef.current = null;
+          rafRef.current = null;
+        });
+      }
+    };
+
+    const onLeave = () => {
+      // move off-screen
+      mouseRef.current.x = -9999;
+      mouseRef.current.y = -9999;
+    };
+
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const [page, setPage] = useState<string>(() => {
     return localStorage.getItem("page") || "";
@@ -60,6 +137,7 @@ function Sidebar({
 
   return (
     <aside
+      ref={asideRef}
       className={`h-screen border-r border-gray-300 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
             ${isCollapsed ? "w-20" : "w-64"} `}
     >
@@ -319,13 +397,19 @@ function Sidebar({
         )}
       </div>
 
+      {/* Particles canvas overlay (many particles react to cursor) */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none -z-0"
+      />
+
       {/* MODAL LOGOUT */}
       <dialog
         ref={dialogRef}
         id="my_modal_5"
         className="modal modal-bottom sm:modal-middle"
       >
-        <div className="modal-box bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
+        <div className="modal-box dark:bg-gray-900 dark:text-white">
           <h3 className="font-bold text-lg">Disconnect</h3>
           <p className="py-4">
             Are you sure you want to log out? <span>😞</span>
@@ -345,11 +429,7 @@ function Sidebar({
               >
                 logout
               </button>
-              <button
-                type="button"
-                className="btn bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 border-none"
-                onClick={closeLogoutModal}
-              >
+              <button type="button" className="btn" onClick={closeLogoutModal}>
                 cancel
               </button>
             </form>

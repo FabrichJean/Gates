@@ -76,4 +76,37 @@ button {
     @apply px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800
     dark:bg-gray-700 dark:text-gray-300;
   }
+
+  /* Neon blobs for header decorative background */
+  .neon-blob {
+    position: absolute;
+    border-radius: 9999px;
+    mix-blend-mode: screen;
+    filter: blur(40px);
+    opacity: 0.85;
+    animation: neon-pulse 4s ease-in-out infinite, neon-drift 8s ease-in-out infinite alternate;
+    will-change: transform, opacity;
+    pointer-events: none;
+    
+  }
+
+  .neon-cyan {
+    background: radial-gradient(circle at 30% 30%, rgba(34,211,238,0.95) 0%, rgba(34,211,238,0.22) 35%, rgba(34,211,238,0.06) 55%, transparent 70%);
+  }
+
+  .neon-purple {
+    background: radial-gradient(circle at 70% 70%, rgba(139,92,246,0.9) 0%, rgba(139,92,246,0.18) 36%, rgba(139,92,246,0.05) 56%, transparent 72%);
+  }
+
+  @keyframes neon-pulse {
+    0% { transform: scale(0.96); opacity: 0.7; }
+    50% { transform: scale(1.06); opacity: 0.96; }
+    100% { transform: scale(0.96); opacity: 0.72; }
+  }
+
+  @keyframes neon-drift {
+    0% { transform: translate3d(0,0,0); }
+    50% { transform: translate3d(8px,-6px,0); }
+    100% { transform: translate3d(0,0,0); }
+  }
 }
