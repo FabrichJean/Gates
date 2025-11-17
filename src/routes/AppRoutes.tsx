@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
+import { BotVideosProvider } from "../context/BotVideosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
@@ -8,6 +9,8 @@ import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
+import VideoBotManagement from "../pages/VideoBotManagement";
+import VideoBotDetails from "../pages/VideoBotDetails";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -82,6 +85,28 @@ const AppRoutes = () => (
           <ProtectedRoute>
             <InsideSidebar>
               <Upload />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bot-videos"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <BotVideosProvider>
+                <VideoBotManagement />
+              </BotVideosProvider>
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bot-videos/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <VideoBotDetails />
             </InsideSidebar>
           </ProtectedRoute>
         }

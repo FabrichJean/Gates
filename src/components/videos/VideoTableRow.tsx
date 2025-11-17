@@ -11,6 +11,12 @@ interface VideoTableRowProps {
   index: number;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
+  updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
+  hideTouchLink?: boolean;
+  cancelFn?: (videoId: number) => Promise<any>;
+  reFetchFn?: (delay?: number) => void;
+  detailsPath?: string;
+  convertToMp4Fn?: (videoId: number) => Promise<any>;
 }
 
 const VideoTableRow = ({
@@ -18,6 +24,12 @@ const VideoTableRow = ({
   index,
   onActivate,
   onSend,
+  updateFn,
+  hideTouchLink,
+  cancelFn,
+  reFetchFn,
+  detailsPath,
+  convertToMp4Fn,
 }: VideoTableRowProps) => {
 
   const {user} = useAuth()
@@ -103,6 +115,8 @@ const VideoTableRow = ({
           reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}
           video={video}
           user={user}
+          updateFn={updateFn}
+          hideTouchLink={hideTouchLink}
         />
       </td>
 
@@ -111,6 +125,10 @@ const VideoTableRow = ({
           video={video}
           user={user!}
           onSend={onSend}
+          cancelFn={cancelFn}
+          reFetchFn={reFetchFn}
+          detailsPath={detailsPath}
+          convertToMp4Fn={convertToMp4Fn}
         />
       </td>
 

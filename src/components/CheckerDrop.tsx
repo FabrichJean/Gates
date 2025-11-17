@@ -17,9 +17,11 @@ interface Props {
   updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
   isVideo?: boolean;
   isPost?: boolean;
+  /** if true, hides the "Touch again" link */
+  hideTouchLink?: boolean;
 }
 
-function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn, isPost = false }: Props) {
+function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
   const actual = resource ?? video;
 
   const update = async (check: string) => {
@@ -83,23 +85,27 @@ function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn
             )}
             {actual?.checking === "refused" && (
               <div className="flex flex-col items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300 overflow-auto">
-                <Link
-                  to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
-                  className="btn bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none w-full transition-colors duration-300"
-                >
-                  Touch again
-                </Link>
+                {!hideTouchLink && (
+                  <Link
+                    to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
+                    className="btn bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none w-full transition-colors duration-300"
+                  >
+                    Touch again
+                  </Link>
+                )}
 
                 <p className="text-gray-600 dark:text-gray-400 text-center px-2 text-wrap break-words overflow-auto max-h-32">
                   {actual?.comment}
                 </p>
 
-                <Link
-                  to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
-                  className=" text-blue-500 font-bold text-underline w-full transition-colors duration-300"
-                >
-                  Touch again
-                </Link>
+                {!hideTouchLink && (
+                  <Link
+                    to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
+                    className=" text-blue-500 font-bold text-underline w-full transition-colors duration-300"
+                  >
+                    Touch again
+                  </Link>
+                )}
               </div>
             )}
           </>

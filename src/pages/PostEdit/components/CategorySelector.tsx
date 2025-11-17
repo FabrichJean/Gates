@@ -19,6 +19,7 @@ export default function CategorySelector(props: {
   availableSubCategories?: SubCategory[];
   setSelectedOptions: (arr: string[]) => void;
   postCategoryName?: string;
+  postSubCategoryName?: string;
 }) {
   const {
     categories,
@@ -36,11 +37,15 @@ export default function CategorySelector(props: {
     availableSubCategories,
     setSelectedOptions,
     postCategoryName,
+    postSubCategoryName
   } = props;
 
   const filteredSubCategories = Array.isArray(availableSubCategories)
     ? availableSubCategories.filter((sc) => sc && sc.category && selectedCategory && sc.category.id === selectedCategory.id)
     : [];
+
+    console.log(selectedSubCategory);
+    
 
   return (
     <>
@@ -69,7 +74,13 @@ export default function CategorySelector(props: {
                 onClick={() => {
                   setSelectedOptions([cat.name]);
                   setSelectedCategory({ id: cat.id, name: cat.name });
-                  setSelectedSubCategory(null);
+                  const firstSub = filteredSubCategories[0];
+                  
+                  setSelectedSubCategory(
+                    firstSub
+                      ? { id: firstSub.id, name: firstSub.name, categoryId: firstSub.category?.id ?? cat.id }
+                      : null
+                  );
                   setOpen(false);
                 }}
                 className="cursor-pointer py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white"
@@ -93,7 +104,7 @@ export default function CategorySelector(props: {
               : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           }`}
         >
-          <span className="block truncate">{selectedSubCategory ? selectedSubCategory.name : ""}</span>
+          <span className="block truncate">{selectedSubCategory ? selectedSubCategory?.name : postSubCategoryName}</span>
         </button>
 
         {subOpen && selectedCategory && (

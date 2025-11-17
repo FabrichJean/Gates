@@ -436,6 +436,7 @@ const PostEdit = () => {
               availableSubCategories={availableSubCategories}
               setSelectedOptions={setSelectedOptions}
               postCategoryName={post.postCategory.name}
+              postSubCategoryName={post.postSubCategory?.name}
             />
 
             <TitlesEditor

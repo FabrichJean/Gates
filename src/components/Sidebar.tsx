@@ -5,6 +5,8 @@ import { LogOut, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useParticles from "../hooks/useParticles";
 import { MdOutlineCategory } from "react-icons/md";
+import { RiRobot2Line } from "react-icons/ri";
+import { MdDynamicFeed } from "react-icons/md";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -166,6 +168,24 @@ function Sidebar({
 
           <hr className="border-t border-gray-200 dark:border-gray-700" />
 
+          <Link to={'/profil'} className="mt-auto py-4 border-t">
+            <div className="flex items-center">
+              <img
+                className="h-10 w-10 rounded-full"
+                src={`https://api.dicebear.com/9.x/open-peeps/svg?seed=${user?.username}`}
+                alt="User"
+              />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-white dark:text-gray-300">
+                  {user?.username || "Unknown User"}
+                </p>
+                <p className="text-xs font-medium text-gray-500">
+                  View Profile
+                </p>
+              </div>
+            </div>
+          </Link>
+
           <Link
             to="/videos"
             onClick={() => handleNav("videos")}
@@ -191,24 +211,21 @@ function Sidebar({
           </Link>
 
           <Link
+            to="/bot-videos"
+            onClick={() => handleNav("bot-videos")}
+            className={linkClass("bot-videos")}
+          >
+            <RiRobot2Line className="w-6 h-6 text-current" />
+
+            {!isCollapsed && <span className="ml-2">Video Bot</span>}
+          </Link>
+
+          <Link
             to="/post"
             onClick={() => handleNav("post")}
             className={linkClass("post")}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6 text-current"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
-              />
-            </svg>
+            <MdDynamicFeed className="w-6 h-6 text-current" />
 
             {!isCollapsed && <span className="ml-2">Posts</span>}
           </Link>
