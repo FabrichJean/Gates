@@ -102,7 +102,7 @@ const VideoBotDetails: React.FC = () => {
           <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
             {videoPlayed ? (
               <video
-                src={video.s3_cover_path || video.public_urls.temp_url}
+                src={video.s3_urls.hlsUrl || video.public_urls.temp_url}
                 className="w-full h-full object-cover rounded-lg"
                 controls
                 autoPlay
@@ -114,7 +114,7 @@ const VideoBotDetails: React.FC = () => {
                   onClick={() => setVideoPlayed(true)}
                 />
                 <img
-                  src={currentCoverUrl || video.public_urls.cover_url}
+                  src={currentCoverUrl || video.s3_urls.coverUrl || video.public_urls.cover_url}
                   alt="cover"
                   className="w-full h-full object-cover rounded-lg"
                 />

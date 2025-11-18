@@ -191,8 +191,8 @@ const PostDetails = () => {
                 </p>
                 <div className="flex items-center gap-3">
                   <img
-                    src={(post as any)?.creatorObj.avatar}
-                    alt={(post as any)?.creatorObj.name}
+                    src={(post).creatorObj.avatar!}
+                    alt={(post)?.creatorObj.name}
                     className="w-10 h-10 rounded-full object-cover"
                     onError={(e) => {
                       const t = e.target as HTMLImageElement;

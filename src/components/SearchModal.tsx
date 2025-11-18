@@ -74,7 +74,7 @@ export default function SearchModal() {
                                 nav('/videos/' + v.id)
                                 console.log("Video selected:", v);
                             }}>
-                            {v.cover && <img src={v.public_urls.cover_url} alt={v.ref} className="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-600" />}
+                            {v.cover && <img src={v.s3_urls.coverUrl || v.public_urls.cover_url} alt={v.ref} className="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-600" />}
                             <span>{v.ref}</span>
                         </li>
                     ))}

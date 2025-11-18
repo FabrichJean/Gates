@@ -1,3 +1,5 @@
+import type { Creator } from "../hooks/useCreators";
+
 export interface Post {
   id: number;
   category_id: number;
@@ -8,6 +10,7 @@ export interface Post {
   updatedAt: string;
   // optional free-text creator name
   creator?: string | null;
+  creatorObj?: Creator | null;
   titles: PostTitle[];
   postCategory: PostCategory;
   postSubCategory: PostSubCategory;

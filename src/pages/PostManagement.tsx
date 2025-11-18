@@ -147,11 +147,11 @@ const PostManagementInner = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {(post as any).creatorObj ? (
+                    {(post).creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
-                          src={(post as any).creatorObj.avatar}
-                          alt={(post as any).creatorObj.name}
+                          src={(post).creatorObj.avatar!}
+                          alt={(post).creatorObj.name!}
                           className="w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;

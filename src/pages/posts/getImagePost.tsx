@@ -63,7 +63,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {localImages.map((image, index) => {
-                const imageUrl = image.public_urls?.local_image_url;
+                const imageUrl = image.s3_urls.imageUrl || image.public_urls?.local_image_url;
                 const handleDelete = async () => {
                   const confirmed = window.confirm("Supprimer cette image ?");
                   if (!confirmed) return;
