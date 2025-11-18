@@ -207,7 +207,6 @@ const Breadcrumb: React.FC = () => {
 };
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-  console.log("InsideSidebar mounted");
   // Avoid creating an extra global socket connection here.
   // Socket connections for video events are handled by specialized hooks (useSocketSend / useSocketCheckVideos)
   const initialIsCollapsed =

@@ -203,13 +203,6 @@ const VideoBotDetails: React.FC = () => {
                   </button>
                 )}
 
-                {/* <button
-                  onClick={() => activate(video.id)}
-                  className="relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700"
-                >
-                  Activate
-                </button> */}
-
                 <button
                   onClick={convertToMp4}
                   disabled={converting}
