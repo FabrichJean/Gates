@@ -53,6 +53,7 @@ export const useBotVideoManagement = () => {
       return [];
     }
   });
+
   const [processedIds, setProcessedIds] = useState<number[]>(() => {
     try {
       return JSON.parse(localStorage.getItem("bot_" + PROCESSED_STORAGE_KEY) || "[]");
@@ -107,9 +108,9 @@ export const useBotVideoManagement = () => {
       if (refetching.current) return;
 
       try {
+      } finally {
         refetching.current = true;
         await reFetch();
-      } finally {
         refetching.current = false;
         if (pendingRefetch.current) {
           pendingRefetch.current = false;
