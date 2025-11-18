@@ -11,6 +11,7 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import VideoBotManagement from "../pages/VideoBotManagement";
 import VideoBotDetails from "../pages/VideoBotDetails";
+// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -111,6 +112,16 @@ const AppRoutes = () => (
           </ProtectedRoute>
         }
       />
+      {/* <Route
+        path="/bot-videos/:id/edit"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <VideoBotEdit />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      /> */}
       <Route
         path="/post"
         element={

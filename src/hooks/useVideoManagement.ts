@@ -25,6 +25,7 @@ export const useVideoManagement = () => {
     category_id: "",
     sub_category_id: "",
     user_id: "",
+    creator_id: "",
     isDeleted: "",
     upload_status: "",
     cover_upload_status: "",

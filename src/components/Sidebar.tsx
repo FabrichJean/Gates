@@ -7,6 +7,9 @@ import useParticles from "../hooks/useParticles";
 import { MdOutlineCategory } from "react-icons/md";
 import { RiRobot2Line } from "react-icons/ri";
 import { MdDynamicFeed } from "react-icons/md";
+import { BiLogoInternetExplorer } from "react-icons/bi";
+import { MdVerified } from "react-icons/md";
+
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -35,7 +38,7 @@ function Sidebar({
   const mouseRef = useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
 
   // ----- Particle configuration & types -----
-  const PARTICLE_MIN = 200;
+  const PARTICLE_MIN = 1000;
   const PARTICLE_DENSITY = 0.005; // per px^2
 
   // Particle type defined inline below to avoid unused-type warnings
@@ -166,23 +169,21 @@ function Sidebar({
             </h1>
           </div>
 
-          <hr className="border-t border-gray-200 dark:border-gray-700" />
-
-          <Link to={'/profil'} className="mt-auto py-4 border-t">
+          <Link to={"/profil"} className="mt-auto py-4 border-t">
             <div className="flex items-center">
               <img
                 className="h-10 w-10 rounded-full"
                 src={`https://api.dicebear.com/9.x/open-peeps/svg?seed=${user?.username}`}
                 alt="User"
               />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-white dark:text-gray-300">
-                  {user?.username || "Unknown User"}
+              {!isCollapsed && <div className="ml-3">
+                <p className="text-sm font-medium dark:text-gray-300 flex items-center">
+                  {user?.username || "Unknown User"} <MdVerified className="ml-1 text-blue-500 w-4 h-4" />
                 </p>
                 <p className="text-xs font-medium text-gray-500">
                   View Profile
                 </p>
-              </div>
+              </div>}
             </div>
           </Link>
 
@@ -219,6 +220,14 @@ function Sidebar({
 
             {!isCollapsed && <span className="ml-2">Video Bot</span>}
           </Link>
+          <Link
+            to="/category-manager"
+            onClick={() => handleNav("category-manager")}
+            className={linkClass("category-manager")}
+          >
+            <MdOutlineCategory className="w-6 h-6 text-current" />
+            {!isCollapsed && <span className="ml-2">Video Category</span>}
+          </Link>
 
           <Link
             to="/post"
@@ -233,21 +242,20 @@ function Sidebar({
           {user?.role === "superadmin" && (
             <>
               <Link
-                to="/category-manager"
-                onClick={() => handleNav("category-manager")}
-                className={linkClass("category-manager")}
-              >
-                <MdOutlineCategory className="w-6 h-6 text-current" />
-                {!isCollapsed && <span className="ml-2">Video Category</span>}
-              </Link>
-
-              <Link
                 to="/post-categories"
                 onClick={() => handleNav("post-categories")}
                 className={linkClass("post-categories")}
               >
                 <MdOutlineCategory className="w-6 h-6 text-current" />
                 {!isCollapsed && <span className="ml-2">Post Category</span>}
+              </Link>
+              <Link
+                to="/plateform-relations"
+                onClick={() => handleNav("plateform-relations")}
+                className={linkClass("plateform-relations")}
+              >
+                <BiLogoInternetExplorer className="w-6 h-6 text-current" />
+                {!isCollapsed && <span className="ml-2">WebApps</span>}
               </Link>
 
               <Link
@@ -330,15 +338,6 @@ function Sidebar({
                   />
                 </svg>
                 {!isCollapsed && <span className="ml-2">Creators</span>}
-              </Link>
-
-              <Link
-                to="/plateform-relations"
-                onClick={() => handleNav("plateform-relations")}
-                className={linkClass("plateform-relations")}
-              >
-                <MdOutlineCategory className="w-6 h-6 text-current" />
-                {!isCollapsed && <span className="ml-2">WebApps</span>}
               </Link>
 
               <Link
