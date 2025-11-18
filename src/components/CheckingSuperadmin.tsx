@@ -16,6 +16,8 @@ interface Props {
   user: User | Partial<User> | any;
   index: number;
   reFetch: () => void;
+  // if true, hides the "Touch again" link in CheckerDrop
+  hideTouchLink?: boolean;
 }
 
 function CheckingSuperadmin({
@@ -25,6 +27,7 @@ function CheckingSuperadmin({
   reFetch,
   user,
   updateFn,
+  hideTouchLink,
 }: Props) {
   const [showModal, setShowModal] = useState(false);
 
@@ -85,6 +88,7 @@ function CheckingSuperadmin({
         user={user}
         openRefuseModal={openModal}
         updateFn={updateFn}
+        hideTouchLink={hideTouchLink}
       />
       {/* )} */}
     </div>

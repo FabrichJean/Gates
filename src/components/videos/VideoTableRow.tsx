@@ -11,6 +11,12 @@ interface VideoTableRowProps {
   index: number;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
+  updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
+  hideTouchLink?: boolean;
+  cancelFn?: (videoId: number) => Promise<any>;
+  reFetchFn?: (delay?: number) => void;
+  detailsPath?: string;
+  convertToMp4Fn?: (videoId: number) => Promise<any>;
 }
 
 const VideoTableRow = ({
@@ -18,6 +24,12 @@ const VideoTableRow = ({
   index,
   onActivate,
   onSend,
+  updateFn,
+  hideTouchLink,
+  cancelFn,
+  reFetchFn,
+  detailsPath,
+  convertToMp4Fn,
 }: VideoTableRowProps) => {
 
   const {user} = useAuth()
@@ -71,7 +83,7 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <img
-          src={`${video.public_urls?.cover_url || video.s3_urls?.coverUrl || ''}`}
+          src={`${video.s3_urls.coverUrl || video.public_urls?.cover_url || video.s3_urls?.coverUrl || ''}`}
           alt="cover"
           className="w-20 h-12 object-cover rounded-lg mx-auto border border-gray-200 dark:border-gray-600 shadow-sm"
         />
@@ -103,6 +115,8 @@ const VideoTableRow = ({
           reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}
           video={video}
           user={user}
+          updateFn={updateFn}
+          hideTouchLink={hideTouchLink}
         />
       </td>
 
@@ -111,6 +125,10 @@ const VideoTableRow = ({
           video={video}
           user={user!}
           onSend={onSend}
+          cancelFn={cancelFn}
+          reFetchFn={reFetchFn}
+          detailsPath={detailsPath}
+          convertToMp4Fn={convertToMp4Fn}
         />
       </td>
 

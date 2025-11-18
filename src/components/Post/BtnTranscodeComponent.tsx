@@ -1,4 +1,4 @@
-import { Video, Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { type TPost } from "../../hooks/usePost";
 import { cancelPostProcessing, usePostProcessing } from "../../api/posts";
 import useSocketProcessing from "../../hooks/useSocketProcessing";

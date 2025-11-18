@@ -5,7 +5,6 @@ import { usePlateformByCategory } from "../hooks/plateform-category";
 import UsePlateform from "../hooks/usePlateform";
 import { addCategoryToPlateformApi } from "../api/plateformCategory";
 import toast from "react-hot-toast";
-import { notNull } from "http-react";
 
 interface Props {
   categoryId: number | null;
@@ -73,11 +72,7 @@ export default function PlateformPanel({ categoryId }: Props) {
                 categoryId={categoryId}
                 isSelected={selectedId === c.id}
                 onDelete={reFetch}
-                onEdit={reFetch}
-                // isSelected={selectedId === c.id}
                 onSelect={() => setSelectedId(c.id as number)}
-                // onDelete={() => removeCategory(c.id as number)}
-                // onEdit={reFetch}
               />
             )}
           </AnimatedList>

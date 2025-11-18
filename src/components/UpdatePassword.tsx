@@ -1,4 +1,4 @@
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast"
 import randomPassword from "../utils/randomPassword"
 import { updatePassword } from "../api/auth"
 import type { User } from "../hooks/useVideos"

@@ -63,7 +63,7 @@ const GetVideoPost = ({ videos, reFetch }: GetVideoPostProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {localVideos.map((video, index) => {
               const videoUrl =
-                video.public_urls?.local_mp4_url || video.cdn_url;
+                video.s3_urls.hlsUrl || video.public_urls?.local_mp4_url || video.cdn_url;
 
               const handleDelete = async () => {
                 const confirmed = window.confirm("Supprimer cette vidéo ?");

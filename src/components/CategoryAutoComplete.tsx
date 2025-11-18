@@ -30,7 +30,7 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get<Category[]>(`${apiURL}/categories`, {
+        const res = await axios.get<Category[]>(`${apiURL}/post-categories`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         setCategories(res.data);
@@ -45,8 +45,8 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
 
   // Filtrer la liste selon la saisie
   useEffect(() => {
-    const f = query
-      ? categories.filter((cat) =>
+    const f = (query && categories.length > 0)
+      ? categories?.filter((cat) =>
           cat.name.toLowerCase().includes(query.toLowerCase())
         )
       : categories;

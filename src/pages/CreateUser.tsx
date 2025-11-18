@@ -1,4 +1,3 @@
-import React from 'react'
 import { createUser } from '../api/auth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';

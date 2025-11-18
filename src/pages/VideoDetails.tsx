@@ -136,7 +136,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
             <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
               {videoPlayed ? (
                 <video
-                  src={video.s3_cover_path || video.public_urls.temp_url}
+                  src={video.s3_urls.hlsUrl || video.public_urls.temp_url}
                   className="w-full h-full object-cover rounded-lg"
                   controls
                   autoPlay
@@ -148,7 +148,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     onClick={() => setVideoPlayed(true)}
                   />
                   <img
-                    src={currentCoverUrl || video.public_urls.cover_url}
+                    src={currentCoverUrl || video.s3_urls.coverUrl || video.public_urls.cover_url}
                     alt="cover"
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -501,8 +501,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 <div className="flex items-center gap-3">
                   {(video as any).creatorObj.avatar ? (
                     <img
-                      src={(video as any).creatorObj.avatar}
-                      alt={(video as any).creatorObj.name}
+                      src={(video).creatorObj.avatar!}
+                      alt={(video).creatorObj.name!}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
