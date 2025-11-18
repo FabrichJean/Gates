@@ -16,6 +16,8 @@ import RoleEnum from "../utils/roleEnum";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import useSocketSend from "../hooks/useSocketSend";
+
 
 const VideoBotDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -37,6 +39,8 @@ const VideoBotDetails: React.FC = () => {
       setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover) + "?t=" + Date.now());
     }
   }, [video]);
+
+  useSocketSend(reFetch);
 
   const send = async (videoId: number) => {
     try {
