@@ -26,7 +26,7 @@ const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) 
     const fetchSubCategories = async () => {
       try {
         const res = await axios.get<{ SubCategorys: SubCategory[] }>(
-          `${apiURL}/post-sub-categories`,
+          `${apiURL}/sub-categories`,
           {
             headers: { Authorization: `Bearer ${getToken()}` },
             params: { category_id: categoryId },
