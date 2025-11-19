@@ -18,7 +18,6 @@ import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import useSocketSend from "../hooks/useSocketSend";
 
-
 const VideoBotDetails: React.FC = () => {
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
@@ -36,7 +35,13 @@ const VideoBotDetails: React.FC = () => {
   // Update cover URL when video data changes
   useEffect(() => {
     if (video) {
-      setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover) + "?t=" + Date.now());
+      setCurrentCoverUrl(
+        (video?.s3_urls?.coverUrl ||
+          video?.public_urls.cover_url ||
+          video?.cover) +
+          "?t=" +
+          Date.now()
+      );
     }
   }, [video]);
 
@@ -115,10 +120,16 @@ const VideoBotDetails: React.FC = () => {
               <>
                 <FaPlayCircle
                   className="absolute text-8xl text-white cursor-pointer z-10"
-                  onClick={() => setVideoPlayed(true)}
+                  onClick={() =>
+                    setVideoPlayed(video.public_urls?.temp_url ? true : false)
+                  }
                 />
                 <img
-                  src={currentCoverUrl || video.s3_urls.coverUrl || video.public_urls.cover_url}
+                  src={
+                    currentCoverUrl ||
+                    video.s3_urls.coverUrl ||
+                    video.public_urls.cover_url
+                  }
                   alt="cover"
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -159,17 +170,24 @@ const VideoBotDetails: React.FC = () => {
             {user?.role === RoleEnum.SUPERADMIN && (
               <div className="relative flex items-center gap-3">
                 {/* Show Send button only if video has been converted to MP4 (has temp_url) */}
-                {video.public_urls?.temp_url && (
+                {video.public_urls?.temp_url ? (
                   <button
-                    disabled={video.processing === "working" || video.processing === "done"}
+                    disabled={
+                      video.processing === "working" ||
+                      video.processing === "done"
+                    }
                     onClick={() => {
                       if (video.checking !== "checked") {
-                        return alert.warning("We need to check this video", "Video Check Required");
+                        return alert.warning(
+                          "We need to check this video",
+                          "Video Check Required"
+                        );
                       }
                       send(video.id);
                     }}
                     className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                      video.processing === "working" || (video.upload_status === 1 && video.transfer_status === 1)
+                      video.processing === "working" ||
+                      (video.upload_status === 1 && video.transfer_status === 1)
                         ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                         : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     }`}
@@ -179,10 +197,22 @@ const VideoBotDetails: React.FC = () => {
                         <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                         <span>Processing...</span>
                       </>
-                    ) : video.upload_status === 1 && video.transfer_status === 1 ? (
+                    ) : video.upload_status === 1 &&
+                      video.transfer_status === 1 ? (
                       <span className="text-green-600 font-semibold flex gap-1 items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
                         </svg>
                         Uploaded
                       </span>
@@ -193,6 +223,37 @@ const VideoBotDetails: React.FC = () => {
                       </span>
                     )}
                   </button>
+                ) : (
+                  <button
+                    onClick={convertToMp4}
+                    disabled={converting}
+                    className="relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {converting ? (
+                      <>
+                        <span className="inline-block w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                        <span>Converting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
+                          />
+                        </svg>
+                        <span>Convert MP4</span>
+                      </>
+                    )}
+                  </button>
                 )}
 
                 {video.processing === "working" && (
@@ -200,32 +261,51 @@ const VideoBotDetails: React.FC = () => {
                     onClick={cancel.bind(null, video.id)}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18 18 6M6 6l12 12"
+                      />
                     </svg>
                     Cancel
                   </button>
                 )}
-
-                <button
-                  onClick={convertToMp4}
-                  disabled={converting}
-                  className="relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {converting ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                      <span>Converting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                      </svg>
-                      <span>Convert MP4</span>
-                    </>
-                  )}
-                </button>
+                {/* Download MP4 button - visible when temp_url exists */}
+                {video.public_urls?.temp_url && (
+                  <a
+                    href={video.public_urls.temp_url}
+                    download={
+                      (video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`)
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5L16.5 12M12 3v13.5"
+                      />
+                    </svg>
+                    <span>Download MP4</span>
+                  </a>
+                )}
               </div>
             )}
 
@@ -248,7 +328,12 @@ const VideoBotDetails: React.FC = () => {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
                 Previous
               </Link>
@@ -267,7 +352,12 @@ const VideoBotDetails: React.FC = () => {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
             )}
@@ -277,20 +367,31 @@ const VideoBotDetails: React.FC = () => {
           <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Title:</span>
-                <p className="text-gray-800 dark:text-gray-200">{video.titles?.[0]?.title || "N/A"}</p>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Title:
+                </span>
+                <p className="text-gray-800 dark:text-gray-200">
+                  {video.titles?.[0]?.title || <i><small>- none -</small></i>}
+                </p>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Status:</span>
-                <p className="text-gray-800 dark:text-gray-200">{video.checking || "pending"}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Processing:</span>
-                <p className="text-gray-800 dark:text-gray-200">{video.processing || "pending"}</p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Creator:</span>
-                <p className="text-gray-800 dark:text-gray-200">{video.creator || "N/A"}</p>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Creator:
+                </span>
+                <div className="flex items-center gap-2">
+                  {video?.creatorObj?.avatar ? (
+                    <img
+                      src={video?.creatorObj.avatar}
+                      alt={video?.creatorObj.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
+                      No
+                    </div>
+                  )}
+                  <div>{video?.creatorObj?.name ?? video.creator ?? "-"}</div>
+                </div>
               </div>
             </div>
           </div>

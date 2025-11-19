@@ -111,7 +111,6 @@ const VideoActions = ({
       setConverting(false);
     }
   };
-  
 
   return (
     <>
@@ -119,10 +118,6 @@ const VideoActions = ({
       <div className="flex justify-center gap-2 flex-wrap">
         {user?.role === RoleEnum.SUPERADMIN && (
         <div className="relative flex items-center gap-3">
-          {/* Show Send button only if:
-              - It's not a bot video (convertToMp4Fn is undefined), OR
-              - It's a bot video AND it has been converted to MP4 (has temp_url)
-          */}
           {(!convertToMp4Fn || video.public_urls?.temp_url) && (
             <button
               disabled={video.processing === 'working' || video.processing === 'done'}
@@ -215,7 +210,7 @@ const VideoActions = ({
           )}
           
           {/* Convert to MP4 button (only for bot videos) */}
-          {convertToMp4Fn && (
+          {(convertToMp4Fn && video.public_urls?.temp_url) && (
             <button
               onClick={convertToMp4}
               disabled={converting}
