@@ -13,9 +13,9 @@ import {
 } from "../api/videoBot";
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
-import AnimatedAlert from "../components/AnimatedAlert";
-import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
+// Animated alerts handled inside VideoActions now
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import VideoActions from "../components/videos/VideoActions";
 import useSocketSend from "../hooks/useSocketSend";
 
 const VideoBotDetails: React.FC = () => {
@@ -27,10 +27,8 @@ const VideoBotDetails: React.FC = () => {
 
   const [videoPlayed, setVideoPlayed] = useState(false);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
-  const [converting, setConverting] = useState(false);
 
-  const { showAlert, alertProps } = useAnimatedAlert();
-  const alert = createQuickAlert(showAlert);
+  // no local animated alert; VideoActions uses its own hooks
 
   // Update cover URL when video data changes
   useEffect(() => {
@@ -57,28 +55,7 @@ const VideoBotDetails: React.FC = () => {
     }
   };
 
-  const cancel = async (videoId: number) => {
-    await cancelVideoBotUpload(videoId)
-      .then(reFetch)
-      .catch((err) => {
-        toast.error(err?.response?.data?.message);
-      });
-  };
-
-  const convertToMp4 = async () => {
-    if (!video) return;
-    if (converting) return;
-    setConverting(true);
-    try {
-      await convertBotVideoToMp4(video.id);
-      toast.success("✅ Conversion MP4 démarrée !");
-      reFetch();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ Erreur de conversion!");
-    } finally {
-      setConverting(false);
-    }
-  };
+  // cancel and convert actions are handled by VideoActions via passed functions
 
   if (!video)
     return (
@@ -89,7 +66,7 @@ const VideoBotDetails: React.FC = () => {
 
   return (
     <>
-      <AnimatedAlert {...alertProps} />
+  {/* Alerts are handled inside child components */}
       <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
         <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
           <div className="flex justify-between gap-4 items-center w-full">
@@ -97,15 +74,15 @@ const VideoBotDetails: React.FC = () => {
               Bot Video - {formatDateFR(video?.createdAt)}
             </h2>
             <div className="flex gap-2">
-              <CheckingSuperadmin
-                index={0}
-                reFetch={reFetch}
-                resource={video}
-                user={user}
-                updateFn={updateVideoBot}
-                hideTouchLink={true}
-              />
-            </div>
+                <CheckingSuperadmin
+                  index={0}
+                  reFetch={reFetch}
+                  resource={video}
+                  user={user}
+                  updateFn={updateVideoBot}
+                  hideTouchLink={true}
+                />
+              </div>
           </div>
 
           <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
@@ -167,147 +144,44 @@ const VideoBotDetails: React.FC = () => {
               </Link>
             )}
 
-            {user?.role === RoleEnum.SUPERADMIN && (
-              <div className="relative flex items-center gap-3">
-                {/* Show Send button only if video has been converted to MP4 (has temp_url) */}
-                {video.public_urls?.temp_url ? (
-                  <button
-                    disabled={
-                      video.processing === "working" ||
-                      video.processing === "done"
-                    }
-                    onClick={() => {
-                      if (video.checking !== "checked") {
-                        return alert.warning(
-                          "We need to check this video",
-                          "Video Check Required"
-                        );
-                      }
-                      send(video.id);
-                    }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                      video.processing === "working" ||
-                      (video.upload_status === 1 && video.transfer_status === 1)
-                        ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
-                        : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    }`}
-                  >
-                    {video.processing === "working" ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : video.upload_status === 1 &&
-                      video.transfer_status === 1 ? (
-                      <span className="text-green-600 font-semibold flex gap-1 items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                          />
-                        </svg>
-                        Uploaded
-                      </span>
-                    ) : (
-                      <span className="hover:text-blue-500 flex gap-3 items-center">
-                        <span>🚀</span>
-                        <span>Send</span>
-                      </span>
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    onClick={convertToMp4}
-                    disabled={converting}
-                    className="relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {converting ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                        <span>Converting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-5 h-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
-                          />
-                        </svg>
-                        <span>Convert MP4</span>
-                      </>
-                    )}
-                  </button>
-                )}
+            <div className="relative flex items-center gap-3">
+              <VideoActions
+                video={video}
+                user={user}
+                onSend={send}
+                cancelFn={cancelVideoBotUpload}
+                reFetchFn={reFetch}
+                detailsPath="/bot-videos"
+                convertToMp4Fn={convertBotVideoToMp4}
+              />
 
-                {video.processing === "working" && (
-                  <button
-                    onClick={cancel.bind(null, video.id)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
+              {/* Download MP4 button - visible when temp_url exists and user is superadmin */}
+              {user?.role === RoleEnum.SUPERADMIN && video.public_urls?.temp_url && (
+                <a
+                  href={video.public_urls.temp_url}
+                  download={(video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="w-4 h-4"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18 18 6M6 6l12 12"
-                      />
-                    </svg>
-                    Cancel
-                  </button>
-                )}
-                {/* Download MP4 button - visible when temp_url exists */}
-                {video.public_urls?.temp_url && (
-                  <a
-                    href={video.public_urls.temp_url}
-                    download={
-                      (video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`)
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5L16.5 12M12 3v13.5"
-                      />
-                    </svg>
-                    <span>Download MP4</span>
-                  </a>
-                )}
-              </div>
-            )}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5L16.5 12M12 3v13.5"
+                    />
+                  </svg>
+                  <span>Download MP4</span>
+                </a>
+              )}
+            </div>
 
             <Link
               to="/bot-videos"
