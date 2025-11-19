@@ -30,7 +30,7 @@ function parseJwt(token?: string | null) {
 // 🔸 Interface du contexte d'authentification
 export interface AuthContextType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  user: Partial<User>;
+  user: Partial<User> | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +47,7 @@ export interface AuthContextType {
 // 🔸 Fournisseur du contexte d’authentification
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [user, setUser] = useState<Partial<User> | null>();
+  const [user, setUser] = useState<Partial<User> | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

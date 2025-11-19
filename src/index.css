@@ -1,49 +1,112 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* stylelint-disable-next-line */
+/* ----- Thème sombre ----- */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Cross-browser font compatibility and readability improvements */
+/* ----- Qualité typographique globale ----- */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
+/* ----- Base ----- */
 body {
-  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   font-feature-settings: "kern" 1, "liga" 1;
   line-height: 1.5;
+  font-weight: 400;
 }
 
-/* Input field improvements for better readability across browsers */
-input, textarea, select {
-  font-family: inherit;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-
-/* Button improvements for better consistency */
+/* ----- Uniformisation des champs et boutons ----- */
+input,
+textarea,
+select,
 button {
   font-family: inherit;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
 }
 
-/* Ensure proper font rendering on Windows */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  body {
-    font-weight: 400;
-  }
-}
-
-/* High DPI display optimization */
+/* ----- Haute résolution ----- */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* -----------------------------------------
+   Composants utilitaires avec @apply
+----------------------------------------- */
+@layer components {
+  .dashboard-btn {
+    @apply flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md
+    bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600
+    hover:bg-gray-100 dark:hover:bg-gray-600 transition;
+  }
+
+  .dashboard-nav {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+    border border-blue-200 dark:border-blue-700 rounded-md py-2
+    hover:bg-blue-200 dark:hover:bg-blue-900/50 transition;
+  }
+
+  .dashboard-nav-disabled {
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500
+    border border-gray-200 dark:border-gray-700 rounded-md py-2 opacity-50;
+  }
+
+  .label {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+
+  .value {
+    @apply font-medium text-gray-900 dark:text-white;
+  }
+
+  /* ----- Badges ----- */
+  .badge-green {
+    @apply px-2 py-1 text-xs rounded-full bg-green-100 text-green-800
+    dark:bg-green-900 dark:text-green-300;
+  }
+
+  .badge-gray {
+    @apply px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800
+    dark:bg-gray-700 dark:text-gray-300;
+  }
+
+  /* Neon blobs for header decorative background */
+  .neon-blob {
+    position: absolute;
+    border-radius: 9999px;
+    mix-blend-mode: screen;
+    filter: blur(40px);
+    opacity: 0.85;
+    animation: neon-pulse 4s ease-in-out infinite, neon-drift 8s ease-in-out infinite alternate;
+    will-change: transform, opacity;
+    pointer-events: none;
+    
+  }
+
+  .neon-cyan {
+    background: radial-gradient(circle at 30% 30%, rgba(34,211,238,0.95) 0%, rgba(34,211,238,0.22) 35%, rgba(34,211,238,0.06) 55%, transparent 70%);
+  }
+
+  .neon-purple {
+    background: radial-gradient(circle at 70% 70%, rgba(139,92,246,0.9) 0%, rgba(139,92,246,0.18) 36%, rgba(139,92,246,0.05) 56%, transparent 72%);
+  }
+
+  @keyframes neon-pulse {
+    0% { transform: scale(0.96); opacity: 0.7; }
+    50% { transform: scale(1.06); opacity: 0.96; }
+    100% { transform: scale(0.96); opacity: 0.72; }
+  }
+
+  @keyframes neon-drift {
+    0% { transform: translate3d(0,0,0); }
+    50% { transform: translate3d(8px,-6px,0); }
+    100% { transform: translate3d(0,0,0); }
   }
 }

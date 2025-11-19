@@ -60,12 +60,12 @@ const useSocketProcessing = (onUploadFinished?: () => void, postId?: number) => 
     });
 
     // 🔴 Événement échec de traitement
-    socket.on("deep-upload-post-failed", (data: { userId: number; error: string, postId: number }) => {
+    socket.on("deep-upload-post-failed", (data: { userId: number; summary: any, postId: number }) => {
       console.error("❌ Échec du deep upload :", data);
       try {
         if(user?.id === data.userId && postId === data.postId) {
           onUploadFinished?.();
-          toast.error(`❌ ${data.error}`);
+          toast.error(`❌ Échec de l'upload `);
         }
       } catch (error) {
         console.error("Error processing post:", error);

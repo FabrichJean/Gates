@@ -1,19 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import UseCreators, { type Creator } from '../hooks/useCreators';
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
-  value?: string | Creator | null;
-  onChange: (v: string | null) => void;
+  value?: string | null;
+  onChange?: (v: string | null) => void;
   /** called when a creator from the list is explicitly selected */
-  onSelect?: (creator: Creator | null) => void;
+  onSelect: (creator: Creator | null) => void;
   placeholder?: string;
   disabled?: boolean;
 }
 
 const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled }: Props) => {
   const { data: creators } = UseCreators();
-  const [query, setQuery] = useState<string>(typeof value === 'string' ? value : (value as Creator)?.name ?? '');
+  const [query, setQuery] = useState<string>(value ?? '');
   const [filtered, setFiltered] = useState<Creator[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -43,7 +43,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
   const handleSelect = (c: Creator) => {
     setQuery(c.name);
     // when a creator is selected, notify both callbacks: string value and object selection
-    onChange(c.name);
+    onChange?.(c.name);
     onSelect?.(c);
     setOpen(false);
   };
@@ -60,7 +60,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
       <input
         type="text"
         value={query}
-        onChange={(e) => { setQuery(e.target.value); setOpen(true); onChange(e.target.value); }}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); onChange?.(e.target.value); }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder || 'Creator name (optional)'}
         disabled={disabled}

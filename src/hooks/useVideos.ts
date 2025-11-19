@@ -3,6 +3,7 @@ import { apiURL } from "../constant"
 import { getToken } from "../utils/storage"
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
+import type { Creator } from "./useCreators";
 
 export type Checking = "null" | "waiting for checking" | "refused" | "checked";
 
@@ -60,8 +61,15 @@ export type TVideo = {
     local_cover_url: string,
     local_hls_url: string
   };
+
+  s3_urls: {
+    coverUrl: string
+    hlsUrl: string
+  };
   // optional creator string (free text)
   creator?: string | null;
+
+  creatorObj: Creator
 };
 
 export type User = {

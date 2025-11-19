@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
+import { BotVideosProvider } from "../context/BotVideosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
@@ -8,6 +9,9 @@ import Profil from "../pages/Profil";
 import Register from "../pages/Register";
 import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
+import VideoBotManagement from "../pages/VideoBotManagement";
+import VideoBotDetails from "../pages/VideoBotDetails";
+// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -15,6 +19,7 @@ import UsersArchives from "../pages/UsersArchive";
 import CreateUser from "../pages/CreateUser";
 import SuperProtected from "../components/SuperProtected";
 import TouchVideo from "../pages/TouchVideo";
+import TouchPost from "../pages/TouchPost";
 import Conversion from "../pages/Convertion";
 import CategoryManager from "../pages/CategoryManager";
 import Plateform from "../pages/Plateform";
@@ -85,6 +90,38 @@ const AppRoutes = () => (
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/bot-videos"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <BotVideosProvider>
+                <VideoBotManagement />
+              </BotVideosProvider>
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bot-videos/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <VideoBotDetails />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      {/* <Route
+        path="/bot-videos/:id/edit"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <VideoBotEdit />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      /> */}
       <Route
         path="/post"
         element={
@@ -290,11 +327,21 @@ const AppRoutes = () => (
         }
       />
       <Route
-        path="/touch/:id"
+        path="/touch/video/:id"
         element={
           <ProtectedRoute>
             <InsideSidebar>
               <TouchVideo />
+            </InsideSidebar>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/touch/post/:id"
+        element={
+          <ProtectedRoute>
+            <InsideSidebar>
+              <TouchPost />
             </InsideSidebar>
           </ProtectedRoute>
         }

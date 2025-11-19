@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Images, X } from "lucide-react";
+import { Images, X, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { deletePostImage } from "../../api/posts";
 import type { Image } from "../../hooks/usePost";
 
 interface GetImagePostProps {
   images: Image[];
+  postId?: number | string;
+  reFetch?: () => void;
 }
 
-const GetImagePost = ({ images }: GetImagePostProps) => {
+const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [localImages, setLocalImages] = useState<Image[]>(images || []);
 
   return (
     <>
@@ -28,7 +33,7 @@ const GetImagePost = ({ images }: GetImagePostProps) => {
         </div>
         <div className="flex flex-wrap gap-4">
           {images.slice(0, 3).map((image, index) => {
-            const imageUrl = image.public_urls?.local_image_url;
+            const imageUrl = image.s3_urls?.imageUrl || image.public_urls.local_image_url;
             return (
               <img
                 key={index}
@@ -57,21 +62,44 @@ const GetImagePost = ({ images }: GetImagePostProps) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {images.map((image, index) => {
-              const imageUrl = image.public_urls?.local_image_url;
-              return (
-                <div key={index} className="relative group">
-                  <img
-                    src={imageUrl || ""}
-                    alt={`image-${index}`}
-                    className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                  />
-                  <div className="absolute top-2 right-2 badge badge-neutral">
-                    {index + 1}/{images.length}
+              {localImages.map((image, index) => {
+                const imageUrl = image.s3_urls.imageUrl || image.public_urls?.local_image_url;
+                const handleDelete = async () => {
+                  const confirmed = window.confirm("Supprimer cette image ?");
+                  if (!confirmed) return;
+                  try {
+                    await deletePostImage(image.id);
+                    toast.success("Image supprimée");
+                    // remove from local list
+                    setLocalImages((prev) => prev.filter((i) => i.id !== image.id));
+                    // request parent re-fetch if provided
+                    reFetch && reFetch();
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Erreur lors de la suppression");
+                  }
+                };
+
+                return (
+                  <div key={image.id} className="relative group">
+                    <img
+                      src={imageUrl || ""}
+                      alt={`image-${index}`}
+                      className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                    />
+                    <div className="absolute top-2 right-2 badge badge-neutral">
+                      {index + 1}/{localImages.length}
+                    </div>
+                    <button
+                      title="Supprimer"
+                      onClick={handleDelete}
+                      className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">

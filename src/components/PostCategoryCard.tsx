@@ -37,6 +37,7 @@ export default function PostCategoryCard({
   return (
     <motion.div
       layout
+      title="double click to edit"
       onClick={onSelect}
       className={`py-1 px-2 text-sm mb-2 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-300 ${
         isSelected

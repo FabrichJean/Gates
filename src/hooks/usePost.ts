@@ -170,49 +170,9 @@ export const getPostsFromAPI = async (): Promise<TPost[]> => {
 
 // Hook pour récupérer un post par ID
 export function UsePost(id: postID) {
-
     return useFetch<TPost>(apiURL + '/posts/' + id, {
         headers: { Authorization: `Bearer ${token()}` },
     })
-    // const [data, setData] = useState<TPost | null>(null);
-    // const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState<Error | null>(null);
-
-    // useEffect(() => {
-    //     if (!id) {
-    //         setError(new Error("L'Id n'est pas trouvé"));
-    //         setLoading(false);
-    //         return;
-    //     }
-
-    //     const fetchPost = async () => {
-    //         try {
-    //             setLoading(true);
-    //             const response = await axios.get<TPost>(`${apiURL}/posts/${id}`, {
-    //                 headers: { 
-    //                     'Authorization': `Bearer ${getToken()}`,
-    //                     'Content-Type': 'application/json'
-    //                 }
-    //             });
-                
-    //             setData(response.data);
-    //             setLoading(false);
-    //         } catch (err) {
-    //             if (axios.isAxiosError(err)) {
-    //                 setError(new Error(err.response?.data?.message || err.message));
-    //             } else {
-    //                 setError(err instanceof Error ? err : new Error('Failed to fetch post'));
-    //             }
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchPost();
-    // }, [id]);
-
-    // return { data, loading, error };
-
-   
 }
 // Hook pour récupérer tous les posts
 export function UsePosts() {
@@ -290,8 +250,3 @@ export function useNextPost(currentId: string | number | undefined) {
         hasPrev
     };
 }
-
-export function usePostProcessing() {
-    
-}
-

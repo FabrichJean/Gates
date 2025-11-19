@@ -4,23 +4,32 @@ import CheckingSuperadmin from "../CheckingSuperadmin";
 import VideoActions from "./VideoActions";
 import RoleEnum from "../../utils/roleEnum";
 import type { TVideo } from "../../hooks/useVideos";
-import type { User } from "../../hooks/useVideos";
 import { useAuth } from "../../hooks/useAuth";
 
 interface VideoTableRowProps {
   video: TVideo;
   index: number;
-  // user: User | Partial<User>;
   onActivate: (videoId: number) => void;
   onSend: (videoId: number) => void;
+  updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
+  hideTouchLink?: boolean;
+  cancelFn?: (videoId: number) => Promise<any>;
+  reFetchFn?: (delay?: number) => void;
+  detailsPath?: string;
+  convertToMp4Fn?: (videoId: number) => Promise<any>;
 }
 
 const VideoTableRow = ({
   video,
   index,
-  // user,
   onActivate,
   onSend,
+  updateFn,
+  hideTouchLink,
+  cancelFn,
+  reFetchFn,
+  detailsPath,
+  convertToMp4Fn,
 }: VideoTableRowProps) => {
 
   const {user} = useAuth()
@@ -43,12 +52,12 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          {((video as any)?.creatorObj?.avatar) ? (
-            <img src={(video as any).creatorObj.avatar} alt={(video as any).creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
+          {(video?.creatorObj?.avatar) ? (
+            <img src={video?.creatorObj.avatar} alt={video?.creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">No</div>
           )}
-          <div>{(video as any)?.creatorObj?.name ?? video.creator ?? '-'}</div>
+          <div>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</div>
         </div>
       </td>
 
@@ -74,7 +83,7 @@ const VideoTableRow = ({
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <img
-          src={`${video.public_urls?.cover_url || ''}`}
+          src={`${video.s3_urls.coverUrl || video.public_urls?.cover_url || video.s3_urls?.coverUrl || ''}`}
           alt="cover"
           className="w-20 h-12 object-cover rounded-lg mx-auto border border-gray-200 dark:border-gray-600 shadow-sm"
         />
@@ -106,14 +115,20 @@ const VideoTableRow = ({
           reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}
           video={video}
           user={user}
+          updateFn={updateFn}
+          hideTouchLink={hideTouchLink}
         />
       </td>
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
         <VideoActions
           video={video}
-          user={user}
+          user={user!}
           onSend={onSend}
+          cancelFn={cancelFn}
+          reFetchFn={reFetchFn}
+          detailsPath={detailsPath}
+          convertToMp4Fn={convertToMp4Fn}
         />
       </td>
 

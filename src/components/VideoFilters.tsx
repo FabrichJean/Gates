@@ -5,11 +5,13 @@ import UseCategory from "../hooks/useCategory";
 import { getFilteredVideos } from "../api/videos";
 import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, reverseStatus } from "../utils/filter";
+import UseCreators from "../hooks/useCreators";
 
 export type TFilter = {
     category_id: string;
     sub_category_id: string;
     user_id: string;
+    creator_id: string;
     isDeleted: string;
     upload_status: string;
     cover_upload_status: string;
@@ -23,6 +25,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
 
     const { data: users } = useUsers('');
     const { data: cat } = UseCategory();
+    const { data: creators } = UseCreators();
 
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
 
@@ -129,6 +132,20 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                             ))}
                         </select>
                     </div>
+
+                    <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+                        <select
+                            className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
+                            value={filters.creator_id}
+                            onChange={(e) => handleChange("creator_id", e.target.value)}
+                        >
+                            <option value=''>all</option>
+                            {creators?.map((c, i) => (
+                                <option key={i} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {/* 📅 Filtres de date */}
@@ -191,6 +208,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
                             setFilters({
                                 category_id: "",
                                 user_id: "",
+                                creator_id: "",
                                 isDeleted: "all",
                                 upload_status: "all",
                                 cover_upload_status: "all",

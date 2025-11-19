@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { type Plateform } from "../hooks/usePlateform";
 
 import {
@@ -13,7 +12,6 @@ interface Props {
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
-  onEdit: (newName: string) => void;
 }
 
 export default function PlateformCard({
@@ -22,25 +20,12 @@ export default function PlateformCard({
   onSelect,
   categoryId,
   onDelete,
-  onEdit,
 }: Props) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempName, setTempName] = useState(plateform.name ?? "");
   // const [showCategories, setShowCategories] = useState(false);
 
   // const { data: categories } = UseCategory();
 
-  const handleSave = async () => {
-    if (tempName.trim() && tempName !== plateform.name) {
-      //   await updatePlateformApi(plateform.id, tempName.trim())
-      //     .then(() => {
-      //       onEdit(tempName.trim());
-      //       toast.success("Plateforme mise à jour !");
-      //     })
-      //     .catch(() => toast.error("Erreur lors de la mise à jour"));
-    }
-    setIsEditing(false);
-  };
+  // editing features removed for now to avoid unused-state warnings
 
   // const handleAddCategory = async (categoryId: number) => {
   //   try {
@@ -72,13 +57,7 @@ export default function PlateformCard({
       }`}
     >
       {/* --- Nom / Edition --- */}
-      <div
-        className="flex justify-between items-center"
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          setIsEditing(true);
-        }}
-      >
+      <div className="flex justify-between items-center">
         <span className="text-gray-800 dark:text-gray-100 font-medium">
           {plateform.name ?? "Sans nom"}
         </span>
