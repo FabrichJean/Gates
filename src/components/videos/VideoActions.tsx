@@ -210,7 +210,7 @@ const VideoActions = ({
           )}
           
           {/* Convert to MP4 button (only for bot videos) */}
-          {(convertToMp4Fn && video.public_urls?.temp_url) && (
+          {(convertToMp4Fn && !video.public_urls?.temp_url) && (
             <button
               onClick={convertToMp4}
               disabled={converting}
