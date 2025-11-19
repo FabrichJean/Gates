@@ -93,6 +93,7 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
 import ProcessModal from "./ProcessModal";
+import { WavyBackground } from "./ui/shadcn-io/wavy-background";
 
 // Composant Breadcrumb
 const Breadcrumb: React.FC = () => {
@@ -147,11 +148,10 @@ const Breadcrumb: React.FC = () => {
           <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
-            className={`text-sm transition-colors duration-200 ${
-              breadcrumbs.length === 1
+            className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
                 ? "text-gray-900 dark:text-white font-medium cursor-default"
                 : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-            }`}
+              }`}
             disabled={breadcrumbs.length === 1}
           >
             {breadcrumbs[0].name}
@@ -162,11 +162,10 @@ const Breadcrumb: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
             <button
               onClick={() => navigate(breadcrumb.path)}
-              className={`text-sm transition-colors duration-200 ${
-                index === breadcrumbs.length - 2
+              className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
                   ? "text-gray-900 dark:text-white font-medium cursor-default"
                   : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-              }`}
+                }`}
               disabled={index === breadcrumbs.length - 2}
             >
               {breadcrumb.name}
@@ -267,7 +266,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
   };
 
   return (
-    <div className="w-dvw h-dvh  from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative bg-[url('https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg')]">
+    <div className="w-dvw h-dvh  from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative">
       <Toaster />
 
       {/* Desktop Sidebar */}
@@ -289,15 +288,14 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
       {/* Contenu principal */}
       <div
         className={`
-                    flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
-                    ${
-                      isMobile
-                        ? "w-full"
-                        : isCollapsed
-                        ? "w-[calc(100%-5rem)]"
-                        : "w-[calc(100%-16rem)]"
-                    }
-                `}
+                  flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
+                  ${isMobile
+            ? "w-full"
+            : isCollapsed
+              ? "w-[calc(100%-5rem)]"
+              : "w-[calc(100%-16rem)]"
+          }
+              `}
       >
         {/* Header */}
         <header className="relative w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 shadow-sm dark:shadow-gray-800 px-4 py-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
