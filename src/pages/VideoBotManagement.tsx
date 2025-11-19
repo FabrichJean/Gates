@@ -44,6 +44,7 @@ const VideoBotManagement = () => {
         loading={headerLoading}
         onMutate={mutate}
         onWebApp={toWebapp}
+        scope="bot"
       />
 
       {checkObjectContent(filters).hasContent ? (

@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
-import { getFilteredVideos } from "../api/videos";
 import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, reverseStatus } from "../utils/filter";
 import UseCreators from "../hooks/useCreators";
@@ -21,7 +20,7 @@ export type TFilter = {
 }
 
 
-export default function VideoFilters({ onSubmit, params, filters, setFilters }: { params: any, filters: any, setFilters: any, onSubmit: (d: any) => void }) {
+export default function VideoFilters({ onSubmit, params, filters, setFilters, scope = "videos" }: { params: any, filters: any, setFilters: any, onSubmit: (d: any) => void, scope?: "videos" | "bot" }) {
 
     const { data: users } = useUsers('');
     const { data: cat } = UseCategory();
@@ -75,7 +74,16 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters }: 
         const finalQuery = { ...safeParams, ...data };
 
         try {
-            const fetched = await getFilteredVideos(finalQuery);
+            let fetched;
+            if (scope === "bot") {
+                // lazy import the bot api to avoid cycles
+                const { getFilteredBotVideos } = await import("../api/videoBot");
+                fetched = await getFilteredBotVideos(finalQuery);
+            } else {
+                const { getFilteredVideos } = await import("../api/videos");
+                fetched = await getFilteredVideos(finalQuery);
+            }
+
             onSubmit(fetched.data);
 
             console.log("✅ Filtres appliqués :", finalQuery);

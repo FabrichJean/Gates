@@ -58,3 +58,11 @@ export const convertBotVideoToMp4 = async (videoId: number) => {
   );
   return response.data;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getFilteredBotVideos(params: any) {
+  return await axios.get(`${apiURL}/bot-videos`, {
+    headers: headers(),
+    params,
+  });
+}

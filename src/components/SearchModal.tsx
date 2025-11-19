@@ -4,7 +4,11 @@ import { getToken } from "../utils/storage";
 import type { TVideo } from "../hooks/useVideos";
 import { useNavigate } from "react-router-dom";
 
-export default function SearchModal() {
+type SearchModalProps = {
+    scope?: "videos" | "bot";
+};
+
+export default function SearchModal({ scope = "videos" }: SearchModalProps) {
     const [query, setQuery] = useState("");
     const [videos, setVideos] = useState<TVideo[]>([]);
 
@@ -17,7 +21,8 @@ export default function SearchModal() {
                 setVideos([]);
                 return;
             }
-            fetch(`${apiURL}/videos?search=${encodeURIComponent(query)}`, {
+            const endpoint = scope === "bot" ? "bot-videos" : "videos";
+            fetch(`${apiURL}/${endpoint}?search=${encodeURIComponent(query)}`, {
                 headers: { Authorization: `Bearer ${getToken()}` },
             })
                 .then(res => res.json())
@@ -25,7 +30,7 @@ export default function SearchModal() {
                 .catch(console.error);
         }, 300); // 300ms après la dernière frappe
         return () => clearTimeout(timer);
-    }, [query]);
+    }, [query, scope]);
 
     // Raccourci ⌘K pour ouvrir le modal
     useEffect(() => {
@@ -68,12 +73,13 @@ export default function SearchModal() {
                 <ul className="mt-2 max-h-60 overflow-y-auto">
                     {videos.map(v => (
                         <li key={v.id} className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white rounded cursor-pointer transition-colors duration-300 text-gray-700 dark:text-gray-300"
-                            onClick={() => {
-                                const modal = document.getElementById("search_modal_45") as HTMLDialogElement;
-                                modal?.close();
-                                nav('/videos/' + v.id)
-                                console.log("Video selected:", v);
-                            }}>
+                                onClick={() => {
+                                    const modal = document.getElementById("search_modal_45") as HTMLDialogElement;
+                                    modal?.close();
+                                    const base = scope === "bot" ? "/bot-videos/" : "/videos/";
+                                    nav(base + v.id);
+                                    console.log("Video selected:", v);
+                                }}>
                             {v.cover && <img src={v.s3_urls.coverUrl || v.public_urls.cover_url} alt={v.ref} className="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-600" />}
                             <span>{v.ref}</span>
                         </li>
