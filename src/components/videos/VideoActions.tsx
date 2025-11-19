@@ -24,6 +24,7 @@ interface VideoActionsProps {
   detailsPath?: string;
   /** Optional convert to mp4 function (for bot videos) */
   convertToMp4Fn?: (videoId: number) => Promise<any>;
+  hidetails?: boolean
 }
 
 const VideoActions = ({
@@ -32,6 +33,7 @@ const VideoActions = ({
   onSend,
   cancelFn,
   reFetchFn,
+  hidetails,
   detailsPath = "/videos",
   convertToMp4Fn,
 }: VideoActionsProps) => {
@@ -128,7 +130,7 @@ const VideoActions = ({
               - It's not a bot video (convertToMp4Fn is undefined), OR
               - It's a bot video AND it has been converted to MP4 (has temp_url)
             */}
-            {(!convertToMp4Fn || video.public_urls?.temp_url) && (
+            {video.public_urls.temp_url && (
               <button
                 disabled={
                   video.processing === "working" || video.processing === "done"
@@ -276,12 +278,12 @@ const VideoActions = ({
           </div>
         )}
 
-        <Link
+        {!hidetails && <Link
           to={`${detailsPath}/${video.id}`}
           className="px-4 py-2 hover:bg-gray-100/10 cursor-pointer underline rounded-md font-light hover:text-blue-400 transition-all"
         >
           Details
-        </Link>
+        </Link>}
       </div>
     </>
   );

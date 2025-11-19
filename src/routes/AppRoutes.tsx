@@ -33,6 +33,7 @@ import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
 import UserDetails from "../pages/UserDetails";
+import VideoBotEdit from "../pages/VideoBotEdit";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -112,7 +113,7 @@ const AppRoutes = () => (
           </ProtectedRoute>
         }
       />
-      {/* <Route
+      <Route
         path="/bot-videos/:id/edit"
         element={
           <ProtectedRoute>
@@ -121,7 +122,7 @@ const AppRoutes = () => (
             </InsideSidebar>
           </ProtectedRoute>
         }
-      /> */}
+      />
       <Route
         path="/post"
         element={

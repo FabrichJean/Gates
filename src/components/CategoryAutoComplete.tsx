@@ -30,7 +30,7 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get<Category[]>(`${apiURL}/post-categories`, {
+        const res = await axios.get<Category[]>(`${apiURL}/categories`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         setCategories(res.data);
