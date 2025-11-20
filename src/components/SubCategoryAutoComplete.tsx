@@ -10,11 +10,13 @@ interface Props {
   onSelect?: (sub: SubCategory) => void;
 }
 
-const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) => {
+const SubCategoryAutoComplete = ({
+  categoryId,
+  defaultValue,
+  onSelect,
+}: Props) => {
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
-  const [selected, setSelected] = useState<number | "">(
-    defaultValue?.id || ""
-  );
+  const [selected, setSelected] = useState<number | "">(defaultValue?.id || "");
 
   useEffect(() => {
     if (!categoryId) {
@@ -25,7 +27,7 @@ const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) 
 
     const fetchSubCategories = async () => {
       try {
-        const res = await axios.get<{SubCategorys: SubCategory[]}>(
+        const res = await axios.get<{ SubCategorys: SubCategory[] }>(
           `${apiURL}/sub-categories`,
           {
             headers: { Authorization: `Bearer ${getToken()}` },
@@ -59,7 +61,11 @@ const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) 
         --Select a subcategory--
       </option>
       {subCategories?.map((sub) => (
-        <option key={sub.id} value={sub.id} className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+        <option
+          key={sub.id}
+          value={sub.id}
+          className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+        >
           {sub.name}
         </option>
       ))}

@@ -9,7 +9,7 @@ export type Category = {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-  subcategories?: Partial<Category>[]
+  subcategories?: Partial<Category>[];
 };
 
 interface Props {
@@ -22,9 +22,6 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-
-  console.log(filtered);
-  
 
   // Référence pour détecter le clic à l'extérieur
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,11 +45,12 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
 
   // Filtrer la liste selon la saisie
   useEffect(() => {
-    const f = (query && categories.length > 0)
-      ? categories?.filter((cat) =>
-          cat.name.toLowerCase().includes(query.toLowerCase())
-        )
-      : categories;
+    const f =
+      query && categories.length > 0
+        ? categories?.filter((cat) =>
+            cat.name.toLowerCase().includes(query.toLowerCase())
+          )
+        : categories;
 
     setFiltered(f);
   }, [query, categories]);
@@ -60,7 +58,10 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   // Fermer le menu lorsqu'on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -76,9 +77,6 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
     setShowDropdown(false);
     onSelect?.(category);
   };
-
-  console.log(showDropdown);
-  
 
   return (
     <div ref={dropdownRef} className="relative w-full">
