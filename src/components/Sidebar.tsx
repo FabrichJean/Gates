@@ -169,7 +169,7 @@ function Sidebar({
             </h1>
           </div>
 
-          <Link to={"/profil"} className="mt-auto py-4 border-t">
+          <Link to={"/profil"} className="mt-auto py-4 border-t border-gray-200 dark:border-gray-600">
             <div className="flex items-center">
               <img
                 className="h-10 w-10 rounded-full"
