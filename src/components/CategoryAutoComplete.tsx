@@ -23,6 +23,9 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  console.log(filtered);
+  
+
   // Référence pour détecter le clic à l'extérieur
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -30,11 +33,11 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get<Category[]>(`${apiURL}/post-categories`, {
+        const res = await axios.get<Category[]>(`${apiURL}/categories`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
-        setCategories(res.data);
-        setFiltered(res.data);
+        setCategories(res.data || []);
+        setFiltered(res.data || []);
       } catch (error) {
         console.error("Erreur lors du chargement des catégories :", error);
       }
@@ -73,6 +76,9 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
     setShowDropdown(false);
     onSelect?.(category);
   };
+
+  console.log(showDropdown);
+  
 
   return (
     <div ref={dropdownRef} className="relative w-full">

@@ -25,14 +25,14 @@ const SubCategoryAutoComplete = ({ categoryId, defaultValue, onSelect }: Props) 
 
     const fetchSubCategories = async () => {
       try {
-        const res = await axios.get<{ SubCategorys: SubCategory[] }>(
-          `${apiURL}/post-sub-categories`,
+        const res = await axios.get<{SubCategorys: SubCategory[]}>(
+          `${apiURL}/sub-categories`,
           {
             headers: { Authorization: `Bearer ${getToken()}` },
             params: { category_id: categoryId },
           }
         );
-        setSubCategories(res.data.SubCategorys);
+        setSubCategories(res.data.SubCategorys || []);
       } catch (error) {
         console.error("Erreur lors du chargement des sous-catégories :", error);
       }
