@@ -17,6 +17,7 @@ interface VideoHeaderProps {
   loading: { id: number | undefined; type: "transc" | "upload" | "cover" | "webapp" } | undefined;
   onMutate: (data: any) => void;
   onWebApp: (platformIds?: number[]) => void;
+  scope?: "videos" | "bot";
 }
 
 const VideoHeader = ({
@@ -27,6 +28,7 @@ const VideoHeader = ({
   loading,
   onMutate,
   onWebApp,
+  scope = "videos",
 }: VideoHeaderProps) => {
   const fabControls = useAnimation();
   const { data: plateforms } = UsePlateform();
@@ -56,6 +58,7 @@ const VideoHeader = ({
           setFilters={setFilters}
           params={params}
           onSubmit={onMutate}
+          scope={scope}
         />
 
         {/* ---- Filtres et recherche ---- */}
@@ -72,7 +75,7 @@ const VideoHeader = ({
             {checkObjectContent(filters).allEmpty ? null : <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>} <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
           </button>
 
-          <SearchModal />
+          <SearchModal scope={scope} />
 
           <button
             onClick={() => {

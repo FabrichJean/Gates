@@ -9,7 +9,7 @@ export type Category = {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-  subcategories?: Partial<Category>[]
+  subcategories?: Partial<Category>[];
 };
 
 interface Props {
@@ -33,8 +33,8 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
         const res = await axios.get<Category[]>(`${apiURL}/categories`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
-        setCategories(res.data);
-        setFiltered(res.data);
+        setCategories(res.data || []);
+        setFiltered(res.data || []);
       } catch (error) {
         console.error("Erreur lors du chargement des catégories :", error);
       }
@@ -45,11 +45,12 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
 
   // Filtrer la liste selon la saisie
   useEffect(() => {
-    const f = (query && categories.length > 0)
-      ? categories?.filter((cat) =>
-          cat.name.toLowerCase().includes(query.toLowerCase())
-        )
-      : categories;
+    const f =
+      query && categories.length > 0
+        ? categories?.filter((cat) =>
+            cat.name.toLowerCase().includes(query.toLowerCase())
+          )
+        : categories;
 
     setFiltered(f);
   }, [query, categories]);
@@ -57,7 +58,10 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   // Fermer le menu lorsqu'on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };

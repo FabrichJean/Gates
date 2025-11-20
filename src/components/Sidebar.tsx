@@ -10,7 +10,6 @@ import { MdDynamicFeed } from "react-icons/md";
 import { BiLogoInternetExplorer } from "react-icons/bi";
 import { MdVerified } from "react-icons/md";
 
-
 interface SidebarProps {
   isCollapsed: boolean;
   onCloseMobile?: () => void; // utilisé uniquement sur mobile
@@ -169,21 +168,27 @@ function Sidebar({
             </h1>
           </div>
 
-          <Link to={"/profil"} className="mt-auto py-4 border-t border-gray-200 dark:border-gray-600">
+          <Link
+            to={"/profil"}
+            className="mt-auto py-4  px-3 border-t border-gray-200 dark:border-gray-600 flex items-center gap-2"
+          >
             <div className="flex items-center">
               <img
                 className="h-10 w-10 rounded-full"
                 src={`https://api.dicebear.com/9.x/open-peeps/svg?seed=${user?.username}`}
                 alt="User"
               />
-              {!isCollapsed && <div className="ml-3">
-                <p className="text-sm font-medium dark:text-gray-300 flex items-center">
-                  {user?.username || "Unknown User"} <MdVerified className="ml-1 text-blue-500 w-4 h-4" />
-                </p>
-                <p className="text-xs font-medium text-gray-500">
-                  View Profile
-                </p>
-              </div>}
+              {!isCollapsed && (
+                <div className="ml-3">
+                  <p className="text-sm font-medium dark:text-gray-300 flex items-center">
+                    {user?.username || "Unknown User"}{" "}
+                    <MdVerified className="ml-1 text-blue-500 w-4 h-4" />
+                  </p>
+                  <p className="text-xs font-medium text-gray-500">
+                    View Profile
+                  </p>
+                </div>
+              )}
             </div>
           </Link>
 
@@ -212,24 +217,6 @@ function Sidebar({
           </Link>
 
           <Link
-            to="/bot-videos"
-            onClick={() => handleNav("bot-videos")}
-            className={linkClass("bot-videos")}
-          >
-            <RiRobot2Line className="w-6 h-6 text-current" />
-
-            {!isCollapsed && <span className="ml-2">Video Bot</span>}
-          </Link>
-          <Link
-            to="/category-manager"
-            onClick={() => handleNav("category-manager")}
-            className={linkClass("category-manager")}
-          >
-            <MdOutlineCategory className="w-6 h-6 text-current" />
-            {!isCollapsed && <span className="ml-2">Video Category</span>}
-          </Link>
-
-          <Link
             to="/post"
             onClick={() => handleNav("post")}
             className={linkClass("post")}
@@ -241,6 +228,25 @@ function Sidebar({
 
           {user?.role === "superadmin" && (
             <>
+              <Link
+                to="/bot-videos"
+                onClick={() => handleNav("bot-videos")}
+                className={linkClass("bot-videos")}
+              >
+                <RiRobot2Line className="w-6 h-6 text-current" />
+
+                {!isCollapsed && <span className="ml-2">Video Bot</span>}
+              </Link>
+
+              <Link
+                to="/category-manager"
+                onClick={() => handleNav("category-manager")}
+                className={linkClass("category-manager")}
+              >
+                <MdOutlineCategory className="w-6 h-6 text-current" />
+                {!isCollapsed && <span className="ml-2">Video Category</span>}
+              </Link>
+
               <Link
                 to="/post-categories"
                 onClick={() => handleNav("post-categories")}
