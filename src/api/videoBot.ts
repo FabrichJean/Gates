@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosProgressEvent } from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 
@@ -21,6 +21,13 @@ export const sendVideoBotToServer = async (videoId: number) => {
   );
   return response.data;
 };
+
+export async function updateVideoBotWithProgress(videoId: string | number, formData: FormData, onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<any> {
+    return await axios.put(apiURL + "/bot-videos/" + videoId, formData, {
+        headers: headers(),
+        onUploadProgress,
+    });
+}
 
 export const updateVideoBot = async (videoId: number | string | undefined, payload: any) => {
   if (!videoId) throw new Error("Video ID is required");
@@ -58,3 +65,11 @@ export const convertBotVideoToMp4 = async (videoId: number) => {
   );
   return response.data;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getFilteredBotVideos(params: any) {
+  return await axios.get(`${apiURL}/bot-videos`, {
+    headers: headers(),
+    params,
+  });
+}

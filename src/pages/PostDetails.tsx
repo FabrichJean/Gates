@@ -254,12 +254,6 @@ const PostDetails = () => {
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-              published
-            </span>
-          </div>
-          <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Verification
             </p>
