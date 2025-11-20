@@ -95,7 +95,6 @@ export default function SearchModal({ scope = "videos" }: SearchModalProps) {
                 modal?.close();
                 const base = scope === "bot" ? "/bot-videos/" : "/videos/";
                 nav(base + v.id);
-                console.log("Video selected:", v);
               }}
             >
               {v.cover && (
