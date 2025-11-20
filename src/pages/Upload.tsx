@@ -135,11 +135,10 @@ export function TitlesForm({
         className={`font-sans relative flex items-center justify-center gap-2 px-6 py-2.5
     font-medium text-sm rounded-md transition-all duration-300
     backdrop-blur-md border cursor-pointer antialiased tracking-wide
-    ${
-      uploading
-        ? "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed"
-        : "bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:scale-[1.02] active:scale-[0.98]"
-    } focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500`}
+    ${uploading
+            ? "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed"
+            : "bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:scale-[1.02] active:scale-[0.98]"
+          } focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500`}
       >
         {uploading ? (
           <>
@@ -265,11 +264,11 @@ const Upload = () => {
     fd.append("category_id", String(category.id));
     if (subcategory) fd.append("sub_category_id", String(subcategory.id));
     // backend expects 'plateform_id' (single id)
-  if (platform?.id) fd.append("plateform_id", String(platform.id));
-  // prefer sending creator_id when an existing creator is selected,
-  // otherwise fall back to free-text creator name for backward compatibility
-  if (creatorId) fd.append("creator_id", String(creatorId));
-  else if (creator) fd.append("creator", String(creator));
+    if (platform?.id) fd.append("plateform_id", String(platform.id));
+    // prefer sending creator_id when an existing creator is selected,
+    // otherwise fall back to free-text creator name for backward compatibility
+    if (creatorId) fd.append("creator_id", String(creatorId));
+    else if (creator) fd.append("creator", String(creator));
     fd.append("ref", String(ref));
     fd.append("titles", JSON.stringify(coupleTitles));
     try {
@@ -294,7 +293,7 @@ const Upload = () => {
       console.error(err);
       toast.error(
         "Erreur lors de l'upload : " +
-          (err.response?.data?.message || err.message)
+        (err.response?.data?.message || err.message)
       );
     } finally {
       setUploading(false);

@@ -17,6 +17,7 @@ import RoleEnum from "../utils/roleEnum";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import VideoActions from "../components/videos/VideoActions";
 import useSocketSend from "../hooks/useSocketSend";
+import Titles from "./posts/GetPostTitles";
 
 const VideoBotDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -37,8 +38,8 @@ const VideoBotDetails: React.FC = () => {
         (video?.s3_urls?.coverUrl ||
           video?.public_urls.cover_url ||
           video?.cover) +
-          "?t=" +
-          Date.now()
+        "?t=" +
+        Date.now()
       );
     }
   }, [video]);
@@ -55,6 +56,40 @@ const VideoBotDetails: React.FC = () => {
     }
   };
 
+  const downloadAsMp4 = async (url: string, filename: string) => {
+    try {
+      // Récupère le fichier depuis le lien (blob ou url normal)
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        toast.error("Erreur lors du téléchargement du fichier !");
+        return;
+      }
+
+      // Convertir en Blob MP4
+      const blob = await response.blob();
+
+      // Créer un objectURL temporaire pour télécharger
+      const a = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+
+      a.href = objectUrl;
+      a.download = filename.endsWith(".mp4") ? filename : filename + ".mp4";
+      document.body.appendChild(a);
+      a.click();
+
+      // Nettoyage
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+
+      toast.success("Téléchargement lancé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Impossible de télécharger la vidéo !");
+    }
+  };
+
+
   // cancel and convert actions are handled by VideoActions via passed functions
 
   if (!video)
@@ -66,23 +101,37 @@ const VideoBotDetails: React.FC = () => {
 
   return (
     <>
-  {/* Alerts are handled inside child components */}
+      {/* Alerts are handled inside child components */}
       <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
         <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
           <div className="flex justify-between gap-4 items-center w-full">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
-              Bot Video - {formatDateFR(video?.createdAt)}
-            </h2>
-            <div className="flex gap-2">
-                <CheckingSuperadmin
-                  index={0}
-                  reFetch={reFetch}
-                  resource={video}
-                  user={user}
-                  updateFn={updateVideoBot}
-                  hideTouchLink={true}
+            <div className="flex items-center gap-2">
+              {video?.creatorObj?.avatar ? (
+                <img
+                  src={video?.creatorObj.avatar}
+                  alt={video?.creatorObj.name}
+                  className="w-8 h-8 rounded-full object-cover"
                 />
-              </div>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
+                  No
+                </div>
+              )}
+              <div>{video?.creatorObj?.name ?? video.creator ?? "-"}</div>
+            </div>
+            {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
+              Bot Video - {formatDateFR(video?.createdAt)}
+            </h2> */}
+            <div className="flex gap-2">
+              <CheckingSuperadmin
+                index={0}
+                reFetch={reFetch}
+                resource={video}
+                user={user}
+                updateFn={updateVideoBot}
+                hideTouchLink={true}
+              />
+            </div>
           </div>
 
           <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
@@ -98,7 +147,7 @@ const VideoBotDetails: React.FC = () => {
                 <FaPlayCircle
                   className="absolute text-8xl text-white cursor-pointer z-10"
                   onClick={() =>
-                    setVideoPlayed(video.public_urls?.temp_url ? true : false)
+                    setVideoPlayed((video.s3_urls.hlsUrl || video.public_urls.temp_url) ? true : false)
                   }
                 />
                 <img
@@ -153,16 +202,19 @@ const VideoBotDetails: React.FC = () => {
                 reFetchFn={reFetch}
                 detailsPath="/bot-videos"
                 convertToMp4Fn={convertBotVideoToMp4}
+                hidetails
               />
 
               {/* Download MP4 button - visible when temp_url exists and user is superadmin */}
-              {user?.role === RoleEnum.SUPERADMIN && video.public_urls?.temp_url && (
-                <a
-                  href={video.public_urls.temp_url}
-                  download={(video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700"
+              {user?.role === RoleEnum.SUPERADMIN && (video.public_urls?.temp_url || video.s3_urls.hlsUrl) && (
+                <button
+                  onClick={() =>
+                    downloadAsMp4(
+                      video.public_urls.temp_url || video.s3_urls.hlsUrl,
+                      video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`
+                    )
+                  }
+                  className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700 cursor-pointer"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +231,8 @@ const VideoBotDetails: React.FC = () => {
                     />
                   </svg>
                   <span>Download MP4</span>
-                </a>
+                </button>
+
               )}
             </div>
 
@@ -239,35 +292,7 @@ const VideoBotDetails: React.FC = () => {
 
           {/* Video Info */}
           <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Title:
-                </span>
-                <p className="text-gray-800 dark:text-gray-200">
-                  {video.titles?.[0]?.title || <i><small>- none -</small></i>}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Creator:
-                </span>
-                <div className="flex items-center gap-2">
-                  {video?.creatorObj?.avatar ? (
-                    <img
-                      src={video?.creatorObj.avatar}
-                      alt={video?.creatorObj.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
-                      No
-                    </div>
-                  )}
-                  <div>{video?.creatorObj?.name ?? video.creator ?? "-"}</div>
-                </div>
-              </div>
-            </div>
+            <Titles postTitles={(video.titles as any)} />
           </div>
         </div>
       </div>

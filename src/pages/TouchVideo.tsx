@@ -61,26 +61,30 @@ function TouchVideo() {
     const handleCoverClick = () => coverInputRef.current?.click();
 
     const handleSubmit = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formData: any = {
-            ...(coverFile && { cover: coverFile }),
-            ...(videoFile && { video: videoFile }), // ✅ Ajout du fichier vidéo
-            ...(category && { category_id: category.id }),
-            ...(subcategory && { sub_category_id: subcategory.id }),
-            ...(creatorId ? { creator_id: creatorId } : (creator ? { creator } : {})),
-            titles: JSON.stringify(coupleTitles),
-            duration,
-            touching: true
-        };
-
-
         try {
             setUploading(true);
             setProgress(0);
 
-            console.log(formData.titles);
+            const fd = new FormData();
+            if (videoFile) {
+                fd.append("video", videoFile as File);
+            }
+            if (coverFile) {
+                fd.append("cover", coverFile as File);
+            }
+            fd.append("category_id", String(category.id));
+            if (subcategory) fd.append("sub_category_id", String(subcategory.id));
+            // backend expects 'plateform_id' (single id)
+            // if (platform?.id) fd.append("plateform_id", String(platform.id));
+            // prefer sending creator_id when an existing creator is selected,
+            // otherwise fall back to free-text creator name for backward compatibility
+            if (creatorId) fd.append("creator_id", String(creatorId));
+            else if (creator) fd.append("creator", String(creator));
+            // fd.append("ref", String(ref));
+            fd.append("duration", String(duration));
+            fd.append("titles", JSON.stringify(coupleTitles));
 
-            const res = await updateVideo(video.id, formData, (progressEvent) => {
+            const res = await updateVideo(video.id, fd, (progressEvent) => {
                 if (progressEvent.total) {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setProgress(percentCompleted);
@@ -89,7 +93,7 @@ function TouchVideo() {
 
             toast.success("✅ successfull !");
             console.log("Video updated:", res.data);
-            navigate('/videos')
+            navigate('/videos/' + video.id)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err);
@@ -98,7 +102,7 @@ function TouchVideo() {
             setUploading(false);
             setProgress(0);
         }
-    }; 
+    };
 
     return (
         <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
