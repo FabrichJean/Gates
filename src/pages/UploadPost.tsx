@@ -42,7 +42,7 @@ const UploadPost = () => {
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
     const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
-    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
+    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, cover: File | null }[]>([{ id: 1, file: null, cover: null }]);
     const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
     const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,7 +172,7 @@ const UploadPost = () => {
     // Fonctions pour gérer les champs de vidéos
     const addVideoField = () => {
         const newId = Math.max(...videoFields.map(field => field.id)) + 1;
-        setVideoFields(prev => [...prev, { id: newId, file: null }]);
+        setVideoFields(prev => [...prev, { id: newId, file: null, cover: null }]);
     };
 
     const removeVideoField = (id: number) => {
@@ -197,6 +197,15 @@ const UploadPost = () => {
         }
     };
 
+    const handleCoverChange = (id: number, file: File | null) => {
+        // Mettre à jour le cover pour la vidéo correspondante
+        if (file) {
+            setVideoFields(prev => prev.map(field => 
+                field.id === id ? { ...field, cover: file } : field
+            ));
+        }
+    };
+
     // Fonction pour réinitialiser le formulaire
     const handleResetForm = () => {
         setSelectedCategory(null);
@@ -206,7 +215,7 @@ const UploadPost = () => {
         setTitles({});
         setDescriptions({});
         setImageFields([{ id: 1, file: null }]);
-        setVideoFields([{ id: 1, file: null }]);
+        setVideoFields([{ id: 1, file: null, cover: null }]);
         setOpen(false);
         setSubOpen(false);
         setWebAppOpen(false);
@@ -227,6 +236,13 @@ const UploadPost = () => {
         const hasTitle = Object.values(titles).some(title => title.trim() !== "");
         if (!hasTitle) {
             toast.error("Veuillez saisir au moins un titre");
+            return;
+        }
+
+        // Vérifier que chaque vidéo a un cover
+        const videosWithoutCover = videoFields.filter(field => field.file !== null && field.cover === null);
+        if (videosWithoutCover.length > 0) {
+            toast.error("Veuillez ajouter une image cover pour chaque vidéo !");
             return;
         }
 
@@ -263,6 +279,7 @@ const UploadPost = () => {
             plateform_id: selectedWebApp.id,
             titles: JSON.stringify(titlesArray),
             videos: videoFields.filter(field => field.file).map(field => field.file),
+            covers: videoFields.filter(field => field.file && field.cover).map(field => field.cover),
             images: imageFields.filter(field => field.file).map(field => field.file),
         };
 
@@ -281,6 +298,11 @@ const UploadPost = () => {
             // Ajouter les fichiers vidéos
             formData.videos.forEach((video) => {
                 if (video) fd.append('videos', video);
+            });
+
+            // Ajouter les fichiers covers
+            formData.covers.forEach((cover) => {
+                if (cover) fd.append('covers', cover);
             });
 
             // prefer sending creator_id when an existing creator is selected,
@@ -312,7 +334,7 @@ const UploadPost = () => {
             setTitles({});
             setDescriptions({});
             setImageFields([{ id: 1, file: null }]);
-            setVideoFields([{ id: 1, file: null }]);
+            setVideoFields([{ id: 1, file: null, cover: null }]);
             setSelectedOptions([]);
             
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -760,9 +782,10 @@ const UploadPost = () => {
                                 {/* Liste des champs d'upload de vidéos en grille */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                                     {videoFields.map((field) => (
-                                        <div key={`video-${field.id}`} className="space-y-2 w-full">
-                                            {/* Zone d'upload avec style pointillé */}
+                                        <div key={`video-${field.id}`} className="space-y-3 w-full">
+                                            {/* Zone d'upload vidéo */}
                                             <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Video</label>
                                                 <input
                                                     type="file"
                                                     accept="video/*"
@@ -779,7 +802,7 @@ const UploadPost = () => {
                                                 />
                                                 <label
                                                     htmlFor={`video-upload-${field.id}`}
-                                                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-4 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[250px] w-full"
+                                                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-4 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[200px] w-full"
                                                 >
                                                     {field.file ? (
                                                         /* Vidéo sélectionnée */
@@ -797,8 +820,58 @@ const UploadPost = () => {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                             </svg>
                                                             <div className="text-gray-600 dark:text-gray-400">
-                                                                <p className="text-sm font-medium">Click to upload a video</p>
-                                                                <p className="text-xs">MP4, AVI, MOV up to 2GB</p>
+                                                                <p className="text-xs font-medium">Upload video</p>
+                                                                <p className="text-xs">MP4, AVI, MOV</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            </div>
+
+                                            {/* Zone d'upload cover (obligatoire si vidéo) */}
+                                            <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Cover <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file && file.type.startsWith('image/')) {
+                                                            handleCoverChange(field.id, file);
+                                                        }
+                                                        e.target.value = '';
+                                                    }}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                    id={`cover-upload-${field.id}`}
+                                                />
+                                                <label
+                                                    htmlFor={`cover-upload-${field.id}`}
+                                                    className={`border-2 border-dashed ${
+                                                        field.file && !field.cover 
+                                                            ? 'border-red-400 dark:border-red-600' 
+                                                            : 'border-gray-300 dark:border-gray-600'
+                                                    } bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}
+                                                >
+                                                    {field.cover ? (
+                                                        /* Cover sélectionné */
+                                                        <div className="w-full h-full">
+                                                            <img
+                                                                src={URL.createObjectURL(field.cover)}
+                                                                alt="Cover"
+                                                                className="w-full h-full object-cover rounded-md"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        /* Zone vide pour upload cover */
+                                                        <div className="text-center h-full flex flex-col justify-center">
+                                                            <svg className="mx-auto h-6 w-6 text-gray-400 dark:text-gray-500 mb-1" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                            </svg>
+                                                            <div className={`${field.file && !field.cover ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                                                                <p className="text-xs font-medium">Upload cover</p>
+                                                                <p className="text-xs">PNG, JPG, GIF</p>
                                                             </div>
                                                         </div>
                                                     )}

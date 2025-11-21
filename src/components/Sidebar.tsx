@@ -131,8 +131,7 @@ function Sidebar({
     "flex items-center rounded-xl px-3.5 py-3 transition-all duration-300 font-medium cursor-pointer group relative overflow-hidden";
 
   const linkClass = (name: string) =>
-    `${baseClass} ${
-      page === name
+     `${baseClass} ${(location.pathname.startsWith(`/${name}`) && !location.pathname.startsWith(`/${name}-`))
         ? "bg-blue-50/80 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50"
         : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 dark:text-gray-400 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 dark:hover:text-blue-400 hover:scale-105 hover:shadow-md"
     }`;
