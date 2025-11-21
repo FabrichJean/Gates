@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
-import { updateVideo } from "../api/videos";
 import toast from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 // creator removed as object; it's an optional string attribute on video
@@ -11,7 +10,7 @@ import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { TitlesForm } from "./Upload";
 import { UseBotVideo } from "../hooks/bot/useBotVideos";
-import { updateVideoBot, updateVideoBotWithProgress } from "../api/videoBot";
+import { updateVideoBotWithProgress } from "../api/videoBot";
 
 
 function VideoBotEdit() {
