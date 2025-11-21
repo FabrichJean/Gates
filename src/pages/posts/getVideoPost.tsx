@@ -37,7 +37,7 @@ const GetVideoPost = ({ videos, reFetch }: GetVideoPostProps) => {
             const videoUrl = video.s3_urls?.hlsUrl || video.public_urls?.local_mp4_url || video.cdn_url;
             const coverUrl =
               video?.s3_cover_path ||
-              video.local_cover_path ||
+              video?.local_cover_path ||
               "";
 
             return (
