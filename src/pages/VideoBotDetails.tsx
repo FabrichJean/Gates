@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
 import { UseBotVideo, useNextBotVideo } from "../hooks/bot/useBotVideos";
 import { FaPlayCircle } from "react-icons/fa";
-import { formatDateFR } from "../utils/date";
 import {
   sendVideoBotToServer,
   cancelVideoBotUpload,

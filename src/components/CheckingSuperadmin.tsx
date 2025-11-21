@@ -80,8 +80,6 @@ function CheckingSuperadmin({
         />
       )}
 
-      {/* CheckerDrop seulement si la vidéo est vérifiable */}
-      {/* {(video.checking === "null" && user.role === "superadmin") ? null : ( */}
       <CheckerDrop
         resource={actual}
         reFetch={reFetch}
