@@ -285,7 +285,15 @@ const PostDetails = () => {
 
         <GetPostTitles postTitles={post?.titles} />
         <GetImagePost images={post?.images} reFetch={reFetch} />
-        <GetVideoPost videos={post?.videos} reFetch={reFetch} />
+        {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
+        <GetVideoPost
+          videos={(post?.videos || []).map((v) => ({
+            ...v,
+            // use video local_cover_path if present, otherwise fall back to post.local_cover_path
+            local_cover_path: (v as any).local_cover_path ?? (post as any).local_cover_path ?? null,
+          }))}
+          reFetch={reFetch}
+        />
       </div>
     </div>
   );
