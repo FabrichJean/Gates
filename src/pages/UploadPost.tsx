@@ -19,7 +19,7 @@ type Language = {
 
 const UploadPost = () => {
     const navigate = useNavigate();
-    
+
     // Hook pour récupérer les catégories
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
 
@@ -130,8 +130,8 @@ const UploadPost = () => {
             }
 
             const newId = Math.max(0, ...languages.map(lang => lang.id)) + 1;
-            const newLanguage = { 
-                id: newId, 
+            const newLanguage = {
+                id: newId,
                 name: selectedLanguageFromBackend.name,
                 code: selectedLanguageFromBackend.code
             };
@@ -200,7 +200,7 @@ const UploadPost = () => {
     const handleCoverChange = (id: number, file: File | null) => {
         // Mettre à jour le cover pour la vidéo correspondante
         if (file) {
-            setVideoFields(prev => prev.map(field => 
+            setVideoFields(prev => prev.map(field =>
                 field.id === id ? { ...field, cover: file } : field
             ));
         }
@@ -288,7 +288,7 @@ const UploadPost = () => {
 
             // Créer le FormData 
             const fd = new FormData();
-            
+
             // Ajouter les données de base
             fd.append('category_id', formData.category_id.toString());
             fd.append('sub_category_id', formData.sub_category_id.toString());
@@ -326,7 +326,7 @@ const UploadPost = () => {
             toast.success("✅ Post uploadé avec succès !");
             navigate("/post");
             console.log("Post uploaded:", response.data);
-            
+
             // Réinitialiser le formulaire
             setSelectedCategory(null);
             setSelectedSubCategory(null);
@@ -336,7 +336,7 @@ const UploadPost = () => {
             setImageFields([{ id: 1, file: null }]);
             setVideoFields([{ id: 1, file: null, cover: null }]);
             setSelectedOptions([]);
-            
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err);
@@ -374,8 +374,8 @@ const UploadPost = () => {
                                         onClick={() => !categoriesLoading && setOpen(!open)}
                                         disabled={categoriesLoading}
                                         className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${categoriesLoading
-                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                                             }`}>
                                         <span className="block truncate">
                                             {categoriesLoading
@@ -490,9 +490,9 @@ const UploadPost = () => {
                                             ) : (
                                                 availableSubCategories?.subCategories?.map((subCat) => (
                                                     <div key={subCat.id} onClick={() => {
-                                                        setSelectedSubCategory({ 
-                                                            id: subCat.id, 
-                                                            name: subCat.name, 
+                                                        setSelectedSubCategory({
+                                                            id: subCat.id,
+                                                            name: subCat.name,
                                                             categoryId: subCat.category?.id || selectedCategory?.id || 0
                                                         });
                                                         setSubOpen(false);
@@ -541,8 +541,8 @@ const UploadPost = () => {
                                         onClick={() => !plateformsLoading && setWebAppOpen(!webAppOpen)}
                                         disabled={plateformsLoading}
                                         className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${plateformsLoading
-                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                                             }`}>
                                         <span className="block truncate">
                                             {plateformsLoading
@@ -848,11 +848,10 @@ const UploadPost = () => {
                                                 />
                                                 <label
                                                     htmlFor={`cover-upload-${field.id}`}
-                                                    className={`border-2 border-dashed ${
-                                                        field.file && !field.cover 
-                                                            ? 'border-red-400 dark:border-red-600' 
+                                                    className={`border-2 border-dashed ${field.file && !field.cover
+                                                            ? 'border-red-400 dark:border-red-600'
                                                             : 'border-gray-300 dark:border-gray-600'
-                                                    } bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}
+                                                        } bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}
                                                 >
                                                     {field.cover ? (
                                                         /* Cover sélectionné */
@@ -996,7 +995,7 @@ const UploadPost = () => {
                                 Select Language
                             </label>
                             <div className="">
-                                <LanguageAutoComplete 
+                                <LanguageAutoComplete
                                     onSelect={(lang) => setSelectedLanguageFromBackend(lang)}
                                     defaultValue={selectedLanguageFromBackend || undefined}
                                 />

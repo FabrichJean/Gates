@@ -75,8 +75,14 @@ const PostEdit = () => {
     { id: number; file: File | null; url?: string }[]
   >([{ id: 1, file: null }]);
   const [videoFields, setVideoFields] = useState<
-    { id: number; file: File | null; url?: string }[]
-  >([{ id: 1, file: null }]);
+    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
+  >([{ id: 1, file: null, cover: null }]);
+  // separate state for covers (like imageFields)
+  const [coverFields, setCoverFields] = useState<{ id: number; file: File | null; url?: string }[]>
+    ([{ id: 1, file: null }]);
+
+  // existing covers for videos already present on the post
+  const [existingCoverFields, setExistingCoverFields] = useState<{ id: number; file: File | null; url?: string }[]>([]);
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
     useState<Language | null>(null);
@@ -86,7 +92,7 @@ const PostEdit = () => {
   const { data: categoriesResponse } = useCategoryPost();
   const { data: subCategoriesResponse } = useSubCategoryPost(
     selectedCategory?.id
-  );
+  );  
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -236,7 +242,7 @@ const PostEdit = () => {
 
   const addVideoField = () => {
     const newId = Math.max(...videoFields.map((field) => field.id)) + 1;
-    setVideoFields((prev) => [...prev, { id: newId, file: null }]);
+    setVideoFields((prev) => [...prev, { id: newId, file: null, cover: null }]);
   };
 
   const removeVideoField = (id: number) => {
@@ -259,10 +265,48 @@ const PostEdit = () => {
     }
   };
 
+  const handleCoverChange = (id: number, file: File | null) => {
+    if (file) {
+      // if id corresponds to an existing video (present in media `videos`), set it in existingCoverFields
+      const existingVideo = videos.find((v) => v.id === id);
+      if (existingVideo) {
+        setExistingCoverFields((prev) => {
+          const found = prev.find((p) => p.id === id);
+          if (found) return prev.map((p) => (p.id === id ? { ...p, file } : p));
+          return [...prev, { id, file, url: undefined }];
+        });
+      } else {
+        // otherwise update the videoField cover
+        setVideoFields((prev) => prev.map((field) => (field.id === id ? { ...field, cover: file, coverUrl: undefined } : field)));
+        // also keep coverFields in sync for a separate cover state
+        setCoverFields((prev) => prev.map((c) => (c.id === id ? { ...c, file, url: undefined } : c)));
+      }
+    }
+  };
+
   const { updatePost, loading: updating } = useUpdatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Build payload including existing videos followed by newly added video fields
+    const videosPayload: any[] = [];
+
+    // existing videos currently in media state
+    videos.forEach((v) => {
+      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false });
+    });
+
+    // new video fields (user added in form)
+    videoFields
+      .filter((field) => field.file !== null || field.url)
+      .forEach((field) => {
+        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file });
+      });
+
+    const imagesPayload = imageFields
+      .filter((field) => field.file !== null || field.url)
+      .map((field) => ({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file }));
+
     const payload = {
       id: post?.id,
       category_id: selectedCategory?.id ?? post?.postCategory?.id,
@@ -275,20 +319,8 @@ const PostEdit = () => {
           description: descriptions[parseInt(langId)] || "",
         };
       }),
-      images: imageFields
-        .filter((field) => field.file !== null || field.url)
-        .map((field) => ({
-          id: field.id,
-          fileName: field.file?.name || field.url,
-          isNew: !!field.file,
-        })),
-      videos: videoFields
-        .filter((field) => field.file !== null || field.url)
-        .map((field) => ({
-          id: field.id,
-          fileName: field.file?.name || field.url,
-          isNew: !!field.file,
-        })),
+      images: imagesPayload,
+      videos: videosPayload,
       // include deferred deletions so backend can remove them as part of the update
       // deleted_image_ids: deletedImageIds,
       // deleted_video_ids: deletedVideoIds,
@@ -299,8 +331,18 @@ const PostEdit = () => {
     }
 
     // If there are newly added files (file objects), send a FormData so the files are transmitted.
+    // derive a record map of existing video id -> cover File for convenience
+    const existingVideoCovers = existingCoverFields.reduce((acc: Record<number, File | null>, cur) => {
+      acc[cur.id] = cur.file ?? null;
+      return acc;
+    }, {} as Record<number, File | null>);
+
+    // Determine if there are any new files (images, videos, or covers for new/existing videos)
     const hasNewFiles =
-      imageFields.some((f) => f.file) || videoFields.some((f) => f.file);
+      imageFields.some((f) => f.file) ||
+      videoFields.some((f) => f.file) ||
+      coverFields.some((c) => c.file) ||
+      Object.values(existingVideoCovers).some((f) => f);
 
     try {
       if (deletedImageIds.length > 0) {
@@ -315,19 +357,37 @@ const PostEdit = () => {
         // Keep the same metadata structure by sending it as JSON in a field
         fd.append("payload", JSON.stringify(payload));
 
-        // Append new image files (backend expects multiple 'images' fields similar to upload)
-        imageFields
-          .filter((f) => f.file)
-          .forEach((f) => {
-            if (f.file) fd.append("images", f.file, f.file.name);
-          });
+        // Append new image files
+        imageFields.filter((f) => f.file).forEach((f) => {
+          if (f.file) fd.append("images", f.file, f.file.name);
+        });
 
         // Append new video files
-        videoFields
-          .filter((f) => f.file)
-          .forEach((f) => {
-            if (f.file) fd.append("videos", f.file, f.file.name);
-          });
+        videoFields.filter((f) => f.file).forEach((f) => {
+          if (f.file) fd.append("videos", f.file, f.file.name);
+        });
+
+        // Build list of covers in the same order as payload.videos (existing videos first, then new fields)
+        const coversInOrder: (File | null)[] = [];
+        // existing videos
+        videos.forEach((v) => {
+          const c = existingVideoCovers?.[v.id] ?? null;
+          coversInOrder.push(c);
+        });
+        // new videoFields
+        videoFields.forEach((f) => {
+          coversInOrder.push(f.cover ?? null);
+        });
+
+        // Append covers preserving order. For videos without a cover we append an empty blob placeholder
+        coversInOrder.forEach((c, idx) => {
+          if (c) {
+            fd.append("covers", c, c.name);
+          } else {
+            const emptyBlob = new Blob([], { type: "image/jpeg" });
+            fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
+          }
+        });
 
         await updatePost(post?.id, fd);
       } else {
@@ -390,6 +450,12 @@ const PostEdit = () => {
       </div>
     );
   }
+
+  // record map for existing covers to pass down to MediaUploader
+  const existingVideoCoversRecord = existingCoverFields.reduce((acc: Record<number, File | null>, cur) => {
+    acc[cur.id] = cur.file ?? null;
+    return acc;
+  }, {} as Record<number, File | null>);
 
   return (
     <div className="min-h-screen flex items-start pb-6">
@@ -469,12 +535,14 @@ const PostEdit = () => {
               videoFields={videoFields}
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
+              handleCoverChange={handleCoverChange}
               addImageField={addImageField}
               addVideoField={addVideoField}
               removeImageField={removeImageField}
               removeVideoField={removeVideoField}
               setDeletedImageIds={setDeletedImageIds}
               setDeletedVideoIds={setDeletedVideoIds}
+              existingVideoCovers={existingVideoCoversRecord}
               setMedia={setMedia}
             />
 

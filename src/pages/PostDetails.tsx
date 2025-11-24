@@ -248,8 +248,8 @@ const PostDetails = () => {
             <p className="font-medium text-gray-900 dark:text-white">
               {post?.videos[0]
                 ? `${Math.floor(post.videos[0].duration / 60)}:${String(
-                    post?.videos[0].duration % 60
-                  ).padStart(2, "0")}`
+                  post?.videos[0].duration % 60
+                ).padStart(2, "0")}`
                 : "N/A"}
             </p>
           </div>
@@ -287,7 +287,10 @@ const PostDetails = () => {
         <GetImagePost images={post?.images} reFetch={reFetch} />
         {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
         <GetVideoPost
-          videos={post?.videos}
+          videos={(post?.videos || []).map((v: any) => ({
+            ...v,
+            local_cover_path: v.local_cover_path || v.public_urls?.cover_url || v.s3_urls?.coverUrl || (post as any)?.local_cover_path || v.cover || "",
+          }))}
           reFetch={reFetch}
         />
       </div>
