@@ -104,7 +104,7 @@ export default function MediaUploader(props: {
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];
                        // prefer explicit local cover paths returned by backend
-                      const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path || video.public_urls?.thumbnail || video.thumbnail || video.poster || video.cover_url;
+                      const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path;
                       const hasCover = Boolean(chosen) || Boolean(existingUrl);
                       return (
                         <label htmlFor={`exist-cover-${video.id}`} className={`border-2 border-dashed ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}>
