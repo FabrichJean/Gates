@@ -36,6 +36,13 @@ import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
+import UseCreators from "../hooks/useCreators";
+import {
+  addCreatorToPlateformApi,
+  removeCreatorFromPlateformApi,
+  getCreatorsByPlateformApi,
+  clearCreatorsFromPlateformApi,
+} from "../api/plateformCreator";
 
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
@@ -51,6 +58,7 @@ export default function PlateformRelationsManager() {
   const { data: allSubCategories } = UseSubCategory();
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
+  const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<'video' | 'post'>('video');
   //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -215,6 +223,27 @@ export default function PlateformRelationsManager() {
 
       setCatRelations(normalizeCategories(catsRes));
       setSubcatRelations(normalizeSubcategories(subsRes));
+      // fetch creators linked to this platform
+      try {
+  const creatorsRes = await getCreatorsByPlateformApi(plateformId);
+  const payload = ((creatorsRes as any) && (creatorsRes as any).data) ?? creatorsRes;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload as unknown[];
+        else if (Array.isArray((payload as any).creators)) list = (payload as any).creators as unknown[];
+        const normalizedCreators: RelationItem[] = list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.id ?? it.creatorId ?? it.CreatorId) as unknown;
+          const creator = it.creator as Record<string, unknown> | undefined;
+                const name = (creator?.name ?? it.fullName ?? it.username) as unknown;
+          return {
+            id: typeof id === 'number' ? id : Number(id ?? 0),
+            name: typeof name === 'string' ? name : String(name ?? ''),
+          };
+        });
+        setCreatorRelations(normalizedCreators);
+      } catch {
+        setCreatorRelations([]);
+      }
     } catch {
       toast.error("Error loading relations");
     }
@@ -227,6 +256,7 @@ export default function PlateformRelationsManager() {
   // post hooks
   const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
   const { data: allPostSubCategories } = useSubCategoryPost();
+  const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
 
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -400,6 +430,44 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  // Creator linking handlers
+  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
+
+  const handleAddCreator = async (creatorId: number) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    try {
+      await addCreatorToPlateformApi(selectedPlateform, creatorId);
+      toast.success("Creator linked");
+      reFetchCreators?.();
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error adding creator");
+    }
+  };
+
+  const handleRemoveCreator = async (creatorId: number) => {
+    if (!selectedPlateform) return;
+    try {
+      await removeCreatorFromPlateformApi(selectedPlateform, creatorId);
+      toast.success("Creator removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error removing creator");
+    }
+  };
+
+  const handleClearCreators = async () => {
+    if (!selectedPlateform) return;
+    if (!confirm("Remove all creators from this platform?")) return;
+    try {
+      await clearCreatorsFromPlateformApi(selectedPlateform);
+      toast.success("All creators removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error clearing creators");
+    }
+  };
+
   const videoFilteredCategories = allCategories?.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   ) || [];
@@ -545,20 +613,6 @@ export default function PlateformRelationsManager() {
             <>
               <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">
                 <div className="flex gap-2 flex-wrap justify-between w-full">
-                  {/* <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => setSubCategoryModalOpen(true)}
-                      className="btn rounded shadow btn-sm"
-                    >
-                      ➕ link Subcategory
-                    </button>
-                    <button
-                      onClick={handleClearCategories}
-                      className="btn rounded shadow btn-sm text-red-500"
-                    >
-                      🗑️ Clear All
-                    </button>
-                  </div> */}
                 </div>
               </div>
 
@@ -667,6 +721,48 @@ export default function PlateformRelationsManager() {
                   )}
                 </div>
               </div>
+              {/* Creators block */}
+              <div className="mt-6">
+                <div className="flex gap-2 flex-wrap mb-3">
+                  <button
+                    onClick={() => setCreatorModalOpen(true)}
+                    className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>link Creator</span>
+                  </button>
+                  <button
+                    onClick={handleClearCreators}
+                    className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                    </svg>
+                    <span>Clear All</span>
+                  </button>
+                </div>
+                <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Linked Creators</h3>
+                {creatorRelations.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
+                ) : (
+                  creatorRelations.map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                    >
+                      <span className="ml-5">{c.name}</span>
+                      <button
+                        onClick={() => handleRemoveCreator(c.id)}
+                        className="btn rounded shadow btn-sm text-red-500"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
             </>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
@@ -741,6 +837,47 @@ export default function PlateformRelationsManager() {
             >
               Close
             </button>
+          </div>
+        </div>
+      </dialog>
+
+      {/* Creator Modal */}
+      <dialog
+        id="creatorModal"
+        className={`modal ${creatorModalOpen ? "modal-open" : ""}`}
+      >
+        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+          <h3 className="font-bold text-lg mb-3">Link Creator</h3>
+          <input
+            type="text"
+            placeholder="Search creator..."
+            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="max-h-60 overflow-auto">
+            {(allCreators || []).filter((c: any) => (c.name ?? '').toLowerCase().includes(search.toLowerCase())).length === 0 && search.trim() !== "" ? (
+              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                <span className="italic text-gray-500 dark:text-gray-400">No creator</span>
+              </div>
+            ) : (
+              (allCreators || []).filter((c: any) => (c.name ?? '').toLowerCase().includes(search.toLowerCase())).map((creator: any) => {
+                const isLinked = creatorRelations.some((rc) => rc.id === creator.id);
+                return (
+                  <div key={creator.id} className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                    <span className="ml-5">{creator.name}</span>
+                    {isLinked ? (
+                      <button className="btn btn-xs btn-disabled">Linked</button>
+                    ) : (
+                      <button onClick={() => { handleAddCreator(creator.id); setCreatorModalOpen(false); }} className="btn btn-xs btn-primary">Add</button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <div className="modal-action">
+            <button onClick={() => setCreatorModalOpen(false)} className="btn btn-outline">Close</button>
           </div>
         </div>
       </dialog>

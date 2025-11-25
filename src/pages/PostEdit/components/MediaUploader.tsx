@@ -17,6 +17,7 @@ export default function MediaUploader(props: {
   setDeletedVideoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setMedia: React.Dispatch<React.SetStateAction<{ images: any[]; videos: any[] }>>;
 }) {
+
   const { images, videos, imageFields, videoFields, handleImageChange, handleVideoChange, handleCoverChange, addImageField, addVideoField, removeImageField, removeVideoField, setDeletedImageIds, setDeletedVideoIds, setMedia } = props;
 
   const { existingVideoCovers } = props as any;
