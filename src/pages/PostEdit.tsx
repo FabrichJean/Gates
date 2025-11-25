@@ -73,10 +73,10 @@ const PostEdit = () => {
 
   const [imageFields, setImageFields] = useState<
     { id: number; file: File | null; url?: string }[]
-  >([{ id: 1, file: null }]);
+  >([]);
   const [videoFields, setVideoFields] = useState<
     { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
-  >([{ id: 1, file: null, cover: null }]);
+  >([]);
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
@@ -216,7 +216,7 @@ const PostEdit = () => {
   };
 
   const addImageField = () => {
-    const newId = Math.max(...imageFields.map((field) => field.id)) + 1;
+    const newId = imageFields.length > 0 ? Math.max(...imageFields.map((field) => field.id)) + 1 : 1;
     setImageFields((prev) => [...prev, { id: newId, file: null }]);
   };
 
@@ -237,7 +237,7 @@ const PostEdit = () => {
   };
 
   const addVideoField = () => {
-    const newId = Math.max(...videoFields.map((field) => field.id)) + 1;
+    const newId = videoFields.length > 0 ? Math.max(...videoFields.map((field) => field.id)) + 1 : 1;
     setVideoFields((prev) => [...prev, { id: newId, file: null, cover: null }]);
   };
 
