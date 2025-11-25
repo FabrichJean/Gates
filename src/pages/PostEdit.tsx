@@ -77,12 +77,8 @@ const PostEdit = () => {
   const [videoFields, setVideoFields] = useState<
     { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
   >([{ id: 1, file: null, cover: null }]);
-  // separate state for covers (like imageFields)
-  const [coverFields, setCoverFields] = useState<{ id: number; file: File | null; url?: string }[]>
-    ([{ id: 1, file: null }]);
-
-  // existing covers for videos already present on the post
-  const [existingCoverFields, setExistingCoverFields] = useState<{ id: number; file: File | null; url?: string }[]>([]);
+  // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
+  const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
     useState<Language | null>(null);
@@ -92,7 +88,7 @@ const PostEdit = () => {
   const { data: categoriesResponse } = useCategoryPost();
   const { data: subCategoriesResponse } = useSubCategoryPost(
     selectedCategory?.id
-  );  
+  );
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -267,19 +263,11 @@ const PostEdit = () => {
 
   const handleCoverChange = (id: number, file: File | null) => {
     if (file) {
-      // if id corresponds to an existing video (present in media `videos`), set it in existingCoverFields
       const existingVideo = videos.find((v) => v.id === id);
       if (existingVideo) {
-        setExistingCoverFields((prev) => {
-          const found = prev.find((p) => p.id === id);
-          if (found) return prev.map((p) => (p.id === id ? { ...p, file } : p));
-          return [...prev, { id, file, url: undefined }];
-        });
+        setExistingVideoCovers((prev) => ({ ...prev, [id]: file }));
       } else {
-        // otherwise update the videoField cover
         setVideoFields((prev) => prev.map((field) => (field.id === id ? { ...field, cover: file, coverUrl: undefined } : field)));
-        // also keep coverFields in sync for a separate cover state
-        setCoverFields((prev) => prev.map((c) => (c.id === id ? { ...c, file, url: undefined } : c)));
       }
     }
   };
@@ -331,17 +319,10 @@ const PostEdit = () => {
     }
 
     // If there are newly added files (file objects), send a FormData so the files are transmitted.
-    // derive a record map of existing video id -> cover File for convenience
-    const existingVideoCovers = existingCoverFields.reduce((acc: Record<number, File | null>, cur) => {
-      acc[cur.id] = cur.file ?? null;
-      return acc;
-    }, {} as Record<number, File | null>);
-
-    // Determine if there are any new files (images, videos, or covers for new/existing videos)
+    // determine if there are any new files (images, videos, covers for new/existing videos)
     const hasNewFiles =
       imageFields.some((f) => f.file) ||
-      videoFields.some((f) => f.file) ||
-      coverFields.some((c) => c.file) ||
+      videoFields.some((f) => f.file || f.cover) ||
       Object.values(existingVideoCovers).some((f) => f);
 
     try {
@@ -451,11 +432,8 @@ const PostEdit = () => {
     );
   }
 
-  // record map for existing covers to pass down to MediaUploader
-  const existingVideoCoversRecord = existingCoverFields.reduce((acc: Record<number, File | null>, cur) => {
-    acc[cur.id] = cur.file ?? null;
-    return acc;
-  }, {} as Record<number, File | null>);
+  // record map for existing covers to pass down to MediaUploader (use state)
+  const existingVideoCoversRecord = existingVideoCovers;
 
   return (
     <div className="min-h-screen flex items-start pb-6">
@@ -560,11 +538,10 @@ const PostEdit = () => {
               <button
                 type="submit"
                 disabled={updating}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${
-                  updating
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-blue-700"
-                }`}
+                  }`}
               >
                 <svg
                   className="w-5 h-5"

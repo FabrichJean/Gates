@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
 import Login from "../pages/Login";
@@ -51,13 +51,7 @@ const AppRoutes = () => (
           } />
         <Route
           path="/"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <VideosManagment />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
+          element={ <Navigate to="/videos" /> }
         />
         <Route
           path="/users"
