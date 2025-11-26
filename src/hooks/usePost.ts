@@ -99,6 +99,7 @@ export type Video = {
     updatedAt: string;
     public_urls: VideoPublicUrls;
     s3_urls: VideoS3Urls;
+    type: '1' | '2';
     // optional local cover path provided by backend (new field)
     local_cover_path?: string | null;
 };

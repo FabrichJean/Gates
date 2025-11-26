@@ -125,6 +125,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 {formatDateFR(video?.createdAt)}
               </h2>
               <div className="flex gap-2">
+                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{ video.type === '1' ? 'short' : 'long' }</span>
                 <CheckingSuperadmin
                   index={0}
                   reFetch={reFetch}

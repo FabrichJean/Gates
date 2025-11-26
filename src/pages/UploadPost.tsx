@@ -42,7 +42,7 @@ const UploadPost = () => {
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
     const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
-    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, cover: File | null }[]>([{ id: 1, file: null, cover: null }]);
+    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, cover: File | null, type?: string }[]>([{ id: 1, file: null, cover: null, type: 'long' }]);
     const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
     const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,13 +172,17 @@ const UploadPost = () => {
     // Fonctions pour gérer les champs de vidéos
     const addVideoField = () => {
         const newId = Math.max(...videoFields.map(field => field.id)) + 1;
-        setVideoFields(prev => [...prev, { id: newId, file: null, cover: null }]);
+        setVideoFields(prev => [...prev, { id: newId, file: null, cover: null, type: 'long' }]);
     };
 
     const removeVideoField = (id: number) => {
         if (videoFields.length > 1) {
             setVideoFields(prev => prev.filter(field => field.id !== id));
         }
+    };
+
+    const handleVideoTypeChange = (id: number, value: 'short' | 'long') => {
+        setVideoFields(prev => prev.map(field => field.id === id ? { ...field, type: value } : field));
     };
 
     const handleVideoChange = (id: number, file: File | null) => {
@@ -215,7 +219,7 @@ const UploadPost = () => {
         setTitles({});
         setDescriptions({});
         setImageFields([{ id: 1, file: null }]);
-        setVideoFields([{ id: 1, file: null, cover: null }]);
+        setVideoFields([{ id: 1, file: null, cover: null, type: 'long' }]);
         setOpen(false);
         setSubOpen(false);
         setWebAppOpen(false);
@@ -280,6 +284,8 @@ const UploadPost = () => {
             titles: JSON.stringify(titlesArray),
             videos: videoFields.filter(field => field.file).map(field => field.file),
             covers: videoFields.filter(field => field.file && field.cover).map(field => field.cover),
+            // mapShorts: array of booleans matching the videos order (true for short)
+            mapShorts: videoFields.filter(field => field.file).map(field => field.type === 'short'),
             images: imageFields.filter(field => field.file).map(field => field.file),
         };
 
@@ -314,6 +320,11 @@ const UploadPost = () => {
             formData.images.forEach((image) => {
                 if (image) fd.append('images', image);
             });
+
+            // Ajouter mapShorts (ordre correspondant aux vidéos ajoutées)
+            if (formData.mapShorts) {
+                fd.append('mapShorts', JSON.stringify(formData.mapShorts));
+            }
 
             // @ts-ignore
             const response = await axios.post(`${apiURL}/posts/submit`, fd, {
@@ -640,47 +651,28 @@ const UploadPost = () => {
                                         <span>Add Title</span>
                                     </button>
                                 </div>
-                                <div className="space-y-4 w-full">
-                                    {languages.length === 0 ? (
-                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                            <p className="text-sm">No titles created yet. Click "Add Title" to create your first title.</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {/* Champ titre */}
-                                            {selectedLanguage && (
-                                                <div className="w-full">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Title ({selectedLanguage.name})
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        value={titles[selectedLanguage.id] || ''}
-                                                        onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
-                                                        placeholder={`Enter title in ${selectedLanguage.name}`}
-                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
-                                                    />
-                                                </div>
-                                            )}
+                                {selectedLanguage && (
+                                    <div className="space-y-2">
+                                        <input
+                                            type="text"
+                                            value={titles[selectedLanguage.id] || ''}
+                                            onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
+                                            placeholder={`Enter title in ${selectedLanguage.name}`}
+                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                        />
 
-                                            {/* Champ description */}
-                                            {selectedLanguage && (
-                                                <div className="w-full">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Description ({selectedLanguage.name})
-                                                    </label>
-                                                    <textarea
-                                                        value={descriptions[selectedLanguage.id] || ''}
-                                                        onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
-                                                        placeholder={`Enter description in ${selectedLanguage.name}`}
-                                                        rows={4}
-                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
-                                                    />
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Description ({selectedLanguage.name})
+                                        </label>
+                                        <textarea
+                                            value={descriptions[selectedLanguage.id] || ''}
+                                            onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
+                                            placeholder={`Enter description in ${selectedLanguage.name}`}
+                                            rows={4}
+                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Divider */}
@@ -876,6 +868,35 @@ const UploadPost = () => {
                                                     )}
                                                 </label>
                                             </div>
+
+                                            {/* zone de selection type `short` ou `long` */}
+                                            <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleVideoTypeChange(field.id, 'short')}
+                                                        className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'short'
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            }`} 
+                                                    >
+                                                        Short
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleVideoTypeChange(field.id, 'long')}
+                                                        className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'long'
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            }`} 
+                                                    >
+                                                        Long
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
 
                                             {/* Bouton supprimer placé en bas du champ */}
                                             {videoFields.length > 1 && (

@@ -75,7 +75,7 @@ const PostEdit = () => {
     { id: number; file: File | null; url?: string }[]
   >([]);
   const [videoFields, setVideoFields] = useState<
-    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
+    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string; type?: string }[]
   >([]);
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
@@ -238,7 +238,7 @@ const PostEdit = () => {
 
   const addVideoField = () => {
     const newId = videoFields.length > 0 ? Math.max(...videoFields.map((field) => field.id)) + 1 : 1;
-    setVideoFields((prev) => [...prev, { id: newId, file: null, cover: null }]);
+    setVideoFields((prev) => [...prev, { id: newId, file: null, cover: null, type: 'long' }]);
   };
 
   const removeVideoField = (id: number) => {
@@ -261,6 +261,20 @@ const PostEdit = () => {
     }
   };
 
+  // Map frontend type <-> backend representation
+  const frontToBackendType = (val: 'short' | 'long') => (val === 'long' ? '2' : '1');
+
+  // Update type for a new video field (user-added)
+  const handleVideoTypeChange = (id: number, value: 'short' | 'long') => {
+    setVideoFields((prev) => prev.map((f) => (f.id === id ? { ...f, type: value } : f)));
+  };
+
+  // Update type for an existing video (already stored on the post)
+  const handleExistingVideoTypeChange = (id: number, value: 'short' | 'long') => {
+    const t = frontToBackendType(value);
+    setMedia((prev) => ({ ...prev, videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)) }));
+  };
+
   const handleCoverChange = (id: number, file: File | null) => {
     if (file) {
       const existingVideo = videos.find((v) => v.id === id);
@@ -279,16 +293,17 @@ const PostEdit = () => {
     // Build payload including existing videos followed by newly added video fields
     const videosPayload: any[] = [];
 
-    // existing videos currently in media state
+    // existing videos currently in media state (preserve their backend 'type' if present)
     videos.forEach((v) => {
-      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false });
+      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false, type: (v as any).type ?? '2' });
     });
 
-    // new video fields (user added in form)
+    // new video fields (user added in form) — include the chosen type (map front->backend)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
-        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file });
+        const t = field.type === 'short' ? '1' : '2';
+        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file, type: t });
       });
 
     const imagesPayload = imageFields
@@ -334,9 +349,34 @@ const PostEdit = () => {
       }
 
       if (hasNewFiles) {
+        // Build titles array matching UploadPost format: [{title, i18_language, description?}, ...]
+        const titlesArray = Object.entries(titles).map(([langId, title]) => {
+          const lang = languages.find((l) => l.id === parseInt(langId));
+          return {
+            title,
+            i18_language: lang?.code,
+            ...(descriptions[parseInt(langId)] ? { description: descriptions[parseInt(langId)] } : {}),
+          };
+        });
+
         const fd = new FormData();
-        // Keep the same metadata structure by sending it as JSON in a field
+        // Keep the same metadata structure by sending it as JSON in a field (backwards compatible)
         fd.append("payload", JSON.stringify(payload));
+
+        // Also append individual fields in the same shape as UploadPost to avoid backend parsing issues
+        if (post?.id) fd.append('id', String(post.id));
+        fd.append('category_id', String(selectedCategory?.id ?? post?.postCategory?.id ?? ''));
+        fd.append('sub_category_id', String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? ''));
+        fd.append('titles', JSON.stringify(titlesArray));
+
+        // Provide full videos metadata so backend can correlate existing entries with uploaded files
+        fd.append('videos_metadata', JSON.stringify(videosPayload));
+
+        // mapShorts: array of booleans matching the videos order (true for short)
+        // UploadPost builds mapShorts as booleans where `true` means short (for uploaded videos).
+        // Here we build the same shape for the full `videosPayload` (existing + new)
+        const mapShorts = videosPayload.map((v) => String(v.type) === '1');
+        fd.append("mapShorts", JSON.stringify(mapShorts));
 
         // Append new image files
         imageFields.filter((f) => f.file).forEach((f) => {
@@ -370,9 +410,35 @@ const PostEdit = () => {
           }
         });
 
+        // Debug logs to inspect what is sent to the backend
+        console.group("UpdatePost Payload Debug (FormData)");
+        console.log("payload", payload);
+        console.log("mapShorts", mapShorts);
+        console.log(
+          "newImages",
+          imageFields.filter((f) => f.file || f.url).map((f) => (f.file ? f.file.name : f.url))
+        );
+        console.log(
+          "newVideos",
+          videoFields.filter((f) => f.file || f.url).map((f) => (f.file ? f.file.name : f.url))
+        );
+        console.log("existingVideosOrder", videos.map((v) => v.id));
+        console.log(
+          "coversInOrder",
+          coversInOrder.map((c, i) => (c ? (c as File).name : `no_cover_${i}.jpg`))
+        );
+        console.groupEnd();
+
         await updatePost(post?.id, fd);
       } else {
         // No files to upload — send JSON payload as before
+        // mapShorts: array of booleans matching the videos order (true for short)
+        // Match UploadPost format: booleans where `true` means short
+        (payload as any).mapShorts = videosPayload.map((v) => String(v.type) === '1');
+        // Debug log JSON payload
+        console.group("UpdatePost Payload Debug (JSON)");
+        console.log("payload", payload);
+        console.groupEnd();
         await updatePost(post?.id, payload);
       }
 
@@ -437,7 +503,7 @@ const PostEdit = () => {
 
   return (
     <div className="min-h-screen flex items-start pb-6">
-      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6">
+      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-2">
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
@@ -514,6 +580,8 @@ const PostEdit = () => {
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
               handleCoverChange={handleCoverChange}
+              handleVideoTypeChange={handleVideoTypeChange}
+              handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
               addVideoField={addVideoField}
               removeImageField={removeImageField}

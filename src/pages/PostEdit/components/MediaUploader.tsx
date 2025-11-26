@@ -4,10 +4,12 @@ export default function MediaUploader(props: {
   images: any[];
   videos: any[];
   imageFields: { id: number; file: File | null; url?: string }[];
-  videoFields: { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[];
+  videoFields: { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string; type?: string }[];
   handleImageChange: (id: number, file: File | null) => void;
   handleVideoChange: (id: number, file: File | null) => void;
   handleCoverChange: (id: number, file: File | null) => void;
+  handleVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
+  handleExistingVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
   existingVideoCovers?: Record<number, File | null>;
   addImageField: () => void;
   addVideoField: () => void;
@@ -17,7 +19,7 @@ export default function MediaUploader(props: {
   setDeletedVideoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setMedia: React.Dispatch<React.SetStateAction<{ images: any[]; videos: any[] }>>;
 }) {
-  const { images, videos, imageFields, videoFields, handleImageChange, handleVideoChange, handleCoverChange, addImageField, addVideoField, removeImageField, removeVideoField, setDeletedImageIds, setDeletedVideoIds, setMedia } = props;
+  const { images, videos, imageFields, videoFields, handleImageChange, handleVideoChange, handleCoverChange, addImageField, addVideoField, removeImageField, removeVideoField, setDeletedImageIds, setDeletedVideoIds, setMedia, handleVideoTypeChange, handleExistingVideoTypeChange } = props;
 
   const { existingVideoCovers } = props as any;
 
@@ -90,6 +92,7 @@ export default function MediaUploader(props: {
               setDeletedVideoIds((prev) => [...prev, video.id]);
               setMedia((prev) => ({ ...prev, videos: prev.videos.filter((v) => v.id !== video.id) }));
             };
+            
 
             return (
               <div key={video.id} className="relative group">
@@ -128,6 +131,25 @@ export default function MediaUploader(props: {
                         </label>
                       );
                     })()}
+                  </div>
+                  <div className="mt-2">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => handleExistingVideoTypeChange?.(video.id, 'short')}
+                        className={`px-3 py-1 text-xs rounded-md ${video.type === '2' ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' : 'bg-indigo-600 text-white'}`}
+                      >
+                        Short
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleExistingVideoTypeChange?.(video.id, 'long')}
+                        className={`px-3 py-1 text-xs rounded-md ${video.type === '2' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+                      >
+                        Long
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -175,6 +197,25 @@ export default function MediaUploader(props: {
                     </div>
                   )}
                 </label>
+              </div>
+              <div className="relative w-full">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => handleVideoTypeChange?.(field.id, 'short')}
+                    className={`px-3 py-1 text-xs rounded-md ${field.type === 'short' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+                  >
+                    Short
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleVideoTypeChange?.(field.id, 'long')}
+                    className={`px-3 py-1 text-xs rounded-md ${field.type === 'long' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+                  >
+                    Long
+                  </button>
+                </div>
               </div>
 
               {videoFields.length > 1 && (

@@ -61,6 +61,7 @@ const GetVideoPost = ({ videos, reFetch }: GetVideoPostProps) => {
                   </div>
                 ) : (
                   <div className="relative h-40 md:h-48 rounded-lg overflow-hidden bg-black">
+                    <span className="absolute top-2 left-2 px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{ video.type === '1' ? 'short' : 'long' }</span>
                     <img
                       src={coverUrl}
                       alt={`cover-${video.id}`}

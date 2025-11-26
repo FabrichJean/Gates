@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from 'framer-motion';
 import { useProcessingCount } from "./useProcessingCount";
 
 interface ProcessModalProps {
@@ -25,7 +26,7 @@ const ProcessModal: React.FC<ProcessModalProps> = ({ open, onClose }) => {
     if (!open) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 bg-black/30">
-            <div ref={modalRef} className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md mx-auto p-6 relative">
+            <div ref={modalRef} className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-md mx-auto p-6 relative border border-gray-100 dark:border-gray-500">
                 <h2 className="text-xl font-bold mb-4 text-left text-gray-800 dark:text-gray-100">Process</h2>
                 <div className="border-b border-gray-200 dark:border-gray-700 mb-4"></div>
                 <button
@@ -38,7 +39,7 @@ const ProcessModal: React.FC<ProcessModalProps> = ({ open, onClose }) => {
                     </svg>
                 </button>
 
-                <div className="mb-4 border-b border-default">
+                <div className="mb-4">
                     <ul className="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
                         <li className="me-2" role="presentation">
                             <button
@@ -47,9 +48,16 @@ const ProcessModal: React.FC<ProcessModalProps> = ({ open, onClose }) => {
                                 aria-controls="video"
                                 aria-selected={activeTab === 'video'}
                                 onClick={() => setActiveTab('video')}
-                                className={`inline-block p-4 rounded-t-base ${activeTab === 'video' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`inline-block px-4 rounded-t-base relative pb-2 ${activeTab === 'video' ? 'text-blue-500' : 'text-gray-200 hover:text-gray-300'}`}
                             >
                                 Videos
+                                {activeTab === 'video' && (
+                                    <motion.span
+                                        layoutId="tab-underline"
+                                        className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-500 rounded"
+                                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                    />
+                                )}
                             </button>
                         </li>
                         <li className="me-2" role="presentation">
@@ -59,9 +67,16 @@ const ProcessModal: React.FC<ProcessModalProps> = ({ open, onClose }) => {
                                 aria-controls="post-video"
                                 aria-selected={activeTab === 'post-video'}
                                 onClick={() => setActiveTab('post-video')}
-                                className={`inline-block p-4 rounded-t-base ${activeTab === 'post-video' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                className={`inline-block px-4 rounded-t-base relative pb-2 ${activeTab === 'post-video' ? 'text-blue-500' : 'text-gray-200 hover:text-gray-300'}`}
                             >
                                 Post
+                                {activeTab === 'post-video' && (
+                                    <motion.span
+                                        layoutId="tab-underline"
+                                        className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-500 rounded"
+                                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                    />
+                                )}
                             </button>
                         </li>
                     </ul>
