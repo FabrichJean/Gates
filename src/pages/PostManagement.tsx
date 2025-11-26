@@ -18,6 +18,8 @@ const PostManagementInner = () => {
   
   const posts = data?.posts || [];
   const total = data?.total || 0;
+  // @ts-ignore
+  const totalSent = data?.totalSent;
   const limit = data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +63,8 @@ const PostManagementInner = () => {
                 <Columns className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </button>
               <SendToWebApp />
+              {/* @ts-ignore */}
+              <small>(video sent) : {totalSent}</small>
             </div>
 
             <div className="flex items-center gap-2">
