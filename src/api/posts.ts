@@ -98,3 +98,11 @@ export async function deleteManyImages(ids: number[] ) {
     },
   });
 }
+
+export async function togglePostStatus(id: string | number): Promise<void> {
+  return await axios.put(`${apiURL}/posts/${id}/toggleStatus`, null, {
+      headers: {
+          Authorization: `Bearer ${getToken()}`,
+      }
+  });
+}

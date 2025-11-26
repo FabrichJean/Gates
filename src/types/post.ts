@@ -15,6 +15,7 @@ export interface Post {
   postCategory: PostCategory;
   postSubCategory: PostSubCategory;
   plateform: Plateform;
+  isDeleted: boolean;
   videos: PostVideo[];
   images: PostImage[];
 }
