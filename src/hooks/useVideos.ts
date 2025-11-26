@@ -12,6 +12,7 @@ export type TVideo = {
   id: number;
   user_id: number;
   checking: Checking;
+  type: '1' | '2';
   comment: string;
   category: Category;
   subCategory: SubCategory;
