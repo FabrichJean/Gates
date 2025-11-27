@@ -30,7 +30,7 @@ const SelectModal = ({ open, onClose, onSubmit, title = "Sync option", options =
             aria-hidden={!open}
             className={`${open ? "flex" : "hidden"} overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
         >
-            <div className="relative p-4 w-full max-w-md max-h-full inset-0 backdrop-blur-2xl border boder-white shadow-lg">
+            <div className="relative p-4 w-full max-w-md max-h-full inset-0 dark:bg-gray-800 backdrop-blur-2xl border boder-white shadow-lg">
                 <div className="relative bg-neutral-primary-soft border border-default rounded-base shadow-sm p-4 md:p-6">
                     <div className="flex items-center justify-between border-b border-default pb-4 md:pb-5">
                         <h3 className="text-lg font-medium text-heading">{title}</h3>

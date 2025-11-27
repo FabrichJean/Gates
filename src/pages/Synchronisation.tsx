@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SelectModal from "../components/SelectModal";
 import useSyncOption from "../hooks/useSyncOption";
+import CardFlottant from "../components/CardFlottant";
 
 const Synchronisation = () => {
     const [modalOpen, setModalOpen] = useState(false);
@@ -79,7 +80,6 @@ const Synchronisation = () => {
                             </tbody>
                         </table>
                     </div>
-
                 </div>
 
                 <SelectModal
@@ -91,7 +91,11 @@ const Synchronisation = () => {
                     onSubmit={handleSubmit}
                 />
             </div>
+            {/* <CardFlottant /> */}
+
         </div>
+
+
     );
 };
 
