@@ -5,6 +5,7 @@ import axios from "axios";
 type SyncPayload = {
     isForce: boolean;
     label?: string | null;
+    platformId?: number | null;
 };
 
 type SyncResult = any;
@@ -14,22 +15,26 @@ export default function useSyncOption() {
     const [error, setError] = useState<Error | null>(null);
     const [data, setData] = useState<SyncResult | null>(null);
 
-    const sync = async ({ isForce, label }: SyncPayload) => {
+    const sync = async ({ isForce, label, platformId }: SyncPayload) => {
         setLoading(true);
         setError(null);
         try {
 
             const url = label ? `${apiURL}/synchronize/retry/${label}?isForce=${isForce}` : `${apiURL}/synchronize/?isForce=${isForce}`;
 
-            const res = await axios.post(
-                url,
-                {
-                    params: { isForce },
-                    headers: {
-                        Authorization: `Bearer ${token()}`
-                    }
+            const payload: any = {
+                params: { isForce },
+                headers: {
+                    Authorization: `Bearer ${token()}`
                 }
-            );
+            };
+
+            // Add platformId to the request body if provided
+            if (platformId) {
+                payload.platformId = platformId;
+            }
+
+            const res = await axios.post(url, payload);
 
             if (res.status < 200 || res.status >= 300) {
                 // throw new Error(`Sync failed: ${res.status} ${res.statusText}`);
