@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 interface PaginationProps {
   totalItems: number;
   pageSize?: number;
   currentPage: number;
   onPageChange: (page: number) => void;
-  storageKey?: string; // 👈 optionnel, utile si tu veux plusieurs paginations indépendantes
 }
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -13,25 +12,8 @@ const Pagination: React.FC<PaginationProps> = ({
   pageSize = 5,
   currentPage,
   onPageChange,
-  storageKey = "current_page_videos", // 👈 clé par défaut
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
-
-  // ⏳ Restaurer la page sauvegardée au montage
-  useEffect(() => {
-    const savedPage = localStorage.getItem(storageKey);
-    if (savedPage) {
-      const pageNumber = Number(savedPage);
-      if (!isNaN(pageNumber)) {
-        onPageChange(pageNumber);
-      }
-    }
-  }, []);
-
-  // 💾 Sauvegarder la page actuelle à chaque changement
-  useEffect(() => {
-    localStorage.setItem(storageKey, currentPage.toString());
-  }, [currentPage]);
 
   const handlePrev = () => {
     if (currentPage > 1) onPageChange(currentPage - 1);
