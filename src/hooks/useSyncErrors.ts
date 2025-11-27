@@ -56,7 +56,7 @@ export default function useSyncErrors() {
             });
             setData(response.data || []);
         } catch (err: any) {
-            setError(err);
+            // setError(err);
             console.error("Failed to fetch sync errors:", err);
             // Return mock data in case of error
             console.warn("Using mock data due to API error");
