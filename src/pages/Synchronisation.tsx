@@ -1,25 +1,21 @@
 import { useState } from "react";
 import SelectModal from "../components/SelectModal";
 import useSyncOption from "../hooks/useSyncOption";
+import useSyncErrors from "../hooks/useSyncErrors";
 import CardFlottant from "../components/CardFlottant";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const Synchronisation = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState<number | null>(null);
+    
+    const { data: syncErrors, loading, error, reFetch } = useSyncErrors();
 
     const [modalFloat, setModalFloat] = useLocalStorage('modal_float', false);
 
     const options = [
         { id: "true", title: "with Force", subtitle: "all data except the ID should be updated directly" },
         { id: "false", title: "No Force", subtitle: "records with an existing ID should not be overwritten" },
-    ];
-
-    // static JSON data for table rows
-    const rows = [
-        { id: 1, name: 'Apple MacBook Pro 17"', color: 'Silver' },
-        { id: 2, name: 'Microsoft Surface Pro', color: 'White' },
-        { id: 3, name: 'Magic Mouse 2', color: 'Black' },
     ];
 
     const handleOpenFor = (id?: number) => {
@@ -39,6 +35,10 @@ const Synchronisation = () => {
                 platformId: platformId 
             });
             console.log("Sync result:", result);
+            // Refresh the errors list after successful sync
+            reFetch();
+            // Close the modal
+            setModalOpen(false);
         } catch (err) {
             console.error("Sync failed", err);
         }
@@ -76,15 +76,44 @@ const Synchronisation = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row) => (
-                                    <tr key={row.id} className="bg-neutral-primary border-b border-default">
-                                        <th scope="row" className="px-6 py-4 font-medium text-heading whitespace-nowrap">{row.name}</th>
-                                        <td className="px-6 py-4">{row.color}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="cursor-pointer text-brand-600" onClick={() => handleOpenFor(row.id)}>Sync</span>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center">
+                                            <div className="flex items-center justify-center">
+                                                <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                                                <span className="ml-2">Loading errors...</span>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-red-500">
+                                            Error loading sync errors: {error.message}
+                                            <button 
+                                                onClick={reFetch} 
+                                                className="ml-2 px-2 py-1 bg-brand-600 text-white rounded text-sm hover:bg-brand-700"
+                                            >
+                                                Retry
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ) : syncErrors.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                                            No sync errors found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    syncErrors.map((row) => (
+                                        <tr key={row.id} className="bg-neutral-primary border-b border-default">
+                                            <th scope="row" className="px-6 py-4 font-medium text-heading whitespace-nowrap">{row.name}</th>
+                                            <td className="px-6 py-4">{row.color}</td>
+                                            <td className="px-6 py-4">
+                                                <span className="cursor-pointer text-brand-600" onClick={() => handleOpenFor(row.id)}>Sync</span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
