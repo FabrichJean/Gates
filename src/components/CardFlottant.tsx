@@ -70,45 +70,6 @@ const CardFlottant: React.FC = () => {
 
                     </div>
 
-                    {/* Styles d'animation locaux */}
-                    <style>{`
-						.file { left: 0; top: 8px; }
-						.file > div { background: rgba(250, 204, 21, 0.95); }
-
-						@keyframes slide-file-1 {
-							0% { transform: translateX(0) translateY(0) rotate(-6deg); opacity: 0 }
-							10% { opacity: 1 }
-							50% { transform: translateX(80px) translateY(-6px) rotate(-2deg); opacity: 1 }
-							100% { transform: translateX(160px) translateY(-12px) rotate(2deg); opacity: 0 }
-						}
-
-						@keyframes slide-file-2 {
-							0% { transform: translateX(0) translateY(6px) rotate(-4deg); opacity: 0 }
-							15% { opacity: 1 }
-							55% { transform: translateX(80px) translateY(0px) rotate(0deg); opacity: 1 }
-							100% { transform: translateX(160px) translateY(-8px) rotate(4deg); opacity: 0 }
-						}
-
-						@keyframes slide-file-3 {
-							0% { transform: translateX(0) translateY(12px) rotate(-2deg); opacity: 0 }
-							20% { opacity: 1 }
-							60% { transform: translateX(80px) translateY(6px) rotate(1deg); opacity: 1 }
-							100% { transform: translateX(160px) translateY(-4px) rotate(6deg); opacity: 0 }
-						}
-
-						.f1 { animation: slide-file-1 2.6s linear infinite; }
-						.f2 { animation: slide-file-2 2.6s linear infinite 0.25s; }
-						.f3 { animation: slide-file-3 2.6s linear infinite 0.5s; }
-
-						/* simple animated prog bar */
-						.prog-bar { background: linear-gradient(90deg, rgba(250,204,21,1), rgba(245,158,11,1)); animation: progMove 3s ease-in-out infinite; }
-						@keyframes progMove {
-							0% { transform: translateX(-6%); }
-							50% { transform: translateX(6%); }
-							100% { transform: translateX(-6%); }
-						}
-					`}</style>
-
                 </div>
             ) : (
                 /* Collapsed small button to restore */
