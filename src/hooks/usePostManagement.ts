@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getPosts, sendPostsToWebApp } from "../api/posts";
+import { getPosts, sendPostsToWebApp, togglePostStatus } from "../api/posts";
 import type { PostsResponse } from "../types/post";
 import toast from "react-hot-toast";
 
@@ -92,6 +92,10 @@ export const usePostManagement = () => {
     }
   };
   
+  const activate = async (id: number) => {
+    try { await togglePostStatus(id); toast.success("Statut mis à jour !"); safeRefetch(400); }
+    catch { toast.error("Erreur lors du changement de statut"); }
+  };
 
   return {
     page,
@@ -104,6 +108,7 @@ export const usePostManagement = () => {
     mutate,
     toWebapp,
     fetch,
+    activate,
   };
 };
 

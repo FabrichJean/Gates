@@ -10,10 +10,11 @@ import Loader from "../components/Loader";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { PostsProvider, usePostsContext } from "../context/PostsContext";
 import { webAppPlateform } from "../api/plateforms";
+import RoleEnum from "../utils/roleEnum";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
-  const { page, setPage, data, loading, reFetch } = usePostsContext();
+  const { page, setPage, data, loading, reFetch, activate } = usePostsContext();
   
   const posts = data?.posts || [];
   const total = data?.total || 0;
@@ -115,6 +116,10 @@ const PostManagementInner = () => {
                 <th scope="col" className="px-6 py-3">
                   Checking
                 </th>
+                
+                <th scope="col" className="px-6 py-3">
+                  Activate
+                </th>
                 <th scope="col" className="px-6 py-3">
                   Videos
                 </th>
@@ -180,6 +185,18 @@ const PostManagementInner = () => {
                   </td>
                   <td className="px-6 py-4">
                     <PostChecking index={idx} reFetch={reFetch} post={post} />
+                  </td>
+                  <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
+                    <input
+                      type="checkbox"
+                      checked={!post.isDeleted}
+                      className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] rounded-full"
+                      onChange={
+                        user?.role === RoleEnum.SUPERADMIN
+                          ? () => activate(post.id)
+                          : undefined
+                      }
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
