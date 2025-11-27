@@ -50,7 +50,7 @@ export function TitlesForm({
   progress?: number;
   handleSubmit: () => void;
 }) {
-  console.log(coupleTitles);
+  // debug log removed
 
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...coupleTitles];
@@ -265,10 +265,7 @@ const Upload = () => {
     fd.append("cover", coverFile as File);
     fd.append("category_id", String(category.id));
     if (subcategory) fd.append("sub_category_id", String(subcategory.id));
-    // backend expects 'plateform_id' (single id)
     if (platform?.id) fd.append("plateform_id", String(platform.id));
-    // prefer sending creator_id when an existing creator is selected,
-    // otherwise fall back to free-text creator name for backward compatibility
     if (creatorId) fd.append("creator_id", String(creatorId));
     else if (creator) fd.append("creator", String(creator));
     fd.append("ref", String(ref));
@@ -276,22 +273,12 @@ const Upload = () => {
     // append type as boolean-like value: short => true, long => false
     fd.append("isShort", String(videoType === "short"));
 
-    // alert(videoType);
     
     try {
       setUploading(true);
       setProgress(0);
 
-      
-      // send FormData for multipart upload
-
-      // Affiche le contenu du FormData dans la console
-      for (const [key, value] of fd.entries()) {
-        console.log(key, value);
-      }
-      
-      
-      const res = await uploadVideo(fd, (progressEvent) => {
+      await uploadVideo(fd, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(
             Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -302,7 +289,6 @@ const Upload = () => {
       toast.success("✅ Upload réussi !");
       reFetch && reFetch();
       navigate("/videos");
-      console.log("Video uploaded:", res.data);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
