@@ -2,10 +2,13 @@ import { useState } from "react";
 import SelectModal from "../components/SelectModal";
 import useSyncOption from "../hooks/useSyncOption";
 import CardFlottant from "../components/CardFlottant";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const Synchronisation = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
+    const [modalFloat, setModalFloat] = useLocalStorage('modal_float', false);
 
     const options = [
         { id: "true", title: "with Force", subtitle: "all data except the ID should be updated directly" },
@@ -29,6 +32,7 @@ const Synchronisation = () => {
     const handleSubmit = async (optionId: string | null, label: number | null, platformId?: number | null) => {
         const force = optionId === "true";
         try {
+            setModalFloat(true);
             const result = await sync({ 
                 isForce: force, 
                 label: label !== null ? label.toString() : null,
@@ -95,7 +99,7 @@ const Synchronisation = () => {
                     onSubmit={handleSubmit}
                 />
             </div>
-            {/* <CardFlottant /> */}
+           { modalFloat ? <CardFlottant  /> : null }
 
         </div>
 
