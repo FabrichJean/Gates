@@ -131,9 +131,9 @@ function Sidebar({
     "flex items-center rounded-xl px-3.5 py-3 transition-all duration-300 font-medium cursor-pointer group relative overflow-hidden";
 
   const linkClass = (name: string) =>
-     `${baseClass} ${(location.pathname.startsWith(`/${name}`) && !location.pathname.startsWith(`/${name}-`))
-        ? "bg-blue-50/80 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50"
-        : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 dark:text-gray-400 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 dark:hover:text-blue-400 hover:scale-105 hover:shadow-md"
+    `${baseClass} ${(location.pathname.startsWith(`/${name}`) && !location.pathname.startsWith(`/${name}-`))
+      ? "bg-blue-50/80 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50"
+      : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 dark:text-gray-400 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 dark:hover:text-blue-400 hover:scale-105 hover:shadow-md"
     }`;
 
   const openLogoutModal = () => dialogRef.current?.showModal();
@@ -159,14 +159,13 @@ function Sidebar({
       <div className="flex flex-col h-full justify-between">
         <div className="flex flex-col gap-1 mt-4 px-3">
           <div
-            className={`flex items-center justify-center ${
-              !isCollapsed && "lg:justify-start"
-            } group`}
+            className={`flex items-center justify-center ${!isCollapsed && "lg:justify-start"
+              } group`}
           >
             <div className="flex items-center relative pb-2 border-b w-full">
               {/* Logo icon with gradient background */}
               <SiGoogledisplayandvideo360 className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-              
+
               {!isCollapsed && (
                 <div className="ml-3 inline-block">
                   <h1 className="text-lg font-black tracking-tight">
@@ -435,6 +434,30 @@ function Sidebar({
                   />
                 </svg>
                 {!isCollapsed && <span className="ml-3 relative z-10">Excel Conversion</span>}
+              </Link>
+
+              <Link
+                to="/sync"
+                onClick={() => handleNav("sync")}
+                className={linkClass("sync")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-lime-400/0 via-lime-400/5 to-lime-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125.504 1.125 1.125V11.25a9 9 0 0 0-9-9Z"
+                  />
+                </svg>
+                {!isCollapsed && <span className="ml-3 relative z-10">Sync</span>}
               </Link>
             </>
           )}

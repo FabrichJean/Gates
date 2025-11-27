@@ -34,6 +34,7 @@ import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
 import UserDetails from "../pages/UserDetails";
 import VideoBotEdit from "../pages/VideoBotEdit";
+import Synchronisation from "../pages/Synchronisation";
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -337,6 +338,16 @@ const AppRoutes = () => (
             <ProtectedRoute>
               <InsideSidebar>
                 <TouchPost />
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sync"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <Synchronisation />
               </InsideSidebar>
             </ProtectedRoute>
           }
