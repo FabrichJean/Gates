@@ -11,9 +11,16 @@ import { useAuth } from "./useAuth";
  * - Écoute l'événement 'checking' du backend
  * - Déclenche un callback pour rafraîchir les données quand l'état de checking change
  */
-const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => void) => {
-
-  const {user} = useAuth()
+const useSocketCheckVideos = (
+  onCheckingUpdated?: (data: {
+    user_id: number;
+    video_id: number;
+    checking: string;
+    comment?: string;
+    role?: string;
+  }) => void
+) => {
+  const { user } = useAuth();
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -21,7 +28,7 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
 
     const socket = io(server, {
       transports: ["websocket"],
-      auth: { token: getToken() }, 
+      auth: { token: getToken() },
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 3000,
@@ -45,32 +52,54 @@ const useSocketCheckVideos = (onCheckingUpdated?: (data: { user_id: number; vide
     });
 
     // mise à jour du statut de checking
-    socket.on("checking", (data: { user_id: number; video_id: number; checking: string; comment?: string; role?: string }) => {
-      console.log("📋 Mise à jour checking reçue :", data);
-      
-      const currentUserId = Number(user?.id);
-      const isVideoOwner = data.user_id === currentUserId;
-      const isSuperadmin = user?.role === 'superadmin';
-      
-      if (!isVideoOwner && !isSuperadmin) {
-        console.log(`🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${user?.role})`);
-        return;
-      }
-      
-      const checkingStatus = data.checking === 'ready' ? 'prête' : 
-                           data.checking === 'checked' ? 'vérifiée' : 
-                           data.checking === 'rejected' ? 'rejetée' : data.checking;
-      
-      if (isVideoOwner && !isSuperadmin) {
-        toast.success(`✅ Your video ${data.video_id} has been marked as ${checkingStatus}`);
-            } else if (isSuperadmin && isVideoOwner) {
-        toast.success(`✅ Your video ${data.video_id} has been marked as ${checkingStatus}`);
-            } else if (isSuperadmin && !isVideoOwner) {
-        toast.success(`✅ Video ${data.video_id} marked as ${checkingStatus}`);
-      }
+    socket.on(
+      "checking",
+      (data: {
+        user_id: number;
+        video_id: number;
+        checking: string;
+        comment?: string;
+        role?: string;
+      }) => {
+        console.log("📋 Mise à jour checking reçue :", data);
 
-      if (onCheckingUpdated) onCheckingUpdated(data);
-    });
+        const currentUserId = Number(user?.id);
+        const isVideoOwner = data.user_id === currentUserId;
+        const isSuperadmin = user?.role === "superadmin";
+
+        if (!isVideoOwner && !isSuperadmin) {
+          console.log(
+            `🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${user?.role})`
+          );
+          return;
+        }
+
+        const checkingStatus =
+          data.checking === "ready"
+            ? "prête"
+            : data.checking === "checked"
+            ? "vérifiée"
+            : data.checking === "rejected"
+            ? "rejetée"
+            : data.checking;
+
+        if (isVideoOwner && !isSuperadmin) {
+          toast.success(
+            `✅ Your video ${data.video_id} has been marked as ${checkingStatus}`
+          );
+        } else if (isSuperadmin && isVideoOwner) {
+          toast.success(
+            `✅ Your video ${data.video_id} has been marked as ${checkingStatus}`
+          );
+        } else if (isSuperadmin && !isVideoOwner) {
+          toast.success(
+            `✅ Video ${data.video_id} marked as ${checkingStatus}`
+          );
+        }
+
+        if (onCheckingUpdated) onCheckingUpdated(data);
+      }
+    );
 
     return () => {
       console.log("🔌 Disconnecting from Socket.IO checking server");

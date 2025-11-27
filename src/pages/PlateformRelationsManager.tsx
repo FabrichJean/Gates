@@ -46,7 +46,12 @@ import {
 
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
-type Platform = { id: number; name: string; video_sync_url?: string; post_sync_url?: string };
+type Platform = {
+  id: number;
+  name: string;
+  video_sync_url?: string;
+  post_sync_url?: string;
+};
 
 export default function PlateformRelationsManager() {
   const { data: plateforms, reFetch: reFetchPlateform } = UsePlateform();
@@ -59,7 +64,7 @@ export default function PlateformRelationsManager() {
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
-  const [relationMode, setRelationMode] = useState<'video' | 'post'>('video');
+  const [relationMode, setRelationMode] = useState<"video" | "post">("video");
   //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
@@ -101,7 +106,11 @@ export default function PlateformRelationsManager() {
     if (!isValidUrl(platformPostSyncUrl))
       return toast.error("Invalid Post sync URL");
     try {
-      const payload: { name: string; video_sync_url?: string; post_sync_url?: string } = {
+      const payload: {
+        name: string;
+        video_sync_url?: string;
+        post_sync_url?: string;
+      } = {
         name: platformName,
       };
       if (platformVideoSyncUrl) payload.video_sync_url = platformVideoSyncUrl;
@@ -146,115 +155,142 @@ export default function PlateformRelationsManager() {
       toast.error("Error deleting platform");
     }
   };
-  
-  const fetchRelations = useCallback(async (plateformId: number | null) => {
-    if (!plateformId) return;
-    try {
-      const [catsRes, subsRes] = relationMode === 'post'
-        ? await Promise.all([
-            getPostCategoriesByPlateformApi(plateformId),
-            getPostSubCategoriesForPlateformApi(plateformId),
-          ])
-        : await Promise.all([
-            getCategoriesByPlateformApi(plateformId),
-            getSubCategoriesForPlateformApi(plateformId),
-          ]);
-      // Normalize categories response (backend may return different shapes)
-      const normalizeCategories = (res: unknown): RelationItem[] => {
-        const payload = ((res as unknown) && (res as Record<string, unknown>)['data']) ?? res;
-        let list: unknown[] = [];
-        if (Array.isArray(payload)) list = payload as unknown[];
-        else {
-          const p = payload as Record<string, unknown>;
-          if (Array.isArray(p['Categories'])) list = p['Categories'] as unknown[];
-          else if (Array.isArray(p['Categorys'])) list = p['Categorys'] as unknown[];
-          else if (Array.isArray(p['categories'])) list = p['categories'] as unknown[];
-          else {
-            const arr = Object.values(p).find((v) => Array.isArray(v));
-            list = Array.isArray(arr) ? (arr as unknown[]) : [];
-          }
-        }
-        return list.map((item) => {
-          const it = item as Record<string, unknown>;
-          const id = (it.id ?? it.categoryId ?? it.CategoryId) as unknown;
-          const name = (it.name ?? it.title ?? it.label) as unknown;
-          return {
-            id: typeof id === 'number' ? id : Number(id ?? 0),
-            name: typeof name === 'string' ? name : String(name ?? ''),
-          };
-        });
-      };
 
-      // Normalize subcategories and extract possible relation id (PlateformSubCategory.id)
-      const normalizeSubcategories = (res: unknown) => {
-        const payload = ((res as unknown) && (res as Record<string, unknown>)['data']) ?? res;
-        let list: unknown[] = [];
-        if (Array.isArray(payload)) list = payload as unknown[];
-        else {
-          const p = payload as Record<string, unknown>;
-          if (Array.isArray(p['SubCategorys'])) list = p['SubCategorys'] as unknown[];
-          else if (Array.isArray(p['subcategories'])) list = p['subcategories'] as unknown[];
-          else if (Array.isArray(p['SubCategories'])) list = p['SubCategories'] as unknown[];
-          else {
-            const arr = Object.values(p).find((v) => Array.isArray(v));
-            list = Array.isArray(arr) ? (arr as unknown[]) : [];
-          }
-        }
-
-        return list.map((item) => {
-          const it = item as Record<string, unknown>;
-          const id = (it.id ?? it.subCategoryId ?? it.SubCategoryId) as unknown;
-          const name = (it.name ?? it.title ?? it.label) as unknown;
-          const relationId = (() => {
-            const p1 = it.PlateformSubCategory as Record<string, unknown> | undefined;
-            if (p1 && typeof p1.id === 'number') return p1.id;
-            const p2 = it.Plateform_SubCategory as Record<string, unknown> | undefined;
-            if (p2 && typeof p2.id === 'number') return p2.id;
-            if (typeof it.relationId === 'number') return it.relationId as number;
-            return null;
-          })();
-          return {
-            id: typeof id === 'number' ? id : Number(id ?? 0),
-            name: typeof name === 'string' ? name : String(name ?? ''),
-            relationId: relationId as number | null,
-          };
-        });
-      };
-
-      setCatRelations(normalizeCategories(catsRes));
-      setSubcatRelations(normalizeSubcategories(subsRes));
-      // fetch creators linked to this platform
+  const fetchRelations = useCallback(
+    async (plateformId: number | null) => {
+      if (!plateformId) return;
       try {
-  const creatorsRes = await getCreatorsByPlateformApi(plateformId);
-  const payload = ((creatorsRes as any) && (creatorsRes as any).data) ?? creatorsRes;
-        let list: unknown[] = [];
-        if (Array.isArray(payload)) list = payload as unknown[];
-        else if (Array.isArray((payload as any).creators)) list = (payload as any).creators as unknown[];
-        const normalizedCreators: RelationItem[] = list.map((item) => {
-          const it = item as Record<string, unknown>;
-          const id = (it.id ?? it.creatorId ?? it.CreatorId) as unknown;
-          const creator = it.creator as Record<string, unknown> | undefined;
-                const name = (creator?.name ?? it.fullName ?? it.username) as unknown;
-          return {
-            id: typeof id === 'number' ? id : Number(id ?? 0),
-            name: typeof name === 'string' ? name : String(name ?? ''),
-          };
-        });
-        setCreatorRelations(normalizedCreators);
+        const [catsRes, subsRes] =
+          relationMode === "post"
+            ? await Promise.all([
+                getPostCategoriesByPlateformApi(plateformId),
+                getPostSubCategoriesForPlateformApi(plateformId),
+              ])
+            : await Promise.all([
+                getCategoriesByPlateformApi(plateformId),
+                getSubCategoriesForPlateformApi(plateformId),
+              ]);
+        // Normalize categories response (backend may return different shapes)
+        const normalizeCategories = (res: unknown): RelationItem[] => {
+          const payload =
+            ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
+            res;
+          let list: unknown[] = [];
+          if (Array.isArray(payload)) list = payload as unknown[];
+          else {
+            const p = payload as Record<string, unknown>;
+            if (Array.isArray(p["Categories"]))
+              list = p["Categories"] as unknown[];
+            else if (Array.isArray(p["Categorys"]))
+              list = p["Categorys"] as unknown[];
+            else if (Array.isArray(p["categories"]))
+              list = p["categories"] as unknown[];
+            else {
+              const arr = Object.values(p).find((v) => Array.isArray(v));
+              list = Array.isArray(arr) ? (arr as unknown[]) : [];
+            }
+          }
+          return list.map((item) => {
+            const it = item as Record<string, unknown>;
+            const id = (it.id ?? it.categoryId ?? it.CategoryId) as unknown;
+            const name = (it.name ?? it.title ?? it.label) as unknown;
+            return {
+              id: typeof id === "number" ? id : Number(id ?? 0),
+              name: typeof name === "string" ? name : String(name ?? ""),
+            };
+          });
+        };
+
+        // Normalize subcategories and extract possible relation id (PlateformSubCategory.id)
+        const normalizeSubcategories = (res: unknown) => {
+          const payload =
+            ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
+            res;
+          let list: unknown[] = [];
+          if (Array.isArray(payload)) list = payload as unknown[];
+          else {
+            const p = payload as Record<string, unknown>;
+            if (Array.isArray(p["SubCategorys"]))
+              list = p["SubCategorys"] as unknown[];
+            else if (Array.isArray(p["subcategories"]))
+              list = p["subcategories"] as unknown[];
+            else if (Array.isArray(p["SubCategories"]))
+              list = p["SubCategories"] as unknown[];
+            else {
+              const arr = Object.values(p).find((v) => Array.isArray(v));
+              list = Array.isArray(arr) ? (arr as unknown[]) : [];
+            }
+          }
+
+          return list.map((item) => {
+            const it = item as Record<string, unknown>;
+            const id = (it.id ??
+              it.subCategoryId ??
+              it.SubCategoryId) as unknown;
+            const name = (it.name ?? it.title ?? it.label) as unknown;
+            const relationId = (() => {
+              const p1 = it.PlateformSubCategory as
+                | Record<string, unknown>
+                | undefined;
+              if (p1 && typeof p1.id === "number") return p1.id;
+              const p2 = it.Plateform_SubCategory as
+                | Record<string, unknown>
+                | undefined;
+              if (p2 && typeof p2.id === "number") return p2.id;
+              if (typeof it.relationId === "number")
+                return it.relationId as number;
+              return null;
+            })();
+            return {
+              id: typeof id === "number" ? id : Number(id ?? 0),
+              name: typeof name === "string" ? name : String(name ?? ""),
+              relationId: relationId as number | null,
+            };
+          });
+        };
+
+        setCatRelations(normalizeCategories(catsRes));
+        setSubcatRelations(normalizeSubcategories(subsRes));
+        // fetch creators linked to this platform
+        try {
+          const creatorsRes = await getCreatorsByPlateformApi(plateformId);
+          const payload =
+            ((creatorsRes as any) && (creatorsRes as any).data) ?? creatorsRes;
+          let list: unknown[] = [];
+          if (Array.isArray(payload)) list = payload as unknown[];
+          else if (Array.isArray((payload as any).creators))
+            list = (payload as any).creators as unknown[];
+          const normalizedCreators: RelationItem[] = list.map((item) => {
+            const it = item as Record<string, unknown>;
+            const id = (it.creator ? (it.creator as Record<string, unknown>).id : it.creatorId ?? it.CreatorId) as unknown;
+            const creator = it.creator as Record<string, unknown> | undefined;
+            const name = (creator?.name ??
+              it.fullName ??
+              it.username) as unknown;
+            return {
+              id: typeof id === "number" ? id : Number(id ?? 0),
+              name: typeof name === "string" ? name : String(name ?? ""),
+            };
+          });
+
+          setCreatorRelations(normalizedCreators);
+        } catch {
+          setCreatorRelations([]);
+        }
       } catch {
-        setCreatorRelations([]);
+        toast.error("Error loading relations");
       }
-    } catch {
-      toast.error("Error loading relations");
-    }
-  }, [relationMode]);
+    },
+    [relationMode]
+  );
 
   useEffect(() => {
     fetchRelations(selectedPlateform);
   }, [selectedPlateform, fetchRelations]);
 
   // post hooks
-  const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
+  const { data: allPostCategories, reFetch: reFetchPostCategories } =
+    useCategoryPost();
   const { data: allPostSubCategories } = useSubCategoryPost();
   const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
 
@@ -393,7 +429,8 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
-    const handleClearSubCategories = async () => {
+  
+  const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
     try {
@@ -468,23 +505,29 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const videoFilteredCategories = allCategories?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  const videoFilteredCategories =
+    allCategories?.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase())
+    ) || [];
 
   const postCategoriesList = allPostCategories?.categories || [];
-  const filteredCategories = (relationMode === 'post' ? postCategoriesList : videoFilteredCategories).filter((c: unknown) => {
+  const filteredCategories = (
+    relationMode === "post" ? postCategoriesList : videoFilteredCategories
+  ).filter((c: unknown) => {
     const cat = c as { name?: string };
-    return (cat.name ?? '').toLowerCase().includes(search.toLowerCase());
+    return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
-  const videoFilteredSubcategories = allSubCategories?.SubCategorys?.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
-  ) || [];
-  const postSubcategoriesList = (allPostSubCategories?.subCategories) || [];
-  const filteredSubcategories = (relationMode === 'post' ? postSubcategoriesList : videoFilteredSubcategories).filter((s: unknown) => {
+  const videoFilteredSubcategories =
+    allSubCategories?.SubCategorys?.filter((s) =>
+      s.name.toLowerCase().includes(search.toLowerCase())
+    ) || [];
+  const postSubcategoriesList = allPostSubCategories?.subCategories || [];
+  const filteredSubcategories = (
+    relationMode === "post" ? postSubcategoriesList : videoFilteredSubcategories
+  ).filter((s: unknown) => {
     const sub = s as { name?: string };
-    return (sub.name ?? '').toLowerCase().includes(search.toLowerCase());
+    return (sub.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
   return (
@@ -497,7 +540,9 @@ export default function PlateformRelationsManager() {
         {/* Sidebar - Platforms */}
         <div className="w-full bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
-            <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">WebApps</h2>
+            <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+              WebApps
+            </h2>
             <button
               onClick={() => {
                 // prepare modal for creating a new platform
@@ -509,8 +554,20 @@ export default function PlateformRelationsManager() {
               }}
               className="btn rounded shadow btn-sm mt-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 mr-2 inline-block"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               <span>add</span>
             </button>
@@ -530,8 +587,20 @@ export default function PlateformRelationsManager() {
                     className="btn btn-sm btn-primary flex items-center justify-center"
                     aria-label="Edit platform"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M4 20l6.5-1.5L20.5 8.5 17 5 4 18v2z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4 inline-block"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.232 5.232l3.536 3.536M4 20l6.5-1.5L20.5 8.5 17 5 4 18v2z"
+                      />
                     </svg>
                   </button>
                   <button
@@ -539,8 +608,20 @@ export default function PlateformRelationsManager() {
                     className="btn btn-sm btn-outline text-red-500 flex items-center justify-center"
                     aria-label="Delete platform"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4 inline-block"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -552,8 +633,13 @@ export default function PlateformRelationsManager() {
                       : "hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900" title="Theme: light/dark"></span>
-                  <span className="ml-5 text-gray-800 dark:text-gray-100">{p.name}</span>
+                  <span
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                    title="Theme: light/dark"
+                  ></span>
+                  <span className="ml-5 text-gray-800 dark:text-gray-100">
+                    {p.name}
+                  </span>
                 </button>
               </div>
             ))}
@@ -612,13 +698,26 @@ export default function PlateformRelationsManager() {
           {selectedPlateform ? (
             <>
               <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">
-                <div className="flex gap-2 flex-wrap justify-between w-full">
-                </div>
+                <div className="flex gap-2 flex-wrap justify-between w-full"></div>
               </div>
 
               <div className="mb-4 flex gap-2">
-                <button className={`btn btn-sm ${relationMode === 'video' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setRelationMode('video')}>Video</button>
-                <button className={`btn btn-sm ${relationMode === 'post' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setRelationMode('post')}>Post</button>
+                <button
+                  className={`btn btn-sm ${
+                    relationMode === "video" ? "btn-primary" : "btn-ghost"
+                  }`}
+                  onClick={() => setRelationMode("video")}
+                >
+                  Video
+                </button>
+                <button
+                  className={`btn btn-sm ${
+                    relationMode === "post" ? "btn-primary" : "btn-ghost"
+                  }`}
+                  onClick={() => setRelationMode("post")}
+                >
+                  Post
+                </button>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6">
@@ -628,45 +727,84 @@ export default function PlateformRelationsManager() {
                       onClick={() => setCategoryModalOpen(true)}
                       className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
-                      <span>link {relationMode === 'post' ? 'Post Category' : 'Category'}</span>
+                      <span>
+                        link{" "}
+                        {relationMode === "post" ? "Post Category" : "Category"}
+                      </span>
                     </button>
                     <button
-                      onClick={relationMode === 'post' ? handleClearPostCategories : handleClearCategories}
+                      onClick={
+                        relationMode === "post"
+                          ? handleClearPostCategories
+                          : handleClearCategories
+                      }
                       className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                        />
                       </svg>
                       <span>Clear All</span>
                     </button>
                   </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Linked Categories</h3>
-                    {catRelations.length === 0 ? (
-                      <p className="text-gray-500 dark:text-gray-400">No categories linked</p>
-                    ) : (
-                      catRelations.map((c) => (
-                        <div
-                          key={c.id}
-                          className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                    Linked Categories
+                  </h3>
+                  {catRelations.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No categories linked
+                    </p>
+                  ) : (
+                    catRelations.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                      >
+                        {/* Theme indicator node (light/dark) */}
+                        <span
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                          title="Theme: light/dark"
+                        ></span>
+                        <span className="ml-5">{c.name}</span>
+                        <button
+                          onClick={() =>
+                            relationMode === "post"
+                              ? handleRemovePostCategory(c.id)
+                              : handleRemoveCategory(c.id)
+                          }
+                          className="btn rounded shadow btn-sm text-red-500"
                         >
-                          {/* Theme indicator node (light/dark) */}
-                          <span
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                            title="Theme: light/dark"
-                          ></span>
-                          <span className="ml-5">{c.name}</span>
-                          <button
-                            onClick={() => relationMode === 'post' ? handleRemovePostCategory(c.id) : handleRemoveCategory(c.id)}
-                            className="btn rounded shadow btn-sm text-red-500"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))
-                    )}
+                          Remove
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -675,24 +813,61 @@ export default function PlateformRelationsManager() {
                       onClick={() => setSubCategoryModalOpen(true)}
                       className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
-                      <span>link {relationMode === 'post' ? 'Post Subcategory' : 'Subcategory'}</span>
+                      <span>
+                        link{" "}
+                        {relationMode === "post"
+                          ? "Post Subcategory"
+                          : "Subcategory"}
+                      </span>
                     </button>
                     <button
-                      onClick={relationMode === 'post' ? handleClearPostSubCategories : handleClearSubCategories}
+                      onClick={
+                        relationMode === "post"
+                          ? handleClearPostSubCategories
+                          : handleClearSubCategories
+                      }
                       className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                        />
                       </svg>
                       <span>Clear All</span>
                     </button>
                   </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Linked Subcategories</h3>
+                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                    Linked Subcategories
+                  </h3>
                   {subcatRelations?.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">No subcategories linked</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No subcategories linked
+                    </p>
                   ) : (
                     subcatRelations?.map((s) => (
                       <div
@@ -708,7 +883,8 @@ export default function PlateformRelationsManager() {
                         <button
                           onClick={() => {
                             if (!s.relationId) return;
-                            if (relationMode === 'post') return handleRemovePostSubcategory(s.relationId);
+                            if (relationMode === "post")
+                              return handleRemovePostSubcategory(s.relationId);
                             return handleRemoveSubcategory(s.relationId);
                           }}
                           className="btn rounded shadow btn-sm text-red-500"
@@ -728,8 +904,20 @@ export default function PlateformRelationsManager() {
                     onClick={() => setCreatorModalOpen(true)}
                     className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4 mr-2 inline-block"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                     <span>link Creator</span>
                   </button>
@@ -737,15 +925,31 @@ export default function PlateformRelationsManager() {
                     onClick={handleClearCreators}
                     className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4 mr-2 inline-block"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                      />
                     </svg>
                     <span>Clear All</span>
                   </button>
                 </div>
-                <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">Linked Creators</h3>
+                <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                  Linked Creators
+                </h3>
                 {creatorRelations.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No creators linked
+                  </p>
                 ) : (
                   creatorRelations.map((c) => (
                     <div
@@ -754,7 +958,7 @@ export default function PlateformRelationsManager() {
                     >
                       <span className="ml-5">{c.name}</span>
                       <button
-                        onClick={() => handleRemoveCreator(c.id)}
+                        onClick={() => handleRemoveCreator(Number(c.id))}
                         className="btn rounded shadow btn-sm text-red-500"
                       >
                         Remove
@@ -790,10 +994,16 @@ export default function PlateformRelationsManager() {
             {filteredCategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new {relationMode === 'post' ? 'post category' : 'category'} "{search}"
+                  Create new{" "}
+                  {relationMode === "post" ? "post category" : "category"} "
+                  {search}"
                 </span>
                 <button
-                  onClick={() => relationMode === 'post' ? handleCreateAndLinkPostCategory(search) : handleCreateAndLinkCategory(search)}
+                  onClick={() =>
+                    relationMode === "post"
+                      ? handleCreateAndLinkPostCategory(search)
+                      : handleCreateAndLinkCategory(search)
+                  }
                   className="btn btn-xs btn-success"
                 >
                   Create & Link
@@ -819,7 +1029,11 @@ export default function PlateformRelationsManager() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => relationMode === 'post' ? handleAddPostCategory(cat.id) : handleAddCategory(cat.id)}
+                        onClick={() =>
+                          relationMode === "post"
+                            ? handleAddPostCategory(cat.id)
+                            : handleAddCategory(cat.id)
+                        }
                         className="btn btn-xs btn-primary"
                       >
                         Add
@@ -856,28 +1070,56 @@ export default function PlateformRelationsManager() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <div className="max-h-60 overflow-auto">
-            {(allCreators || []).filter((c: any) => (c.name ?? '').toLowerCase().includes(search.toLowerCase())).length === 0 && search.trim() !== "" ? (
+            {(allCreators || []).filter((c: any) =>
+              (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+            ).length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">No creator</span>
+                <span className="italic text-gray-500 dark:text-gray-400">
+                  No creator
+                </span>
               </div>
             ) : (
-              (allCreators || []).filter((c: any) => (c.name ?? '').toLowerCase().includes(search.toLowerCase())).map((creator: any) => {
-                const isLinked = creatorRelations.some((rc) => rc.id === creator.id);
-                return (
-                  <div key={creator.id} className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                    <span className="ml-5">{creator.name}</span>
-                    {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">Linked</button>
-                    ) : (
-                      <button onClick={() => { handleAddCreator(creator.id); setCreatorModalOpen(false); }} className="btn btn-xs btn-primary">Add</button>
-                    )}
-                  </div>
-                );
-              })
+              (allCreators || [])
+                .filter((c: any) =>
+                  (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+                )
+                .map((creator: any) => {
+                  const isLinked = creatorRelations.some(
+                    (rc) => rc.id === creator.id
+                  );
+                  return (
+                    <div
+                      key={creator.id}
+                      className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                    >
+                      <span className="ml-5">{creator.name}</span>
+                      {isLinked ? (
+                        <button className="btn btn-xs btn-disabled">
+                          Linked
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            handleAddCreator(creator.id);
+                            setCreatorModalOpen(false);
+                          }}
+                          className="btn btn-xs btn-primary"
+                        >
+                          Add
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
             )}
           </div>
           <div className="modal-action">
-            <button onClick={() => setCreatorModalOpen(false)} className="btn btn-outline">Close</button>
+            <button
+              onClick={() => setCreatorModalOpen(false)}
+              className="btn btn-outline"
+            >
+              Close
+            </button>
           </div>
         </div>
       </dialog>
@@ -899,7 +1141,9 @@ export default function PlateformRelationsManager() {
           <div className="max-h-60 overflow-auto">
             {filteredSubcategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">no subcategory</span>
+                <span className="italic text-gray-500 dark:text-gray-400">
+                  no subcategory
+                </span>
               </div>
             ) : (
               filteredSubcategories?.map((sub) => {
@@ -921,7 +1165,11 @@ export default function PlateformRelationsManager() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => relationMode === 'post' ? handleAddPostSubcategory(sub.id) : handleAddSubcategory(sub.id)}
+                        onClick={() =>
+                          relationMode === "post"
+                            ? handleAddPostSubcategory(sub.id)
+                            : handleAddSubcategory(sub.id)
+                        }
                         className="btn btn-xs btn-secondary"
                       >
                         Add
