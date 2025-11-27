@@ -89,6 +89,7 @@ export type Video = {
     thumbnail_url: string | null;
     duration: number;
     s3_hls_path: string | null;
+    s3_cover_path: string | null;
     cdn_url: string | null;
     local_mp4_path: string | null;
     hash: string;
@@ -98,6 +99,9 @@ export type Video = {
     updatedAt: string;
     public_urls: VideoPublicUrls;
     s3_urls: VideoS3Urls;
+    type: '1' | '2';
+    // optional local cover path provided by backend (new field)
+    local_cover_path?: string | null;
 };
 
 export type ImagePublicUrls = {

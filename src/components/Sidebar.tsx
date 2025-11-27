@@ -9,6 +9,7 @@ import { RiRobot2Line } from "react-icons/ri";
 import { MdDynamicFeed } from "react-icons/md";
 import { BiLogoInternetExplorer } from "react-icons/bi";
 import { MdVerified } from "react-icons/md";
+import { SiGoogledisplayandvideo360 } from "react-icons/si";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -127,13 +128,12 @@ function Sidebar({
   };
 
   const baseClass =
-    "flex items-center rounded-lg px-3.5 py-2.5 transition-all duration-200 font-medium cursor-pointer";
+    "flex items-center rounded-xl px-3.5 py-3 transition-all duration-300 font-medium cursor-pointer group relative overflow-hidden";
 
   const linkClass = (name: string) =>
-    `${baseClass} ${
-      page === name
-        ? "bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400"
-        : "text-gray-500 hover:bg-gray-100 hover:text-blue-500 dark:text-gray-400 dark:hover:bg-gray-800"
+     `${baseClass} ${(location.pathname.startsWith(`/${name}`) && !location.pathname.startsWith(`/${name}-`))
+        ? "bg-blue-50/80 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50"
+        : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 dark:text-gray-400 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 dark:hover:text-blue-400 hover:scale-105 hover:shadow-md"
     }`;
 
   const openLogoutModal = () => dialogRef.current?.showModal();
@@ -142,7 +142,7 @@ function Sidebar({
   return (
     <aside
       ref={asideRef}
-      className={`h-screen border-r border-gray-300 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex flex-col justify-between relative
+      className={`h-screen border-r border-gray-300 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950/70 dark:to-gray-900/70 transition-all duration-300 flex flex-col justify-between relative
             ${isCollapsed ? "w-20" : "w-64"} `}
     >
       {/* Bouton de fermeture mobile */}
@@ -159,33 +159,55 @@ function Sidebar({
       <div className="flex flex-col h-full justify-between">
         <div className="flex flex-col gap-1 mt-4 px-3">
           <div
-            className={`flex items-center justify-center  ${
+            className={`flex items-center justify-center ${
               !isCollapsed && "lg:justify-start"
-            } mb-4`}
+            } group`}
           >
-            <h1 className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              VMS
-            </h1>
+            <div className="flex items-center relative pb-2 border-b w-full">
+              {/* Logo icon with gradient background */}
+              <SiGoogledisplayandvideo360 className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+              
+              {!isCollapsed && (
+                <div className="ml-3 inline-block">
+                  <h1 className="text-lg font-black tracking-tight">
+                    <span className="bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-blue-700/90 dark:from-blue-400/90 dark:via-indigo-400/90 dark:to-blue-500/90 bg-clip-text text-transparent transition-all duration-300">
+                      VMS
+                    </span>
+                  </h1>
+                  <p className="text-[9px] font-semibold text-gray-500/80 dark:text-gray-400/80 tracking-wider uppercase">
+                    Video Management
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           <Link
             to={"/profil"}
-            className="mt-auto py-4  px-3 border-t border-gray-200 dark:border-gray-600 flex items-center gap-2"
+            className="mt-auto py-4 flex items-center gap-2 
+              hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20
+              rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-md group"
           >
-            <div className="flex items-center">
-              <img
-                className="h-10 w-10 rounded-full"
-                src={`https://api.dicebear.com/9.x/open-peeps/svg?seed=${user?.username}`}
-                alt="User"
-              />
+            <div className="flex items-center w-full">
+              <div className="relative">
+                <img
+                  className="h-10 min-w-10 rounded-full border-2 border-gray-200 dark:border-gray-700 
+                    group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-all duration-300
+                    group-hover:scale-110 shadow-sm group-hover:shadow-lg"
+                  src={`https://api.dicebear.com/9.x/open-peeps/svg?seed=${user?.username}`}
+                  alt="User"
+                />
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full 
+                  group-hover:scale-110 transition-transform duration-300"></div>
+              </div>
               {!isCollapsed && (
-                <div className="ml-3">
-                  <p className="text-sm font-medium dark:text-gray-300 flex items-center">
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                     {user?.username || "Unknown User"}{" "}
-                    <MdVerified className="ml-1 text-blue-500 w-4 h-4" />
+                    <MdVerified className="ml-1 text-blue-500 w-4 h-4 group-hover:scale-125 transition-transform duration-300" />
                   </p>
-                  <p className="text-xs font-medium text-gray-500">
-                    View Profile
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-500 group-hover:text-blue-500 transition-colors duration-300">
+                    View Profile →
                   </p>
                 </div>
               )}
@@ -197,14 +219,15 @@ function Sidebar({
             onClick={() => handleNav("videos")}
             className={linkClass("videos")}
           >
-            {/* <BiSolidVideos className="min-w-5 h-5 text-indigo-400" /> */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-blue-400/0 
+              opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6 text-current"
+              className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 relative z-10"
             >
               <path
                 strokeLinecap="round"
@@ -213,7 +236,7 @@ function Sidebar({
               />
             </svg>
 
-            {!isCollapsed && <span className="ml-2">Videos</span>}
+            {!isCollapsed && <span className="ml-3 relative z-10">Videos</span>}
           </Link>
 
           <Link
@@ -221,9 +244,11 @@ function Sidebar({
             onClick={() => handleNav("post")}
             className={linkClass("post")}
           >
-            <MdDynamicFeed className="w-6 h-6 text-current" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-purple-400/5 to-purple-400/0 
+              opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <MdDynamicFeed className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10" />
 
-            {!isCollapsed && <span className="ml-2">Posts</span>}
+            {!isCollapsed && <span className="ml-3 relative z-10">Posts</span>}
           </Link>
 
           {user?.role === "superadmin" && (
@@ -233,9 +258,11 @@ function Sidebar({
                 onClick={() => handleNav("bot-videos")}
                 className={linkClass("bot-videos")}
               >
-                <RiRobot2Line className="w-6 h-6 text-current" />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/5 to-green-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <RiRobot2Line className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 relative z-10" />
 
-                {!isCollapsed && <span className="ml-2">Video Bot</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Video Bot</span>}
               </Link>
 
               <Link
@@ -243,8 +270,10 @@ function Sidebar({
                 onClick={() => handleNav("category-manager")}
                 className={linkClass("category-manager")}
               >
-                <MdOutlineCategory className="w-6 h-6 text-current" />
-                {!isCollapsed && <span className="ml-2">Video Category</span>}
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/0 via-indigo-400/5 to-indigo-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <MdOutlineCategory className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10" />
+                {!isCollapsed && <span className="ml-3 relative z-10">Video Category</span>}
               </Link>
 
               <Link
@@ -252,16 +281,20 @@ function Sidebar({
                 onClick={() => handleNav("post-categories")}
                 className={linkClass("post-categories")}
               >
-                <MdOutlineCategory className="w-6 h-6 text-current" />
-                {!isCollapsed && <span className="ml-2">Post Category</span>}
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-400/0 via-pink-400/5 to-pink-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <MdOutlineCategory className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10" />
+                {!isCollapsed && <span className="ml-3 relative z-10">Post Category</span>}
               </Link>
               <Link
                 to="/plateform-relations"
                 onClick={() => handleNav("plateform-relations")}
                 className={linkClass("plateform-relations")}
               >
-                <BiLogoInternetExplorer className="w-6 h-6 text-current" />
-                {!isCollapsed && <span className="ml-2">WebApps</span>}
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/5 to-cyan-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <BiLogoInternetExplorer className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 relative z-10" />
+                {!isCollapsed && <span className="ml-3 relative z-10">WebApps</span>}
               </Link>
 
               <Link
@@ -269,13 +302,15 @@ function Sidebar({
                 onClick={() => handleNav("users")}
                 className={linkClass("users")}
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/5 to-amber-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-6 h-6 text-current"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10"
                 >
                   <path
                     strokeLinecap="round"
@@ -297,7 +332,7 @@ function Sidebar({
                   />
                 </svg>
 
-                {!isCollapsed && <span className="ml-2">Users</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Users</span>}
               </Link>
 
               <Link
@@ -305,14 +340,15 @@ function Sidebar({
                 onClick={() => handleNav("archive")}
                 className={linkClass("archive")}
               >
-                {/* <Archive className="min-w-5 h-5 text-zinc-500" /> */}
+                <div className="absolute inset-0 bg-gradient-to-r from-red-400/0 via-red-400/5 to-red-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-6 h-6 text-current"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10"
                 >
                   <path
                     strokeLinecap="round"
@@ -321,7 +357,7 @@ function Sidebar({
                   />
                 </svg>
 
-                {!isCollapsed && <span className="ml-2">Blocked User</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Blocked User</span>}
               </Link>
 
               <Link
@@ -329,13 +365,15 @@ function Sidebar({
                 onClick={() => handleNav("creators")}
                 className={linkClass("creators")}
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-400/0 via-teal-400/5 to-teal-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-6 h-6 text-current"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10"
                 >
                   <path
                     strokeLinecap="round"
@@ -343,7 +381,7 @@ function Sidebar({
                     d="M15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.5 19.5a6.75 6.75 0 0 1 13.5 0"
                   />
                 </svg>
-                {!isCollapsed && <span className="ml-2">Creators</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Creators</span>}
               </Link>
 
               <Link
@@ -351,14 +389,15 @@ function Sidebar({
                 onClick={() => handleNav("settings")}
                 className={linkClass("settings")}
               >
-                {/* <Settings className="min-w-5 h-5 text-zinc-400" /> */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-400/0 via-slate-400/5 to-slate-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-6 h-6 text-current"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 group-hover:rotate-90 relative z-10"
                 >
                   <path
                     strokeLinecap="round"
@@ -371,7 +410,7 @@ function Sidebar({
                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                   />
                 </svg>
-                {!isCollapsed && <span className="ml-2">Settings</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Settings</span>}
               </Link>
 
               <Link
@@ -379,13 +418,15 @@ function Sidebar({
                 onClick={() => handleNav("conversion")}
                 className={linkClass("conversion")}
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-400/0 via-violet-400/5 to-violet-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-6 h-6 text-current"
+                  className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10"
                 >
                   <path
                     strokeLinecap="round"
@@ -393,7 +434,7 @@ function Sidebar({
                     d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125.504 1.125 1.125V11.25a9 9 0 0 0-9-9Z"
                   />
                 </svg>
-                {!isCollapsed && <span className="ml-2">Excel Conversion</span>}
+                {!isCollapsed && <span className="ml-3 relative z-10">Excel Conversion</span>}
               </Link>
             </>
           )}
