@@ -642,9 +642,6 @@ function EditVideo({
       setUploading(true);
       setProgress(0);
 
-      console.log(formData.titles);
-      console.log(formData.isShort);
-
       const res = await updateVideo(video.id, formData, (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round(

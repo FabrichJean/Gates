@@ -418,11 +418,6 @@ const Upload = () => {
                   </svg>
                 </span>
               </div>
-              <span>
-                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                  Type sélectionné : <span className="font-semibold">{videoType}</span>
-                </span>
-              </span>
             </div>
 
             {uploading && (
