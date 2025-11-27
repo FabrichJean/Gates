@@ -225,7 +225,7 @@ const PostManagementInner = () => {
                       )}
                       {post.videos?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          Aucune vidéo
+                          No video
                         </span>
                       )}
                     </div>
@@ -255,7 +255,7 @@ const PostManagementInner = () => {
                       )}
                       {post.images?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          Aucune image
+                          No image
                         </span>
                       )}
                     </div>

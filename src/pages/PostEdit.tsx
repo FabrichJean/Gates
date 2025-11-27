@@ -115,8 +115,6 @@ const PostEdit = () => {
 
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
-          // Créer l'objet langue basé sur les données du post
-          // prefer explicit i18_language, otherwise fallback to language.code if available
           const code = item.i18_language || item.language?.code || "";
           const postLanguage = {
             id: languageId,
@@ -333,8 +331,6 @@ const PostEdit = () => {
       (payload as any).creator_id = creatorObj.id;
     }
 
-    // If there are newly added files (file objects), send a FormData so the files are transmitted.
-    // determine if there are any new files (images, videos, covers for new/existing videos)
     const hasNewFiles =
       imageFields.some((f) => f.file) ||
       videoFields.some((f) => f.file || f.cover) ||
@@ -349,7 +345,6 @@ const PostEdit = () => {
       }
 
       if (hasNewFiles) {
-        // Build titles array matching UploadPost format: [{title, i18_language, description?}, ...]
         const titlesArray = Object.entries(titles).map(([langId, title]) => {
           const lang = languages.find((l) => l.id === parseInt(langId));
           return {
@@ -360,35 +355,27 @@ const PostEdit = () => {
         });
 
         const fd = new FormData();
-        // Keep the same metadata structure by sending it as JSON in a field (backwards compatible)
+
         fd.append("payload", JSON.stringify(payload));
 
-        // Also append individual fields in the same shape as UploadPost to avoid backend parsing issues
         if (post?.id) fd.append('id', String(post.id));
         fd.append('category_id', String(selectedCategory?.id ?? post?.postCategory?.id ?? ''));
         fd.append('sub_category_id', String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? ''));
         fd.append('titles', JSON.stringify(titlesArray));
 
-        // Provide full videos metadata so backend can correlate existing entries with uploaded files
         fd.append('videos_metadata', JSON.stringify(videosPayload));
 
-        // mapShorts: array of booleans matching the videos order (true for short)
-        // UploadPost builds mapShorts as booleans where `true` means short (for uploaded videos).
-        // Here we build the same shape for the full `videosPayload` (existing + new)
         const mapShorts = videosPayload.map((v) => String(v.type) === '1');
         fd.append("mapShorts", JSON.stringify(mapShorts));
 
-        // Append new image files
         imageFields.filter((f) => f.file).forEach((f) => {
           if (f.file) fd.append("images", f.file, f.file.name);
         });
 
-        // Append new video files
         videoFields.filter((f) => f.file).forEach((f) => {
           if (f.file) fd.append("videos", f.file, f.file.name);
         });
 
-        // Build list of covers in the same order as payload.videos (existing videos first, then new fields)
         const coversInOrder: (File | null)[] = [];
         // existing videos
         videos.forEach((v) => {
@@ -400,7 +387,7 @@ const PostEdit = () => {
           coversInOrder.push(f.cover ?? null);
         });
 
-        // Append covers preserving order. For videos without a cover we append an empty blob placeholder
+        // Append covers
         coversInOrder.forEach((c, idx) => {
           if (c) {
             fd.append("covers", c, c.name);
@@ -409,36 +396,11 @@ const PostEdit = () => {
             fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
           }
         });
-
-        // Debug logs to inspect what is sent to the backend
-        console.group("UpdatePost Payload Debug (FormData)");
-        console.log("payload", payload);
-        console.log("mapShorts", mapShorts);
-        console.log(
-          "newImages",
-          imageFields.filter((f) => f.file || f.url).map((f) => (f.file ? f.file.name : f.url))
-        );
-        console.log(
-          "newVideos",
-          videoFields.filter((f) => f.file || f.url).map((f) => (f.file ? f.file.name : f.url))
-        );
-        console.log("existingVideosOrder", videos.map((v) => v.id));
-        console.log(
-          "coversInOrder",
-          coversInOrder.map((c, i) => (c ? (c as File).name : `no_cover_${i}.jpg`))
-        );
-        console.groupEnd();
-
+        
         await updatePost(post?.id, fd);
       } else {
-        // No files to upload — send JSON payload as before
-        // mapShorts: array of booleans matching the videos order (true for short)
-        // Match UploadPost format: booleans where `true` means short
         (payload as any).mapShorts = videosPayload.map((v) => String(v.type) === '1');
-        // Debug log JSON payload
-        console.group("UpdatePost Payload Debug (JSON)");
-        console.log("payload", payload);
-        console.groupEnd();
+        // Debug logs removed for production
         await updatePost(post?.id, payload);
       }
 
