@@ -25,10 +25,14 @@ const Synchronisation = () => {
 
     const { sync } = useSyncOption();
 
-    const handleSubmit = async (optionId: string | null) => {
+    const handleSubmit = async (optionId: string | null, label: number | null, platformId?: number | null) => {
         const force = optionId === "true";
         try {
-            const result = await sync({ isForce: force, label: selectedRow !== null ? selectedRow.toString() : null });
+            const result = await sync({ 
+                isForce: force, 
+                label: label !== null ? label.toString() : null,
+                platformId: platformId 
+            });
             console.log("Sync result:", result);
         } catch (err) {
             console.error("Sync failed", err);
