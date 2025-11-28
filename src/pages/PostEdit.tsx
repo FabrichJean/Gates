@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
@@ -75,11 +74,20 @@ const PostEdit = () => {
     { id: number; file: File | null; url?: string }[]
   >([]);
   const [videoFields, setVideoFields] = useState<
-    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string; type?: string }[]
+    {
+      id: number;
+      file: File | null;
+      url?: string;
+      cover?: File | null;
+      coverUrl?: string;
+      type?: string;
+    }[]
   >([]);
 
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
-  const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
+  const [existingVideoCovers, setExistingVideoCovers] = useState<
+    Record<number, File | null>
+  >({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
@@ -214,7 +222,10 @@ const PostEdit = () => {
   };
 
   const addImageField = () => {
-    const newId = imageFields.length > 0 ? Math.max(...imageFields.map((field) => field.id)) + 1 : 1;
+    const newId =
+      imageFields.length > 0
+        ? Math.max(...imageFields.map((field) => field.id)) + 1
+        : 1;
     setImageFields((prev) => [...prev, { id: newId, file: null }]);
   };
 
@@ -235,8 +246,14 @@ const PostEdit = () => {
   };
 
   const addVideoField = () => {
-    const newId = videoFields.length > 0 ? Math.max(...videoFields.map((field) => field.id)) + 1 : 1;
-    setVideoFields((prev) => [...prev, { id: newId, file: null, cover: null, type: 'long' }]);
+    const newId =
+      videoFields.length > 0
+        ? Math.max(...videoFields.map((field) => field.id)) + 1
+        : 1;
+    setVideoFields((prev) => [
+      ...prev,
+      { id: newId, file: null, cover: null, type: "long" },
+    ]);
   };
 
   const removeVideoField = (id: number) => {
@@ -250,27 +267,45 @@ const PostEdit = () => {
       const maxSize = 2 * 1024 * 1024 * 1024;
       if (file.size > maxSize) {
         alert(
-          `⚠️ La vidéo est trop volumineuse !\n\nTaille: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\nMax: 2 GB`
+          `⚠️ La vidéo est trop volumineuse !\n\nTaille: ${(
+            file.size /
+            1024 /
+            1024 /
+            1024
+          ).toFixed(2)} GB\nMax: 2 GB`
         );
         return;
       }
 
-      setVideoFields((prev) => prev.map((field) => (field.id === id ? { ...field, file, url: undefined } : field)));
+      setVideoFields((prev) =>
+        prev.map((field) =>
+          field.id === id ? { ...field, file, url: undefined } : field
+        )
+      );
     }
   };
 
   // Map frontend type <-> backend representation
-  const frontToBackendType = (val: 'short' | 'long') => (val === 'long' ? '2' : '1');
+  const frontToBackendType = (val: "short" | "long") =>
+    val === "long" ? "2" : "1";
 
   // Update type for a new video field (user-added)
-  const handleVideoTypeChange = (id: number, value: 'short' | 'long') => {
-    setVideoFields((prev) => prev.map((f) => (f.id === id ? { ...f, type: value } : f)));
+  const handleVideoTypeChange = (id: number, value: "short" | "long") => {
+    setVideoFields((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, type: value } : f))
+    );
   };
 
   // Update type for an existing video (already stored on the post)
-  const handleExistingVideoTypeChange = (id: number, value: 'short' | 'long') => {
+  const handleExistingVideoTypeChange = (
+    id: number,
+    value: "short" | "long"
+  ) => {
     const t = frontToBackendType(value);
-    setMedia((prev) => ({ ...prev, videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)) }));
+    setMedia((prev) => ({
+      ...prev,
+      videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)),
+    }));
   };
 
   const handleCoverChange = (id: number, file: File | null) => {
@@ -279,7 +314,13 @@ const PostEdit = () => {
       if (existingVideo) {
         setExistingVideoCovers((prev) => ({ ...prev, [id]: file }));
       } else {
-        setVideoFields((prev) => prev.map((field) => (field.id === id ? { ...field, cover: file, coverUrl: undefined } : field)));
+        setVideoFields((prev) =>
+          prev.map((field) =>
+            field.id === id
+              ? { ...field, cover: file, coverUrl: undefined }
+              : field
+          )
+        );
       }
     }
   };
@@ -293,20 +334,35 @@ const PostEdit = () => {
 
     // existing videos currently in media state (preserve their backend 'type' if present)
     videos.forEach((v) => {
-      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false, type: (v as any).type ?? '2' });
+      videosPayload.push({
+        id: v.id,
+        fileName:
+          v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url,
+        isNew: false,
+        type: (v as any).type ?? "2",
+      });
     });
 
     // new video fields (user added in form) — include the chosen type (map front->backend)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
-        const t = field.type === 'short' ? '1' : '2';
-        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file, type: t });
+        const t = field.type === "short" ? "1" : "2";
+        videosPayload.push({
+          id: field.id,
+          fileName: field.file?.name || field.url,
+          isNew: !!field.file,
+          type: t,
+        });
       });
 
     const imagesPayload = imageFields
       .filter((field) => field.file !== null || field.url)
-      .map((field) => ({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file }));
+      .map((field) => ({
+        id: field.id,
+        fileName: field.file?.name || field.url,
+        isNew: !!field.file,
+      }));
 
     const payload = {
       id: post?.id,
@@ -348,7 +404,9 @@ const PostEdit = () => {
           return {
             title,
             i18_language: lang?.code,
-            ...(descriptions[parseInt(langId)] ? { description: descriptions[parseInt(langId)] } : {}),
+            ...(descriptions[parseInt(langId)]
+              ? { description: descriptions[parseInt(langId)] }
+              : {}),
           };
         });
 
@@ -356,23 +414,33 @@ const PostEdit = () => {
 
         fd.append("payload", JSON.stringify(payload));
 
-        if (post?.id) fd.append('id', String(post.id));
-        fd.append('category_id', String(selectedCategory?.id ?? post?.postCategory?.id ?? ''));
-        fd.append('sub_category_id', String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? ''));
-        fd.append('titles', JSON.stringify(titlesArray));
+        if (post?.id) fd.append("id", String(post.id));
+        fd.append(
+          "category_id",
+          String(selectedCategory?.id ?? post?.postCategory?.id ?? "")
+        );
+        fd.append(
+          "sub_category_id",
+          String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? "")
+        );
+        fd.append("titles", JSON.stringify(titlesArray));
 
-        fd.append('videos_metadata', JSON.stringify(videosPayload));
+        fd.append("videos_metadata", JSON.stringify(videosPayload));
 
         const mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
         fd.append("mapShorts", JSON.stringify(mapShorts));
 
-        imageFields.filter((f) => f.file).forEach((f) => {
-          if (f.file) fd.append("images", f.file, f.file.name);
-        });
+        imageFields
+          .filter((f) => f.file)
+          .forEach((f) => {
+            if (f.file) fd.append("images", f.file, f.file.name);
+          });
 
-        videoFields.filter((f) => f.file).forEach((f) => {
-          if (f.file) fd.append("videos", f.file, f.file.name);
-        });
+        videoFields
+          .filter((f) => f.file)
+          .forEach((f) => {
+            if (f.file) fd.append("videos", f.file, f.file.name);
+          });
 
         const coversInOrder: (File | null)[] = [];
         // existing videos
@@ -394,6 +462,7 @@ const PostEdit = () => {
             fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
           }
         });
+
 
         await updatePost(post?.id, fd);
       } else {
