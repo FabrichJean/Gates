@@ -469,7 +469,7 @@ const PostEdit = () => {
         );
         // Debug logs removed for production
         await updatePost(post?.id, payload);
-      }
+      }  
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
