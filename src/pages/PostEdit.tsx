@@ -365,7 +365,7 @@ const PostEdit = () => {
 
         fd.append('videos_metadata', JSON.stringify(videosPayload));
 
-        const mapShorts = videosPayload.map((v) => String(v.type) === '1');
+        const mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
         fd.append("mapShorts", JSON.stringify(mapShorts));
 
         imageFields.filter((f) => f.file).forEach((f) => {
@@ -399,7 +399,7 @@ const PostEdit = () => {
         
         await updatePost(post?.id, fd);
       } else {
-        (payload as any).mapShorts = videosPayload.map((v) => String(v.type) === '1');
+        (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
         // Debug logs removed for production
         await updatePost(post?.id, payload);
       }  
