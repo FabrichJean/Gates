@@ -77,11 +77,11 @@ const PostEdit = () => {
   const [videoFields, setVideoFields] = useState<
     { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string; type?: string }[]
   >([]);
+
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
-    useState<Language | null>(null);
+  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
@@ -101,7 +101,7 @@ const PostEdit = () => {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-      // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
+      
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
         // setSelectedSubCategory(matchingSubCategory);
@@ -135,7 +135,7 @@ const PostEdit = () => {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-      // Prefill creator fields if available on post
+
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
         setCreatorObj((post as any).creatorObj || null);
@@ -322,10 +322,8 @@ const PostEdit = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
-      // include deferred deletions so backend can remove them as part of the update
-      // deleted_image_ids: deletedImageIds,
-      // deleted_video_ids: deletedVideoIds,
     };
+
     // include creator or creator_id in payload
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;

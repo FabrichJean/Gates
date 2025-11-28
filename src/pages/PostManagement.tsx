@@ -1,4 +1,4 @@
-import { FilePlus, Eye, Columns, SendIcon } from "lucide-react";
+import { FilePlus, Eye, SendIcon } from "lucide-react";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -57,9 +57,7 @@ const PostManagementInner = () => {
               >
                 <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </Link>
-              <button className="flex items-center justify-center gap-2 p-2.5 cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all">
-                <Columns className="w-5 h-auto text-blue-400 dark:text-blue-300" />
-              </button>
+              
               <SendToWebApp />
             </div>
 
@@ -306,8 +304,6 @@ const PostManagement = () => (
     <PostManagementInner />
   </PostsProvider>
 );
-
-// export default PostManagement; (export already defined above)
 
 // --- SendToWebApp component ---
 function SendToWebApp() {

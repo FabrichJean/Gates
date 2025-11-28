@@ -80,8 +80,7 @@ const TouchPost = () => {
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
-    useState<Language | null>(null);
+  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
@@ -95,16 +94,14 @@ const TouchPost = () => {
 
   const availableSubCategories = subCategoriesResponse?.subCategories;
 
-  // Pré-remplir les champs avec les données du post
   useEffect(() => {
     if (post) {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-      // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
+
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
-        // setSelectedSubCategory(matchingSubCategory);
         setSelectedOptions([matchingCategory.name]);
       }
 
@@ -130,20 +127,17 @@ const TouchPost = () => {
         setTitles(titlesMap);
         setDescriptions(descriptionsMap);
 
-        // Sélectionner la première langue par défaut
         if (postLanguages.length > 0) {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-      // Prefill creator fields if available on post
-      // prefer creatorObj when present
+      
       if ((post as any).creatorObj) {
         setCreatorObj((post as any).creatorObj || null);
       }
     }
   }, [post, categoriesResponse]);
 
-  // Effet pour s'assurer que selectedLanguage est toujours valide
   useEffect(() => {
     if (
       languages.length > 0 &&
@@ -203,11 +197,11 @@ const TouchPost = () => {
       setLanguages((prev) => [...prev, newLanguage]);
       setSelectedLanguageFromBackend(null);
       setShowAddLanguageModal(false);
-      setSelectedLanguage(newLanguage); // Sélectionner automatiquement la nouvelle langue
+      setSelectedLanguage(newLanguage);
     }
   };
 
-  // Fonction pour annuler l'ajout de langue
+  
   const handleCancelAddLanguage = () => {
     setSelectedLanguageFromBackend(null);
     setShowAddLanguageModal(false);
@@ -322,11 +316,8 @@ const TouchPost = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
-      // include deferred deletions so backend can remove them as part of the update
-      // deleted_image_ids: deletedImageIds,
-      // deleted_video_ids: deletedVideoIds,
     };
-    // include creator or creator_id in payload
+    
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
