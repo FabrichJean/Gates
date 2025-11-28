@@ -163,13 +163,13 @@ export default function PlateformRelationsManager() {
         const [catsRes, subsRes] =
           relationMode === "post"
             ? await Promise.all([
-                getPostCategoriesByPlateformApi(plateformId),
-                getPostSubCategoriesForPlateformApi(plateformId),
-              ])
+              getPostCategoriesByPlateformApi(plateformId),
+              getPostSubCategoriesForPlateformApi(plateformId),
+            ])
             : await Promise.all([
-                getCategoriesByPlateformApi(plateformId),
-                getSubCategoriesForPlateformApi(plateformId),
-              ]);
+              getCategoriesByPlateformApi(plateformId),
+              getSubCategoriesForPlateformApi(plateformId),
+            ]);
         // Normalize categories response (backend may return different shapes)
         const normalizeCategories = (res: unknown): RelationItem[] => {
           const payload =
@@ -429,7 +429,7 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
-  
+
   const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -627,11 +627,10 @@ export default function PlateformRelationsManager() {
                 </div>
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
-                  className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${
-                    selectedPlateform === p.id
+                  className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${selectedPlateform === p.id
                       ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                    }`}
                 >
                   <span
                     className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
@@ -703,17 +702,15 @@ export default function PlateformRelationsManager() {
 
               <div className="mb-4 flex gap-2">
                 <button
-                  className={`btn btn-sm ${
-                    relationMode === "video" ? "btn-primary" : "btn-ghost"
-                  }`}
+                  className={`btn btn-sm ${relationMode === "video" ? "btn-primary" : "btn-ghost"
+                    }`}
                   onClick={() => setRelationMode("video")}
                 >
                   Video
                 </button>
                 <button
-                  className={`btn btn-sm ${
-                    relationMode === "post" ? "btn-primary" : "btn-ghost"
-                  }`}
+                  className={`btn btn-sm ${relationMode === "post" ? "btn-primary" : "btn-ghost"
+                    }`}
                   onClick={() => setRelationMode("post")}
                 >
                   Post
@@ -1101,7 +1098,7 @@ export default function PlateformRelationsManager() {
                         <button
                           onClick={() => {
                             handleAddCreator(creator.id);
-                            setCreatorModalOpen(false);
+                            setCreatorModalOpen(true);
                           }}
                           className="btn btn-xs btn-primary"
                         >
