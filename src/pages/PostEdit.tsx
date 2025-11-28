@@ -101,7 +101,7 @@ const PostEdit = () => {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-      
+
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
         // setSelectedSubCategory(matchingSubCategory);
@@ -394,13 +394,13 @@ const PostEdit = () => {
             fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
           }
         });
-        
+
         await updatePost(post?.id, fd);
       } else {
         (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
         // Debug logs removed for production
         await updatePost(post?.id, payload);
-      }  
+      }
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
@@ -567,8 +567,8 @@ const PostEdit = () => {
                 type="submit"
                 disabled={updating}
                 className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-700"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
                   }`}
               >
                 <svg
