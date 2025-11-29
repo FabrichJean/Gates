@@ -132,6 +132,7 @@ import ProcessModal from "./ProcessModal";
 import { MdDynamicFeed } from "react-icons/md";
 import { useCardFlottant } from "../hooks/useCardFlottant";
 import useSyncOption from "../hooks/useSyncOption";
+import useSyncErrors from "../hooks/useSyncErrors";
 
 // Composant Breadcrumb
 const Breadcrumb: React.FC = () => {
@@ -181,6 +182,8 @@ const Breadcrumb: React.FC = () => {
   };
 
   const { sync } = useSyncOption();
+  const { reFetch } = useSyncErrors();
+
 
   const handleSubmit = async (
     optionId: string | null,
@@ -190,12 +193,14 @@ const Breadcrumb: React.FC = () => {
     const force = optionId === "true";
     try {
       show();
-      const result = await sync({
+      await sync({
         isForce: force,
-        label: label !== null ? label.toString() : null,
+        label: label!,
         platformId: platformId,
       });
-      console.log("Sync result:", result);
+
+      reFetch();
+
       setModalOpen(false);
     } catch (err) {
       console.error("Sync failed", err);
@@ -205,19 +210,6 @@ const Breadcrumb: React.FC = () => {
   const [showProcessModal, setShowProcessModal] = useState(false);
 
   const { show } = useCardFlottant();
-  // modal options
-  const options = [
-    {
-      id: "true",
-      title: "with Force",
-      subtitle: "all data except the ID should be updated directly",
-    },
-    {
-      id: "false",
-      title: "No Force",
-      subtitle: "records with an existing ID should not be overwritten",
-    },
-  ];
 
   if (breadcrumbs.length <= 1) {
     return null;
@@ -232,8 +224,8 @@ const Breadcrumb: React.FC = () => {
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
             className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
-                ? "text-gray-900 dark:text-white font-medium cursor-default"
-                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+              ? "text-gray-900 dark:text-white font-medium cursor-default"
+              : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
               }`}
             disabled={breadcrumbs.length === 1}
           >
@@ -246,8 +238,8 @@ const Breadcrumb: React.FC = () => {
             <button
               onClick={() => navigate(breadcrumb.path)}
               className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
-                  ? "text-gray-900 dark:text-white font-medium cursor-default"
-                  : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+                ? "text-gray-900 dark:text-white font-medium cursor-default"
+                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
                 }`}
               disabled={index === breadcrumbs.length - 2}
             >
@@ -298,7 +290,6 @@ const Breadcrumb: React.FC = () => {
       <SelectModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        options={options}
         rowLabel={selectedRow}
         title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
         onSubmit={handleSubmit}

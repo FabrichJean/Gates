@@ -41,13 +41,12 @@ const Synchronisation = () => {
     
     try {
       show();
-      const result = await sync({
+      await sync({
         isForce: optionId === "true",
         label: label,
         platformId: platformId,
       });
-      console.log("Sync result:", result);
-      // Refresh the errors list after successful sync
+      
       reFetch();
       // Close the modal
       setModalOpen(false);
@@ -129,10 +128,10 @@ const Synchronisation = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="inline-flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <label className="inline-flex items-center text-sm text-gray-600 dark:text-gray-300 ">
               <input
                 type="checkbox"
-                className="checkbox mr-2"
+                className="checkbox mr-2 accent-blue-500 dark:accent-blue-300"
                 checked={onlyUnresolved}
                 onChange={(e) => setOnlyUnresolved(e.target.checked)}
               />
@@ -164,7 +163,7 @@ const Synchronisation = () => {
             <div className="relative bg-neutral-primary-soft shadow-xs rounded-base border border-default">
               <div className="max-h-[60vh] overflow-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-body">
-                  <thead className="text-sm text-body bg-slate-600 border-b border-default no-scrollbar sticky top-0 z-20">
+                  <thead className="text-sm text-body text-white dark:text-white bg-slate-500 dark:bg-slate-800 border-b border-default no-scrollbar sticky top-0 z-20">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">
                       ID
