@@ -4,6 +4,7 @@ import useSyncOption from "../hooks/useSyncOption";
 import useSyncErrors from "../hooks/useSyncErrors";
 import useCardFlottant from "../hooks/useCardFlottant";
 import { Link } from "react-router-dom";
+import WaterProgressModal from "../components/WaterProgressModal";
 import { FaSyncAlt } from "react-icons/fa";
 
 const Synchronisation = () => {
@@ -14,6 +15,12 @@ const Synchronisation = () => {
   );
 
   const { data: syncErrors, loading, error, reFetch } = useSyncErrors();
+
+  const [processingAll, setProcessingAll] = useState(false);
+  const [processedCount, setProcessedCount] = useState(0);
+  const [totalToProcess, setTotalToProcess] = useState(0);
+  const [currentItem, setCurrentItem] = useState<number | null>(null);
+  const [onlyUnresolved, setOnlyUnresolved] = useState(false);
 
   const { show } = useCardFlottant();
 
@@ -36,6 +43,8 @@ const Synchronisation = () => {
   };
 
   const { sync } = useSyncOption();
+
+  const displayedErrors = onlyUnresolved ? (syncErrors || []).filter((r) => !r.resolved) : (syncErrors || []);
 
   const handleSubmit = async (
     optionId: string | null,
@@ -66,7 +75,8 @@ const Synchronisation = () => {
         {/* view error process */}
         <div className="w-full flex justify-between">
           <h2 className="text-2xl font-semibold mb-4">Synchronisation</h2>
-          <button
+          <div className="flex items-center gap-2">
+            <button
             onClick={handleOpenFor.bind(null, undefined)}
             className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
           >
@@ -75,18 +85,73 @@ const Synchronisation = () => {
               Launch Synchronisation
             </span>
           </button>
+            <button
+              onClick={async () => {
+                // retry all errors one by one
+                if (!syncErrors || syncErrors.length === 0) return;
+                const rows = syncErrors.filter((r) => !r.resolved);
+                if (rows.length === 0) return;
+                setTotalToProcess(rows.length);
+                setProcessedCount(0);
+                setProcessingAll(true);
+
+                for (let i = 0; i < rows.length; i++) {
+                  const row = rows[i];
+                  try {
+                    setCurrentItem(row.id);
+                    // call sync for each error id; don't force by default
+                    await sync({ isForce: false, label: row.id, platformId: row.plateform_id ?? null });
+                  } catch (err) {
+                    // swallow error and continue to next
+                    console.error(`Retry failed for id=${row.id}`, err);
+                  } finally {
+                    setProcessedCount((c) => c + 1);
+                  }
+                }
+
+                // finished
+                setProcessingAll(false);
+                setCurrentItem(null);
+                // refresh list
+                reFetch();
+              }}
+              disabled={processingAll || loading}
+              className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
+            >
+              Retry all errors
+            </button>
+            {processingAll && (
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                {processedCount}/{totalToProcess} processed{currentItem ? ` — current: ${currentItem}` : ''}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="tabs tabs-bordered w-full mt-6">
-          <button
-            className={`tab tab-bordered ${
-              activeTab === "errorList" ? "tab-active" : ""
-            }`}
-            onClick={() => setActiveTab("errorList")}
-          >
-            Error List
-          </button>
+        {/* Tabs Navigation + filter */}
+        <div className="w-full mt-6 flex items-center justify-between">
+          <div className="tabs tabs-bordered">
+            <button
+              className={`tab tab-bordered ${
+                activeTab === "errorList" ? "tab-active" : ""
+              }`}
+              onClick={() => setActiveTab("errorList")}
+            >
+              Error List
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <input
+                type="checkbox"
+                className="checkbox mr-2"
+                checked={onlyUnresolved}
+                onChange={(e) => setOnlyUnresolved(e.target.checked)}
+              />
+              Only unresolved
+            </label>
+          </div>
         </div>
 
         {/* Tab Content */}
@@ -164,7 +229,7 @@ const Synchronisation = () => {
                         </button>
                       </td>
                     </tr>
-                  ) : syncErrors.length === 0 ? (
+                  ) : displayedErrors.length === 0 ? (
                     <tr>
                       <td
                         colSpan={8}
@@ -174,7 +239,7 @@ const Synchronisation = () => {
                       </td>
                     </tr>
                   ) : (
-                    syncErrors.map((row) => (
+                    displayedErrors.map((row) => (
                       <tr
                         key={row.id}
                         className="bg-neutral-primary border-b border-default"
@@ -228,7 +293,7 @@ const Synchronisation = () => {
                             className={`btn btn-xs btn-primary ${row.resolved ? "btn-disabled" : ""}`}
                             onClick={() => handleOpenFor(row.id)}
                           >
-                            Sync
+                            retry
                           </button>
                         </td>
                       </tr>
@@ -248,6 +313,20 @@ const Synchronisation = () => {
           title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
           onSubmit={handleSubmit}
         />}
+          <WaterProgressModal
+            open={processingAll}
+            percent={totalToProcess > 0 ? (processedCount / totalToProcess) * 100 : 0}
+            processed={processedCount}
+            total={totalToProcess}
+            currentItem={currentItem}
+            onClose={() => {
+              // allow closing the modal visually but keep processing running in background — if you prefer to cancel, implement abort logic
+              // just stop showing the modal
+              // user can re-open later or view status in page
+              /* eslint-disable no-console */
+              console.log('Progress modal closed by user');
+            }}
+          />
       </div>
     </div>
   );
