@@ -33,13 +33,14 @@ const CardFlottant: React.FC = () => {
 
     if (!visible) return null;
 
+    // If you want to fully hide the card from UI, AppRoutes controls mounting via visible flag.
     return (
         <div className="fixed bottom-6 right-6 z-50">
             {/* Expanded card */}
             {!collapsed ? (
                 <div className="w-80 max-w-full rounded-xl shadow-lg p-4 inset-0 backdrop-blur-sm border border-gray-200 dark:border-gray-700 transform transition-all duration-200">
                     {/* close/minimize button */}
-                    <div className="absolute top-0 right-0 m-3 flex items-center space-x-2 bg-transparent">
+                    <div className="absolute top-0 right-0 m-3 flex items-center space-x-2 bg-white">
                         <button
                             aria-label="Minimize"
                             title="Minimize"
