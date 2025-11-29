@@ -5,14 +5,9 @@ import { getToken } from "../utils/storage";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./useAuth";
 
-/**
- * Hook personnalisé pour gérer la connexion Socket.IO côté client.
- * - Authentifie automatiquement l'utilisateur
- * - Écoute les événements backend liés au traitement vidéo (upload, transcodage, etc.)
- * - Déclenche un callback quand un upload est terminé (succès ou échec)
- */
+
 const useSocketSend = (onUploadFinished?: (videoId: string) => void) => {
- const {user} = useAuth()
+  const { user } = useAuth()
   const socketRef = useRef<Socket | null>(null);
 
   // ⚙️ Étape 2 — Connexion socket dès que l'utilisateur est identifié

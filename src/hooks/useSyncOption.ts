@@ -4,7 +4,7 @@ import axios from "axios";
 
 type SyncPayload = {
   isForce: boolean;
-  label?: string | null;
+  label?: number | null;
   platformId?: number | null;
 };
 
@@ -66,7 +66,6 @@ export default function useSyncOption() {
       };
 
       let payload: { body?: { plateformId?: number } } = {};
-      // Add platformId to the request body if provided
       if (platformId) {
         payload.body = { plateformId: platformId };
       }
@@ -74,15 +73,10 @@ export default function useSyncOption() {
       const res = await axios.post(url, payload.body, option);
 
       if (res.status < 200 || res.status >= 300) {
-        // throw new Error(`Sync failed: ${res.status} ${res.statusText}`);
-        alert(`Sync failed: ${res.status} ${res.statusText}`);
+        throw new Error(`Sync failed: ${res.status} ${res.statusText}`);
       }
 
-      // return alert(res.data);
-
       setData(res.data);
-      // return res.data;
-      console.log(res.data);
       return res.data;
     } catch (err: any) {
       setError(err);

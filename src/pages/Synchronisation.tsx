@@ -31,8 +31,8 @@ const Synchronisation = () => {
   ];
 
   const handleOpenFor = (id?: number) => {
-    setSelectedRow(id || null);
-    setModalOpen(true);
+    setSelectedRow(() => id || null);
+    setModalOpen(() => true);
   };
 
   const { sync } = useSyncOption();
@@ -42,12 +42,12 @@ const Synchronisation = () => {
     label: number | null,
     platformId?: number | null
   ) => {
-    const force = optionId === "true";
+    
     try {
       show();
       const result = await sync({
-        isForce: force,
-        label: label !== null ? label.toString() : null,
+        isForce: optionId === "true",
+        label: label,
         platformId: platformId,
       });
       console.log("Sync result:", result);
@@ -224,7 +224,8 @@ const Synchronisation = () => {
                         </td>
                         <td className="px-4 py-3">
                           <button
-                            className="btn btn-xs btn-primary"
+                            disabled={row.resolved}
+                            className={`btn btn-xs btn-primary ${row.resolved ? "btn-disabled" : ""}`}
                             onClick={() => handleOpenFor(row.id)}
                           >
                             Sync
@@ -239,14 +240,14 @@ const Synchronisation = () => {
           </div>
         )}
 
-        <SelectModal
+        {modalOpen && <SelectModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          options={options}
+          options={options}  
           rowLabel={selectedRow}
           title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
           onSubmit={handleSubmit}
-        />
+        />}
       </div>
     </div>
   );
