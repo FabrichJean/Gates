@@ -290,6 +290,16 @@ function Sidebar({
                   {!isCollapsed && <span className="ml-3 relative z-10">Post Category</span>}
                 </Link>
                 <Link
+                  to="/tag-category"
+                  onClick={() => handleNav("tag-category")}
+                  className={linkClass("tag-category")}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-400/0 via-pink-400/5 to-pink-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <MdOutlineCategory className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 relative z-10" />
+                  {!isCollapsed && <span className="ml-3 relative z-10">Tag Category</span>}
+                </Link>
+                <Link
                   to="/plateform-relations"
                   onClick={() => handleNav("plateform-relations")}
                   className={linkClass("plateform-relations")}

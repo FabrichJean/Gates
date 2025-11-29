@@ -37,6 +37,7 @@ import VideoBotEdit from "../pages/VideoBotEdit";
 import Synchronisation from "../pages/Synchronisation";
 import CardFlottant from "../components/CardFlottant";
 import useCardFlottant from "../hooks/useCardFlottant";
+import TagCategory from "../pages/TagCategory";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -259,6 +260,18 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/tag-category"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <TagCategory />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/creators"
             element={
               <ProtectedRoute>
@@ -286,11 +299,11 @@ const AppRoutes = () => {
             path="/conversion"
             element={
               <ProtectedRoute>
-                {/* <SuperProtected> */}
+                <SuperProtected>
                 <InsideSidebar>
                   <Conversion />
                 </InsideSidebar>
-                {/* </SuperProtected> */}
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
@@ -340,9 +353,11 @@ const AppRoutes = () => {
             path="/sync"
             element={
               <ProtectedRoute>
+                <SuperProtected>
                 <InsideSidebar>
                   <Synchronisation />
                 </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
