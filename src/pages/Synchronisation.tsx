@@ -17,19 +17,6 @@ const Synchronisation = () => {
 
   const { show } = useCardFlottant();
 
-  const options = [
-    {
-      id: "true",
-      title: "with Force",
-      subtitle: "all data except the ID should be updated directly",
-    },
-    {
-      id: "false",
-      title: "No Force",
-      subtitle: "records with an existing ID should not be overwritten",
-    },
-  ];
-
   const handleOpenFor = (id?: number) => {
     setSelectedRow(() => id || null);
     setModalOpen(() => true);
@@ -109,9 +96,10 @@ const Synchronisation = () => {
           <div className="w-full flex flex-col mt-6">
             <h2 className="font-bold pb-2 text-pink-400">Error List</h2>
 
-            <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
-              <table className="w-full text-sm text-left rtl:text-right text-body">
-                <thead className="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
+            <div className="relative bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+              <div className="max-h-[60vh] overflow-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-body">
+                  <thead className="text-sm text-body bg-slate-600 border-b border-default no-scrollbar sticky top-0 z-20">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">
                       ID
@@ -138,8 +126,8 @@ const Synchronisation = () => {
                       Action
                     </th>
                   </tr>
-                </thead>
-                <tbody>
+                  </thead>
+                  <tbody>
                   {loading ? (
                     <tr>
                       <td colSpan={8} className="px-6 py-4 text-center">
@@ -234,8 +222,9 @@ const Synchronisation = () => {
                       </tr>
                     ))
                   )}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -243,7 +232,6 @@ const Synchronisation = () => {
         {modalOpen && <SelectModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          options={options}  
           rowLabel={selectedRow}
           title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
           onSubmit={handleSubmit}

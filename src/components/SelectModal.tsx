@@ -30,21 +30,16 @@ const SelectModal = ({
   onClose,
   onSubmit,
   title = "Sync option",
-  options = [],
   rowLabel,
 }: SelectModalProps) => {
   const { data: platforms } = UsePlateform();
-  const [selected, setSelected] = useState<string | null>(
-    options.length ? options[0].id : null
-  );
   const [selectedPlatform, setSelectedPlatform] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
-      setSelected(options.length ? options[0].id : null);
       setSelectedPlatform(platforms && platforms.length ? platforms[0].id : null);
     }
-  }, [open, options, platforms]);
+  }, [open, platforms]);
 
   const handleSync = (label: number | null, isForce: boolean) => () => {
     const platformToSend = rowLabel == null ? (selectedPlatform ?? null) : undefined;
@@ -114,7 +109,7 @@ const SelectModal = ({
             )}
 
             <div className="space-y-4 mb-4">
-              <button onClick={handleSync(rowLabel ?? null, true)} className="inline-flex items-center w-full p-5 hover:bg-slate-600 text-body bg-neutral-primary-soft border-1 border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">
+              <button onClick={handleSync(rowLabel ?? null, true)} className="inline-flex items-center w-full p-5 dark:hover:bg-slate-600 hover:bg-slate-100 text-body bg-neutral-primary-soft border-1 border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">
                 <div className="flex items-center justify-center w-9 h-9 rounded bg-brand-soft text-fg-brand-strong">
                   <svg
                     className="w-5 h-5"
@@ -158,7 +153,7 @@ const SelectModal = ({
                 </svg>
               </button>
 
-              <button onClick={handleSync(rowLabel ?? null, false)} className="inline-flex items-center w-full hover:bg-slate-600 p-5 text-body bg-neutral-primary-soft border-1 border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">
+              <button onClick={handleSync(rowLabel ?? null, false)} className="inline-flex items-center w-full dark:hover:bg-slate-600 hover:bg-slate-100 p-5 text-body bg-neutral-primary-soft border-1 border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">
                 <div className="flex items-center justify-center w-9 h-9 rounded bg-brand-soft text-fg-brand-strong">
                   <svg
                     className="w-5 h-5"

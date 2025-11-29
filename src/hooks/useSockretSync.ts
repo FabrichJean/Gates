@@ -3,52 +3,66 @@ import { io, Socket } from "socket.io-client";
 import { server } from "../constant";
 import { useAuth } from "./useAuth";
 import { getToken } from "../utils/storage";
-import { toast } from "react-hot-toast";
 
+type UseSocketSyncOptions = {
+  onSyncFinished?: (data: any) => void;
+  onSyncProgress?: (data: any) => void;
+};
 
-const useSockretSync = (onSyncFinished?: (videoId: string | number) => void) => {
-    const { user } = useAuth()
-    const socketRef = useRef<Socket | null>(null);
+const useSockretSync = (opts?: UseSocketSyncOptions) => {
+  const { onSyncFinished, onSyncProgress } = opts || {};
+  const { user } = useAuth();
+  const socketRef = useRef<Socket | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!user?.id) return;
+
     const socket = io(server, {
-        transports: ["websocket"],
-        auth: { token: getToken() }, // envoie le token d'auth côté serveur
-        reconnection: true,
-        reconnectionAttempts: 10,
-        reconnectionDelay: 3000,
+      transports: ["websocket"],
+      auth: { token: getToken() }, // envoie le token d'auth côté serveur
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 3000,
     });
 
     socketRef.current = socket;
 
     socket.on("connect_error", (err) => {
-      console.error("🔴 Erreur de connexion Socket.IO :", err.message);
+      console.error("🔴 Erreur de connexion Socket.IO :", err?.message ?? err);
     });
 
-    // Événement succès de traitement (sync terminé)
-    socket.on("deep-sync-success", (data: { videoId: string | number; message: string }) => {
-      console.log("🎉 Sync complet :", data);
-      toast.success(`✅ ${data.message} (Video ID: ${data.videoId})`);
-        if (onSyncFinished) onSyncFinished(data.videoId);
+    // écoute l'événement envoyé par le backend
+    socket.on("sync:progress", (data: any) => {
+      try {
+        if (typeof onSyncProgress === "function") onSyncProgress(data);
+        // si le backend signale la fin via sync:progress, on peut aussi appeler onSyncFinished
+        if (data && (data.finished === true || data.done === true) && typeof onSyncFinished === "function") {
+          onSyncFinished(data);
+        }
+      } catch (err) {
+        console.error("Error in sync:progress handler:", err);
+      }
     });
 
-    // Événement échec de traitement
-    socket.on("deep-sync-failed", (data: { videoId: string | number; error: string }) => {
-      console.error("❌ Échec du deep sync :", data);
-      toast.error(`Sync échoué pour la vidéo ${data.videoId}`);
-        if (onSyncFinished) onSyncFinished(data.videoId);
+    // optionnel: écoute d'autres events utiles
+    socket.on("disconnect", () => {
+      // console.info("Socket disconnected");
     });
 
-    // Nettoyage à la fermeture du composant
     return () => {
-      console.log("🔌 Déconnexion du serveur Socket.IO");
-      socket.disconnect();
+      try {
+        socket.off("sync:progress");
+        socket.off("connect_error");
+        socket.off("disconnect");
+        socket.disconnect();
+      } catch (e) {
+        // ignore
+      }
+      socketRef.current = null;
     };
+  }, [user?.id, onSyncFinished, onSyncProgress]);
 
-    }, [user?.id, onSyncFinished]);
-
-    return socketRef.current;
+  return socketRef.current;
 };
 
 export default useSockretSync;

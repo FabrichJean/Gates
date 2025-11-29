@@ -1,9 +1,37 @@
-import React from "react";
+import React, { useRef } from "react";
 import { HashLoader } from "react-spinners";
 import useCardFlottant from "../hooks/useCardFlottant";
+import useSockretSync from "../hooks/useSockretSync";
+import { toast } from "react-hot-toast";
 
 const CardFlottant: React.FC = () => {
-    const { collapsed, collapse, expand } = useCardFlottant();
+    const { collapsed, collapse, expand, hide, visible } = useCardFlottant();
+    const toastTimerRef = useRef<number | null>(null);
+
+    useSockretSync({
+        onSyncProgress: (data: any) => {
+            try {
+                hide();
+
+                if (toastTimerRef.current) {
+                    window.clearTimeout(toastTimerRef.current as unknown as number);
+                    toastTimerRef.current = null;
+                }
+
+                const total = data?.total ?? null;
+                toast.success(`Total: ${total}`, { 
+                    duration: 8000, 
+                    position: "bottom-right",
+                    style: { minWidth: "350px" }
+                });
+            } catch (err) {
+                console.error("Error handling sync:progress in CardFlottant:", err);
+            }
+        },
+    });
+
+
+    if (!visible) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-50">
