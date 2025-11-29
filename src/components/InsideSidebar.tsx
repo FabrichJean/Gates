@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { FaSortDown } from "react-icons/fa";
+import { FaSortDown, FaSyncAlt } from "react-icons/fa";
 import {
   ChevronRight,
   Home,
@@ -210,7 +210,7 @@ const Breadcrumb: React.FC = () => {
           </div>
         ))}
         {/* Download icon (votre SVG) en bouton interactif */}
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
           <button
             type="button"
             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -232,8 +232,18 @@ const Breadcrumb: React.FC = () => {
               <rect x="4" y="18" width="16" height="2" rx="1" />
             </svg>
           </button>
+          <button
+            // onClick={handleOpenFor.bind(null, undefined)}
+            className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-xs border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+          >
+            <FaSyncAlt />
+            <span className="md:inline hidden text-gray-600 dark:text-gray-400 PX-3">
+              Launch Synchronisation
+            </span>
+          </button>
         </span>
       </nav>
+
       <ProcessModal
         open={showProcessModal}
         onClose={() => setShowProcessModal(false)}

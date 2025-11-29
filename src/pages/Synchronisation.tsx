@@ -2,20 +2,20 @@ import { useState } from "react";
 import SelectModal from "../components/SelectModal";
 import useSyncOption from "../hooks/useSyncOption";
 import useSyncErrors from "../hooks/useSyncErrors";
-import CardFlottant from "../components/CardFlottant";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import useCardFlottant from "../hooks/useCardFlottant";
 import { Link } from "react-router-dom";
+import { FaSyncAlt } from "react-icons/fa";
 
 const Synchronisation = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"firstTab" | "errorList">(
-    "firstTab"
+    "errorList"
   );
 
   const { data: syncErrors, loading, error, reFetch } = useSyncErrors();
 
-  const [modalFloat, setModalFloat] = useLocalStorage("modal_float", false);
+  const { show } = useCardFlottant();
 
   const options = [
     {
@@ -44,7 +44,7 @@ const Synchronisation = () => {
   ) => {
     const force = optionId === "true";
     try {
-      setModalFloat(true);
+      show();
       const result = await sync({
         isForce: force,
         label: label !== null ? label.toString() : null,
@@ -70,20 +70,7 @@ const Synchronisation = () => {
             onClick={handleOpenFor.bind(null, undefined)}
             className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m15 11.25-3-3m0 0-3 3m3-3v7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
-            </svg>
+            <FaSyncAlt/>
             <span className="md:inline hidden text-gray-600 dark:text-gray-400 PX-3">
               Launch Synchronisation
             </span>
@@ -92,14 +79,6 @@ const Synchronisation = () => {
 
         {/* Tabs Navigation */}
         <div className="tabs tabs-bordered w-full mt-6">
-          <button
-            className={`tab tab-bordered ${
-              activeTab === "firstTab" ? "tab-active" : ""
-            }`}
-            onClick={() => setActiveTab("firstTab")}
-          >
-            First Tab
-          </button>
           <button
             className={`tab tab-bordered ${
               activeTab === "errorList" ? "tab-active" : ""
@@ -269,7 +248,6 @@ const Synchronisation = () => {
           onSubmit={handleSubmit}
         />
       </div>
-      {modalFloat ? <CardFlottant /> : null}
     </div>
   );
 };

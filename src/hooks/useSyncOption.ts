@@ -60,7 +60,6 @@ export default function useSyncOption() {
         : `${apiURL}/synchronize/?isForce=${isForce}`;
 
       const option: any = {
-        params: { isForce },
         headers: {
           Authorization: `Bearer ${token()}`,
         },
