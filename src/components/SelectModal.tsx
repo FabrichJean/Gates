@@ -62,7 +62,7 @@ const SelectModal = ({
             <h3 className="text-lg font-medium text-heading">{title}</h3>
             <button
               type="button"
-              className="text-body bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
+              className="text-body bg-transparent dark:bg-transparent hover:bg-neutral-tertiary hover:text-heading rounded-base text-sm w-9 h-9 ms-auto inline-flex justify-center items-center"
               onClick={onClose}
               aria-label="Close modal"
             >

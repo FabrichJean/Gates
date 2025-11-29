@@ -17,7 +17,7 @@ const CardFlottant: React.FC = () => {
                             aria-label="Minimize"
                             title="Minimize"
                             onClick={collapse}
-                            className="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm focus:outline-none text-gray-700 dark:text-gray-200"
+                            className="p-1 rounded-full  dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm focus:outline-none text-gray-700 dark:text-gray-200"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <rect x="4" y="11" width="16" height="2" rx="1" fill="currentColor" />

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { FaSortDown, FaSyncAlt } from "react-icons/fa";
+import SelectModal from "./SelectModal";
 import {
   ChevronRight,
   Home,
@@ -129,11 +130,16 @@ import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
 import ProcessModal from "./ProcessModal";
 import { MdDynamicFeed } from "react-icons/md";
+import { useCardFlottant } from "../hooks/useCardFlottant";
+import useSyncOption from "../hooks/useSyncOption";
 
 // Composant Breadcrumb
 const Breadcrumb: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   // Mapping des routes vers des noms lisibles
   const routeNames: Record<string, string> = {
@@ -169,25 +175,66 @@ const Breadcrumb: React.FC = () => {
     breadcrumbs.push({ name, path: currentPath });
   });
 
+  const handleOpenFor = (id?: number) => {
+    setSelectedRow(id || null);
+    setModalOpen(true);
+  };
+
+  const { sync } = useSyncOption();
+
+  const handleSubmit = async (
+    optionId: string | null,
+    label: number | null,
+    platformId?: number | null
+  ) => {
+    const force = optionId === "true";
+    try {
+      show();
+      const result = await sync({
+        isForce: force,
+        label: label !== null ? label.toString() : null,
+        platformId: platformId,
+      });
+      console.log("Sync result:", result);
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Sync failed", err);
+    }
+  };
+
   const [showProcessModal, setShowProcessModal] = useState(false);
 
-  // Ne pas afficher si on est déjà sur Home/Dashboard
+  const { show } = useCardFlottant();
+  // modal options
+  const options = [
+    {
+      id: "true",
+      title: "with Force",
+      subtitle: "all data except the ID should be updated directly",
+    },
+    {
+      id: "false",
+      title: "No Force",
+      subtitle: "records with an existing ID should not be overwritten",
+    },
+  ];
+
   if (breadcrumbs.length <= 1) {
     return null;
   }
+
   return (
     <>
       <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 relative min-h-[48px]">
-        {/* Home icon at the very start */}
+
         <div className="flex items-center">
           <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
-            className={`text-sm transition-colors duration-200 ${
-              breadcrumbs.length === 1
+            className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
                 ? "text-gray-900 dark:text-white font-medium cursor-default"
                 : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-            }`}
+              }`}
             disabled={breadcrumbs.length === 1}
           >
             {breadcrumbs[0].name}
@@ -198,18 +245,17 @@ const Breadcrumb: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
             <button
               onClick={() => navigate(breadcrumb.path)}
-              className={`text-sm transition-colors duration-200 ${
-                index === breadcrumbs.length - 2
+              className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
                   ? "text-gray-900 dark:text-white font-medium cursor-default"
                   : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-              }`}
+                }`}
               disabled={index === breadcrumbs.length - 2}
             >
               {breadcrumb.name}
             </button>
           </div>
         ))}
-        {/* Download icon (votre SVG) en bouton interactif */}
+
         <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
           <button
             type="button"
@@ -233,12 +279,12 @@ const Breadcrumb: React.FC = () => {
             </svg>
           </button>
           <button
-            // onClick={handleOpenFor.bind(null, undefined)}
+            onClick={handleOpenFor.bind(null, undefined)}
             className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-xs border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
           >
             <FaSyncAlt />
             <span className="md:inline hidden text-gray-600 dark:text-gray-400 PX-3">
-              Launch Synchronisation
+              Synchronisation
             </span>
           </button>
         </span>
@@ -248,13 +294,21 @@ const Breadcrumb: React.FC = () => {
         open={showProcessModal}
         onClose={() => setShowProcessModal(false)}
       />
+
+      <SelectModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        options={options}
+        rowLabel={selectedRow}
+        title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
+        onSubmit={handleSubmit}
+      />
     </>
   );
 };
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-  // Avoid creating an extra global socket connection here.
-  // Socket connections for video events are handled by specialized hooks (useSocketSend / useSocketCheckVideos)
+
   const initialIsCollapsed =
     typeof window !== "undefined" &&
     localStorage.getItem("is-collapsed") === "true";
@@ -266,6 +320,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
   const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
   const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+
 
   const openLogoutModal = () => dialogRef.current?.showModal();
   const closeLogoutModal = () => dialogRef.current?.close();
@@ -312,6 +367,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     }
   };
 
+
   return (
     <div className="w-dvw h-dvh  from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative bg-[url('https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg')]">
       <Toaster />
@@ -336,13 +392,12 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
       <div
         className={`
                     flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
-                    ${
-                      isMobile
-                        ? "w-full"
-                        : isCollapsed
-                        ? "w-[calc(100%-5rem)]"
-                        : "w-[calc(100%-16rem)]"
-                    }
+                    ${isMobile
+            ? "w-full"
+            : isCollapsed
+              ? "w-[calc(100%-5rem)]"
+              : "w-[calc(100%-16rem)]"
+          }
                 `}
       >
         {/* Header */}
