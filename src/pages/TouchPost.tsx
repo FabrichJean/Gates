@@ -80,8 +80,7 @@ const TouchPost = () => {
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers, setExistingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
-    useState<Language | null>(null);
+  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
@@ -95,16 +94,14 @@ const TouchPost = () => {
 
   const availableSubCategories = subCategoriesResponse?.subCategories;
 
-  // Pré-remplir les champs avec les données du post
   useEffect(() => {
     if (post) {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-      // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
+
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
-        // setSelectedSubCategory(matchingSubCategory);
         setSelectedOptions([matchingCategory.name]);
       }
 
@@ -115,8 +112,6 @@ const TouchPost = () => {
 
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
-          // Créer l'objet langue basé sur les données du post
-          // prefer explicit i18_language, otherwise fallback to language.code if available
           const code = item.i18_language || item.language?.code || "";
           const postLanguage = {
             id: languageId,
@@ -132,20 +127,17 @@ const TouchPost = () => {
         setTitles(titlesMap);
         setDescriptions(descriptionsMap);
 
-        // Sélectionner la première langue par défaut
         if (postLanguages.length > 0) {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-      // Prefill creator fields if available on post
-      // prefer creatorObj when present
+      
       if ((post as any).creatorObj) {
         setCreatorObj((post as any).creatorObj || null);
       }
     }
   }, [post, categoriesResponse]);
 
-  // Effet pour s'assurer que selectedLanguage est toujours valide
   useEffect(() => {
     if (
       languages.length > 0 &&
@@ -205,11 +197,11 @@ const TouchPost = () => {
       setLanguages((prev) => [...prev, newLanguage]);
       setSelectedLanguageFromBackend(null);
       setShowAddLanguageModal(false);
-      setSelectedLanguage(newLanguage); // Sélectionner automatiquement la nouvelle langue
+      setSelectedLanguage(newLanguage);
     }
   };
 
-  // Fonction pour annuler l'ajout de langue
+  
   const handleCancelAddLanguage = () => {
     setSelectedLanguageFromBackend(null);
     setShowAddLanguageModal(false);
@@ -271,7 +263,8 @@ const TouchPost = () => {
 
   // Update type for an existing video (already stored on the post)
   const handleExistingVideoTypeChange = (id: number, value: 'short' | 'long') => {
-    setMedia((prev) => ({ ...prev, videos: prev.videos.map((v) => (v.id === id ? { ...v, type: frontToBackendType(value) } : v)) }));
+    const t = frontToBackendType(value);
+    setMedia((prev) => ({ ...prev, videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)) }));
   };
 
   const handleCoverChange = (id: number, file: File | null) => {
@@ -323,17 +316,12 @@ const TouchPost = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
-      // include deferred deletions so backend can remove them as part of the update
-      // deleted_image_ids: deletedImageIds,
-      // deleted_video_ids: deletedVideoIds,
     };
-    // include creator or creator_id in payload
+    
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
 
-    // If there are newly added files (file objects), send a FormData so the files are transmitted.
-    // determine if there are any new files (images, videos, covers for new/existing videos)
     const hasNewFiles =
       imageFields.some((f) => f.file) ||
       videoFields.some((f) => f.file || f.cover) ||
@@ -348,26 +336,37 @@ const TouchPost = () => {
       }
 
       if (hasNewFiles) {
+        const titlesArray = Object.entries(titles).map(([langId, title]) => {
+          const lang = languages.find((l) => l.id === parseInt(langId));
+          return {
+            title,
+            i18_language: lang?.code,
+            ...(descriptions[parseInt(langId)] ? { description: descriptions[parseInt(langId)] } : {}),
+          };
+        });
+
         const fd = new FormData();
-        // Keep the same metadata structure by sending it as JSON in a field
+
         fd.append("payload", JSON.stringify(payload));
 
-        // Build an ordered list of video types in the same order as payload.videos
-        // This will be consumed by backend as `mapShorts` to know each video's type
-        const mapShorts = videosPayload.map((v) => v.type);
+        if (post?.id) fd.append('id', String(post.id));
+        fd.append('category_id', String(selectedCategory?.id ?? post?.postCategory?.id ?? ''));
+        fd.append('sub_category_id', String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? ''));
+        fd.append('titles', JSON.stringify(titlesArray));
+
+        fd.append('videos_metadata', JSON.stringify(videosPayload));
+
+        const mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
         fd.append("mapShorts", JSON.stringify(mapShorts));
 
-        // Append new image files
         imageFields.filter((f) => f.file).forEach((f) => {
           if (f.file) fd.append("images", f.file, f.file.name);
         });
 
-        // Append new video files
         videoFields.filter((f) => f.file).forEach((f) => {
           if (f.file) fd.append("videos", f.file, f.file.name);
         });
 
-        // Build list of covers in the same order as payload.videos (existing videos first, then new fields)
         const coversInOrder: (File | null)[] = [];
         // existing videos
         videos.forEach((v) => {
@@ -379,7 +378,7 @@ const TouchPost = () => {
           coversInOrder.push(f.cover ?? null);
         });
 
-        // Append covers preserving order. For videos without a cover we append an empty blob placeholder
+        // Append covers
         coversInOrder.forEach((c, idx) => {
           if (c) {
             fd.append("covers", c, c.name);
@@ -388,12 +387,13 @@ const TouchPost = () => {
             fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
           }
         });
-
+        
         await updatePost(post?.id, fd);
       } else {
-        // No files to upload — send JSON payload as before
+        (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
+        // Debug logs removed for production
         await updatePost(post?.id, payload);
-      }
+      }  
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
@@ -456,7 +456,7 @@ const TouchPost = () => {
 
   return (
     <div className="min-h-screen flex items-start pb-6">
-      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6">
+      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-2">
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">

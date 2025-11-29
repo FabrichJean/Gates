@@ -34,317 +34,324 @@ import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
 import UserDetails from "../pages/UserDetails";
 import VideoBotEdit from "../pages/VideoBotEdit";
+import Synchronisation from "../pages/Synchronisation";
+import CardFlottant from "../components/CardFlottant";
+import useCardFlottant from "../hooks/useCardFlottant";
 
-const AppRoutes = () => (
-  <BrowserRouter>
-    <VideosProvider>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <Login />
-          } />
-        <Route
-          path="/register"
-          element={
-            <Register />
-          } />
-        <Route
-          path="/"
-          element={ <Navigate to="/videos" /> }
-        />
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+const AppRoutes = () => {
+  const { visible: modalFloat } = useCardFlottant();
+
+  return (
+    <BrowserRouter>
+      <VideosProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Navigate to="/videos" />} />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <Users />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/videos"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <Users />
+                  <VideosManagment />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/videos"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <VideosManagment />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/videos/upload"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <Upload />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/bot-videos"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <BotVideosProvider>
-                  <VideoBotManagement />
-                </BotVideosProvider>
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/bot-videos/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <VideoBotDetails />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/bot-videos/:id/edit"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <VideoBotEdit />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <PostManagement />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post/upload"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <UploadPost />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <PostDetails />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post/edit/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <PostEdit />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profil"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <Profil />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users/create"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/videos/upload"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <CreateUser />
+                  <Upload />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users/:id"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bot-videos"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <UserDetails />
+                  <BotVideosProvider>
+                    <VideoBotManagement />
+                  </BotVideosProvider>
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/archive"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bot-videos/:id"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <UsersArchives />
+                  <VideoBotDetails />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/category-manager"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bot-videos/:id/edit"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <CategoryManager />
+                  <VideoBotEdit />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/plateform-subcategories"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <PlateformSubCategoryManager />
+                  <PostManagement />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />  
-        <Route
-          path="/plateform-categories"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/upload"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <PlateformCategoryManager />
+                  <UploadPost />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/plateform-relations"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/:id"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <PlateformRelationsManager />
+                  <PostDetails />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post-categories"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/edit/:id"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <PostCategoryManager />
+                  <PostEdit />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/creators"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profil"
+            element={
+              <ProtectedRoute>
                 <InsideSidebar>
-                  <CreatorManager />
+                  <Profil />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/plateform"
-          element={
-            <ProtectedRoute>
-              <SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/create"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <CreateUser />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:id"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <UserDetails />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/archive"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <UsersArchives />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/category-manager"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <CategoryManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plateform-subcategories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <PlateformSubCategoryManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plateform-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <PlateformCategoryManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plateform-relations"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <PlateformRelationsManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <PostCategoryManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/creators"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <CreatorManager />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plateform"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <Plateform />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/conversion"
+            element={
+              <ProtectedRoute>
+                {/* <SuperProtected> */}
                 <InsideSidebar>
-                  <Plateform />
+                  <Conversion />
                 </InsideSidebar>
-              </SuperProtected>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/conversion"
-          element={
-            <ProtectedRoute>
-              {/* <SuperProtected> */}
-              <InsideSidebar>
-                <Conversion />
-              </InsideSidebar>
-              {/* </SuperProtected> */}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              {/* <SuperProtected> */}
-              <InsideSidebar>
-                <Settings />
-              </InsideSidebar>
-              {/* </SuperProtected> */}
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/videos/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <VideoDetails />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/touch/video/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <TouchVideo />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/touch/post/:id"
-          element={
-            <ProtectedRoute>
-              <InsideSidebar>
-                <TouchPost />
-              </InsideSidebar>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </VideosProvider>
-  </BrowserRouter>
-);
+                {/* </SuperProtected> */}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                {/* <SuperProtected> */}
+                <InsideSidebar>
+                  <Settings />
+                </InsideSidebar>
+                {/* </SuperProtected> */}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/videos/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoDetails />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/touch/video/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <TouchVideo />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/touch/post/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <TouchPost />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sync"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <Synchronisation />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        {modalFloat && <CardFlottant />}
+      </VideosProvider>
+    </BrowserRouter>
+  );
+};
 
 export default AppRoutes;

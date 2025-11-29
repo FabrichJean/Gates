@@ -102,7 +102,7 @@ export default function MediaUploader(props: {
                 <div className="mt-4">
                   <div className="relative w-full">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cover <span className="text-red-500">*</span></label>
-                    <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleCoverChange(video.id, file); e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id={`exist-cover-${video.id}`} />
+                    {/* <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleCoverChange(video.id, file); e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id={`exist-cover-${video.id}`} /> */}
                     {/* determine if a cover exists (newly chosen or existing url) */}
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];
@@ -110,7 +110,7 @@ export default function MediaUploader(props: {
                       const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path;
                       const hasCover = Boolean(chosen) || Boolean(existingUrl);
                       return (
-                        <label htmlFor={`exist-cover-${video.id}`} className={`border-2 border-dashed ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}>
+                        <label htmlFor={`exist-cover-${video.id}`} className={`border ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center  h-[120px] w-full`}>
                           {chosen ? (
                             <div className="w-full h-full">
                               <img src={URL.createObjectURL(chosen)} alt="Cover" className="w-full h-full object-cover rounded-md" />
