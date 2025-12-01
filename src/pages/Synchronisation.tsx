@@ -47,7 +47,6 @@ const Synchronisation = () => {
         platformId: platformId,
       });
       
-      reFetch();
       // Close the modal
       setModalOpen(false);
     } catch (err) {

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import axios from "axios";
+import useFetch from "http-react";
 
 export interface SyncError {
     id: number;
@@ -21,37 +22,7 @@ export interface SyncError {
 }
 
 export default function useSyncErrors() {
-    const [data, setData] = useState<SyncError[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-
-    const fetchSyncErrors = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await axios.get(`${apiURL}/synchronize/errors`, {
-                headers: {
-                    Authorization: `Bearer ${getToken()}`
-                }
-            });
-            setData(response.data || []);
-        } catch (err: any) {
-            setError(err);
-            console.error("Failed to fetch sync errors:", err);
-            // Return mock data in case of error
-            console.warn("Using mock data due to API error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const reFetch = () => {
-        fetchSyncErrors();
-    };
-
-    useEffect(() => {
-        fetchSyncErrors();
-    }, []);
-
-    return { data, loading, error, reFetch } as const;
+   return useFetch<SyncError[]>(apiURL + "/synchronize/errors", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+    })
 }
