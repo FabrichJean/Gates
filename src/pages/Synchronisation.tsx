@@ -38,7 +38,7 @@ const Synchronisation = () => {
     label: number | null,
     platformId?: number | null
   ) => {
-    
+
     try {
       show();
       await sync({
@@ -46,7 +46,7 @@ const Synchronisation = () => {
         label: label,
         platformId: platformId,
       });
-      
+
       reFetch();
       // Close the modal
       setModalOpen(false);
@@ -59,18 +59,18 @@ const Synchronisation = () => {
     <div className="h-screen w-full flex p-2">
       <div className="w-full h-full flex flex-col">
         {/* view error process */}
-        <div className="w-full flex justify-between">
-          <h2 className="text-2xl font-semibold mb-4">Synchronisation</h2>
+        <div className="w-full flex justify-between gap-2 items-center">
+          <h2 className="text-xl md:text-2xl font-semibold mb-4">Synchronisation</h2>
           <div className="flex items-center gap-2">
             <button
-            onClick={handleOpenFor.bind(null, undefined)}
-            className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-          >
-            <FaSyncAlt/>
-            <span className="md:inline hidden text-gray-600 dark:text-gray-400 PX-3">
-              Launch Synchronisation
-            </span>
-          </button>
+              onClick={handleOpenFor.bind(null, undefined)}
+              className=" rounded-lg cursor-pointer flex items-center justify-center gap-2 px-2 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            >
+              <FaSyncAlt />
+              <span className="md:inline hidden text-gray-600 dark:text-gray-400 ">
+                Launch Synchronisation
+              </span>
+            </button>
             <button
               onClick={async () => {
                 // retry all errors one by one
@@ -102,7 +102,7 @@ const Synchronisation = () => {
                 reFetch();
               }}
               disabled={processingAll || loading}
-              className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
+              className=" rounded-lg cursor-pointer flex items-center justify-center gap-2 px-2 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
             >
               Retry all errors
             </button>
@@ -118,9 +118,8 @@ const Synchronisation = () => {
         <div className="w-full mt-6 flex items-center justify-between">
           <div className="tabs tabs-bordered">
             <button
-              className={`tab tab-bordered ${
-                activeTab === "errorList" ? "tab-active" : ""
-              }`}
+              className={`tab tab-bordered ${activeTab === "errorList" ? "tab-active" : ""
+                }`}
               onClick={() => setActiveTab("errorList")}
             >
               Error List
@@ -164,82 +163,82 @@ const Synchronisation = () => {
               <div className="max-h-[60vh] overflow-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-body">
                   <thead className="text-sm text-body text-white dark:text-white bg-slate-500 dark:bg-slate-800 border-b border-default no-scrollbar sticky top-0 z-20">
-                  <tr>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      ID
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Entity
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Platform
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Origin ID
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Source ID
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Resolved
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Created
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Action
-                    </th>
-                  </tr>
+                    <tr>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        ID
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Entity
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Platform
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Origin ID
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Source ID
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Resolved
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Created
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Action
+                      </th>
+                    </tr>
                   </thead>
                   <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center">
-                          <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="ml-2">Loading errors...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : error ? (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        className="px-6 py-4 text-center text-red-500"
-                      >
-                        Error loading sync errors: {error.message}
-                        <button
-                          onClick={reFetch}
-                          className="ml-2 px-2 py-1 bg-brand-600 text-white rounded text-sm hover:bg-brand-700"
-                        >
-                          Retry
-                        </button>
-                      </td>
-                    </tr>
-                  ) : displayedErrors.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        className="px-6 py-4 text-center text-gray-500"
-                      >
-                        No sync errors found
-                      </td>
-                    </tr>
-                  ) : (
-                    displayedErrors.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="bg-neutral-primary border-b border-default"
-                      >
-                        <td className="px-4 py-3">{row.id}</td>
-                        <td className="px-4 py-3">{row.entity}</td>
-                        <td className="px-4 py-3">
-                          {row.plateform?.name ?? row.plateform_id}
+                    {loading ? (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center">
+                            <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="ml-2">Loading errors...</span>
+                          </div>
                         </td>
-                        <td className="px-4 py-3">
-                          {row.origin_id
-                            ? row.entity === "video" || row.entity === "post"
-                              ? (() => {
+                      </tr>
+                    ) : error ? (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="px-6 py-4 text-center text-red-500"
+                        >
+                          Error loading sync errors: {error.message}
+                          <button
+                            onClick={reFetch}
+                            className="ml-2 px-2 py-1 bg-brand-600 text-white rounded text-sm hover:bg-brand-700"
+                          >
+                            Retry
+                          </button>
+                        </td>
+                      </tr>
+                    ) : displayedErrors.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="px-6 py-4 text-center text-gray-500"
+                        >
+                          No sync errors found
+                        </td>
+                      </tr>
+                    ) : (
+                      displayedErrors.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="bg-neutral-primary border-b border-default"
+                        >
+                          <td className="px-4 py-3">{row.id}</td>
+                          <td className="px-4 py-3">{row.entity}</td>
+                          <td className="px-4 py-3">
+                            {row.plateform?.name ?? row.plateform_id}
+                          </td>
+                          <td className="px-4 py-3">
+                            {row.origin_id
+                              ? row.entity === "video" || row.entity === "post"
+                                ? (() => {
                                   // choose base path depending on entity
                                   const basePath =
                                     row.entity === "video" ? "videos" : "posts";
@@ -254,38 +253,38 @@ const Synchronisation = () => {
                                     </Link>
                                   );
                                 })()
-                              : String(row.origin_id)
-                            : "-"}
-                        </td>
-                        <td className="px-4 py-3">{row.source_id ?? "-"}</td>
-                        <td className="px-4 py-3">
-                          {row.resolved ? (
-                            <span className="text-green-600 font-medium">
-                              Resolved
-                            </span>
-                          ) : (
-                            <span className="text-yellow-600 font-medium">
-                              Pending
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          {row.createdAt
-                            ? new Date(row.createdAt).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            disabled={row.resolved}
-                            className={`btn btn-xs btn-primary ${row.resolved ? "btn-disabled" : ""}`}
-                            onClick={() => handleOpenFor(row.id)}
-                          >
-                            retry
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
+                                : String(row.origin_id)
+                              : "-"}
+                          </td>
+                          <td className="px-4 py-3">{row.source_id ?? "-"}</td>
+                          <td className="px-4 py-3">
+                            {row.resolved ? (
+                              <span className="text-green-600 font-medium">
+                                Resolved
+                              </span>
+                            ) : (
+                              <span className="text-yellow-600 font-medium">
+                                Pending
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {row.createdAt
+                              ? new Date(row.createdAt).toLocaleString()
+                              : "-"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              disabled={row.resolved}
+                              className={`btn btn-xs btn-primary ${row.resolved ? "btn-disabled" : ""}`}
+                              onClick={() => handleOpenFor(row.id)}
+                            >
+                              retry
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -300,20 +299,20 @@ const Synchronisation = () => {
           title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
           onSubmit={handleSubmit}
         />}
-          <WaterProgressModal
-            open={processingAll}
-            percent={totalToProcess > 0 ? (processedCount / totalToProcess) * 100 : 0}
-            processed={processedCount}
-            total={totalToProcess}
-            currentItem={currentItem}
-            onClose={() => {
-              // allow closing the modal visually but keep processing running in background — if you prefer to cancel, implement abort logic
-              // just stop showing the modal
-              // user can re-open later or view status in page
-              /* eslint-disable no-console */
-              console.log('Progress modal closed by user');
-            }}
-          />
+        <WaterProgressModal
+          open={processingAll}
+          percent={totalToProcess > 0 ? (processedCount / totalToProcess) * 100 : 0}
+          processed={processedCount}
+          total={totalToProcess}
+          currentItem={currentItem}
+          onClose={() => {
+            // allow closing the modal visually but keep processing running in background — if you prefer to cancel, implement abort logic
+            // just stop showing the modal
+            // user can re-open later or view status in page
+            /* eslint-disable no-console */
+            console.log('Progress modal closed by user');
+          }}
+        />
       </div>
     </div>
   );

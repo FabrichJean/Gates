@@ -70,8 +70,9 @@ export default function PlateformRelationsManager() {
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  //   console.log('categories', categories);
-  console.log("allcat", allCategories);
+  const [catTagRelations, setCatTagRelations] = useState<RelationItem[]>([]);
+  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
+
 
   // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
@@ -628,8 +629,8 @@ export default function PlateformRelationsManager() {
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
                   className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${selectedPlateform === p.id
-                      ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                    ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                 >
                   <span
@@ -717,7 +718,7 @@ export default function PlateformRelationsManager() {
                 </button>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
@@ -885,6 +886,89 @@ export default function PlateformRelationsManager() {
                             return handleRemoveSubcategory(s.relationId);
                           }}
                           className="btn rounded shadow btn-sm text-red-500"
+                          disabled={!s.relationId}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {/* link tag category */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setTagCatModalOpen(true)}
+                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span>
+                        Link tag category
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleClearSubCategories}
+                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                        />
+                      </svg>
+                      <span>Clear All</span>
+                    </button>
+                  </div>
+                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                    Tag video category
+                  </h3>
+                  {subcatRelations?.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No subcategories linked
+                    </p>
+                  ) : (
+                    subcatRelations?.map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                      >
+                        {/* Theme indicator node (light/dark) */}
+                        <span
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                          title="Theme: light/dark"
+                        ></span>
+                        <span className="ml-5">{s.name}</span>
+                        <button
+                          onClick={() => {
+                            if (!s.relationId) return;
+                            if (relationMode === "post")
+                              return handleRemovePostSubcategory(s.relationId);
+                            return handleRemoveSubcategory(s.relationId);
+                          }}
+                          className="btn bg-slate-200 dark:bg-gray-700 rounded-lg shadow btn-sm text-red-600 dark:text-red-500 border border-red-500"
                           disabled={!s.relationId}
                         >
                           Remove
@@ -1186,6 +1270,13 @@ export default function PlateformRelationsManager() {
             </button>
           </div>
         </div>
+      </dialog>
+
+      {/* dialog for tag category */}
+      <dialog
+        id="tagCatModal"
+      >
+        {/* miandry */}
       </dialog>
     </div>
   );
