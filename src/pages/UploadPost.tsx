@@ -917,9 +917,8 @@ const UploadPost = () => {
                                     </button>
                                 </div>
 
-                                {/* Creator (optional) */}
                                 <div className="w-full mt-4">
-                                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
+                                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator</label>
                                     <CreatorAutoComplete
                                         value={creator}
                                         onChange={(v: string | null) => {

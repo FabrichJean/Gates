@@ -139,7 +139,7 @@ function TouchVideo() {
                             <SubCategoryAutoComplete categoryId={category?.id} defaultValue={subcategory} onSelect={(cat) => setSubCategory(cat)} />
                         </div>
                         <div>
-                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator (optional)</label>
+                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator</label>
                             <CreatorAutoComplete value={creator} onChange={(v: string | null) => setCreator(v)} onSelect={(c) => setCreatorId(c?.id ?? null)} />
                         </div>
 
