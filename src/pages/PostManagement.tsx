@@ -1,4 +1,4 @@
-import { FilePlus, Eye, Columns, SendIcon } from "lucide-react";
+import { FilePlus, Eye, SendIcon } from "lucide-react";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -59,9 +59,7 @@ const PostManagementInner = () => {
               >
                 <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </Link>
-              <button className="flex items-center justify-center gap-2 p-2.5 cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all">
-                <Columns className="w-5 h-auto text-blue-400 dark:text-blue-300" />
-              </button>
+              
               <SendToWebApp />
               {/* @ts-ignore */}
               <small>(video sent) : {totalSent}</small>
@@ -229,7 +227,7 @@ const PostManagementInner = () => {
                       )}
                       {post.videos?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          Aucune vidéo
+                          No video
                         </span>
                       )}
                     </div>
@@ -259,7 +257,7 @@ const PostManagementInner = () => {
                       )}
                       {post.images?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          Aucune image
+                          No image
                         </span>
                       )}
                     </div>
@@ -311,8 +309,6 @@ const PostManagement = () => (
   </PostsProvider>
 );
 
-// export default PostManagement; (export already defined above)
-
 // --- SendToWebApp component ---
 function SendToWebApp() {
   const { data: plateforms } = UsePlateform();
@@ -344,17 +340,6 @@ function SendToWebApp() {
 
   return (
     <>
-      <button
-        disabled={loading}
-        onClick={() => setWebappModalOpen(true)}
-        className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-      >
-        <SendIcon className="text-blue-400 dark:text-blue-300" />
-        <span className="md:inline hidden text-gray-600 dark:text-gray-400">
-          send to webApp
-        </span>
-      </button>
-
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
           <h3 className="font-bold text-lg">Select platforms to send</h3>

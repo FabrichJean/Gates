@@ -52,7 +52,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   // Mettre à jour l'URL de cover quand les données vidéo changent
   useEffect(() => {
-    setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover)+ "?t=" + Date.now());
+    setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover) + "?t=" + Date.now());
   }, [video]);
 
   if (!video)
@@ -125,6 +125,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 {formatDateFR(video?.createdAt)}
               </h2>
               <div className="flex gap-2">
+                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{ video.type === '1' ? 'short' : 'long' }</span>
                 <CheckingSuperadmin
                   index={0}
                   reFetch={reFetch}
@@ -182,7 +183,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 </button>
               ) : (
                 <Link
-                  to={"/touch/" + videoId}
+                  to={"/touch/video/" + videoId}
                   className="btn flex-shrink-0 relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
     font-medium text-sm rounded-md transition-all duration-300
     backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
@@ -221,12 +222,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       }
                       send(video.id);
                     }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                      video.processing === "working" ||
-                      (video.upload_status === 1 && video.transfer_status === 1)
+                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
+                        (video.upload_status === 1 && video.transfer_status === 1)
                         ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                         : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    }`}
+                      }`}
                   >
                     {video.processing === "working" ? (
                       <>
@@ -610,6 +610,9 @@ function EditVideo({
     null;
   const [creator, setCreator] = useState<string | null>(initialCreatorName);
   const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
+  const [videoType, setVideoType] = useState<string>(
+    video?.type === "1" ? "short" : "long"
+  );
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -627,15 +630,17 @@ function EditVideo({
       ...(category && { category_id: category.id }),
       ...(subcategory && { sub_category_id: subcategory.id }),
       ...(creatorId ? { creator_id: creatorId } : creator ? { creator } : {}),
+      ...(videoType ? { type: videoType === "short" ? "1" : "2" } : {}),
+      isShort: videoType === "short",
       titles: JSON.stringify(coupleTitles),
       duration,
     };
 
+
+
     try {
       setUploading(true);
       setProgress(0);
-
-      console.log(formData.titles);
 
       const res = await updateVideo(video.id, formData, (progressEvent) => {
         if (progressEvent.total) {
@@ -715,6 +720,27 @@ function EditVideo({
                 defaultValue={duration || 0}
                 onChange={(e) => setDuration(Number(e.currentTarget.value))}
               />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Type
+              </label>
+              <div className="relative w-full">
+                <select
+                  className="w-full appearance-none text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 pr-10 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-900 transition-all duration-300 shadow-sm cursor-pointer"
+                  value={videoType}
+                  onChange={(e) => setVideoType(e.target.value)}
+                >
+                  <option value="short" className="cursor-pointer">Short</option>
+                  <option value="long" className="cursor-pointer">Long</option>
+                </select>
+                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                    <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </div>
             </div>
 
             <div>

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
@@ -73,13 +72,24 @@ const PostEdit = () => {
 
   const [imageFields, setImageFields] = useState<
     { id: number; file: File | null; url?: string }[]
-  >([{ id: 1, file: null }]);
+  >([]);
   const [videoFields, setVideoFields] = useState<
-    { id: number; file: File | null; url?: string }[]
-  >([{ id: 1, file: null }]);
+    {
+      id: number;
+      file: File | null;
+      url?: string;
+      cover?: File | null;
+      coverUrl?: string;
+      type?: string;
+    }[]
+  >([]);
+
+  // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
+  const [existingVideoCovers, setExistingVideoCovers] = useState<
+    Record<number, File | null>
+  >({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
-    useState<Language | null>(null);
+  const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
@@ -99,7 +109,7 @@ const PostEdit = () => {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-      // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
+
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
         // setSelectedSubCategory(matchingSubCategory);
@@ -113,8 +123,6 @@ const PostEdit = () => {
 
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
-          // Créer l'objet langue basé sur les données du post
-          // prefer explicit i18_language, otherwise fallback to language.code if available
           const code = item.i18_language || item.language?.code || "";
           const postLanguage = {
             id: languageId,
@@ -135,7 +143,7 @@ const PostEdit = () => {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-      // Prefill creator fields if available on post
+
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
         setCreatorObj((post as any).creatorObj || null);
@@ -214,7 +222,10 @@ const PostEdit = () => {
   };
 
   const addImageField = () => {
-    const newId = Math.max(...imageFields.map((field) => field.id)) + 1;
+    const newId =
+      imageFields.length > 0
+        ? Math.max(...imageFields.map((field) => field.id)) + 1
+        : 1;
     setImageFields((prev) => [...prev, { id: newId, file: null }]);
   };
 
@@ -235,8 +246,14 @@ const PostEdit = () => {
   };
 
   const addVideoField = () => {
-    const newId = Math.max(...videoFields.map((field) => field.id)) + 1;
-    setVideoFields((prev) => [...prev, { id: newId, file: null }]);
+    const newId =
+      videoFields.length > 0
+        ? Math.max(...videoFields.map((field) => field.id)) + 1
+        : 1;
+    setVideoFields((prev) => [
+      ...prev,
+      { id: newId, file: null, cover: null, type: "long" },
+    ]);
   };
 
   const removeVideoField = (id: number) => {
@@ -250,12 +267,61 @@ const PostEdit = () => {
       const maxSize = 2 * 1024 * 1024 * 1024;
       if (file.size > maxSize) {
         alert(
-          `⚠️ La vidéo est trop volumineuse !\n\nTaille: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\nMax: 2 GB`
+          `⚠️ La vidéo est trop volumineuse !\n\nTaille: ${(
+            file.size /
+            1024 /
+            1024 /
+            1024
+          ).toFixed(2)} GB\nMax: 2 GB`
         );
         return;
       }
 
-      setVideoFields((prev) => prev.map((field) => (field.id === id ? { ...field, file, url: undefined } : field)));
+      setVideoFields((prev) =>
+        prev.map((field) =>
+          field.id === id ? { ...field, file, url: undefined } : field
+        )
+      );
+    }
+  };
+
+  // Map frontend type <-> backend representation
+  const frontToBackendType = (val: "short" | "long") =>
+    val === "long" ? "2" : "1";
+
+  // Update type for a new video field (user-added)
+  const handleVideoTypeChange = (id: number, value: "short" | "long") => {
+    setVideoFields((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, type: value } : f))
+    );
+  };
+
+  // Update type for an existing video (already stored on the post)
+  const handleExistingVideoTypeChange = (
+    id: number,
+    value: "short" | "long"
+  ) => {
+    const t = frontToBackendType(value);
+    setMedia((prev) => ({
+      ...prev,
+      videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)),
+    }));
+  };
+
+  const handleCoverChange = (id: number, file: File | null) => {
+    if (file) {
+      const existingVideo = videos.find((v) => v.id === id);
+      if (existingVideo) {
+        setExistingVideoCovers((prev) => ({ ...prev, [id]: file }));
+      } else {
+        setVideoFields((prev) =>
+          prev.map((field) =>
+            field.id === id
+              ? { ...field, cover: file, coverUrl: undefined }
+              : field
+          )
+        );
+      }
     }
   };
 
@@ -263,6 +329,41 @@ const PostEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Build payload including existing videos followed by newly added video fields
+    const videosPayload: any[] = [];
+
+    // existing videos currently in media state (preserve their backend 'type' if present)
+    videos.forEach((v) => {
+      videosPayload.push({
+        id: v.id,
+        fileName:
+          v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url,
+        isNew: false,
+        type: (v as any).type ?? "2",
+      });
+    });
+
+    // new video fields (user added in form) — include the chosen type (map front->backend)
+    videoFields
+      .filter((field) => field.file !== null || field.url)
+      .forEach((field) => {
+        const t = field.type === "short" ? "1" : "2";
+        videosPayload.push({
+          id: field.id,
+          fileName: field.file?.name || field.url,
+          isNew: !!field.file,
+          type: t,
+        });
+      });
+
+    const imagesPayload = imageFields
+      .filter((field) => field.file !== null || field.url)
+      .map((field) => ({
+        id: field.id,
+        fileName: field.file?.name || field.url,
+        isNew: !!field.file,
+      }));
+
     const payload = {
       id: post?.id,
       category_id: selectedCategory?.id ?? post?.postCategory?.id,
@@ -275,32 +376,19 @@ const PostEdit = () => {
           description: descriptions[parseInt(langId)] || "",
         };
       }),
-      images: imageFields
-        .filter((field) => field.file !== null || field.url)
-        .map((field) => ({
-          id: field.id,
-          fileName: field.file?.name || field.url,
-          isNew: !!field.file,
-        })),
-      videos: videoFields
-        .filter((field) => field.file !== null || field.url)
-        .map((field) => ({
-          id: field.id,
-          fileName: field.file?.name || field.url,
-          isNew: !!field.file,
-        })),
-      // include deferred deletions so backend can remove them as part of the update
-      // deleted_image_ids: deletedImageIds,
-      // deleted_video_ids: deletedVideoIds,
+      images: imagesPayload,
+      videos: videosPayload,
     };
+
     // include creator or creator_id in payload
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
 
-    // If there are newly added files (file objects), send a FormData so the files are transmitted.
     const hasNewFiles =
-      imageFields.some((f) => f.file) || videoFields.some((f) => f.file);
+      imageFields.some((f) => f.file) ||
+      videoFields.some((f) => f.file || f.cover) ||
+      Object.values(existingVideoCovers).some((f) => f);
 
     try {
       if (deletedImageIds.length > 0) {
@@ -311,27 +399,75 @@ const PostEdit = () => {
       }
 
       if (hasNewFiles) {
+        const titlesArray = Object.entries(titles).map(([langId, title]) => {
+          const lang = languages.find((l) => l.id === parseInt(langId));
+          return {
+            title,
+            i18_language: lang?.code,
+            ...(descriptions[parseInt(langId)]
+              ? { description: descriptions[parseInt(langId)] }
+              : {}),
+          };
+        });
+
         const fd = new FormData();
-        // Keep the same metadata structure by sending it as JSON in a field
+
         fd.append("payload", JSON.stringify(payload));
 
-        // Append new image files (backend expects multiple 'images' fields similar to upload)
+        if (post?.id) fd.append("id", String(post.id));
+        fd.append(
+          "category_id",
+          String(selectedCategory?.id ?? post?.postCategory?.id ?? "")
+        );
+        fd.append(
+          "sub_category_id",
+          String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? "")
+        );
+        fd.append("titles", JSON.stringify(titlesArray));
+
+        fd.append("videos_metadata", JSON.stringify(videosPayload));
+
+        const mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
+        fd.append("mapShorts", JSON.stringify(mapShorts));
+
         imageFields
           .filter((f) => f.file)
           .forEach((f) => {
             if (f.file) fd.append("images", f.file, f.file.name);
           });
 
-        // Append new video files
         videoFields
           .filter((f) => f.file)
           .forEach((f) => {
             if (f.file) fd.append("videos", f.file, f.file.name);
           });
 
+        const coversInOrder: (File | null)[] = [];
+        // existing videos
+        videos.forEach((v) => {
+          const c = existingVideoCovers?.[v.id] ?? null;
+          coversInOrder.push(c);
+        });
+        // new videoFields
+        videoFields.forEach((f) => {
+          coversInOrder.push(f.cover ?? null);
+        });
+
+        // Append covers
+        coversInOrder.forEach((c, idx) => {
+          if (c) {
+            fd.append("covers", c, c.name);
+          } else {
+            const emptyBlob = new Blob([], { type: "image/jpeg" });
+            fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
+          }
+        });
+
+
         await updatePost(post?.id, fd);
       } else {
-        // No files to upload — send JSON payload as before
+        (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
+        // Debug logs removed for production
         await updatePost(post?.id, payload);
       }
 
@@ -391,9 +527,12 @@ const PostEdit = () => {
     );
   }
 
+  // record map for existing covers to pass down to MediaUploader (use state)
+  const existingVideoCoversRecord = existingVideoCovers;
+
   return (
     <div className="min-h-screen flex items-start pb-6">
-      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6">
+      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-2">
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
@@ -469,12 +608,16 @@ const PostEdit = () => {
               videoFields={videoFields}
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
+              handleCoverChange={handleCoverChange}
+              handleVideoTypeChange={handleVideoTypeChange}
+              handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
               addVideoField={addVideoField}
               removeImageField={removeImageField}
               removeVideoField={removeVideoField}
               setDeletedImageIds={setDeletedImageIds}
               setDeletedVideoIds={setDeletedVideoIds}
+              existingVideoCovers={existingVideoCoversRecord}
               setMedia={setMedia}
             />
 
@@ -492,11 +635,10 @@ const PostEdit = () => {
               <button
                 type="submit"
                 disabled={updating}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${
-                  updating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-700"
-                }`}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
+                  }`}
               >
                 <svg
                   className="w-5 h-5"

@@ -19,7 +19,7 @@ type Language = {
 
 const UploadPost = () => {
     const navigate = useNavigate();
-    
+
     // Hook pour récupérer les catégories
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
 
@@ -42,7 +42,7 @@ const UploadPost = () => {
     const [titles, setTitles] = useState<{ [key: number]: string }>({});
     const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
     const [imageFields, setImageFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
-    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null }[]>([{ id: 1, file: null }]);
+    const [videoFields, setVideoFields] = useState<{ id: number, file: File | null, cover: File | null, type?: string }[]>([{ id: 1, file: null, cover: null, type: 'long' }]);
     const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
     const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,8 +130,8 @@ const UploadPost = () => {
             }
 
             const newId = Math.max(0, ...languages.map(lang => lang.id)) + 1;
-            const newLanguage = { 
-                id: newId, 
+            const newLanguage = {
+                id: newId,
                 name: selectedLanguageFromBackend.name,
                 code: selectedLanguageFromBackend.code
             };
@@ -172,13 +172,17 @@ const UploadPost = () => {
     // Fonctions pour gérer les champs de vidéos
     const addVideoField = () => {
         const newId = Math.max(...videoFields.map(field => field.id)) + 1;
-        setVideoFields(prev => [...prev, { id: newId, file: null }]);
+        setVideoFields(prev => [...prev, { id: newId, file: null, cover: null, type: 'long' }]);
     };
 
     const removeVideoField = (id: number) => {
         if (videoFields.length > 1) {
             setVideoFields(prev => prev.filter(field => field.id !== id));
         }
+    };
+
+    const handleVideoTypeChange = (id: number, value: 'short' | 'long') => {
+        setVideoFields(prev => prev.map(field => field.id === id ? { ...field, type: value } : field));
     };
 
     const handleVideoChange = (id: number, file: File | null) => {
@@ -197,6 +201,15 @@ const UploadPost = () => {
         }
     };
 
+    const handleCoverChange = (id: number, file: File | null) => {
+        // Mettre à jour le cover pour la vidéo correspondante
+        if (file) {
+            setVideoFields(prev => prev.map(field =>
+                field.id === id ? { ...field, cover: file } : field
+            ));
+        }
+    };
+
     // Fonction pour réinitialiser le formulaire
     const handleResetForm = () => {
         setSelectedCategory(null);
@@ -206,7 +219,7 @@ const UploadPost = () => {
         setTitles({});
         setDescriptions({});
         setImageFields([{ id: 1, file: null }]);
-        setVideoFields([{ id: 1, file: null }]);
+        setVideoFields([{ id: 1, file: null, cover: null, type: 'long' }]);
         setOpen(false);
         setSubOpen(false);
         setWebAppOpen(false);
@@ -230,20 +243,13 @@ const UploadPost = () => {
             return;
         }
 
-        // // Vérifier qu'au moins une image est sélectionnée
-        // const hasImages = imageFields.some(field => field.file !== null);
-        // if (!hasImages) {
-        //     toast.error("Veuillez sélectionner au moins une image");
-        //     return;
-        // }
-
-        // Vérifier qu'au moins une vidéo est sélectionnée
-        // const hasVideos = videoFields.some(field => field.file !== null);
-        // if (!hasVideos) {
-        //     toast.error("Veuillez sélectionner au moins une vidéo");
-        //     return;
-        // }
-
+        // Vérifier que chaque vidéo a un cover
+        const videosWithoutCover = videoFields.filter(field => field.file !== null && field.cover === null);
+        if (videosWithoutCover.length > 0) {
+            toast.error("Veuillez ajouter une image cover pour chaque vidéo !");
+            return;
+        }
+        
         // Préparer les titres multilingues selon la nouvelle structure
         const titlesArray: { title: string, i18_language: string, description?: string }[] = [];
 
@@ -263,6 +269,9 @@ const UploadPost = () => {
             plateform_id: selectedWebApp.id,
             titles: JSON.stringify(titlesArray),
             videos: videoFields.filter(field => field.file).map(field => field.file),
+            covers: videoFields.filter(field => field.file && field.cover).map(field => field.cover),
+            // mapShorts: array of booleans matching the videos order (true for short)
+            mapShorts: videoFields.filter(field => field.file).map(field => field.type === 'short'),
             images: imageFields.filter(field => field.file).map(field => field.file),
         };
 
@@ -271,7 +280,7 @@ const UploadPost = () => {
 
             // Créer le FormData 
             const fd = new FormData();
-            
+
             // Ajouter les données de base
             fd.append('category_id', formData.category_id.toString());
             fd.append('sub_category_id', formData.sub_category_id.toString());
@@ -281,6 +290,11 @@ const UploadPost = () => {
             // Ajouter les fichiers vidéos
             formData.videos.forEach((video) => {
                 if (video) fd.append('videos', video);
+            });
+
+            // Ajouter les fichiers covers
+            formData.covers.forEach((cover) => {
+                if (cover) fd.append('covers', cover);
             });
 
             // prefer sending creator_id when an existing creator is selected,
@@ -293,6 +307,11 @@ const UploadPost = () => {
                 if (image) fd.append('images', image);
             });
 
+            // Ajouter mapShorts (ordre correspondant aux vidéos ajoutées)
+            if (formData.mapShorts) {
+                fd.append('mapShorts', JSON.stringify(formData.mapShorts));
+            }
+
             // @ts-ignore
             const response = await axios.post(`${apiURL}/posts/submit`, fd, {
                 headers: {
@@ -304,7 +323,7 @@ const UploadPost = () => {
             toast.success("✅ Post uploadé avec succès !");
             navigate("/post");
             console.log("Post uploaded:", response.data);
-            
+
             // Réinitialiser le formulaire
             setSelectedCategory(null);
             setSelectedSubCategory(null);
@@ -312,9 +331,9 @@ const UploadPost = () => {
             setTitles({});
             setDescriptions({});
             setImageFields([{ id: 1, file: null }]);
-            setVideoFields([{ id: 1, file: null }]);
+            setVideoFields([{ id: 1, file: null, cover: null }]);
             setSelectedOptions([]);
-            
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err);
@@ -352,8 +371,8 @@ const UploadPost = () => {
                                         onClick={() => !categoriesLoading && setOpen(!open)}
                                         disabled={categoriesLoading}
                                         className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${categoriesLoading
-                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                                             }`}>
                                         <span className="block truncate">
                                             {categoriesLoading
@@ -468,9 +487,9 @@ const UploadPost = () => {
                                             ) : (
                                                 availableSubCategories?.subCategories?.map((subCat) => (
                                                     <div key={subCat.id} onClick={() => {
-                                                        setSelectedSubCategory({ 
-                                                            id: subCat.id, 
-                                                            name: subCat.name, 
+                                                        setSelectedSubCategory({
+                                                            id: subCat.id,
+                                                            name: subCat.name,
                                                             categoryId: subCat.category?.id || selectedCategory?.id || 0
                                                         });
                                                         setSubOpen(false);
@@ -519,8 +538,8 @@ const UploadPost = () => {
                                         onClick={() => !plateformsLoading && setWebAppOpen(!webAppOpen)}
                                         disabled={plateformsLoading}
                                         className={`relative w-full border border-gray-300 dark:border-gray-600 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${plateformsLoading
-                                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                                                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                                             }`}>
                                         <span className="block truncate">
                                             {plateformsLoading
@@ -618,47 +637,28 @@ const UploadPost = () => {
                                         <span>Add Title</span>
                                     </button>
                                 </div>
-                                <div className="space-y-4 w-full">
-                                    {languages.length === 0 ? (
-                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                            <p className="text-sm">No titles created yet. Click "Add Title" to create your first title.</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {/* Champ titre */}
-                                            {selectedLanguage && (
-                                                <div className="w-full">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Title ({selectedLanguage.name})
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        value={titles[selectedLanguage.id] || ''}
-                                                        onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
-                                                        placeholder={`Enter title in ${selectedLanguage.name}`}
-                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
-                                                    />
-                                                </div>
-                                            )}
+                                {selectedLanguage && (
+                                    <div className="space-y-2">
+                                        <input
+                                            type="text"
+                                            value={titles[selectedLanguage.id] || ''}
+                                            onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
+                                            placeholder={`Enter title in ${selectedLanguage.name}`}
+                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                        />
 
-                                            {/* Champ description */}
-                                            {selectedLanguage && (
-                                                <div className="w-full">
-                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                        Description ({selectedLanguage.name})
-                                                    </label>
-                                                    <textarea
-                                                        value={descriptions[selectedLanguage.id] || ''}
-                                                        onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
-                                                        placeholder={`Enter description in ${selectedLanguage.name}`}
-                                                        rows={4}
-                                                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
-                                                    />
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Description ({selectedLanguage.name})
+                                        </label>
+                                        <textarea
+                                            value={descriptions[selectedLanguage.id] || ''}
+                                            onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
+                                            placeholder={`Enter description in ${selectedLanguage.name}`}
+                                            rows={4}
+                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Divider */}
@@ -760,9 +760,10 @@ const UploadPost = () => {
                                 {/* Liste des champs d'upload de vidéos en grille */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                                     {videoFields.map((field) => (
-                                        <div key={`video-${field.id}`} className="space-y-2 w-full">
-                                            {/* Zone d'upload avec style pointillé */}
+                                        <div key={`video-${field.id}`} className="space-y-3 w-full">
+                                            {/* Zone d'upload vidéo */}
                                             <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Video</label>
                                                 <input
                                                     type="file"
                                                     accept="video/*"
@@ -779,7 +780,7 @@ const UploadPost = () => {
                                                 />
                                                 <label
                                                     htmlFor={`video-upload-${field.id}`}
-                                                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-4 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[250px] w-full"
+                                                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-md p-4 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[200px] w-full"
                                                 >
                                                     {field.file ? (
                                                         /* Vidéo sélectionnée */
@@ -797,13 +798,91 @@ const UploadPost = () => {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                             </svg>
                                                             <div className="text-gray-600 dark:text-gray-400">
-                                                                <p className="text-sm font-medium">Click to upload a video</p>
-                                                                <p className="text-xs">MP4, AVI, MOV up to 2GB</p>
+                                                                <p className="text-xs font-medium">Upload video</p>
+                                                                <p className="text-xs">MP4, AVI, MOV</p>
                                                             </div>
                                                         </div>
                                                     )}
                                                 </label>
                                             </div>
+
+                                            {/* Zone d'upload cover (obligatoire si vidéo) */}
+                                            <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Cover <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file && file.type.startsWith('image/')) {
+                                                            handleCoverChange(field.id, file);
+                                                        }
+                                                        e.target.value = '';
+                                                    }}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                    id={`cover-upload-${field.id}`}
+                                                />
+                                                <label
+                                                    htmlFor={`cover-upload-${field.id}`}
+                                                    className={`border-2 border-dashed ${field.file && !field.cover
+                                                            ? 'border-red-400 dark:border-red-600'
+                                                            : 'border-gray-300 dark:border-gray-600'
+                                                        } bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}
+                                                >
+                                                    {field.cover ? (
+                                                        /* Cover sélectionné */
+                                                        <div className="w-full h-full">
+                                                            <img
+                                                                src={URL.createObjectURL(field.cover)}
+                                                                alt="Cover"
+                                                                className="w-full h-full object-cover rounded-md"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        /* Zone vide pour upload cover */
+                                                        <div className="text-center h-full flex flex-col justify-center">
+                                                            <svg className="mx-auto h-6 w-6 text-gray-400 dark:text-gray-500 mb-1" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                            </svg>
+                                                            <div className={`${field.file && !field.cover ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                                                                <p className="text-xs font-medium">Upload cover</p>
+                                                                <p className="text-xs">PNG, JPG, GIF</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            </div>
+
+                                            {/* zone de selection type `short` ou `long` */}
+                                            <div className="relative w-full">
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleVideoTypeChange(field.id, 'short')}
+                                                        className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'short'
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            }`} 
+                                                    >
+                                                        Short
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleVideoTypeChange(field.id, 'long')}
+                                                        className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'long'
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            }`} 
+                                                    >
+                                                        Long
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
 
                                             {/* Bouton supprimer placé en bas du champ */}
                                             {videoFields.length > 1 && (
@@ -923,7 +1002,7 @@ const UploadPost = () => {
                                 Select Language
                             </label>
                             <div className="">
-                                <LanguageAutoComplete 
+                                <LanguageAutoComplete
                                     onSelect={(lang) => setSelectedLanguageFromBackend(lang)}
                                     defaultValue={selectedLanguageFromBackend || undefined}
                                 />

@@ -8,20 +8,6 @@ const useSocket = () => {
   const id = user?.id
   const socketRef = useRef<Socket | null>(null);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const res = await axios.get<{ role: string; id: number }>(
-  //         `${apiURL}/auth`,
-  //         { headers: { Authorization: `Bearer ${getToken()}` } }
-  //       );
-  //       setId(String(res.data.id));
-  //     } catch (err) {
-  //       console.error("Erreur d’authentification :", err);
-  //     }
-  //   })();
-  // }, []);
-
   useEffect(() => {
     if (!id) return;
 

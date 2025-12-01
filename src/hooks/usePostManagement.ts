@@ -4,7 +4,16 @@ import type { PostsResponse } from "../types/post";
 import toast from "react-hot-toast";
 
 export const usePostManagement = () => {
-  const [page, setPage] = useState<number>(1);
+  const STORAGE_KEY = "posts_current_page";
+  const [page, setPage] = useState<number>(() => {
+    try {
+      const v = localStorage.getItem(STORAGE_KEY);
+      const n = v ? Number(v) : 1;
+      return Number.isNaN(n) ? 1 : n;
+    } catch (e) {
+      return 1;
+    }
+  });
   const [params, setParams] = useState<any>(null);
   const [data, setData] = useState<PostsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,6 +65,15 @@ export const usePostManagement = () => {
       if (refetchTimeout.current) window.clearTimeout(refetchTimeout.current);
     };
   }, [page, fetch]);
+
+  // Persist current page so it survives refresh/navigation
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(page));
+    } catch (e) {
+      // ignore
+    }
+  }, [page]);
 
   const mutate = async () => {
     await fetch(page);

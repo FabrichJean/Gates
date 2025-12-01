@@ -33,6 +33,18 @@ function TouchVideo() {
     useEffect(() => {
         setVideoPreview(video?.s3_urls?.hlsUrl || video?.public_urls.temp_url || video?.local_mp4_path);
         setCoverPreview(video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover);
+        setVideoType(video?.type === "1" ? "short" : "long");
+        // initialize form fields from loaded video
+        if (video) {
+            setDuration(video.duration ?? null);
+            setCategory(video.category ?? ({} as any));
+            setSubCategory(video.subCategory ?? (null as any));
+            // titles may be undefined/null
+            setCoupleTitles(video.titles || []);
+            // creator fields
+            setCreator((video as any)?.creatorObj?.name ?? (typeof (video as any)?.creator === 'string' ? (video as any).creator : (video as any)?.creator?.name) ?? null);
+            setCreatorId((video as any)?.creatorObj?.id ?? (video as any)?.creator?.id ?? (video as any)?.creator_id ?? null);
+        }
     }, [video]);
 
     const [duration, setDuration] = useState<number | null>(video?.duration);
@@ -49,6 +61,7 @@ function TouchVideo() {
     const initialCreatorId = (video as any)?.creatorObj?.id ?? (video as any)?.creator?.id ?? (video as any)?.creator_id ?? null;
     const [creator, setCreator] = useState<string | null>(initialCreatorName);
     const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
+    const [videoType, setVideoType] = useState<string>("long");
 
     const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -82,6 +95,9 @@ function TouchVideo() {
             else if (creator) fd.append("creator", String(creator));
             // fd.append("ref", String(ref));
             fd.append("duration", String(duration));
+            // include type andS for backend compatibility
+            if (videoType) fd.append("type", videoType === "short" ? "1" : "2");
+            fd.append("isShort", String(videoType === "short"));
             fd.append("titles", JSON.stringify(coupleTitles));
 
             const res = await updateVideo(video.id, fd, (progressEvent) => {
@@ -130,6 +146,28 @@ function TouchVideo() {
                         <div>
                             <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Duration ( ms)</label>
                             <input type="number" className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300" defaultValue={duration || 0} onChange={(e) => setDuration(Number(e.currentTarget.value))} />
+                        </div>
+
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Type</label>
+                            <div className="relative w-full">
+                                <select
+                                    className="w-full appearance-none text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 pr-10 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-900 transition-all duration-300 shadow-sm cursor-pointer"
+                                    value={videoType}
+                                    onChange={(e) => setVideoType(e.target.value)}
+                                >
+                                    <option value="short" className="cursor-pointer">Short</option>
+                                    <option value="long" className="cursor-pointer">Long</option>
+                                </select>
+                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                                        <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </span>
+                            </div>
+                            <span>
+                                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">Type sélectionné : <span className="font-semibold">{videoType}</span></span>
+                            </span>
                         </div>
 
                         <div>
