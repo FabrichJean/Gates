@@ -92,7 +92,7 @@ export default function MediaUploader(props: {
               setDeletedVideoIds((prev) => [...prev, video.id]);
               setMedia((prev) => ({ ...prev, videos: prev.videos.filter((v) => v.id !== video.id) }));
             };
-            
+
 
             return (
               <div key={video.id} className="relative group">
@@ -106,7 +106,7 @@ export default function MediaUploader(props: {
                     {/* determine if a cover exists (newly chosen or existing url) */}
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];
-                       // prefer explicit local cover paths returned by backend
+                      // prefer explicit local cover paths returned by backend
                       const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path;
                       const hasCover = Boolean(chosen) || Boolean(existingUrl);
                       return (

@@ -135,7 +135,7 @@ const Synchronisation = () => {
                 checked={onlyUnresolved}
                 onChange={(e) => setOnlyUnresolved(e.target.checked)}
               />
-              Only unresolved
+              <span className="cursor-pointer">Only unresolved</span>
             </label>
           </div>
         </div>
