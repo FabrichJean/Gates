@@ -1,7 +1,5 @@
-import { useState, useEffect, use } from "react";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
-import axios from "axios";
 import useFetch from "http-react";
 
 export interface SyncError {
