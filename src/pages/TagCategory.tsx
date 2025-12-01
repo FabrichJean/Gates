@@ -1,23 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AnimatedList from "../components/AnimatedList";
-import CategoryCard from "../components/CategoryCard";
-import SubCategoryPanel from "../components/SubCategoryPanel";
-import { motion, AnimatePresence } from "framer-motion";
-import UseCategory from "../hooks/useCategory";
-import { createCastegoryApi, deleteCategoryApi } from "../api/categories";
+import TagCard from "../components/TagCard";
+import {
+    getTagCategoriesApi,
+    createTagCategoryApi,
+    deleteTagCategoryApi,
+    bulkUpsertTagCategoriesApi,
+} from "../api/tagCategory";
 import toast from "react-hot-toast";
 
 export default function TagCategory() {
 
-    const { data: categories, reFetch } = UseCategory()
-
-    console.log(categories);
-    
-
+    const [categories, setCategories] = useState<any[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [newCat, setNewCat] = useState("");
+    const [bulkJson, setBulkJson] = useState("");
     const NON_SPACE_LIMIT = 324;
 
+    useEffect(() => {
+        fetchTags();
+    }, []);
+
+    const fetchTags = async () => {
+        try {
+            const res = await getTagCategoriesApi();
+            setCategories(res.data.items || []);
+        } catch (err) {
+            console.error("Failed to load tags", err);
+            toast.error("Unable to load tags");
+        }
+    };
     const handleNewCatChange = (value: string) => {
         const nonSpaceCount = value.replace(/\s/g, '').length;
         if (nonSpaceCount <= NON_SPACE_LIMIT) {
@@ -40,31 +52,53 @@ export default function TagCategory() {
             }
         }
         setNewCat(out);
+
     };
 
     const addCategory = async () => {
         if (!newCat.trim()) return;
-
-        await createCastegoryApi(newCat.trim())
-            .then(reFetch)
-            .catch(() => {
-                toast.error('err')
-            })
-        setNewCat("");
+        try {
+            await createTagCategoryApi({ name: newCat.trim() });
+            toast.success("Tag created");
+            setNewCat("");
+            fetchTags();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to create tag");
+        }
     };
 
     const removeCategory = async (id: number) => {
-        await deleteCategoryApi(id)
-            .then(() => {
-                if (selectedId === id) setSelectedId(null);
-                reFetch()
-            })
-            .catch(() => {
-                toast.error('err')
-            })
+        try {
+            await deleteTagCategoryApi(id);
+            if (selectedId === id) setSelectedId(null);
+            toast.success("Tag removed");
+            fetchTags();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to remove tag");
+        }
     };
 
-    const selectedCategory = categories?.find((c) => c.id === selectedId) ?? null;
+    const bulkUpsert = async () => {
+        if (!bulkJson.trim()) return;
+        try {
+            const payload = JSON.parse(bulkJson);
+            if (!payload.tagCategory || !Array.isArray(payload.tagCategory)) {
+                toast.error("Invalid payload: expected { tagCategory: [...] }");
+                return;
+            }
+            await bulkUpsertTagCategoriesApi(payload.tagCategory);
+            toast.success("Bulk upsert successful");
+            setBulkJson("");
+            fetchTags();
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err?.message || "Bulk upsert failed");
+        }
+    };
+
+    
 
     return (
         <div className="flex flex-col md:flex-row gap-5 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
@@ -93,13 +127,13 @@ export default function TagCategory() {
 
                 <AnimatedList items={categories}>
                     {(c) => (
-                        <CategoryCard
+                        <TagCard
                             key={c.id}
-                            category={c}
+                            tag={c}
                             isSelected={selectedId === c.id}
                             onSelect={() => setSelectedId(c.id as number)}
                             onDelete={() => removeCategory(c.id as number)}
-                            onEdit={reFetch}
+                            onEdit={(newName: string) => setCategories((prev) => prev.map((it) => (it.id === c.id ? { ...it, name: newName } : it)))}
                         />
                     )}
                 </AnimatedList>
