@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 
 const ThemeToggle = () => {
@@ -8,6 +8,9 @@ const ThemeToggle = () => {
     }
     return "dark";
   });
+
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -24,6 +27,17 @@ const ThemeToggle = () => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  // Close when clicking outside (mobile & desktop)
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (!containerRef.current) return;
+      if (containerRef.current.contains(e.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const themes = [
     { value: "light", icon: Sun, label: "Light", color: "text-amber-500" },
     { value: "dark", icon: Moon, label: "Dark", color: "text-indigo-400" },
@@ -38,9 +52,12 @@ const ThemeToggle = () => {
   const currentTheme = themes.find((t) => t.value === theme) || themes[1];
 
   return (
-    <div className="relative group mr-2">
+    <div ref={containerRef} className="relative group mr-2">
       {/* Main Toggle Button */}
       <button
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-center p-2 rounded-lg
             dark:bg-gradient-to-br bg-white dark:from-gray-800 dark:to-gray-900
             hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-700 dark:hover:to-gray-800
@@ -56,9 +73,9 @@ const ThemeToggle = () => {
 
       {/* Dropdown Menu */}
       <div
-        className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 
-                    group-hover:visible transition-all duration-300 ease-out transform 
-                    group-hover:translate-y-0 -translate-y-2 z-50"
+        className={`absolute right-0 mt-2 w-48 transition-all duration-300 ease-out transform z-50 
+                    ${open ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"} 
+                    group-hover:opacity-100 group-hover:visible group-hover:translate-y-0`}
       >
         <div
           className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 
@@ -70,7 +87,10 @@ const ThemeToggle = () => {
             return (
               <button
                 key={themeOption.value}
-                onClick={() => setTheme(themeOption.value)}
+                onClick={() => {
+                  setTheme(themeOption.value);
+                  setOpen(false);
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left
                                     transition-all duration-200 ease-out
                                     ${isActive

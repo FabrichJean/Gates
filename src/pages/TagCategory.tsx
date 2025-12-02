@@ -30,30 +30,40 @@ export default function TagCategory() {
             toast.error("Unable to load tags");
         }
     };
-    
+
+    // const handleNewCatChange = (value: string) => {
+    //     const nonSpaceCount = value.replace(/\s/g, '').length;
+    //     if (nonSpaceCount <= NON_SPACE_LIMIT) {
+    //         setNewCat(value);
+    //         return;
+    //     }
+
+    //     let count = 0;
+    //     let out = '';
+    //     for (const ch of value) {
+    //         if (/\s/.test(ch)) {
+    //             out += ch;
+    //         } else {
+    //             if (count < NON_SPACE_LIMIT) {
+    //                 out += ch;
+    //                 count++;
+    //             } else {
+    //                 // skip 
+    //             }
+    //         }
+    //     }
+    //     setNewCat(out);
+
+    // };
+
     const handleNewCatChange = (value: string) => {
-        const nonSpaceCount = value.replace(/\s/g, '').length;
-        if (nonSpaceCount <= NON_SPACE_LIMIT) {
-            setNewCat(value);
-            return;
-        }
-
         let count = 0;
-        let out = '';
-        for (const ch of value) {
-            if (/\s/.test(ch)) {
-                out += ch;
-            } else {
-                if (count < NON_SPACE_LIMIT) {
-                    out += ch;
-                    count++;
-                } else {
-                    // skip 
-                }
-            }
-        }
-        setNewCat(out);
-
+        setNewCat(
+            [...value].map(ch => {
+                if (/\s/.test(ch)) return ch;
+                return count++ < NON_SPACE_LIMIT ? ch : '';
+            }).join('')
+        );
     };
 
     const addCategory = async () => {
@@ -99,7 +109,7 @@ export default function TagCategory() {
         }
     };
 
-    
+
 
     return (
         <div className="flex flex-col md:flex-row gap-5 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
@@ -142,7 +152,7 @@ export default function TagCategory() {
 
             {/* <PlateformPanel categoryId={selectedId}/> */}
 
-            
+
         </div>
     );
 }
