@@ -306,11 +306,7 @@ const Synchronisation = () => {
           total={totalToProcess}
           currentItem={currentItem}
           onClose={() => {
-            // allow closing the modal visually but keep processing running in background — if you prefer to cancel, implement abort logic
-            // just stop showing the modal
-            // user can re-open later or view status in page
-            /* eslint-disable no-console */
-            console.log('Progress modal closed by user');
+            setProcessingAll(false);
           }}
         />
       </div>

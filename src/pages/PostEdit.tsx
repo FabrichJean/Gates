@@ -379,7 +379,6 @@ const PostEdit = () => {
       if (image?.id) {
         setExistingCoverIds((prev) => {
           const next = { ...prev, [videoId]: image.id };
-          console.log('existingCoverIds updated ->', next);
           return next;
         });
       }
@@ -525,33 +524,19 @@ const PostEdit = () => {
           });
 
         const coversInOrder: (File | null)[] = [];
+        
         // existing videos
         videos.forEach((v) => {
           const c = existingVideoCovers?.[v.id] ?? null;
           coversInOrder.push(c);
         });
+
         // new videoFields
         videoFields.forEach((f) => {
           coversInOrder.push(f.cover ?? null);
         });
 
-  
         fd.append('coverPost', JSON.stringify(coverPost));
-
-        try {
-          console.group('PostUpdate - FormData debug');
-          console.log('payload (object):', payload);
-          console.log('videosPayload (metadata):', videosPayload);
-          console.log('coversInOrder length:', coversInOrder.length);
-          console.log('covers filenames:', coversInOrder.map((c) => (c ? c.name : null)));
-          for (const pair of fd.entries()) {
-            // don't stringify File objects here — log them directly
-            console.log('FormData entry:', pair[0], pair[1]);
-          }
-          console.groupEnd();
-        } catch (err) {
-          console.warn('Failed to log FormData debug info', err);
-        }
 
         await updatePost(post?.id, fd);
       } else {
@@ -567,15 +552,7 @@ const PostEdit = () => {
         });
         (payload as any).coverPost = coverPost;
         (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
-        try {
-          console.group('PostUpdate - JSON payload debug');
-          console.log('payload (JSON):', payload);
-          console.log('videosPayload (metadata):', videosPayload);
-          console.log('covers_meta (for JSON path):', (payload as any).covers_meta);
-          console.groupEnd();
-        } catch (err) {
-          console.warn('Failed to log JSON payload debug info', err);
-        }
+        // Removed JSON debug logging to keep console clean.
 
         await updatePost(post?.id, payload);
       }

@@ -13,7 +13,7 @@ export default function ConfirmCoverUploadModal(props: {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 w-full max-w-md">
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Upload cover</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Voulez-vous uploader ce fichier comme nouveau cover ?</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Do you want to upload this file as the new cover?</p>
 
         <div className="mb-3">
           {file ? (
