@@ -35,7 +35,7 @@ const VideoBotManagement = () => {
   );
 
   return (
-    <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6 pb-0">
+    <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-2 pb-0">
       <VideoHeader
         user={user}
         filters={filters}
