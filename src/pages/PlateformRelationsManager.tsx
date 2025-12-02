@@ -90,7 +90,7 @@ export default function PlateformRelationsManager() {
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
   const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
-  //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
+  
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
