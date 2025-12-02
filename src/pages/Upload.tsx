@@ -316,7 +316,7 @@ const Upload = () => {
 
   return (
     <div className="font-sans h-full antialiased bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-      <div className="flex flex-col flex-wrap md:flex-row gap-8 p-4 items-start justify-center w-full">
+      <div className="flex flex-col flex-wrap md:flex-row gap-8 p-2 items-start justify-center w-full">
         <div className="flex md:flex-row flex-col flex-wrap gap-7 bg-white dark:bg-gray-800 rounded-md p-8 border border-gray-200 dark:border-gray-700 w-full backdrop-blur-sm transition-all duration-300">
           <div className="space-y-6">
             <div>

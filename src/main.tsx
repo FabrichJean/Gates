@@ -6,9 +6,7 @@ import { AuthProvider } from './context/AuthContext.tsx'
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById('root')!).render(
-  // <StrictMode>
     <AuthProvider >
       <App />
     </AuthProvider>
-  // </StrictMode>
 )

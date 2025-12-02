@@ -32,6 +32,7 @@ import {
   updatePlateformApi,
   deletePlateformApi,
 } from "../api/plateforms";
+import useTagVideoCategory from "../hooks/useTagVideoCategory";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -44,9 +45,18 @@ import {
   clearCreatorsFromPlateformApi,
 } from "../api/plateformCreator";
 
+import {
+  addTagCategoryToPlateformApi,
+  getTagCategoriesByPlateformApi,
+  removeTagCategoryFromPlateformApi,
+  clearTagCategoriesFromPlateformApi,
+} from "../api/plateformTagCategory";
+
+import { getTagCategoriesApi } from "../api/tagCategory";
+
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
-type Platform = {
+type Platform = { 
   id: number;
   name: string;
   video_sync_url?: string;
@@ -60,18 +70,37 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
+  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory();
+  const [tagCategories, setTagCategories] = useState<any[]>([]);
+
+  const fetchTagCategories = async () => {
+    try {
+      const res = await getTagCategoriesApi();
+      const items = (res && (res as any).data && (res as any).data.items) ?? (res && (res as any).data) ?? res;
+      setTagCategories(Array.isArray(items) ? items : []);
+    } catch (err) {
+      setTagCategories([]);
+    }
+  };
+
+  
   const { data: allSubCategories } = UseSubCategory();
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
+  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
-  //   const [allSubCategories, setAllSubCategories] = useState<any[]>([]);
+  
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  //   console.log('categories', categories);
-  console.log("allcat", allCategories);
+  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (tagCatModalOpen) fetchTagCategories();
+  }, [tagCatModalOpen]);
+
 
   // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
@@ -148,6 +177,7 @@ export default function PlateformRelationsManager() {
         setSelectedPlateform(null);
         setCatRelations([]);
         setSubcatRelations([]);
+        setTagCatRelations([]);
       }
       // refresh platform list
       fetchPlatforms();
@@ -251,6 +281,13 @@ export default function PlateformRelationsManager() {
 
         setCatRelations(normalizeCategories(catsRes));
         setSubcatRelations(normalizeSubcategories(subsRes));
+        // fetch tag categories linked to this platform
+        try {
+          const tagCatsRes = await getTagCategoriesByPlateformApi(plateformId);
+          setTagCatRelations(normalizeCategories(tagCatsRes));
+        } catch {
+          setTagCatRelations([]);
+        }
         // fetch creators linked to this platform
         try {
           const creatorsRes = await getCreatorsByPlateformApi(plateformId);
@@ -307,6 +344,20 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  // tag category linking handler
+  const handleAddCategoryTag = async (categoryId: number) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    try {
+      await addTagCategoryToPlateformApi(selectedPlateform, categoryId);
+      toast.success("Category linked");
+      reFetchCategoriesTag();
+      fetchRelations(selectedPlateform);
+      // setCategoryModalOpen(false);
+    } catch {
+      toast.error("Error adding category");
+    }
+  };
+
   const handleAddPostCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
@@ -319,7 +370,26 @@ export default function PlateformRelationsManager() {
     }
   };
 
+
   const handleCreateAndLinkCategory = async (name: string) => {
+    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!name.trim()) return toast.error("Name required");
+    try {
+      const res = await createCastegoryApi(name.trim());
+      const newCat = res.data;
+      const id = newCat.category.id;
+      if (!id) throw new Error("Invalid create response");
+      await handleAddCategory(id);
+
+      //   toast.success("Category created and linked");
+      setCategoryModalOpen(false);
+      setSearch("");
+    } catch (err) {
+      toast.error(JSON.stringify(err));
+    }
+  };
+
+  const handleCreateAndLinkTagCategory = async (name: string) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     if (!name.trim()) return toast.error("Name required");
     try {
@@ -387,6 +457,17 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  const handleRemoveTagCategory = async (categoryId: number) => {
+    if (!selectedPlateform) return;
+    try {
+      await removeTagCategoryFromPlateformApi(selectedPlateform, categoryId);
+      toast.success("Tag category removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error removing tag category");
+    }
+  };
+
   const handleRemovePostCategory = async (categoryId: number) => {
     if (!selectedPlateform) return;
     try {
@@ -430,6 +511,18 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  const handleClearTagCategories = async () => {
+    if (!selectedPlateform) return;
+    if (!confirm("Remove all tag categories from this platform?")) return;
+    try {
+      await clearTagCategoriesFromPlateformApi(selectedPlateform);
+      toast.success("All tag categories removed");
+      fetchRelations(selectedPlateform);
+    } catch {
+      toast.error("Error clearing Tag categories");
+    }
+  };
+
   const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -441,6 +534,7 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
+  
 
   const handleClearPostCategories = async () => {
     if (!selectedPlateform) return;
@@ -510,7 +604,13 @@ export default function PlateformRelationsManager() {
       c.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
+  const videoFilteredTagCategories =
+    tagCategories?.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
   const postCategoriesList = allPostCategories?.categories || [];
+
   const filteredCategories = (
     relationMode === "post" ? postCategoriesList : videoFilteredCategories
   ).filter((c: unknown) => {
@@ -518,10 +618,17 @@ export default function PlateformRelationsManager() {
     return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
+  const filteredTagCategories =
+    tagCategories?.filter((c) =>
+      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
+
   const videoFilteredSubcategories =
     allSubCategories?.SubCategorys?.filter((s) =>
       s.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
+  
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
   const filteredSubcategories = (
     relationMode === "post" ? postSubcategoriesList : videoFilteredSubcategories
@@ -552,7 +659,7 @@ export default function PlateformRelationsManager() {
                 setPlatformPostSyncUrl("");
                 setPlatformModalOpen(true);
               }}
-              className="btn rounded shadow btn-sm mt-2"
+              className="text-body bg-neutral-secondary-medium rounded-lg box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading  cursor-pointer focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -569,7 +676,7 @@ export default function PlateformRelationsManager() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span>add</span>
+              <span className="text-gray-600">add</span>
             </button>
           </div>
           <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
@@ -584,12 +691,18 @@ export default function PlateformRelationsManager() {
                       setPlatformPostSyncUrl(p.post_sync_url ?? "");
                       setPlatformModalOpen(true);
                     }}
-                    className="btn btn-sm btn-primary flex items-center justify-center"
                     aria-label="Edit platform"
+                    className="rounded-sm cursor-pointer focus:outline-none px-3 py-2 text-sm font-medium bg-transparent"
+                    style={{
+                      borderStyle: "solid",
+                      borderWidth: 2,
+                      borderImage: "linear-gradient(90deg,#7c3aed,#ec4899) 1",
+                      background: "transparent",
+                    }}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 inline-block"
+                      className="w-4 h-4 inline-block text-purple-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -605,12 +718,18 @@ export default function PlateformRelationsManager() {
                   </button>
                   <button
                     onClick={() => handleDeletePlatform(p.id)}
-                    className="btn btn-sm btn-outline text-red-500 flex items-center justify-center"
                     aria-label="Delete platform"
+                    className="rounded-sm cursor-pointer focus:outline-none px-3 py-2 text-sm font-medium bg-transparent"
+                    style={{
+                      borderStyle: "solid",
+                      borderWidth: 2,
+                      borderImage: "linear-gradient(90deg,#ef4444,#fb923c) 1",
+                      background: "transparent",
+                    }}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 inline-block"
+                      className="w-4 h-4 inline-block text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -628,8 +747,8 @@ export default function PlateformRelationsManager() {
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
                   className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${selectedPlateform === p.id
-                      ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                    ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                 >
                   <span
@@ -717,7 +836,7 @@ export default function PlateformRelationsManager() {
                 </button>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
@@ -803,7 +922,7 @@ export default function PlateformRelationsManager() {
                     ))
                   )}
                 </div>
-
+                
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
@@ -893,6 +1012,85 @@ export default function PlateformRelationsManager() {
                     ))
                   )}
                 </div>
+
+                {/* link tag category */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setTagCatModalOpen(true)}
+                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span>
+                        Link tag category
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleClearTagCategories}
+                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                        />
+                      </svg>
+                      <span>Clear All</span>
+                    </button>
+                  </div>
+                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                    Tag video category
+                  </h3>
+                  {tagCatRelations?.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">
+                      No tag category linked
+                    </p>
+                  ) : (
+                    tagCatRelations?.map((tc) => (
+                      <div
+                        key={tc.id}
+                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                      >
+                        {/* Theme indicator node (light/dark) */}
+                        <span
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                          title="Theme: light/dark"
+                        ></span>
+                        <span className="ml-5">{tc.name}</span>
+                        <button
+                          onClick={() => handleRemoveTagCategory(tc.id)}
+                          className="btn bg-slate-200 dark:bg-gray-700 rounded-lg shadow btn-sm text-red-600 dark:text-red-500 border border-red-500"
+                          disabled={!selectedPlateform}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
               {/* Creators block */}
               <div className="mt-6">
@@ -956,7 +1154,7 @@ export default function PlateformRelationsManager() {
                       <span className="ml-5">{c.name}</span>
                       <button
                         onClick={() => handleRemoveCreator(Number(c.id))}
-                        className="btn rounded shadow btn-sm text-red-500"
+                        className="btn rounded shadow btn-sm text-green-500"
                       >
                         Remove
                       </button>
@@ -1180,6 +1378,77 @@ export default function PlateformRelationsManager() {
           <div className="modal-action">
             <button
               onClick={() => setSubCategoryModalOpen(false)}
+              className="btn btn-outline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </dialog>
+
+      {/* dialog for tag category */}
+      <dialog
+        id="tagCatModal"
+        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}  
+      >
+        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+          <h3 className="font-bold text-lg mb-3">Add Tag Category</h3>
+          <input
+            type="text"
+            placeholder="Search category..."
+            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="max-h-60 overflow-auto">
+            {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
+              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                <span className="italic text-gray-500 dark:text-gray-400">
+                  Create new{" "}
+                  Tag category "
+                  {search}"
+                </span>
+                <button
+                  onClick={() => handleCreateAndLinkTagCategory(search) }
+                  className="btn btn-xs btn-success"
+                >
+                  Create & Link
+                </button>
+              </div>
+            ) : (
+              filteredTagCategories?.map((Tagcat) => {
+                const isLinked = catRelations.some((rc) => rc.id === Tagcat.id);
+                return (
+                  <div
+                    key={Tagcat.id}
+                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                  >
+                    {/* Theme indicator node (light/dark) */}
+                    <span
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                      title="Theme: light/dark"
+                    ></span>
+                    <span className="ml-7">{Tagcat.name}</span>
+                    {isLinked ? (
+                      <button className="btn btn-xs btn-disabled">
+                        Linked
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() =>  handleAddCategoryTag(Tagcat.id) }
+                        className="btn btn-xs btn-primary"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <div className="modal-action">
+            <button
+              onClick={() => setTagCatModalOpen(false)}
               className="btn btn-outline"
             >
               Close
