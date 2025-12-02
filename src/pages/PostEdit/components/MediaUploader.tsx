@@ -8,6 +8,7 @@ export default function MediaUploader(props: {
   handleImageChange: (id: number, file: File | null) => void;
   handleVideoChange: (id: number, file: File | null) => void;
   handleCoverChange: (id: number, file: File | null) => void;
+  onExistingCoverSelect?: (id: number, file: File) => void;
   handleVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
   handleExistingVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
   existingVideoCovers?: Record<number, File | null>;
@@ -19,7 +20,7 @@ export default function MediaUploader(props: {
   setDeletedVideoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setMedia: React.Dispatch<React.SetStateAction<{ images: any[]; videos: any[] }>>;
 }) {
-  const { images, videos, imageFields, videoFields, handleImageChange, handleVideoChange, handleCoverChange, addImageField, addVideoField, removeImageField, removeVideoField, setDeletedImageIds, setDeletedVideoIds, setMedia, handleVideoTypeChange, handleExistingVideoTypeChange } = props;
+  const { images, videos, imageFields, videoFields, handleImageChange, handleVideoChange, handleCoverChange, onExistingCoverSelect, addImageField, addVideoField, removeImageField, removeVideoField, setDeletedImageIds, setDeletedVideoIds, setMedia, handleVideoTypeChange, handleExistingVideoTypeChange } = props;
 
   const { existingVideoCovers } = props as any;
 
@@ -102,7 +103,6 @@ export default function MediaUploader(props: {
                 <div className="mt-4">
                   <div className="relative w-full">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cover <span className="text-red-500">*</span></label>
-                    {/* <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleCoverChange(video.id, file); e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id={`exist-cover-${video.id}`} /> */}
                     {/* determine if a cover exists (newly chosen or existing url) */}
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];
@@ -110,7 +110,8 @@ export default function MediaUploader(props: {
                       const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path;
                       const hasCover = Boolean(chosen) || Boolean(existingUrl);
                       return (
-                        <label htmlFor={`exist-cover-${video.id}`} className={`border ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center  h-[120px] w-full`}>
+                        <label className={`border ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center relative overflow-hidden h-[120px] w-full cursor-pointer`}>
+                              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (onExistingCoverSelect) { onExistingCoverSelect(video.id, file); } else { handleCoverChange(video.id, file); } } e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                           {chosen ? (
                             <div className="w-full h-full">
                               <img src={URL.createObjectURL(chosen)} alt="Cover" className="w-full h-full object-cover rounded-md" />
@@ -128,6 +129,7 @@ export default function MediaUploader(props: {
                               </div>
                             </div>
                           )}
+                          <div className="absolute top-2 right-2 bg-black bg-opacity-40 text-white text-xs rounded px-2 py-0.5">Changer</div>
                         </label>
                       );
                     })()}

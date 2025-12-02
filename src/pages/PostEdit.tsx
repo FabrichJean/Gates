@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import axios from 'axios';
+import { getToken } from '../utils/storage';
+import ConfirmCoverUploadModal from './PostEdit/components/ConfirmCoverUploadModal';
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -11,6 +14,7 @@ import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
 import MediaUploader from "./PostEdit/components/MediaUploader";
 import { deleteManyImages, deleteManyVideos } from "../api/posts";
+import { apiURL } from "../constant";
 
 type Language = {
   code: string;
@@ -88,6 +92,9 @@ const PostEdit = () => {
   const [existingVideoCovers, setExistingVideoCovers] = useState<
     Record<number, File | null>
   >({});
+  const [pendingCover, setPendingCover] = useState<{ videoId: number; file: File } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
@@ -325,6 +332,53 @@ const PostEdit = () => {
     }
   };
 
+  // When the user selects a cover for an existing video, we will show a confirmation modal
+  const handleExistingCoverSelect = (videoId: number, file: File) => {
+    setPendingCover({ videoId, file });
+    setConfirmOpen(true);
+  };
+
+  const uploadExistingCover = async () => {
+    if (!pendingCover || !post) return;
+    const { videoId, file } = pendingCover;
+    setUploadingCover(true);
+    try {
+      const url = `${apiURL}/posts/${post.id}/images`;
+      const fd = new FormData();
+      fd.append('image', file, file.name);
+
+      const token = getToken();
+      const resp = await axios.post(url, fd, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      });
+
+      const image = resp.data?.image;
+      const localPath = image?.public_urls.local_image_url || image?.local_image_url || null;
+
+      if (localPath) {
+        setMedia((prev) => ({
+          ...prev,
+          videos: prev.videos.map((v) => (v.id === videoId ? { ...v, public_urls: { ...v.public_urls, local_cover_path: localPath } } : v)),
+        }));
+        toast.success('Cover uploaded');
+      } else {
+        toast.success('Cover uploaded (no path returned)');
+      }
+
+      // clear any staged existingVideoCovers for that video (we uploaded immediately)
+      setExistingVideoCovers((prev) => ({ ...prev, [videoId]: null }));
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to upload cover');
+    } finally {
+      setUploadingCover(false);
+      setConfirmOpen(false);
+      setPendingCover(null);
+    }
+  };
+
   const { updatePost, loading: updating } = useUpdatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -389,6 +443,19 @@ const PostEdit = () => {
       imageFields.some((f) => f.file) ||
       videoFields.some((f) => f.file || f.cover) ||
       Object.values(existingVideoCovers).some((f) => f);
+
+    // Build coversInOrder regardless of whether we will use FormData.
+    // This array aligns with videosPayload order: first existing videos, then new videoFields.
+    const coversInOrder: (File | null)[] = [];
+    // existing videos
+    videos.forEach((v) => {
+      const c = existingVideoCovers?.[v.id] ?? null;
+      coversInOrder.push(c);
+    });
+    // new videoFields
+    videoFields.forEach((f) => {
+      coversInOrder.push(f.cover ?? null);
+    });
 
     try {
       if (deletedImageIds.length > 0) {
@@ -464,10 +531,41 @@ const PostEdit = () => {
         });
 
 
+        // Debug logs: inspect payload, videos metadata and covers before sending FormData
+        try {
+          console.group('PostUpdate - FormData debug');
+          console.log('payload (object):', payload);
+          console.log('videosPayload (metadata):', videosPayload);
+          console.log('coversInOrder length:', coversInOrder.length);
+          console.log('covers filenames:', coversInOrder.map((c) => (c ? c.name : null)));
+          // iterate FormData entries (will show File objects for files)
+          for (const pair of fd.entries()) {
+            // don't stringify File objects here — log them directly
+            console.log('FormData entry:', pair[0], pair[1]);
+          }
+          console.groupEnd();
+        } catch (err) {
+          console.warn('Failed to log FormData debug info', err);
+        }
+
         await updatePost(post?.id, fd);
       } else {
+        // When there are NO new files, we cannot append File objects to JSON payload.
+        // Still include a covers metadata array so the server knows which covers have been changed.
+        // For each position: if user selected a new cover file, include its name; otherwise null.
+        (payload as any).covers_meta = coversInOrder.map((c) => (c ? c.name : null));
         (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
-        // Debug logs removed for production
+        // Debug logs for non-FormData payload
+        try {
+          console.group('PostUpdate - JSON payload debug');
+          console.log('payload (JSON):', payload);
+          console.log('videosPayload (metadata):', videosPayload);
+          console.log('covers_meta (for JSON path):', (payload as any).covers_meta);
+          console.groupEnd();
+        } catch (err) {
+          console.warn('Failed to log JSON payload debug info', err);
+        }
+
         await updatePost(post?.id, payload);
       }
 
@@ -609,6 +707,7 @@ const PostEdit = () => {
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
               handleCoverChange={handleCoverChange}
+              onExistingCoverSelect={handleExistingCoverSelect}
               handleVideoTypeChange={handleVideoTypeChange}
               handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
@@ -619,6 +718,14 @@ const PostEdit = () => {
               setDeletedVideoIds={setDeletedVideoIds}
               existingVideoCovers={existingVideoCoversRecord}
               setMedia={setMedia}
+            />
+
+            <ConfirmCoverUploadModal
+              open={confirmOpen}
+              file={pendingCover?.file ?? null}
+              onCancel={() => { setConfirmOpen(false); setPendingCover(null); }}
+              onConfirm={uploadExistingCover}
+              uploading={uploadingCover}
             />
 
             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
