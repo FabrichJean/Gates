@@ -7,7 +7,7 @@ export default function MediaUploader(props: {
   videoFields: { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string; type?: string }[];
   handleImageChange: (id: number, file: File | null) => void;
   handleVideoChange: (id: number, file: File | null) => void;
-  handleCoverChange: (id: number, file: File | null) => void;
+  handleCoverChange: (id: number, file: File | null, index?: number) => void;
   handleVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
   handleExistingVideoTypeChange?: (id: number, value: 'short' | 'long') => void;
   existingVideoCovers?: Record<number, File | null>;
@@ -102,7 +102,7 @@ export default function MediaUploader(props: {
                 <div className="mt-4">
                   <div className="relative w-full">
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cover <span className="text-red-500">*</span></label>
-                    {/* <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleCoverChange(video.id, file); e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id={`exist-cover-${video.id}`} /> */}
+                    <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleCoverChange(video.id, file, index); e.target.value = ""; }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id={`exist-cover-${video.id}`} />
                     {/* determine if a cover exists (newly chosen or existing url) */}
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];

@@ -308,7 +308,7 @@ const PostEdit = () => {
     }));
   };
 
-  const handleCoverChange = (id: number, file: File | null) => {
+  const handleCoverChange = (id: number, file: File | null, index?: number) => {
     if (file) {
       const existingVideo = videos.find((v) => v.id === id);
       if (existingVideo) {
@@ -412,7 +412,7 @@ const PostEdit = () => {
 
         const fd = new FormData();
 
-        fd.append("payload", JSON.stringify(payload));
+        // fd.append("payload", JSON.stringify(payload));
 
         if (post?.id) fd.append("id", String(post.id));
         fd.append(
@@ -442,25 +442,42 @@ const PostEdit = () => {
             if (f.file) fd.append("videos", f.file, f.file.name);
           });
 
-        const coversInOrder: (File | null)[] = [];
-        // existing videos
-        videos.forEach((v) => {
-          const c = existingVideoCovers?.[v.id] ?? null;
-          coversInOrder.push(c);
-        });
-        // new videoFields
-        videoFields.forEach((f) => {
-          coversInOrder.push(f.cover ?? null);
+        // New media handling: send videos and covers as structured arrays
+        // Videos: Array<{ id_video?: number, video: File }>
+        // Covers: Array<{ id_video?: number, cover: File }>
+
+        const videosToSend: Array<{ id_video?: number; file: File }> = [];
+        // Only new video files (user added) are sent as video files
+        videoFields
+          .filter((f) => f.file)
+          .forEach((f) => {
+            if (f.file) videosToSend.push({ file: f.file });
+          });
+
+        // Append videos with indexed form fields: videos[0][id_video], videos[0][video]
+        videosToSend.forEach((item, idx) => {
+          if (item.id_video) fd.append(`videos[${idx}][id_video]`, String(item.id_video));
+          fd.append(`videos[${idx}][video]`, item.file, item.file.name);
         });
 
-        // Append covers
-        coversInOrder.forEach((c, idx) => {
-          if (c) {
-            fd.append("covers", c, c.name);
-          } else {
-            const emptyBlob = new Blob([], { type: "image/jpeg" });
-            fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
-          }
+        // Covers: include updates for existing videos and covers for new video fields
+        const coversToSend: Array<{ id_video?: number; file: File }> = [];
+
+        // existing videos: if user selected a new cover for an existing video, include it with id_video
+        videos.forEach((v) => {
+          const c = existingVideoCovers?.[v.id] ?? null;
+          if (c) coversToSend.push({ id_video: v.id, file: c });
+        });
+
+        // new video fields: include their cover if present (no id_video)
+        videoFields.forEach((f) => {
+          if (f.cover) coversToSend.push({ file: f.cover });
+        });
+
+        // Append covers with indexed form fields: covers[0][id_video], covers[0][cover]
+        coversToSend.forEach((item, idx) => {
+          if (item.id_video) fd.append(`covers[${idx}][id_video]`, String(item.id_video));
+          fd.append(`covers[${idx}][cover]`, item.file, item.file.name);
         });
 
 

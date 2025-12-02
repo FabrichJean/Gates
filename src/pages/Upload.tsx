@@ -261,8 +261,36 @@ const Upload = () => {
     }
 
     const fd = new FormData();
-    fd.append("video", videoFile as File);
-    fd.append("cover", coverFile as File);
+
+    // Build videos and covers arrays. Each entry may contain id_video (for updates) and the file.
+    // For the simple upload page we only have one video+cover, but we structure the FormData
+    // to support multiple entries and updates: videos[0][id_video], videos[0][video], covers[0][id_video], covers[0][cover]
+    const videosArray: Array<{ id_video?: number; video: File }> = [];
+    const coversArray: Array<{ id_video?: number; cover: File }> = [];
+
+    if (videoFile) {
+      videosArray.push({ video: videoFile as File });
+    }
+    if (coverFile) {
+      coversArray.push({ cover: coverFile as File });
+    }
+
+    // Append videos entries to FormData
+    videosArray.forEach((v, i) => {
+      if (v.id_video !== undefined && v.id_video !== null) {
+        fd.append(`videos[${i}][id_video]`, String(v.id_video));
+      }
+      fd.append(`videos[${i}][video]`, v.video, v.video.name);
+    });
+
+    // Append covers entries to FormData
+    coversArray.forEach((c, i) => {
+      if (c.id_video !== undefined && c.id_video !== null) {
+        fd.append(`covers[${i}][id_video]`, String(c.id_video));
+      }
+      fd.append(`covers[${i}][cover]`, c.cover, c.cover.name);
+    });
+
     fd.append("category_id", String(category.id));
     if (subcategory) fd.append("sub_category_id", String(subcategory.id));
     if (platform?.id) fd.append("plateform_id", String(platform.id));
