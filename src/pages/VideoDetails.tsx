@@ -589,7 +589,7 @@ function EditVideo({
   // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(
     video?.titles?.map((title, index) => ({
-      id: index, // or title.video_id if that's more appropriate
+      id: title.id, // or title.video_id if that's more appropriate
       language: title.language,
       i18_language: title.i18_language,
       title: title.title,

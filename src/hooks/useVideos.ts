@@ -25,7 +25,9 @@ export type TVideo = {
   ref: string;
   sequence: number | null;
   temp_url: string;
-  titles: { title: string; i18_language: string; video_id: number; description?: string; language: { code: string, name: string } }[];
+  titles: {
+    id: any; title: string; i18_language: string; video_id: number; description?: string; language: { code: string, name: string } 
+}[];
   transfer_status: number;
   upload_status: number;
   cover_upload_status: number;

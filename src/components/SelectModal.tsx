@@ -45,6 +45,7 @@ const SelectModal = ({
     const platformToSend = rowLabel == null ? (selectedPlatform ?? null) : undefined;
     if (typeof onSubmit === "function") {
       onSubmit(isForce.toString(), label!, platformToSend as number | null | undefined);
+      onClose()
     }
   };
 

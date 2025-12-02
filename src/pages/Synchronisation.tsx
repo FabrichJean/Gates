@@ -40,15 +40,15 @@ const Synchronisation = () => {
   ) => {
     
     try {
+      // Close the modal
+      // setModalOpen(false);
       show();
       await sync({
         isForce: optionId === "true",
         label: label,
         platformId: platformId,
       });
-      
-      // Close the modal
-      setModalOpen(false);
+
     } catch (err) {
       console.error("Sync failed", err);
     }
