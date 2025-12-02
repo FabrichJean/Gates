@@ -92,6 +92,13 @@ const PostEdit = () => {
   const [existingVideoCovers, setExistingVideoCovers] = useState<
     Record<number, File | null>
   >({});
+
+  const [coverPost, setCoverPost] = useState<{ cover_id: number | null; video_id: number }[]>(
+    []
+  );;
+
+  // mapping of existing video id -> uploaded cover image id returned by API
+  const [existingCoverIds, setExistingCoverIds] = useState<Record<number, number | null>>({});
   const [pendingCover, setPendingCover] = useState<{ videoId: number; file: File } | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -332,7 +339,6 @@ const PostEdit = () => {
     }
   };
 
-  // When the user selects a cover for an existing video, we will show a confirmation modal
   const handleExistingCoverSelect = (videoId: number, file: File) => {
     setPendingCover({ videoId, file });
     setConfirmOpen(true);
@@ -356,18 +362,28 @@ const PostEdit = () => {
 
       const image = resp.data?.image;
       const localPath = image?.public_urls.local_image_url || image?.local_image_url || null;
+      
 
       if (localPath) {
         setMedia((prev) => ({
           ...prev,
           videos: prev.videos.map((v) => (v.id === videoId ? { ...v, public_urls: { ...v.public_urls, local_cover_path: localPath } } : v)),
         }));
-        toast.success('Cover uploaded');
+
+        setCoverPost((prev) => [...prev, { cover_id: image.id, video_id: videoId }]);
+
       } else {
         toast.success('Cover uploaded (no path returned)');
       }
 
-      // clear any staged existingVideoCovers for that video (we uploaded immediately)
+      if (image?.id) {
+        setExistingCoverIds((prev) => {
+          const next = { ...prev, [videoId]: image.id };
+          console.log('existingCoverIds updated ->', next);
+          return next;
+        });
+      }
+
       setExistingVideoCovers((prev) => ({ ...prev, [videoId]: null }));
     } catch (err: any) {
       console.error(err);
@@ -383,10 +399,13 @@ const PostEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Build payload including existing videos followed by newly added video fields
+    if (uploadingCover) {
+      toast.error('A cover upload is in progress. Please wait until it finishes.');
+      return;
+    }
+    
     const videosPayload: any[] = [];
 
-    // existing videos currently in media state (preserve their backend 'type' if present)
     videos.forEach((v) => {
       videosPayload.push({
         id: v.id,
@@ -397,7 +416,6 @@ const PostEdit = () => {
       });
     });
 
-    // new video fields (user added in form) — include the chosen type (map front->backend)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
@@ -434,7 +452,6 @@ const PostEdit = () => {
       videos: videosPayload,
     };
 
-    // include creator or creator_id in payload
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
@@ -444,8 +461,6 @@ const PostEdit = () => {
       videoFields.some((f) => f.file || f.cover) ||
       Object.values(existingVideoCovers).some((f) => f);
 
-    // Build coversInOrder regardless of whether we will use FormData.
-    // This array aligns with videosPayload order: first existing videos, then new videoFields.
     const coversInOrder: (File | null)[] = [];
     // existing videos
     videos.forEach((v) => {
@@ -520,25 +535,15 @@ const PostEdit = () => {
           coversInOrder.push(f.cover ?? null);
         });
 
-        // Append covers
-        coversInOrder.forEach((c, idx) => {
-          if (c) {
-            fd.append("covers", c, c.name);
-          } else {
-            const emptyBlob = new Blob([], { type: "image/jpeg" });
-            fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
-          }
-        });
+  
+        fd.append('coverPost', JSON.stringify(coverPost));
 
-
-        // Debug logs: inspect payload, videos metadata and covers before sending FormData
         try {
           console.group('PostUpdate - FormData debug');
           console.log('payload (object):', payload);
           console.log('videosPayload (metadata):', videosPayload);
           console.log('coversInOrder length:', coversInOrder.length);
           console.log('covers filenames:', coversInOrder.map((c) => (c ? c.name : null)));
-          // iterate FormData entries (will show File objects for files)
           for (const pair of fd.entries()) {
             // don't stringify File objects here — log them directly
             console.log('FormData entry:', pair[0], pair[1]);
@@ -550,12 +555,18 @@ const PostEdit = () => {
 
         await updatePost(post?.id, fd);
       } else {
-        // When there are NO new files, we cannot append File objects to JSON payload.
-        // Still include a covers metadata array so the server knows which covers have been changed.
-        // For each position: if user selected a new cover file, include its name; otherwise null.
         (payload as any).covers_meta = coversInOrder.map((c) => (c ? c.name : null));
+        const coverPost: { cover_id: number | null; video_id: number }[] = [];
+        videos.forEach((v) => {
+          const cover_id = (existingCoverIds && existingCoverIds[v.id]) ? existingCoverIds[v.id] : null;
+          coverPost.push({ cover_id, video_id: v.id });
+        });
+        videoFields.forEach((f, i) => {
+          const c = coversInOrder[videos.length + i];
+          coverPost.push({ cover_id: c ? null : null, video_id: f.id });
+        });
+        (payload as any).coverPost = coverPost;
         (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
-        // Debug logs for non-FormData payload
         try {
           console.group('PostUpdate - JSON payload debug');
           console.log('payload (JSON):', payload);
@@ -625,7 +636,6 @@ const PostEdit = () => {
     );
   }
 
-  // record map for existing covers to pass down to MediaUploader (use state)
   const existingVideoCoversRecord = existingVideoCovers;
 
   return (
@@ -741,8 +751,8 @@ const PostEdit = () => {
               </button>
               <button
                 type="submit"
-                disabled={updating}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
+                disabled={updating || uploadingCover}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating || uploadingCover
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-blue-700"
                   }`}
@@ -760,7 +770,7 @@ const PostEdit = () => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {updating ? "Updating..." : "Update"}
+                {uploadingCover ? 'Uploading cover...' : updating ? 'Updating...' : 'Update'}
               </button>
             </div>
           </form>
