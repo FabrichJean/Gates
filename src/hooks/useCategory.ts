@@ -6,7 +6,7 @@ import type { Category } from "../components/CategoryAutoComplete"
 function UseCategory() {
    return useFetch<Category[]>(apiURL + "/categories", {
       headers: { Authorization: `Bearer ${getToken()}` },
-   })
+   }) 
 }
 
 export default UseCategory

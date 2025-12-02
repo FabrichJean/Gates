@@ -10,8 +10,8 @@ export const addTagCategoryToPlateformApi = async (
   categoryId: number
 ) =>
   await axios.post(
-    `${apiURL}/plateform-category/add`,
-    { plateformId, categoryId },
+    `${apiURL}/plateform-tag-category/add`,
+    { plateformId, tagCategoryId: categoryId },
     {
       headers,
     }
@@ -22,7 +22,7 @@ export const removeTagCategoryFromPlateformApi = async (
   categoryId: number
 ) =>
   await axios.delete(
-    `${apiURL}/plateform-category/${plateformId}/${categoryId}`,
+    `${apiURL}/plateform-tag-category/${plateformId}/${categoryId}`,
     {
       headers,
     }
@@ -33,28 +33,28 @@ export const removePlateformFromTagCategoryApi = async (
   plateformId: number
 ) =>
   await axios.delete(
-    `${apiURL}/plateform-category/${categoryId}/${plateformId}`,
+    `${apiURL}/plateform-tag-category/${categoryId}/${plateformId}`,
     {
       headers,
     }
   );
 
 export const getTagCategoriesByPlateformApi = async (plateformId: number) =>
-  await axios.get(`${apiURL}/plateform-category/plateform/${plateformId}`, {
+  await axios.get(`${apiURL}/plateform-tag-category/plateform/${plateformId}`, {
     headers,
   });
 
 export const getPlateformsByTagCategoryApi = async (categoryId: number) =>
-  await axios.get(`${apiURL}/plateform-category/category/${categoryId}`, {
+  await axios.get(`${apiURL}/plateform-tag-category/category/${categoryId}`, {
     headers,
   });
 
 export const clearTagCategoriesFromPlateformApi = async (plateformId: number) =>
-  await axios.delete(`${apiURL}/plateform-category/plateform/${plateformId}/clear`, {
+  await axios.delete(`${apiURL}/plateform-tag-category/plateform/${plateformId}/clear`, {
     headers,
   });
 
   export const clearTagSubCategoriesFromPlateformApi = async (plateformId: number) =>
-  await axios.delete(`${apiURL}/plateform-subcategory/plateform/${plateformId}/clear`, {
+  await axios.delete(`${apiURL}/plateform-tag-subcategory/plateform/${plateformId}/clear`, {
     headers,
   });

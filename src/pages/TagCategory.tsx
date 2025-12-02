@@ -30,6 +30,7 @@ export default function TagCategory() {
             toast.error("Unable to load tags");
         }
     };
+    
     const handleNewCatChange = (value: string) => {
         const nonSpaceCount = value.replace(/\s/g, '').length;
         if (nonSpaceCount <= NON_SPACE_LIMIT) {
