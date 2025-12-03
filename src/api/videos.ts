@@ -43,7 +43,7 @@ export async function uploadVideo(formData: FormData, onUploadProgress?: ((progr
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function updateVideo(videoId: string | number, formData: FormData, onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<any> {
+export async function updateVideo(videoId: string | number, formData: FormData | Object, onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<any> {
     return await axios.put(apiURL + "/videos/" + videoId, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
