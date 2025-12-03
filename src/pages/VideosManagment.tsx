@@ -9,7 +9,6 @@ import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 
 const VideosManagment = () => {
-  // console.log('cid mababsia');
 
   const { user } = useAuth();
   const ctx = useVideosContext();
