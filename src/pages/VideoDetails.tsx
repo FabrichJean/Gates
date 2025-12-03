@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from "./Upload";
 import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
-import { FaPlayCircle } from "react-icons/fa";
+import { FaCheckDouble, FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
@@ -27,10 +27,11 @@ import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { useVideosContext } from "../context/VideosContext";
+import VideoActions from "../components/videos/VideoActions";
+import { FiHexagon } from "react-icons/fi";
+import { EllipsisVertical, Pencil, Send, ShieldCheck } from "lucide-react";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
-  console.log("details kbfjkdffkj,n");
-
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
@@ -40,6 +41,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   const [modifying, setModifying] = useState(false);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
+  const [selectedLang, setSelectedLang] = useState<string | null>(null);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
 
@@ -52,7 +54,15 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   // Mettre à jour l'URL de cover quand les données vidéo changent
   useEffect(() => {
-    setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover) + "?t=" + Date.now());
+    setCurrentCoverUrl(
+      (video?.s3_urls?.coverUrl ||
+        video?.public_urls.cover_url ||
+        video?.cover) +
+        "?t=" +
+        Date.now()
+    );
+    // initialize selected language for titles when video changes
+    setSelectedLang(video?.titles?.[0]?.i18_language ?? null);
   }, [video]);
 
   if (!video)
@@ -61,26 +71,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         <div className="text-red-500">Video not found</div>
       </div>
     );
-
-  const deleteVideo = async (
-    id: string | number,
-    type: "archive" | "delete"
-  ) => {
-    try {
-      if (type === "archive") {
-        await archiveVideo(id);
-        toast.success("Video archived successfully");
-        navigate("/videos");
-      } else {
-        await deletePerm(id);
-        toast.success("Video deleted successfully");
-        navigate("/videos");
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast.error("Error deleting video");
-    }
-  };
 
   const send = async (videoId: number) => {
     try {
@@ -103,6 +93,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   return (
     <>
       <AnimatedAlert {...alertProps} />
+
       {modifying ? (
         <EditVideo
           video={video}
@@ -115,442 +106,374 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           }}
         />
       ) : (
-        <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-          {/* <Toaster position="top-right" /> */}
-
-          {/* Formulaire */}
-          <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
-            <div className="flex justify-between gap-4 items-center w-full">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
-                {formatDateFR(video?.createdAt)}
-              </h2>
-              <div className="flex gap-2">
-                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{ video.type === '1' ? 'short' : 'long' }</span>
-                <CheckingSuperadmin
-                  index={0}
-                  reFetch={reFetch}
-                  video={video}
-                  user={user}
-                />
-              </div>
-            </div>
-            <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
-              {videoPlayed ? (
-                <video
-                  src={video.s3_urls.hlsUrl || video.public_urls.temp_url}
-                  className="w-full h-full object-cover rounded-lg"
-                  controls
-                  autoPlay
-                ></video>
-              ) : (
+        <div className="w-full min-h-screen flex justify-center py-10">
+          {/* --- FEED CENTRAL --- */}
+          <div className="w-full max-w-2xl space-y-4">
+            {/* --- CARD SOCIAL MEDIA --- */}
+            <div className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              {/* Indeterminate top bar while processing */}
+              {video.processing === "working" && (
                 <>
-                  <FaPlayCircle
-                    className="absolute text-8xl text-white cursor-pointer z-10"
-                    onClick={() => setVideoPlayed(true)}
-                  />
-                  <img
-                    src={currentCoverUrl || video.s3_urls.coverUrl || video.public_urls.cover_url}
-                    alt="cover"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                  <style>{`
+                    @keyframes vms-loading {
+                      0% { transform: translateX(-100%); }
+                      100% { transform: translateX(400%); }
+                    }
+                  `}</style>
+                  <div className="absolute top-0 left-0 right-0 h-1 overflow-hidden rounded-t-3xl">
+                    <div
+                      className="h-full w-1/3 bg-gradient-to-r from-blue-500 via-sky-400 to-blue-500"
+                      style={{ animation: "vms-loading 1.2s linear infinite" }}
+                    />
+                  </div>
                 </>
               )}
+              {/* HEADER */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {/* Avatar random */}
+                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <img
+                      src={video.creatorObj.avatar || ""}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div>
+                    <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      {video.creatorObj.name}
+                      {video?.checking === "checked" ? (
+                        <FaCheckDouble className="text-green-600 dark:text-green-400 text-xs" />
+                      ) : (
+                        <FiHexagon className="text-gray-500 dark:text-gray-400 text-xs" />
+                      )}
+                    </h3>
+
+                    <p className="text-sm text-gray-500">
+                      {formatDateFR(video?.createdAt)} ·{" "}
+                      <span className="text-violet-500">
+                        {video.type === "1" ? "Short" : "Long"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right controls: Checking + Actions dropdown */}
+                <div className="flex items-center gap-2">
+                  {/* Actions dropdown: checking, send, edit */}
+                  <div className="dropdown dropdown-end">
+                    {/* Trigger */}
+                    <div
+                      tabIndex={46}
+                      role="button"
+                      className="cursor-pointer rounded-xl px-3 py-2 bg-white dark:bg-gray-800 
+                     border border-gray-200 dark:border-gray-700 
+                     hover:bg-gray-100 dark:hover:bg-gray-700
+                     transition-all flex items-center gap-2 shadow-sm"
+                    >
+                      <EllipsisVertical className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    </div>
+
+                    {/* DROPDOWN CONTENT */}
+                    <div
+                      tabIndex={78}
+                      className="dropdown-content p-3 shadow-xl bg-white dark:bg-gray-800 
+                     rounded-xl w-60 border border-gray-200 dark:border-gray-700
+                     backdrop-blur-sm animate-fadeIn space-y-2"
+                    >
+                      {/* CHECKING (pas de liste) */}
+                      <div className="flex items-center justify-between p-2">
+                        <CheckingSuperadmin
+                          index={1}
+                          reFetch={reFetch}
+                          video={video}
+                          user={user}
+                          hideTouchLink
+                        />
+                      </div>
+
+                      {/* SEND */}
+                      <button
+                        className="w-full flex items-center p-2 rounded-lg  cursor-pointer
+                       hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                        onClick={() => {
+                          if (video.checking !== "checked") {
+                            return alert.warning(
+                              "We need to check this video",
+                              "Video Check Required"
+                            );
+                          }
+                          if (!video.public_urls?.temp_url) {
+                            return toast.error("MP4 not ready yet");
+                          }
+                          if (
+                            video.processing === "working" ||
+                            video.processing === "done"
+                          )
+                            return;
+
+                          send(video.id);
+                        }}
+                      >
+                        <Send className="h-5 w-5 text-green-600" />
+                        <span className="ml-3 text-sm font-medium">
+                          Envoyer
+                        </span>
+                      </button>
+
+                      {/* EDIT */}
+                      <button
+                        className="w-full flex items-center p-2 rounded-lg cursor-pointer
+                       hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                        onClick={() => setModifying(true)}
+                      >
+                        <Pencil className="h-5 w-5 text-orange-500" />
+                        <span className="ml-3 text-sm font-medium">
+                          Modifier
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <p className="flex gap-2 mt-2">
+                    {/* Tag Categories */}
+                    {Array.isArray(video.tagCategory) &&
+                      video.tagCategory.length > 0 &&
+                      video.tagCategory.map((vc) => (
+                        <span
+                          key={`${vc.id}-${vc.id}`}
+                          className="text-sm text-blue-700 dark:text-blue-300"
+                          title={
+                            vc?.name
+                              ? JSON.stringify(vc.VideoTagCategory)
+                              : undefined
+                          }
+                        >
+                          #{vc?.name}
+                        </span>
+                      ))}
+                  </p>
+                </p>
+              </div>
+
+              {/* --- VIDEO CARD --- */}
+              <div className="w-full rounded-3xl overflow-hidden shadow-sm relative bg-black max-h-[540px]">
+                {videoPlayed ? (
+                  <video
+                    src={video.s3_urls.hlsUrl || video.public_urls.temp_url}
+                    className="w-full max-h-[540px] object-cover"
+                    controls
+                    autoPlay
+                  ></video>
+                ) : (
+                  <>
+                    <FaPlayCircle
+                      className="absolute z-20 text-white/90 text-7xl cursor-pointer left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition"
+                      onClick={() => setVideoPlayed(true)}
+                    />
+
+                    <img
+                      src={
+                        currentCoverUrl ||
+                        video.s3_urls.coverUrl ||
+                        video.public_urls.cover_url
+                      }
+                      alt="cover"
+                      className="w-full max-h-[300px] object-cover"
+                    />
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 w-full">
-              {video.checking !== "refused" ? (
-                <button
-                  onClick={() => setModifying(true)}
-                  className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-    font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  modify
-                </button>
-              ) : (
-                <Link
-                  to={"/touch/video/" + videoId}
-                  className="btn flex-shrink-0 relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-    font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  touch again
-                </Link>
-              )}
-
-              {user?.role === RoleEnum.SUPERADMIN && (
-                <div className="relative flex items-center gap-3">
-                  <button
-                    disabled={
-                      video.processing === "working" ||
-                      video.processing === "done"
+            {/* ---- VIDEO INFORMATION SECTION ---- */}
+            <div className="w-full bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300 mt-8">
+              <div className="flex space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                <VideoActions
+                  hidetails
+                  video={video}
+                  user={user ?? null}
+                  onSend={send}
+                  cancelFn={cancel}
+                  reFetchFn={(delay?: number) => {
+                    if (delay && delay > 0) {
+                      setTimeout(() => {
+                        reFetch();
+                      }, delay);
+                    } else {
+                      reFetch();
                     }
-                    onClick={() => {
-                      if (video.checking !== "checked") {
-                        return alert.warning(
-                          "We need to check this video",
-                          "Video Check Required"
-                        );
-                      }
-                      send(video.id);
-                    }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
-                        (video.upload_status === 1 && video.transfer_status === 1)
-                        ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
-                        : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      }`}
-                  >
-                    {video.processing === "working" ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : video.upload_status === 1 &&
-                      video.transfer_status === 1 ? (
-                      <span className="text-green-600 font-semibold flex gap-1 items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                          />
-                        </svg>
-                        Uploaded
-                      </span>
-                    ) : (
-                      <span className="hover:text-blue-500 flex gap-3 items-center">
-                        <span>🚀</span>
-                        <span>Send</span>
-                      </span>
-                    )}
-                  </button>
-
-                  {/* --- BOUTON ANNULER --- */}
-                  {video.processing === "working" && (
-                    <button
-                      onClick={cancel.bind(null, video.id)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-5 h-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18 18 6M6 6l12 12"
-                        />
-                      </svg>
-                      Cancel
-                    </button>
-                  )}
+                  }}
+                />
+              </div>
+              {/* CDN URLs */}
+              {video?.cdn_url && video?.s3_hls_path && (
+                <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                  <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    CDN Playback URL
+                  </h1>
+                  <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                    {video?.cdn_url + video?.s3_hls_path}
+                  </a>
                 </div>
               )}
 
+              {video?.cdn_url && video?.s3_cover_path && (
+                <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                  <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    CDN Cover URL
+                  </h1>
+                  <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                    {video?.cdn_url + video?.s3_cover_path}
+                  </a>
+                </div>
+              )}
+
+              {/* Titles & Descriptions with Language Switcher */}
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  Titles & Descriptions
+                </h1>
+
+                {video?.titles && video.titles.length > 0 ? (
+                  <>
+                    {/* Language switcher buttons */}
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      {video.titles.map((t: any) => (
+                        <button
+                          key={t.i18_language || t.language || t.video_id}
+                          onClick={() =>
+                            setSelectedLang(
+                              t.i18_language ?? t.language ?? null
+                            )
+                          }
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-150 ${
+                            (t.i18_language ?? t.language) === selectedLang
+                              ? "bg-blue-600 text-white shadow-sm"
+                              : "bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-500 border border-gray-200 dark:border-gray-500"
+                          }`}
+                        >
+                          {(t.i18_language ?? t.language)?.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Current language content */}
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                          Title
+                        </span>
+                        <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mt-1">
+                          {video.titles.find(
+                            (x: any) =>
+                              (x.i18_language ?? x.language) === selectedLang
+                          )?.title ||
+                            video.titles[0].title ||
+                            "No title available"}
+                        </h3>
+                      </div>
+
+                      {/* Description section */}
+                      {(() => {
+                        const currentTitle =
+                          video.titles.find(
+                            (x: any) =>
+                              (x.i18_language ?? x.language) === selectedLang
+                          ) || video.titles[0];
+                        const description = currentTitle?.description;
+
+                        if (description && description.trim()) {
+                          return (
+                            <div>
+                              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                Description
+                              </span>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mt-1 whitespace-pre-line">
+                                {description}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                    No titles available for this video.
+                  </p>
+                )}
+              </div>
+
+              {/* Author */}
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  Author
+                </h1>
+                <Link
+                  to={`/users/${video.user?.id}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-300"
+                >
+                  {video.user?.username}
+                </Link>
+              </div>
+
+              {/* Category */}
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  Category
+                </h1>
+                <span className="font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
+                  {video?.category?.name} / {video?.subCategory?.name}
+                </span>
+              </div>
+            </div>
+
+            {/* ---- NAVIGATION (prev / next / back) ---- */}
+            <div className="flex justify-between py-2 px-4">
+              {/* Prev */}
               {hasPrev ? (
                 <Link
                   to={"/videos/" + prevVideo}
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
-    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
-    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
+                  className="px-4 py-2 rounded-xl dark:bg-transparent dark:text-gray-400 dark:border-gray-600 bg-white border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  prev
+                  ← Prev
                 </Link>
               ) : (
-                <div
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-gray-100 dark:bg-gray-800 
-    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
-    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  prev
+                <div className="px-4 py-2 rounded-xl dark:bg-transparent dark:text-gray-400 dark:border-gray-600 bg-white border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-not-allowed">
+                  ← Prev
                 </div>
               )}
 
+              {/* Back */}
+              <Link
+                to="/videos"
+                className="px-4 py-2 rounded-xl dark:bg-transparent dark:text-gray-400 dark:border-gray-600 bg-white border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
+                Back
+              </Link>
+
+              {/* Next */}
               {hasNext ? (
                 <Link
                   to={"/videos/" + nextVideo}
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
-    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
-    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
+                  className="px-4 py-2 rounded-xl dark:bg-transparent dark:text-gray-400 dark:border-gray-600 bg-white border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                 >
-                  next
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                  Next →
                 </Link>
               ) : (
-                <div
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-gray-100 dark:bg-gray-800 
-    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
-    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
-                >
-                  next
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <div className="px-4 py-2 rounded-xl dark:bg-transparent dark:text-gray-400 dark:border-gray-600 bg-white border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-not-allowed">
+                  Next →
                 </div>
               )}
-
-              <Link
-                to={"/videos"}
-                className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-        font-medium text-sm rounded-md transition-all duration-300
-        backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 hidden sm:block"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                  />
-                </svg>
-                <span className="sm:hidden">←</span>
-                <span className="hidden sm:inline">Back</span>
-                <span className="sm:hidden">Back</span>
-              </Link>
-
-              <dialog
-                id="my_modal_6"
-                className="modal modal-bottom sm:modal-middle"
-              >
-                <div className="modal-box bg-white dark:bg-gray-800 border dark:border-gray-700">
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                    Delete
-                  </h3>
-                  <div className="modal-action">
-                    <form
-                      method="dialog"
-                      className="flex flex-col gap-4 w-full"
-                    >
-                      <div
-                        className="px-1 btn w-full bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 border dark:border-gray-600"
-                        onClick={deleteVideo.bind(null, video.id, "delete")}
-                      >
-                        <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300">
-                          <span className="inline-flex justify-center items-center ml-3.5"></span>
-                          <span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                            delete permanently
-                          </span>
-                        </div>
-                      </div>
-
-                      <div
-                        className="px-1 btn w-full bg-white dark:bg-gray-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 border dark:border-gray-600"
-                        onClick={deleteVideo.bind(null, video.id, "archive")}
-                      >
-                        <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300">
-                          <span className="inline-flex justify-center items-center ml-3.5"></span>
-                          <span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                            archive
-                          </span>
-                        </div>
-                      </div>
-
-                      <button className="btn w-full bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        cancel
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </dialog>
-            </div>
-
-            {video?.cdn_url && video?.s3_hls_path && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  CDN playback URL
-                </h1>
-                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
-                  {video?.cdn_url + video?.s3_hls_path}
-                </a>
-              </div>
-            )}
-
-            {video?.cdn_url && video?.s3_cover_path && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  CDN Cover URL
-                </h1>
-                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
-                  {video?.cdn_url + video?.s3_cover_path}
-                </a>
-              </div>
-            )}
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Author
-              </h1>
-              <Link
-                to={`/users/${video.user?.id}`}
-                className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-300"
-              >
-                {video.user?.username}
-              </Link>
-            </div>
-
-            {(video as any)?.creatorObj && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  Creator
-                </h1>
-                <div className="flex items-center gap-3">
-                  {(video as any).creatorObj.avatar ? (
-                    <img
-                      src={(video).creatorObj.avatar!}
-                      alt={(video).creatorObj.name!}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
-                      No
-                    </div>
-                  )}
-                  <div>
-                    <div className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(video as any).creatorObj.name}
-                    </div>
-                    {(video as any).creatorObj.gender && (
-                      <div className="text-xs text-gray-500">
-                        {(video as any).creatorObj.gender}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Titles
-              </h1>
-              {video?.titles?.map((t, i) => (
-                <div key={i} className="flex gap-3 items-center p-2">
-                  <span className="w-20 font-bold text-blue-600 dark:text-blue-400 uppercase text-sm tracking-wide">
-                    {t.i18_language} :
-                  </span>
-                  <span className="flex-1 text-gray-800 dark:text-gray-200 font-medium text-sm">
-                    {t.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Category
-              </h1>
-              <span className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
-                {video?.category?.name} / {video?.subCategory?.name}
-              </span>
             </div>
           </div>
-
-          <div className="w-full md:w-[35%] flex flex-col gap-4" />
         </div>
       )}
     </>
@@ -593,7 +516,7 @@ function EditVideo({
       language: title.language,
       i18_language: title.i18_language,
       title: title.title,
-      description: title.description
+      description: title.description,
     })) || []
   );
   // prefer creatorObj when available; keep both creator name and possible id
@@ -635,8 +558,6 @@ function EditVideo({
       titles: JSON.stringify(coupleTitles),
       duration,
     };
-
-
 
     try {
       setUploading(true);
@@ -732,12 +653,22 @@ function EditVideo({
                   value={videoType}
                   onChange={(e) => setVideoType(e.target.value)}
                 >
-                  <option value="short" className="cursor-pointer">Short</option>
-                  <option value="long" className="cursor-pointer">Long</option>
+                  <option value="short" className="cursor-pointer">
+                    Short
+                  </option>
+                  <option value="long" className="cursor-pointer">
+                    Long
+                  </option>
                 </select>
                 <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                   <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                    <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M7 8l3 3 3-3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
               </div>

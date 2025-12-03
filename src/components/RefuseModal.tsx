@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
   onClose: () => void;
@@ -13,7 +14,7 @@ const RefuseModal = ({ onClose, onSubmit }: Props) => {
     await onSubmit(comment);
   };
 
-  return (
+  return createPortal(
     <dialog open className="modal">
       <div className="modal-box bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl dark:shadow-gray-700 flex flex-col gap-3 transition-colors duration-300">
         <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">Refuse Video</h3>
@@ -24,21 +25,22 @@ const RefuseModal = ({ onClose, onSubmit }: Props) => {
           onChange={(e) => setComment(e.currentTarget.value)}
         />
         <div className="flex justify-end gap-2">
-          <button 
-            className="btn bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300" 
+          <button
+            className="btn bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
             onClick={onClose}
           >
             cancel
           </button>
-          <button 
-            className="btn bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white border-none transition-colors duration-300" 
+          <button
+            className="btn bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white border-none transition-colors duration-300"
             onClick={handleSubmit}
           >
             submit
           </button>
         </div>
       </div>
-    </dialog>
+    </dialog>,
+    document.body
   );
 };
 
