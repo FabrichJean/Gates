@@ -23,7 +23,6 @@ const VideosManagment = () => {
     params,
     data,
     loading,
-    // reFetch is available in context but we avoid calling it directly from rows
     mutate,
     toWebapp,
     activate,
@@ -65,7 +64,6 @@ const VideosManagment = () => {
                   key={video.id}
                   video={video}
                   index={index}
-                  // user={video.user}
                   onActivate={activate}
                   onSend={send}
                 />

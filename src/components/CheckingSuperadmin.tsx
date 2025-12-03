@@ -29,9 +29,13 @@ function CheckingSuperadmin({
   updateFn,
   hideTouchLink,
 }: Props) {
-  const [showModal, setShowModal] = useState(false);
 
   const actual = resource ?? video;
+  const [checking, setChecking] = useState<string | null>(actual?.checking || null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -48,13 +52,13 @@ function CheckingSuperadmin({
         role="button"
         className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-max p-1 px-2 rounded-md cursor-default m-auto transition-colors duration-300 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800"
       >
-        {actual?.checking === "checked" ? (
+        {checking === "checked" ? (
           <FaCheckDouble className="text-green-600 dark:text-green-400" />
         ) : (
           <FiHexagon className="text-gray-500 dark:text-gray-400" />
         )}
         <span className="text-gray-700 dark:text-gray-300">
-          {actual?.checking === "null" ? "not ready" : actual?.checking}
+          {checking === "null" ? "not ready" : checking}
         </span>
       </div>
 
@@ -65,13 +69,15 @@ function CheckingSuperadmin({
           onSubmit={async (comment: string) => {
             try {
               if (updateFn) {
-                await updateFn(actual?.id, { checking: "refused", comment });
+                const Uv = await updateFn(actual?.id, { checking: "refused", comment });
+                setChecking(Uv.data.checking);
               } else {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                await updateVideo(actual?.id, { checking: "refused", comment });
+                const Uv = await updateVideo(actual?.id, { checking: "refused", comment });
+                setChecking(Uv.data.checking);
               }
-              reFetch();
+              
             } catch (err: any) {
               // ignore here; toast will surface errors elsewhere
             }
@@ -86,6 +92,8 @@ function CheckingSuperadmin({
         user={user}
         openRefuseModal={openModal}
         updateFn={updateFn}
+        checking={checking}
+        setChecking={setChecking}
         hideTouchLink={hideTouchLink}
       />
       {/* )} */}
