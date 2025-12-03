@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FilePlus, Filter, SendIcon } from "lucide-react";
+import { FilePlus, Filter } from "lucide-react";
 import { motion, useAnimation } from "framer-motion";
 import VideoFilters, { type TFilter } from "../VideoFilters";
 import SearchModal from "../SearchModal";
@@ -26,7 +26,6 @@ const VideoHeader = ({
   filters,
   setFilters,
   params,
-  loading,
   onMutate,
   onWebApp, sent,
   scope = "videos",
