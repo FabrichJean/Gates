@@ -1,5 +1,5 @@
 import { useState } from "react";
-// support both Post and TPost shapes (loose typing below)
+
 import { FaCheckDouble } from "react-icons/fa6";
 import { FiHexagon } from "react-icons/fi";
 import RefuseModal from "./RefuseModal";
@@ -8,7 +8,6 @@ import { useAuth } from "../hooks/useAuth";
 import useUpdatePost from "../hooks/useUpdatePost";
 
 interface Props {
-  // Accept a loose post shape to support both Post and TPost types used across the app
   post: any;
   index?: number;
   reFetch: () => void;
@@ -22,8 +21,6 @@ export default function PostChecking({ post, index = 0, reFetch }: Props) {
   const closeModal = () => setShowModal(false);
 
   const { updatePost } = useUpdatePost();
-
-  // const firstVideo = post.videos?.[0];
 
   if (!post) return <span className="text-xs text-gray-400">-</span>;
 
@@ -53,9 +50,8 @@ export default function PostChecking({ post, index = 0, reFetch }: Props) {
               const newChecking = U?.data?.post?.checking ?? null;
               alert(newChecking);
               setChecking(newChecking);
-              // reFetch();
             } catch (err: any) {
-              // swallow — UI will show server errors elsewhere
+              console.error("Error updating post checking status:", err);
             }
             closeModal();
           }}

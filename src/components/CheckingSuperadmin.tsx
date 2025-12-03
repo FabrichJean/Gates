@@ -7,16 +7,12 @@ import { updateVideo } from "../api/videos";
 import { FaCheckDouble } from "react-icons/fa6";
 
 interface Props {
-  // legacy: video prop
   video?: TVideo;
-  // generic resource (video or post)
   resource?: any;
-  // optional override to perform updates e.g. updatePost
   updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
   user: User | Partial<User> | any;
   index: number;
   reFetch: () => void;
-  // if true, hides the "Touch again" link in CheckerDrop
   hideTouchLink?: boolean;
 }
 
@@ -35,7 +31,7 @@ function CheckingSuperadmin({
 
   const [showModal, setShowModal] = useState(false);
 
-  
+
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -77,7 +73,7 @@ function CheckingSuperadmin({
                 const Uv = await updateVideo(actual?.id, { checking: "refused", comment });
                 setChecking(Uv.data.checking);
               }
-              
+
             } catch (err: any) {
               // ignore here; toast will surface errors elsewhere
             }

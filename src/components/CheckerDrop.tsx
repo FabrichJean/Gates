@@ -7,19 +7,15 @@ import { Link } from "react-router-dom";
 
 interface Props {
   user: User | Partial<User> | any;
-  /** legacy: a video prop may be passed */
   video?: TVideo | any;
-  /** generic resource (video or post) */
   resource?: any;
   checking?: string | null;
   setChecking?: (check: string | null) => void;
   reFetch: () => void;
   openRefuseModal: () => void;
-  /** optional override to perform the update (id, payload) => Promise */
   updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
   isVideo?: boolean;
   isPost?: boolean;
-  /** if true, hides the "Touch again" link */
   hideTouchLink?: boolean;
 }
 
