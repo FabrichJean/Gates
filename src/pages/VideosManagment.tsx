@@ -9,8 +9,7 @@ import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 
 const VideosManagment = () => {
-  // console.log('cid mababsia');
-  
+
   const { user } = useAuth();
   const ctx = useVideosContext();
   if (!ctx) return null;
@@ -23,7 +22,6 @@ const VideosManagment = () => {
     params,
     data,
     loading,
-    // reFetch is available in context but we avoid calling it directly from rows
     mutate,
     toWebapp,
     activate,
@@ -65,7 +63,6 @@ const VideosManagment = () => {
                   key={video.id}
                   video={video}
                   index={index}
-                  // user={video.user}
                   onActivate={activate}
                   onSend={send}
                 />
