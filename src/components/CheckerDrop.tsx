@@ -7,19 +7,15 @@ import { Link } from "react-router-dom";
 
 interface Props {
   user: User | Partial<User> | any;
-  /** legacy: a video prop may be passed */
   video?: TVideo | any;
-  /** generic resource (video or post) */
   resource?: any;
   checking?: string | null;
   setChecking?: (check: string | null) => void;
   reFetch: () => void;
   openRefuseModal: () => void;
-  /** optional override to perform the update (id, payload) => Promise */
   updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
   isVideo?: boolean;
   isPost?: boolean;
-  /** if true, hides the "Touch again" link */
   hideTouchLink?: boolean;
 }
 
@@ -33,16 +29,8 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
     }
 
     try {
-      if (updateFn) {
-        const Uv = await updateFn(actual?.id, { checking: check });
-        setChecking && setChecking(Uv.data.checking);
-      } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const Uv = await updateVideo(actual?.id, { checking: check });
-        setChecking && setChecking(Uv.data.checking);
-      }
-      
+      const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
+      setChecking && setChecking(Uv.data.post.checking);
     } catch (err: any) {
       toast.error("Error: " + (err.response?.data?.message || err.message));
     }
