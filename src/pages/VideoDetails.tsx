@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { TitlesForm, type Couple } from "./Upload";
 import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
 import { FaCheckDouble, FaPlayCircle } from "react-icons/fa";
@@ -27,9 +27,10 @@ import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { useVideosContext } from "../context/VideosContext";
+import { getTagCategoriesApi } from "../api/tagCategory";
 import VideoActions from "../components/videos/VideoActions";
 import { FiHexagon } from "react-icons/fi";
-import { EllipsisVertical, Pencil, Send, ShieldCheck } from "lucide-react";
+import { EllipsisVertical, Pencil, Send } from "lucide-react";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -45,7 +46,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
@@ -537,6 +538,60 @@ function EditVideo({
     video?.type === "1" ? "short" : "long"
   );
 
+  // TagCategory selection (mirror Upload): suggestions + add-by-name + chips
+  const [availableTags, setAvailableTags] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+  const [selectedTagCategories, setSelectedTagCategories] = useState<Array<{ id?: number; name: string; meta?: any }>>(
+    Array.isArray((video as any)?.tagCategory)
+      ? ((video as any).tagCategory as Array<{ id?: number; name: string; meta?: any }>).map((t) => ({ id: (t as any).id, name: (t as any).name, meta: (t as any).meta ?? null }))
+      : []
+  );
+  const [tagQuery, setTagQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+
+  useEffect(() => {
+    // load available tags
+    getTagCategoriesApi()
+      .then((res) => {
+        const items = (res?.data?.items ?? res?.data ?? []);
+        const normalized = (Array.isArray(items) ? items : []).map((it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null }));
+        setAvailableTags(normalized);
+        setSuggestions(normalized);
+      })
+      .catch(() => {
+        // silent; keep UI usable
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!tagQuery) {
+      setSuggestions(availableTags);
+      return;
+    }
+    const q = tagQuery.toLowerCase();
+    setSuggestions(availableTags.filter((t) => t.name.toLowerCase().includes(q)));
+  }, [tagQuery, availableTags]);
+
+  const addTagByName = (name: string) => {
+    const n = name.trim();
+    if (!n) return;
+    const exists = selectedTagCategories.find((t) => t.name.toLowerCase() === n.toLowerCase());
+    if (exists) return;
+    setSelectedTagCategories((s) => [...s, { name: n }]);
+    setTagQuery("");
+  };
+
+  const addSuggestion = (tag: { id?: number; name: string; meta?: any }) => {
+    const existsByName = selectedTagCategories.find((t) => t.name.toLowerCase() === tag.name.toLowerCase());
+    const existsById = tag.id ? selectedTagCategories.find((t) => t.id === tag.id) : null;
+    if (existsByName || existsById) return;
+    setSelectedTagCategories((s) => [...s, { id: tag.id, name: tag.name, meta: tag.meta ?? null }]);
+    setTagQuery("");
+  };
+
+  const removeSelectedTag = (index: number) => {
+    setSelectedTagCategories((s) => s.filter((_, i) => i !== index));
+  };
+
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -548,7 +603,7 @@ function EditVideo({
   const handleCoverClick = () => coverInputRef.current?.click();
 
   const handleSubmit = async () => {
-    const formData: any = {
+  const formData: any = {
       ...(coverFile && { cover: coverFile }),
       ...(category && { category_id: category.id }),
       ...(subcategory && { sub_category_id: subcategory.id }),
@@ -557,6 +612,26 @@ function EditVideo({
       isShort: videoType === "short",
       titles: JSON.stringify(coupleTitles),
       duration,
+      // Build mixed array as expected by server: ids for known tags, objects for name/meta; [] clears all
+      tagCategory: (() => {
+        if (!selectedTagCategories || selectedTagCategories.length === 0) return JSON.stringify([]);
+        const ids: number[] = [];
+        const named: Array<{ name: string; meta?: any }> = [];
+        selectedTagCategories.forEach((t) => {
+          if (typeof t.id === "number") ids.push(t.id);
+          else named.push({ name: t.name, ...(t.meta ? { meta: t.meta } : {}) });
+        });
+        const uniqIds = Array.from(new Set(ids));
+        const seen = new Set<string>();
+        const uniqNamed = named.filter((n) => {
+          const key = n.name.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        const mixed: any[] = [...uniqIds, ...uniqNamed];
+        return JSON.stringify(mixed.length > 0 ? mixed : []);
+      })(),
     };
 
     try {
@@ -608,6 +683,61 @@ function EditVideo({
                 defaultValue={category}
                 onSelect={(cat) => setCategory(cat)}
               />
+            </div>
+
+            {/* TagCategory selection with suggestions (mirrors Upload) */}
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Tags
+              </label>
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={tagQuery}
+                    onChange={(e) => setTagQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTagByName(tagQuery);
+                      }
+                    }}
+                    placeholder="Type tag name or select suggestion..."
+                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
+                  />
+
+                  {suggestions && suggestions.length > 0 && tagQuery && (
+                    <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+                      {suggestions.slice(0, 8).map((s) => (
+                        <li
+                          key={s.id ?? s.name}
+                          onClick={() => addSuggestion(s)}
+                          className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                        >
+                          {s.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => addTagByName(tagQuery)}
+                  className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedTagCategories.map((t, i) => (
+                  <span key={`${t.id ?? "new"}-${t.name}-${i}`} className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
+                    <span>{t.name}</span>
+                    <button onClick={() => removeSelectedTag(i)} className="text-red-500">✕</button>
+                  </span>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">

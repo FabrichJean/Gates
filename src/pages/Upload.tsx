@@ -203,12 +203,12 @@ const Upload = () => {
   const [creatorId, setCreatorId] = useState<number | null>(null);
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>([]);
   const [videoType, setVideoType] = useState<string>("long");
-  const [availableTags, setAvailableTags] = useState<Array<{name: string; meta?: any}>>([]);
+  const [availableTags, setAvailableTags] = useState<Array<{id?: number; name: string; meta?: any}>>([]);
   const [tagQuery, setTagQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<Array<{name: string; meta?: any}>>([]);
+  const [suggestions, setSuggestions] = useState<Array<{id?: number; name: string; meta?: any}>>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const tagWrapperRef = useRef<HTMLDivElement | null>(null);
-  const [selectedTagCategories, setSelectedTagCategories] = useState<Array<{name: string; meta?: any}>>([]);
+  const [selectedTagCategories, setSelectedTagCategories] = useState<Array<{id?: number; name: string; meta?: any}>>([]);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -230,8 +230,8 @@ const Upload = () => {
     const load = async () => {
       try {
         const res = await getTagCategoriesApi();
-        const items = res.data.items || [];
-        const normalized = items.map((it: any) => ({ name: it.name, meta: it.meta ?? null }));
+  const items = res.data.items || [];
+  const normalized = items.map((it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null }));
         setAvailableTags(normalized);
         setSuggestions(normalized);
       } catch (err) {
@@ -305,10 +305,11 @@ const Upload = () => {
     setTagQuery("");
   };
 
-  const addSuggestion = (tag: { name: string; meta?: any }) => {
-    const exists = selectedTagCategories.find((t) => t.name.toLowerCase() === tag.name.toLowerCase());
-    if (exists) return;
-    setSelectedTagCategories((s) => [...s, { name: tag.name, meta: tag.meta ?? null }]);
+  const addSuggestion = (tag: { id?: number; name: string; meta?: any }) => {
+    const existsByName = selectedTagCategories.find((t) => t.name.toLowerCase() === tag.name.toLowerCase());
+    const existsById = tag.id ? selectedTagCategories.find((t) => t.id === tag.id) : null;
+    if (existsByName || existsById) return;
+    setSelectedTagCategories((s) => [...s, { id: tag.id, name: tag.name, meta: tag.meta ?? null }]);
     setTagQuery("");
   };
 
@@ -324,7 +325,7 @@ const Upload = () => {
       return;
     }
 
-    const fd = new FormData();
+  const fd = new FormData();
     fd.append("video", videoFile as File);
     fd.append("cover", coverFile as File);
     fd.append("category_id", String(category.id));
@@ -337,7 +338,31 @@ const Upload = () => {
     // append type as boolean-like value: short => true, long => false
     fd.append("isShort", String(videoType === "short"));
     if (selectedTagCategories.length > 0) {
-      fd.append("tagCategory", JSON.stringify(selectedTagCategories));
+      // Build mixed array as expected by server: ids for known tags, objects for name/meta
+      const ids: number[] = [];
+      const named: Array<{ name: string; meta?: any }> = [];
+      selectedTagCategories.forEach((t) => {
+        if (typeof t.id === "number") {
+          ids.push(t.id);
+        } else {
+          named.push({ name: t.name, ...(t.meta ? { meta: t.meta } : {}) });
+        }
+      });
+      // Deduplicate ids
+      const uniqIds = Array.from(new Set(ids));
+      // Deduplicate names (case-insensitive)
+      const seen = new Set<string>();
+      const uniqNamed = named.filter((n) => {
+        const key = n.name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      const mixed: any[] = [...uniqIds, ...uniqNamed];
+      fd.append("tagCategory", JSON.stringify(mixed.length > 0 ? mixed : []));
+    } else {
+      // Explicitly clear all tags
+      fd.append("tagCategory", JSON.stringify([]));
     }
 
     

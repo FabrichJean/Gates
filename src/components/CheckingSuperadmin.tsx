@@ -18,6 +18,7 @@ interface Props {
   reFetch: () => void;
   // if true, hides the "Touch again" link in CheckerDrop
   hideTouchLink?: boolean;
+  isDetails?: boolean;
 }
 
 function CheckingSuperadmin({
@@ -38,8 +39,6 @@ function CheckingSuperadmin({
   }, [actual?.checking]);
 
   const [showModal, setShowModal] = useState(false);
-
-  
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
