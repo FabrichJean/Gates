@@ -30,7 +30,7 @@ export default function useUpdatePost() {
             });
 
             setLoading(false);
-            return response.data;
+            return response;
         } catch (err) {
             setLoading(false);
             if (axios.isAxiosError(err)) {
