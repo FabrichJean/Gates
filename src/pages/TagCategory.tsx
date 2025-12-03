@@ -30,29 +30,40 @@ export default function TagCategory() {
             toast.error("Unable to load tags");
         }
     };
+
+    // const handleNewCatChange = (value: string) => {
+    //     const nonSpaceCount = value.replace(/\s/g, '').length;
+    //     if (nonSpaceCount <= NON_SPACE_LIMIT) {
+    //         setNewCat(value);
+    //         return;
+    //     }
+
+    //     let count = 0;
+    //     let out = '';
+    //     for (const ch of value) {
+    //         if (/\s/.test(ch)) {
+    //             out += ch;
+    //         } else {
+    //             if (count < NON_SPACE_LIMIT) {
+    //                 out += ch;
+    //                 count++;
+    //             } else {
+    //                 // skip 
+    //             }
+    //         }
+    //     }
+    //     setNewCat(out);
+
+    // };
+
     const handleNewCatChange = (value: string) => {
-        const nonSpaceCount = value.replace(/\s/g, '').length;
-        if (nonSpaceCount <= NON_SPACE_LIMIT) {
-            setNewCat(value);
-            return;
-        }
-
         let count = 0;
-        let out = '';
-        for (const ch of value) {
-            if (/\s/.test(ch)) {
-                out += ch;
-            } else {
-                if (count < NON_SPACE_LIMIT) {
-                    out += ch;
-                    count++;
-                } else {
-                    // skip 
-                }
-            }
-        }
-        setNewCat(out);
-
+        setNewCat(
+            [...value].map(ch => {
+                if (/\s/.test(ch)) return ch;
+                return count++ < NON_SPACE_LIMIT ? ch : '';
+            }).join('')
+        );
     };
 
     const addCategory = async () => {
@@ -98,13 +109,13 @@ export default function TagCategory() {
         }
     };
 
-    
+
 
     return (
         <div className="flex flex-col md:flex-row gap-5 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
             {/* Liste des catégories */}
             <div className="md:min-w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 transition-all duration-300">
-                <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Category Video</h1>
+                <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Tag video category</h1>
 
                 <div className="flex gap-2 my-4">
                     <input
@@ -141,7 +152,7 @@ export default function TagCategory() {
 
             {/* <PlateformPanel categoryId={selectedId}/> */}
 
-            
+
         </div>
     );
 }

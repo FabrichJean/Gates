@@ -3,16 +3,19 @@ import { HashLoader } from "react-spinners";
 import useCardFlottant from "../hooks/useCardFlottant";
 import useSockretSync from "../hooks/useSockretSync";
 import { toast } from "react-hot-toast";
+import useSyncErrors from "../hooks/useSyncErrors";
 
 const CardFlottant: React.FC = () => {
     const { collapsed, collapse, expand, hide, visible } = useCardFlottant();
+      const { reFetch } = useSyncErrors();
+    
     const toastTimerRef = useRef<number | null>(null);
 
     useSockretSync({
         onSyncProgress: (data: any) => {
             try {
                 hide();
-
+                reFetch();
                 if (toastTimerRef.current) {
                     window.clearTimeout(toastTimerRef.current as unknown as number);
                     toastTimerRef.current = null;

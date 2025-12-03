@@ -18,6 +18,7 @@ interface VideoHeaderProps {
   onMutate: (data: any) => void;
   onWebApp: (platformIds?: number[]) => void;
   scope?: "videos" | "bot";
+  sent?: number
 }
 
 const VideoHeader = ({
@@ -27,7 +28,7 @@ const VideoHeader = ({
   params,
   loading,
   onMutate,
-  onWebApp,
+  onWebApp, sent,
   scope = "videos",
 }: VideoHeaderProps) => {
   const fabControls = useAnimation();
@@ -95,6 +96,7 @@ const VideoHeader = ({
 
         {/* ---- Actions ---- */}
         <div className="flex gap-2">
+        <small>(video sent : {sent})</small>
           <Link
             to={"/videos/upload"}
             className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all"
@@ -104,17 +106,6 @@ const VideoHeader = ({
 
           {user?.role === RoleEnum.SUPERADMIN && (
             <>
-              <button
-                disabled={loading?.type === "webapp"}
-                onClick={() => setWebappModalOpen(true)}
-                className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-              >
-                <SendIcon className="text-blue-400 dark:text-blue-300" />
-                <span className="md:inline hidden text-gray-600 dark:text-gray-400">
-                  send to webApp
-                </span>
-              </button>
-
               <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
                 <div className="modal-box max-w-lg">
                   <h3 className="font-bold text-lg">Select WebApp</h3>

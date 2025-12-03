@@ -11,6 +11,7 @@ import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { PostsProvider, usePostsContext } from "../context/PostsContext";
 import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
+import PostFilter from "../components/Post/PostFilter";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
@@ -18,6 +19,8 @@ const PostManagementInner = () => {
   
   const posts = data?.posts || [];
   const total = data?.total || 0;
+  // @ts-ignore
+  const totalSent = data?.totalSent;
   const limit = data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,6 +62,8 @@ const PostManagementInner = () => {
               </Link>
               
               <SendToWebApp />
+              {/* @ts-ignore */}
+              <small>(video sent) : {totalSent}</small>
             </div>
 
             <div className="flex items-center gap-2">
@@ -289,8 +294,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-                ? "Aucun post trouvé pour cette recherche"
-                : "Aucun post disponible"}
+              ? "No posts found for this search"
+              : "No posts available"}
             </div>
           )}
         </div>
@@ -336,17 +341,6 @@ function SendToWebApp() {
 
   return (
     <>
-      <button
-        disabled={loading}
-        onClick={() => setWebappModalOpen(true)}
-        className="p-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-      >
-        <SendIcon className="text-blue-400 dark:text-blue-300" />
-        <span className="md:inline hidden text-gray-600 dark:text-gray-400">
-          send to webApp
-        </span>
-      </button>
-
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
           <h3 className="font-bold text-lg">Select platforms to send</h3>

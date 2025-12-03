@@ -59,14 +59,12 @@ export const usePostManagement = () => {
   }, [fetch, page]);
 
   useEffect(() => {
-    // fetch whenever page changes (includes initial mount)
     fetch(page);
     return () => {
       if (refetchTimeout.current) window.clearTimeout(refetchTimeout.current);
     };
   }, [page, fetch]);
 
-  // Persist current page so it survives refresh/navigation
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, String(page));
