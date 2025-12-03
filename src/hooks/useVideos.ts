@@ -7,6 +7,14 @@ import type { Creator } from "./useCreators";
 
 export type Checking = "null" | "waiting for checking" | "refused" | "checked";
 
+export interface VideoTagCategory {
+  id: number;
+  video_id: number;
+  tag_category_video_id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type TVideo = {
   // Champs de votre type existant (prioritaires)
   id: number;
@@ -31,9 +39,8 @@ export type TVideo = {
   cover_upload_status: number;
   url: string | null;
   user: User;
-
   processing: 'null' | 'working' | 'done'
-
+  tagCategory: VideoTagCategory[]
   nexts: TVideo[]
 
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
