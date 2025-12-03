@@ -1,4 +1,4 @@
-import { FilePlus, Eye, SendIcon } from "lucide-react";
+import { FilePlus, Eye, Filter } from "lucide-react";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -11,17 +11,37 @@ import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { PostsProvider, usePostsContext } from "../context/PostsContext";
 import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
-import PostFilter from "../components/Post/PostFilter"; // mbola miandry
+import PostFilter, { type TPostFilter } from "../components/Post/PostFilter"; // mbola miandry
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
   const { page, setPage, data, loading, reFetch, activate } = usePostsContext();
-  
-  const posts = data?.posts || [];
-  const total = data?.total || 0;
-  // @ts-ignore
-  const totalSent = data?.totalSent;
-  const limit = data?.limit || 10;
+
+  // local state to hold filter UI and optionally filtered results
+  const [filters, setFilters] = useState<TPostFilter>({
+    category_id: "",
+    sub_category_id: "",
+    creator_id: "",
+    startDate: "",
+    endDate: "",
+    user_id: "",
+    isDeleted: "all",
+    upload_status: "all",
+    cover_upload_status: "all",
+    transfer_status: "all",
+    uploaded: "all",
+    page: "1",
+    limit: "20",
+    sort: "createdAt",
+    order: "DESC",
+  });
+
+  const [filteredData, setFilteredData] = useState<any | null>(null);
+
+  const posts = filteredData?.posts || data?.posts || [];
+  const total = filteredData?.total || data?.total || 0;
+  const totalSent = filteredData?.totalSent ?? data?.total;
+  const limit = filteredData?.limit || data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
@@ -30,7 +50,7 @@ const PostManagementInner = () => {
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("fr-FR");
   const filteredPosts = posts.filter(
-    (post) =>
+    (post: any) =>
       post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.postSubCategory.name
         .toLowerCase()
@@ -64,6 +84,34 @@ const PostManagementInner = () => {
               <SendToWebApp />
               {/* @ts-ignore */}
               <small>(video sent) : {totalSent}</small>
+
+              {/* Post filters (dialog rendered by PostFilter) */}
+              <div>
+                <button
+                  onClick={() => {
+                    const modal = document.getElementById(
+                      "search_modal_52"
+                    ) as HTMLDialogElement | null;
+                    modal?.showModal();
+                  }}
+                  className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
+                </button>
+
+                <PostFilter
+                  filters={filters}
+                  setFilters={setFilters}
+                  params={{ page: String(page), limit: String(limit) }}
+                  onSubmit={(d: any) => {
+                    setFilteredData(d);
+                    try {
+                      const p = Number(d?.page || page);
+                      if (!Number.isNaN(p)) setPage(p);
+                    } catch {}
+                  }}
+                />
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -138,7 +186,7 @@ const PostManagementInner = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPosts.map((post, idx) => (
+              {filteredPosts.map((post: any, idx: number) => (
                 <tr
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
@@ -203,7 +251,7 @@ const PostManagementInner = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
-                      {post.videos?.slice(0, 2).map((video) => (
+                      {post.videos?.slice(0, 2).map((video: any) => (
                         <div key={video.id} className="relative group">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
                             <svg
@@ -235,7 +283,7 @@ const PostManagementInner = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
-                      {post.images?.slice(0, 2).map((image, index) => (
+                      {post.images?.slice(0, 2).map((image: any, index: number) => (
                         <div key={image.id} className="relative group">
                           <img
                             src={image.s3_urls?.imageUrl || image.public_urls.local_image_url}
