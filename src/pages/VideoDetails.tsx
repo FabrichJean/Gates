@@ -186,6 +186,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           reFetch={reFetch}
                           video={video}
                           user={user}
+                          isDetails
                         />
                       </div>
 
@@ -235,26 +236,22 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </div>
 
               <div className="mb-4">
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  <p className="flex gap-2 mt-2">
-                    {/* Tag Categories */}
-                    {Array.isArray(video.tagCategory) &&
-                      video.tagCategory.length > 0 &&
-                      video.tagCategory.map((vc) => (
-                        <span
-                          key={`${vc.id}-${vc.id}`}
-                          className="text-sm text-blue-700 dark:text-blue-300"
-                          title={
-                            vc?.name
-                              ? JSON.stringify(vc.VideoTagCategory)
-                              : undefined
-                          }
-                        >
-                          #{vc?.name}
-                        </span>
-                      ))}
-                  </p>
-                </p>
+                {/* Tag Categories shown as chips */}
+                {Array.isArray(video.tagCategory) && video.tagCategory.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {video.tagCategory.map((vc: any) => (
+                      <span
+                        key={`${vc?.id ?? vc?.name}-chip`}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                        title={vc?.meta ? JSON.stringify(vc.meta) : vc?.VideoTagCategory ? JSON.stringify(vc.VideoTagCategory) : undefined}
+                      >
+                        #{vc?.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 italic">No tags</p>
+                )}
               </div>
 
               {/* --- VIDEO CARD --- */}

@@ -29,6 +29,7 @@ function CheckingSuperadmin({
   user,
   updateFn,
   hideTouchLink,
+  isDetails,
 }: Props) {
 
   const actual = resource ?? video;
@@ -79,6 +80,7 @@ function CheckingSuperadmin({
                 // @ts-ignore
                 const Uv = await updateVideo(actual?.id, { checking: "refused", comment });
                 setChecking(Uv.data.checking);
+                isDetails ? reFetch() : null;
               }
               
             } catch (err: any) {
@@ -98,8 +100,8 @@ function CheckingSuperadmin({
         checking={checking}
         setChecking={setChecking}
         hideTouchLink={hideTouchLink}
+        isDetails={isDetails}
       />
-      {/* )} */}
     </div>
   );
 }

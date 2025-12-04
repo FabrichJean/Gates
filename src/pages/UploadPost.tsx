@@ -55,6 +55,8 @@ const UploadPost = () => {
     const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
     const [postTagQuery, setPostTagQuery] = useState("");
     const [postTagSuggestions, setPostTagSuggestions] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+    const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
+    const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
 
     // Refs pour détecter les clics à l'extérieur
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -111,6 +113,18 @@ const UploadPost = () => {
         const q = postTagQuery.toLowerCase();
         setPostTagSuggestions(availablePostTags.filter((t) => t.name.toLowerCase().includes(q)));
     }, [postTagQuery, availablePostTags]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (!postTagWrapperRef.current) return;
+            if (!postTagWrapperRef.current.contains(e.target as Node)) {
+                setShowPostTagDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     const addPostTagByName = (name: string) => {
         const n = name.trim();
@@ -598,14 +612,18 @@ const UploadPost = () => {
                             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
 
                             {/* Tag categories for Post */}
-                            <div className="relative w-full">
+                            <div className="relative w-full" ref={postTagWrapperRef}>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tags:</label>
                                 <div className="flex gap-2 items-center">
                                     <div className="relative flex-1">
                                         <input
                                             type="text"
                                             value={postTagQuery}
-                                            onChange={(e) => setPostTagQuery(e.target.value)}
+                                            onChange={(e) => {
+                                                setPostTagQuery(e.target.value);
+                                                setShowPostTagDropdown(true);
+                                            }}
+                                            onFocus={() => setShowPostTagDropdown(true)}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
                                                     e.preventDefault();
@@ -616,12 +634,15 @@ const UploadPost = () => {
                                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
                                         />
 
-                                        {postTagSuggestions && postTagSuggestions.length > 0 && postTagQuery && (
+                                        {showPostTagDropdown && postTagSuggestions && postTagSuggestions.length > 0 && (
                                             <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
                                                 {postTagSuggestions.slice(0, 8).map((s) => (
                                                     <li
                                                         key={s.id ?? s.name}
-                                                        onClick={() => addPostTagSuggestion(s)}
+                                                        onClick={() => {
+                                                            addPostTagSuggestion(s);
+                                                            setShowPostTagDropdown(false);
+                                                        }}
                                                         className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
                                                     >
                                                         {s.name}
@@ -633,7 +654,10 @@ const UploadPost = () => {
 
                                     <button
                                         type="button"
-                                        onClick={() => addPostTagByName(postTagQuery)}
+                                        onClick={() => {
+                                            addPostTagByName(postTagQuery);
+                                            setShowPostTagDropdown(false);
+                                        }}
                                         className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
                                     >
                                         Add
