@@ -10,9 +10,7 @@ import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import {
-  archiveVideo,
   cancelUpload,
-  deletePerm,
   sendProcessing,
   updateVideo,
 } from "../api/videos";
@@ -22,7 +20,6 @@ import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 // creator is an optional string attribute on video; no creators fetch here
 import { useAuthMe } from "../hooks/useAuth";
-import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
@@ -31,6 +28,7 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import VideoActions from "../components/videos/VideoActions";
 import { FiHexagon } from "react-icons/fi";
 import { EllipsisVertical, Pencil, Send } from "lucide-react";
+import { RoleEnum } from "../utils/roleEnum";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -45,8 +43,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
-
-  // const navigate = useNavigate();
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
@@ -190,12 +186,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           reFetch={reFetch}
                           video={video}
                           user={user}
-                          hideTouchLink
                         />
                       </div>
 
                       {/* SEND */}
-                      <button
+                      {user?.role === RoleEnum.SUPERADMIN && <button
                         className="w-full flex items-center p-2 rounded-lg  cursor-pointer
                        hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                         onClick={() => {
@@ -219,9 +214,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       >
                         <Send className="h-5 w-5 text-green-600" />
                         <span className="ml-3 text-sm font-medium">
-                          Envoyer
+                          send
                         </span>
-                      </button>
+                      </button>}
 
                       {/* EDIT */}
                       <button
@@ -231,7 +226,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       >
                         <Pencil className="h-5 w-5 text-orange-500" />
                         <span className="ml-3 text-sm font-medium">
-                          Modifier
+                          edit
                         </span>
                       </button>
                     </div>
