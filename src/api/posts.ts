@@ -79,9 +79,6 @@ export async function sendPostsToWebApp(plateformIds?: number[] | null) {
 }
 
 export async function deleteManyVideos(ids: number[] ) {
-
-    console.log(ids);
-    
   return await axios.post(`${apiURL}/post-videos/removeMany`, { ids }, {
     headers: {
       Authorization: `Bearer ${getToken()}`,

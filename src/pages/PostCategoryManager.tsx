@@ -66,7 +66,6 @@ export default function PostCategoryManager() {
                 <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Post Category</h1>
                 <div className="flex gap-2 my-4">
                     <input type="text" value={newCat} onChange={(e) => handleNewCatChange(e.target.value)} placeholder="new category..." maxLength={1000} className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300" />
-                    {/* <input type="text" value={newCatCreator} onChange={(e) => setNewCatCreator(e.target.value)} placeholder="creator (optional)" className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg px-2 py-1 w-48 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300" /> */}
                     <div className="text-sm text-gray-500 dark:text-gray-400 px-1">Max {NON_SPACE_LIMIT} caractères (hors espaces)</div>
                     <button onClick={addCategory} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-1 rounded-lg transition-all duration-300">+</button>
                 </div>

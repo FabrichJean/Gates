@@ -5,8 +5,8 @@ import {
     getTagCategoriesApi,
     createTagCategoryApi,
     deleteTagCategoryApi,
-    bulkUpsertTagCategoriesApi,
 } from "../api/tagCategory";
+import { getTagCategoriesPostApi, createTagCategoryPostApi, deleteTagCategoryPostApi, updateTagCategoryPostApi } from "../api/tagCategoryPost";
 import toast from "react-hot-toast";
 
 export default function TagCategory() {
@@ -14,11 +14,16 @@ export default function TagCategory() {
     const [categories, setCategories] = useState<any[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [newCat, setNewCat] = useState("");
-    const [bulkJson, setBulkJson] = useState("");
     const NON_SPACE_LIMIT = 324;
+
+    // Post tag categories section state
+    const [postCategories, setPostCategories] = useState<any[]>([]);
+    const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+    const [newPostCat, setNewPostCat] = useState("");
 
     useEffect(() => {
         fetchTags();
+        fetchPostTags();
     }, []);
 
     const fetchTags = async () => {
@@ -31,30 +36,16 @@ export default function TagCategory() {
         }
     };
 
-    // const handleNewCatChange = (value: string) => {
-    //     const nonSpaceCount = value.replace(/\s/g, '').length;
-    //     if (nonSpaceCount <= NON_SPACE_LIMIT) {
-    //         setNewCat(value);
-    //         return;
-    //     }
-
-    //     let count = 0;
-    //     let out = '';
-    //     for (const ch of value) {
-    //         if (/\s/.test(ch)) {
-    //             out += ch;
-    //         } else {
-    //             if (count < NON_SPACE_LIMIT) {
-    //                 out += ch;
-    //                 count++;
-    //             } else {
-    //                 // skip 
-    //             }
-    //         }
-    //     }
-    //     setNewCat(out);
-
-    // };
+    const fetchPostTags = async () => {
+        try {
+            const res = await getTagCategoriesPostApi();
+            const items = res?.data?.items ?? res?.data ?? [];
+            setPostCategories(Array.isArray(items) ? items : []);
+        } catch (err) {
+            console.error("Failed to load post tags", err);
+            toast.error("Unable to load post tags");
+        }
+    };
 
     const handleNewCatChange = (value: string) => {
         let count = 0;
@@ -91,29 +82,23 @@ export default function TagCategory() {
         }
     };
 
-    const bulkUpsert = async () => {
-        if (!bulkJson.trim()) return;
-        try {
-            const payload = JSON.parse(bulkJson);
-            if (!payload.tagCategory || !Array.isArray(payload.tagCategory)) {
-                toast.error("Invalid payload: expected { tagCategory: [...] }");
-                return;
-            }
-            await bulkUpsertTagCategoriesApi(payload.tagCategory);
-            toast.success("Bulk upsert successful");
-            setBulkJson("");
-            fetchTags();
-        } catch (err: any) {
-            console.error(err);
-            toast.error(err?.message || "Bulk upsert failed");
-        }
+
+    // Helpers for post tag inputs (same non-space limit behavior)
+    const handleNewPostCatChange = (value: string) => {
+        let count = 0;
+        setNewPostCat(
+            [...value].map(ch => {
+                if (/\s/.test(ch)) return ch;
+                return count++ < NON_SPACE_LIMIT ? ch : '';
+            }).join('')
+        );
     };
 
 
 
     return (
         <div className="flex flex-col md:flex-row gap-5 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
-            {/* Liste des catégories */}
+            {/* Liste des catégories (video) */}
             <div className="md:min-w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 transition-all duration-300">
                 <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Tag video category</h1>
 
@@ -127,7 +112,6 @@ export default function TagCategory() {
                         maxLength={1000}
                         className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
                     />
-                    <div className="text-sm text-gray-500 dark:text-gray-400 px-1">Max {NON_SPACE_LIMIT} caractères (hors espaces)</div>
                     <button
                         onClick={addCategory}
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-1 rounded-lg transition-all duration-300"
@@ -144,13 +128,77 @@ export default function TagCategory() {
                             isSelected={selectedId === c.id}
                             onSelect={() => setSelectedId(c.id as number)}
                             onDelete={() => removeCategory(c.id as number)}
-                            onEdit={(newName: string) => setCategories((prev) => prev.map((it) => (it.id === c.id ? { ...it, name: newName } : it)))}
+                            onEdit={(update) => setCategories((prev) => prev.map((it) => (it.id === c.id ? { ...it, name: update.name } : it)))}
                         />
                     )}
                 </AnimatedList>
             </div>
 
-            {/* <PlateformPanel categoryId={selectedId}/> */}
+            {/* Liste des catégories (post) */}
+            <div className="md:min-w-1/3 bg-white dark:bg-gray-800 shadow dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 transition-all duration-300">
+                <h1 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 transition-colors duration-300">Tag post category</h1>
+
+                <div className="flex gap-2 my-4">
+                    <input
+                        type="text"
+                        value={newPostCat}
+                        onChange={(e) => handleNewPostCatChange(e.target.value)}
+                        placeholder="new post tag..."
+                        maxLength={1000}
+                        className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg flex-1 px-2 py-1 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 transition-all duration-300"
+                    />
+                    <button
+                        onClick={async () => {
+                            const name = newPostCat.trim();
+                            if (!name) return;
+                            try {
+                                await createTagCategoryPostApi({ name });
+                                toast.success("Post tag created");
+                                setNewPostCat("");
+                                fetchPostTags();
+                            } catch (err) {
+                                console.error(err);
+                                toast.error("Failed to create post tag");
+                            }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 py-1 rounded-lg transition-all duration-300"
+                    >
+                        +
+                    </button>
+                </div>
+
+                <AnimatedList items={postCategories}>
+                    {(c) => (
+                        <TagCard
+                            key={c.id}
+                            tag={c}
+                            isSelected={selectedPostId === c.id}
+                            onSelect={() => setSelectedPostId(c.id as number)}
+                            onDelete={async () => {
+                                try {
+                                    await deleteTagCategoryPostApi(c.id as number);
+                                    if (selectedPostId === c.id) setSelectedPostId(null);
+                                    toast.success("Post tag removed");
+                                    fetchPostTags();
+                                } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to remove post tag");
+                                }
+                            }}
+                            onEdit={async (update) => {
+                                try {
+                                    await updateTagCategoryPostApi({ id: c.id as number, name: update.name });
+                                    toast.success("Post tag updated");
+                                    fetchPostTags();
+                                } catch (err) {
+                                    console.error(err);
+                                    toast.error("Failed to update post tag");
+                                }
+                            }}
+                        />
+                    )}
+                </AnimatedList>
+            </div>
 
 
         </div>

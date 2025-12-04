@@ -11,6 +11,7 @@ import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { PostsProvider, usePostsContext } from "../context/PostsContext";
 import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
+import PostFilter from "../components/Post/PostFilter"; // mbola miandry
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
@@ -293,8 +294,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-                ? "Aucun post trouvé pour cette recherche"
-                : "Aucun post disponible"}
+              ? "No posts found for this search"
+              : "No posts available"}
             </div>
           )}
         </div>

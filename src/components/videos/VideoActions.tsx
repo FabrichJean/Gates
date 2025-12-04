@@ -191,6 +191,7 @@ const VideoActions = ({
 
             {/* --- BOUTON ANNULER --- */}
             {video.processing === "working" && (
+              <>
               <button
                 onClick={cancel}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
@@ -211,8 +212,6 @@ const VideoActions = ({
                 </svg>
                 Cancel
               </button>
-            )}
-            {video.processing === "working" && (
               <button
                 onClick={resend}
                 disabled={resending}
@@ -244,8 +243,8 @@ const VideoActions = ({
                 )}
                 <span>{resending ? "Resending..." : "Resend"}</span>
               </button>
+              </>
             )}
-
             {/* Convert to MP4 button (only for bot videos) */}
             {/* Convert to MP4 button (only for bot videos and only before MP4 exists) */}
             {convertToMp4Fn && !video.public_urls?.temp_url && (
