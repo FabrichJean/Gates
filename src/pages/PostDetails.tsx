@@ -281,6 +281,25 @@ const PostDetails = () => {
               {new Date(post?.createdAt).toLocaleDateString()}
             </p>
           </div>
+          {/* Tag Category chips */}
+          <div className="col-span-2 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Tags</p>
+            {Array.isArray((post as any)?.tagCategory) && (post as any)?.tagCategory.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(post as any).tagCategory.map((tg: any) => (
+                  <span
+                    key={`${tg?.id ?? tg?.name}-chip`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                    title={tg?.meta ? JSON.stringify(tg.meta) : undefined}
+                  >
+                    #{tg?.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
+            )}
+          </div>
         </div>
 
         <GetPostTitles postTitles={post?.titles} />
