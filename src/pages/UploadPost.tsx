@@ -11,6 +11,7 @@ import UsePlateform from "../hooks/usePlateform";
 import { useNavigate } from "react-router-dom";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
+import { getTagCategoriesPostApi } from "../api/tagCategoryPost";
 
 type Language = {
     code: string;
@@ -49,6 +50,12 @@ const UploadPost = () => {
     const [creator, setCreator] = useState<string | null>(null);
     const [creatorId, setCreatorId] = useState<number | null>(null);
 
+    // TagCategory for Post: suggestions + add-by-name + chips
+    const [availablePostTags, setAvailablePostTags] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+    const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+    const [postTagQuery, setPostTagQuery] = useState("");
+    const [postTagSuggestions, setPostTagSuggestions] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
+
     // Refs pour détecter les clics à l'extérieur
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -79,6 +86,52 @@ const UploadPost = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    // Load post tag categories
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await getTagCategoriesPostApi();
+                const items = (res?.data?.items ?? res?.data ?? []);
+                const normalized = (Array.isArray(items) ? items : []).map((it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null }));
+                setAvailablePostTags(normalized);
+                setPostTagSuggestions(normalized);
+            } catch (err) {
+                console.warn("Failed to load post tag categories", err);
+            }
+        };
+        load();
+    }, []);
+
+    useEffect(() => {
+        if (!postTagQuery) {
+            setPostTagSuggestions(availablePostTags);
+            return;
+        }
+        const q = postTagQuery.toLowerCase();
+        setPostTagSuggestions(availablePostTags.filter((t) => t.name.toLowerCase().includes(q)));
+    }, [postTagQuery, availablePostTags]);
+
+    const addPostTagByName = (name: string) => {
+        const n = name.trim();
+        if (!n) return;
+        const exists = selectedPostTagCategories.find((t) => t.name.toLowerCase() === n.toLowerCase());
+        if (exists) return;
+        setSelectedPostTagCategories((s) => [...s, { name: n }]);
+        setPostTagQuery("");
+    };
+
+    const addPostTagSuggestion = (tag: { id?: number; name: string; meta?: any }) => {
+        const existsByName = selectedPostTagCategories.find((t) => t.name.toLowerCase() === tag.name.toLowerCase());
+        const existsById = tag.id ? selectedPostTagCategories.find((t) => t.id === tag.id) : null;
+        if (existsByName || existsById) return;
+        setSelectedPostTagCategories((s) => [...s, { id: tag.id, name: tag.name, meta: tag.meta ?? null }]);
+        setPostTagQuery("");
+    };
+
+    const removeSelectedPostTag = (index: number) => {
+        setSelectedPostTagCategories((s) => s.filter((_, i) => i !== index));
+    };
 
     // Effet pour s'assurer que selectedLanguage est toujours valide
     useEffect(() => {
@@ -312,6 +365,31 @@ const UploadPost = () => {
                 fd.append('mapShorts', JSON.stringify(formData.mapShorts));
             }
 
+            // Append tagCategoryPost as mixed array (ids + {name, meta}); [] clears all
+            if (selectedPostTagCategories && selectedPostTagCategories.length > 0) {
+                const ids: number[] = [];
+                const named: Array<{ name: string; meta?: any }> = [];
+                selectedPostTagCategories.forEach((t) => {
+                    if (typeof t.id === 'number') {
+                        ids.push(t.id);
+                    } else {
+                        named.push({ name: t.name, ...(t.meta ? { meta: t.meta } : {}) });
+                    }
+                });
+                const uniqIds = Array.from(new Set(ids));
+                const seen = new Set<string>();
+                const uniqNamed = named.filter((n) => {
+                    const key = n.name.toLowerCase();
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+                const mixed: any[] = [...uniqIds, ...uniqNamed];
+                fd.append('tagCategoryPost', JSON.stringify(mixed.length > 0 ? mixed : []));
+            } else {
+                fd.append('tagCategoryPost', JSON.stringify([]));
+            }
+
             // @ts-ignore
             const response = await axios.post(`${apiURL}/posts/submit`, fd, {
                 headers: {
@@ -518,6 +596,59 @@ const UploadPost = () => {
 
                             {/* Divider */}
                             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
+
+                            {/* Tag categories for Post */}
+                            <div className="relative w-full">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tags:</label>
+                                <div className="flex gap-2 items-center">
+                                    <div className="relative flex-1">
+                                        <input
+                                            type="text"
+                                            value={postTagQuery}
+                                            onChange={(e) => setPostTagQuery(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    addPostTagByName(postTagQuery);
+                                                }
+                                            }}
+                                            placeholder="Type tag name or select suggestion..."
+                                            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
+                                        />
+
+                                        {postTagSuggestions && postTagSuggestions.length > 0 && postTagQuery && (
+                                            <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                {postTagSuggestions.slice(0, 8).map((s) => (
+                                                    <li
+                                                        key={s.id ?? s.name}
+                                                        onClick={() => addPostTagSuggestion(s)}
+                                                        className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                                                    >
+                                                        {s.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => addPostTagByName(postTagQuery)}
+                                        className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {selectedPostTagCategories.map((t, i) => (
+                                        <span key={`${t.id ?? 'new'}-${t.name}-${i}`} className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm">
+                                            <span>{t.name}</span>
+                                            <button onClick={() => removeSelectedPostTag(i)} className="text-red-500">✕</button>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* champ de sélection de l'application web */}
                             <div className="relative w-full" ref={webAppDropdownRef}>
