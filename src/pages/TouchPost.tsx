@@ -515,7 +515,7 @@ const TouchPost = () => {
 
             <div className="w-full mt-4">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator (optional)
+                Creator
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}

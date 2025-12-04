@@ -17,9 +17,10 @@ interface Props {
   isVideo?: boolean;
   isPost?: boolean;
   hideTouchLink?: boolean;
+  isDetails?: boolean;
 }
 
-function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
+function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false, isDetails = false, reFetch }: Props) {
   const actual = resource ?? video;
 
   const update = async (check: string) => {
@@ -29,8 +30,17 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
     }
 
     try {
-      const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
-      setChecking && setChecking(Uv.data.post.checking);
+      if (updateFn) {
+        const Uv = await updateFn(actual?.id, { checking: check });
+        setChecking && setChecking(Uv.data.checking);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const Uv = await updateVideo(actual?.id, { checking: check });
+        setChecking && setChecking(Uv.data.checking);
+        isDetails ? reFetch() : null;
+      }
+      
     } catch (err: any) {
       toast.error("Error: " + (err.response?.data?.message || err.message));
     }

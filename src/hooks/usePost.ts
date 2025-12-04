@@ -5,6 +5,7 @@ import { getToken } from "../utils/storage";
 import axios from "axios";
 import useFetch from "http-react";
 import type { Creator } from "./useCreators";
+import type { TagCategoryItem } from "../api/tagCategory";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
@@ -140,6 +141,7 @@ export type TPost = {
     contents: PostContent[];
     postCategory: PostCategory;
     postSubCategory: PostSubCategory;
+    tagCategory: TagCategoryItem[];
     plateform: Plateform;
     videos: Video[];
     images: Image[];
