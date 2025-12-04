@@ -17,9 +17,10 @@ interface Props {
   isVideo?: boolean;
   isPost?: boolean;
   hideTouchLink?: boolean;
+  isDetails?: boolean;
 }
 
-function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
+function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false, isDetails = false, reFetch }: Props) {
   const actual = resource ?? video;
 
   const update = async (check: string) => {

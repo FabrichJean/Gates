@@ -37,6 +37,12 @@
     }
 }
 
+body {
+  font-family: 'Geist Sans', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
 /* Position initiale des fichiers (pour que l'animation parte depuis le serveur gauche) */
 
 .file {

@@ -1,15 +1,13 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import type { TagCategoryItem } from "../api/tagCategory";
-import { updateTagCategoryApi } from "../api/tagCategory";
-import toast from "react-hot-toast";
 
 interface Props {
   tag: TagCategoryItem & { id?: number };
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
-  onEdit: (newName: string) => void;
+  onEdit: (update: { id?: number; name: string }) => void;
 }
 
 export default function TagCard({ tag, isSelected, onSelect, onDelete, onEdit }: Props) {
@@ -17,20 +15,10 @@ export default function TagCard({ tag, isSelected, onSelect, onDelete, onEdit }:
   const [tempName, setTempName] = useState(tag.name ?? "");
 
   const handleSave = async () => {
-    if (!tag.id) {
-      // nothing to update on server
-      setIsEditing(false);
-      return;
-    }
-    if (tempName.trim() && tempName !== tag.name) {
-      try {
-        await updateTagCategoryApi(tag.id, { name: tempName.trim() });
-        onEdit(tempName.trim());
-        toast.success("Tag updated");
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to update tag");
-      }
+    // Delegate update behavior to parent via onEdit, so parent can choose proper API (video vs post)
+    const next = tempName.trim();
+    if (next && next !== tag.name) {
+      onEdit({ id: tag.id, name: next });
     }
     setIsEditing(false);
   };

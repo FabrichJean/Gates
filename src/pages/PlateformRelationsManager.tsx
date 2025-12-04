@@ -51,12 +51,16 @@ import {
   removeTagCategoryFromPlateformApi,
   clearTagCategoriesFromPlateformApi,
 } from "../api/plateformTagCategory";
+import { createTagCategoryApi } from "../api/tagCategory";
 
-import { getTagCategoriesApi } from "../api/tagCategory";
+
+
+
 
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
-type Platform = { 
+
+type Platform = {
   id: number;
   name: string;
   video_sync_url?: string;
@@ -70,59 +74,36 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory();
-  const [tagCategories, setTagCategories] = useState<any[]>([]);
-
-  const fetchTagCategories = async () => {
-    try {
-      const res = await getTagCategoriesApi();
-      const items = (res && (res as any).data && (res as any).data.items) ?? (res && (res as any).data) ?? res;
-      setTagCategories(Array.isArray(items) ? items : []);
-    } catch (err) {
-      setTagCategories([]);
-    }
-  };
-
-  
+  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory(); // ------------ TAG CATEGORIES
   const { data: allSubCategories } = UseSubCategory();
+
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
+  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]); //-------------TAG CATEGORIES
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
-  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
-  
+
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (tagCatModalOpen) fetchTagCategories();
-  }, [tagCatModalOpen]);
-
-
-  // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState("");
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
-  // Fetch Platforms (remplacer UsePlateform si besoin pour rafraîchir)
   const fetchPlatforms = async () => {
     reFetchPlateform();
   };
 
-  // Add / Edit Platform
   const handleSavePlatform = async () => {
     if (!platformName.trim()) return toast.error("Enter a platform name");
-    // validate URLs if provided
     const isValidUrl = (u: string) => {
       if (!u) return true;
       try {
-        // will throw on invalid URLs
-        // allow relative URLs? currently require absolute
         new URL(u);
         return true;
       } catch {
@@ -153,33 +134,28 @@ export default function PlateformRelationsManager() {
         toast.success("Platform created");
       }
 
-      // reset modal state and refresh list
       setPlatformModalOpen(false);
       setPlatformName("");
       setPlatformVideoSyncUrl("");
       setPlatformPostSyncUrl("");
       setEditingPlatform(null);
-      // refresh platforms list
       fetchPlatforms();
     } catch {
       toast.error("Error saving platform");
     }
   };
 
-  // Delete Platform
   const handleDeletePlatform = async (id: number) => {
     if (!confirm("Are you sure you want to delete this platform?")) return;
     try {
       await deletePlateformApi(id);
       toast.success("Platform deleted");
-      // if the deleted platform was selected, clear selection and relations
       if (selectedPlateform === id) {
         setSelectedPlateform(null);
         setCatRelations([]);
         setSubcatRelations([]);
         setTagCatRelations([]);
       }
-      // refresh platform list
       fetchPlatforms();
     } catch {
       toast.error("Error deleting platform");
@@ -200,7 +176,7 @@ export default function PlateformRelationsManager() {
               getCategoriesByPlateformApi(plateformId),
               getSubCategoriesForPlateformApi(plateformId),
             ]);
-        // Normalize categories response (backend may return different shapes)
+
         const normalizeCategories = (res: unknown): RelationItem[] => {
           const payload =
             ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
@@ -231,7 +207,6 @@ export default function PlateformRelationsManager() {
           });
         };
 
-        // Normalize subcategories and extract possible relation id (PlateformSubCategory.id)
         const normalizeSubcategories = (res: unknown) => {
           const payload =
             ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
@@ -281,14 +256,14 @@ export default function PlateformRelationsManager() {
 
         setCatRelations(normalizeCategories(catsRes));
         setSubcatRelations(normalizeSubcategories(subsRes));
-        // fetch tag categories linked to this platform
+
         try {
           const tagCatsRes = await getTagCategoriesByPlateformApi(plateformId);
           setTagCatRelations(normalizeCategories(tagCatsRes));
         } catch {
           setTagCatRelations([]);
         }
-        // fetch creators linked to this platform
+
         try {
           const creatorsRes = await getCreatorsByPlateformApi(plateformId);
           const payload =
@@ -345,16 +320,16 @@ export default function PlateformRelationsManager() {
   };
 
   // tag category linking handler
-  const handleAddCategoryTag = async (categoryId: number) => {
+  const handleAddTagCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
       await addTagCategoryToPlateformApi(selectedPlateform, categoryId);
-      toast.success("Category linked");
+      toast.success("Tag category linked");
       reFetchCategoriesTag();
       fetchRelations(selectedPlateform);
       // setCategoryModalOpen(false);
     } catch {
-      toast.error("Error adding category");
+      toast.error("Error adding tag category");
     }
   };
 
@@ -381,7 +356,6 @@ export default function PlateformRelationsManager() {
       if (!id) throw new Error("Invalid create response");
       await handleAddCategory(id);
 
-      //   toast.success("Category created and linked");
       setCategoryModalOpen(false);
       setSearch("");
     } catch (err) {
@@ -393,14 +367,10 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return toast.error("Select a platform first");
     if (!name.trim()) return toast.error("Name required");
     try {
-      const res = await createCastegoryApi(name.trim());
-      const newCat = res.data;
-      const id = newCat.category.id;
-      if (!id) throw new Error("Invalid create response");
-      await handleAddCategory(id);
-
-      //   toast.success("Category created and linked");
-      setCategoryModalOpen(false);
+      const res = await createTagCategoryApi({ name: name.trim() });
+      const newTagCat = res.data;
+      const id = newTagCat.tagCategory?.id ?? newTagCat.id ?? null;
+      await handleAddTagCategory(id);
       setSearch("");
     } catch (err) {
       toast.error(JSON.stringify(err));
@@ -429,7 +399,7 @@ export default function PlateformRelationsManager() {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
       toast.success("Subcategory linked");
       fetchRelations(selectedPlateform);
-      // setSubCategoryModalOpen(false);
+
     } catch {
       toast.error("Error adding subcategory");
     }
@@ -523,6 +493,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
+
   const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -534,7 +505,7 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
-  
+
 
   const handleClearPostCategories = async () => {
     if (!selectedPlateform) return;
@@ -604,13 +575,20 @@ export default function PlateformRelationsManager() {
       c.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
+
   const videoFilteredTagCategories =
-    tagCategories?.filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase())
+    allCategoriesTag?.items.filter((c) =>
+      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
+
+
+  const videoFilteredSubcategories =
+    allSubCategories?.SubCategorys?.filter((s) =>
+      s.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
   const postCategoriesList = allPostCategories?.categories || [];
-
   const filteredCategories = (
     relationMode === "post" ? postCategoriesList : videoFilteredCategories
   ).filter((c: unknown) => {
@@ -618,17 +596,12 @@ export default function PlateformRelationsManager() {
     return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
-  const filteredTagCategories =
-    tagCategories?.filter((c) =>
-      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-    ) || [];
+  const filteredTagCategories = (videoFilteredTagCategories).filter((tc: unknown) => {
+    const tagcat = tc as { name?: string };
+    return (tagcat.name ?? "").toLowerCase().includes(search.toLowerCase());
+  });
 
 
-  const videoFilteredSubcategories =
-    allSubCategories?.SubCategorys?.filter((s) =>
-      s.name.toLowerCase().includes(search.toLowerCase())
-    ) || [];
-  
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
   const filteredSubcategories = (
     relationMode === "post" ? postSubcategoriesList : videoFilteredSubcategories
@@ -636,6 +609,8 @@ export default function PlateformRelationsManager() {
     const sub = s as { name?: string };
     return (sub.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
+
+
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto text-gray-900 dark:text-gray-100">
@@ -652,7 +627,7 @@ export default function PlateformRelationsManager() {
             </h2>
             <button
               onClick={() => {
-                // prepare modal for creating a new platform
+
                 setEditingPlatform(null);
                 setPlatformName("");
                 setPlatformVideoSyncUrl("");
@@ -746,22 +721,24 @@ export default function PlateformRelationsManager() {
                 </div>
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
-                  className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${selectedPlateform === p.id
-                    ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className={`text-success flex flex-1 items-center gap-3 bg-neutral-primary border border-info hover:bg-slate-200 cursor-pointer hover:text-white focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none
+                     ${selectedPlateform === p.id
+                      ? "bg-blue-200 dark:text-red-700 dark:bg-blue-950 border-blue-200 dark:dark:hover:bg-gray-700 dark:border-info"
+                      : "hover:bg-slate-200 dark:hover:bg-gray-700"
                     }`}
                 >
                   <span
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${ selectedPlateform === p.id ? "bg-green-600" : "bg-transparent" } ring-2 ring-white dark:ring-gray-900`}
                     title="Theme: light/dark"
                   ></span>
-                  <span className="ml-5 text-gray-800 dark:text-gray-100">
+                  <span className=" text-gray-800 dark:text-gray-100">
                     {p.name}
                   </span>
                 </button>
               </div>
             ))}
           </div>
+
           {/* // Platform Modal */}
           <dialog className={`modal ${platformModalOpen ? "modal-open" : ""}`}>
             <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
@@ -819,16 +796,18 @@ export default function PlateformRelationsManager() {
                 <div className="flex gap-2 flex-wrap justify-between w-full"></div>
               </div>
 
-              <div className="mb-4 flex gap-2">
+              <div className="mb-5 flex gap-2">
                 <button
-                  className={`btn btn-sm ${relationMode === "video" ? "btn-primary" : "btn-ghost"
+                type="button"
+                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "video" ? "bg-purple-700 text-white" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("video")}
                 >
                   Video
                 </button>
                 <button
-                  className={`btn btn-sm ${relationMode === "post" ? "btn-primary" : "btn-ghost"
+                type="button"
+                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "post" ? "bg-purple-700 text-white" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("post")}
                 >
@@ -841,7 +820,7 @@ export default function PlateformRelationsManager() {
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setCategoryModalOpen(true)}
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400  dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -869,7 +848,7 @@ export default function PlateformRelationsManager() {
                           ? handleClearPostCategories
                           : handleClearCategories
                       }
-                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-red-500 border dark:border-red-600"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -922,12 +901,12 @@ export default function PlateformRelationsManager() {
                     ))
                   )}
                 </div>
-                
+
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setSubCategoryModalOpen(true)}
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -1017,8 +996,8 @@ export default function PlateformRelationsManager() {
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
-                      onClick={() => setTagCatModalOpen(true)}
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      onClick={() => setTagCatModalOpen(true)} // -----------------------------verifié
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -1062,11 +1041,11 @@ export default function PlateformRelationsManager() {
                     </button>
                   </div>
                   <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    Tag video category
+                    Limk Tag category
                   </h3>
-                  {tagCatRelations?.length === 0 ? (
+                  {relationMode === "post" ? (
                     <p className="text-gray-500 dark:text-gray-400">
-                      No tag category linked
+                      Tag categories are only available for video relations.
                     </p>
                   ) : (
                     tagCatRelations?.map((tc) => (
@@ -1089,7 +1068,8 @@ export default function PlateformRelationsManager() {
                         </button>
                       </div>
                     ))
-                  )}
+                  )
+                  }
                 </div>
               </div>
               {/* Creators block */}
@@ -1389,7 +1369,7 @@ export default function PlateformRelationsManager() {
       {/* dialog for tag category */}
       <dialog
         id="tagCatModal"
-        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}  
+        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <h3 className="font-bold text-lg mb-3">Add Tag Category</h3>
@@ -1405,22 +1385,23 @@ export default function PlateformRelationsManager() {
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
                   Create new{" "}
-                  Tag category "
-                  {search}"
+                  Tag category
+                  "{search}"
                 </span>
                 <button
-                  onClick={() => handleCreateAndLinkTagCategory(search) }
+                  onClick={() => handleCreateAndLinkTagCategory(search)}
                   className="btn btn-xs btn-success"
                 >
                   Create & Link
                 </button>
               </div>
             ) : (
-              filteredTagCategories?.map((Tagcat) => {
-                const isLinked = catRelations.some((rc) => rc.id === Tagcat.id);
+              filteredTagCategories?.map((tagCat) => {
+                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
+
                 return (
                   <div
-                    key={Tagcat.id}
+                    key={tagCat.id}
                     className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
                   >
                     {/* Theme indicator node (light/dark) */}
@@ -1428,14 +1409,12 @@ export default function PlateformRelationsManager() {
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
                       title="Theme: light/dark"
                     ></span>
-                    <span className="ml-7">{Tagcat.name}</span>
+                    <span className="ml-7">{tagCat.name}</span>
                     {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
-                        Linked
-                      </button>
+                      <button className="btn btn-xs btn-disabled">Linked</button>
                     ) : (
                       <button
-                        onClick={() =>  handleAddCategoryTag(Tagcat.id) }
+                        onClick={() => handleAddTagCategory(tagCat.id)}
                         className="btn btn-xs btn-primary"
                       >
                         Add
