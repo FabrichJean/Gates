@@ -734,6 +734,7 @@ function EditVideo({
                 ))}
               </div>
             </div>
+
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
                 Sub Category
