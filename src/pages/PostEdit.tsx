@@ -524,16 +524,10 @@ const PostEdit = () => {
           });
 
         const coversInOrder: (File | null)[] = [];
-        
-        // existing videos
-        videos.forEach((v) => {
-          const c = existingVideoCovers?.[v.id] ?? null;
-          if (c) coversToSend.push({ id_video: v.id, file: c });
-        });
 
         // new videoFields
         videoFields.forEach((f) => {
-          if (f.cover) coversToSend.push({ file: f.cover });
+          if (f.cover) coversInOrder.push(f.cover);
         });
 
         fd.append('coverPost', JSON.stringify(coverPost));
@@ -694,7 +688,6 @@ const PostEdit = () => {
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
               handleCoverChange={handleCoverChange}
-              onExistingCoverSelect={handleExistingCoverSelect}
               handleVideoTypeChange={handleVideoTypeChange}
               handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
