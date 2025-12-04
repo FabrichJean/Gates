@@ -1,7 +1,7 @@
 import { FiHexagon } from "react-icons/fi";
 import type { TVideo, User } from "../hooks/useVideos";
 import CheckerDrop from "./CheckerDrop";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RefuseModal from "./RefuseModal";
 import { updateVideo } from "../api/videos";
 import { FaCheckDouble } from "react-icons/fa6";
@@ -18,6 +18,7 @@ interface Props {
   reFetch: () => void;
   // if true, hides the "Touch again" link in CheckerDrop
   hideTouchLink?: boolean;
+  isDetails?: boolean;
 }
 
 function CheckingSuperadmin({
@@ -33,9 +34,11 @@ function CheckingSuperadmin({
   const actual = resource ?? video;
   const [checking, setChecking] = useState<string | null>(actual?.checking || null);
 
-  const [showModal, setShowModal] = useState(false);
+  useEffect(() => {
+    setChecking(actual?.checking || null);
+  }, [actual?.checking]);
 
-  
+  const [showModal, setShowModal] = useState(false);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
