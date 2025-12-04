@@ -52,11 +52,11 @@ import {
   clearTagCategoriesFromPlateformApi,
 } from "../api/plateformTagCategory";
 
-import { getTagCategoriesApi } from "../api/tagCategory";
+import { getTagCategoriesApi, createTagCategoryApi } from "../api/tagCategory";
 
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
-type Platform = { 
+type Platform = {
   id: number;
   name: string;
   video_sync_url?: string;
@@ -83,14 +83,14 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  
+
   const { data: allSubCategories } = UseSubCategory();
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
   const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
-  
+
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -102,27 +102,21 @@ export default function PlateformRelationsManager() {
   }, [tagCatModalOpen]);
 
 
-  // States supplémentaires pour Platform CRUD
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState("");
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
-  // Fetch Platforms (remplacer UsePlateform si besoin pour rafraîchir)
   const fetchPlatforms = async () => {
     reFetchPlateform();
   };
 
-  // Add / Edit Platform
   const handleSavePlatform = async () => {
     if (!platformName.trim()) return toast.error("Enter a platform name");
-    // validate URLs if provided
     const isValidUrl = (u: string) => {
       if (!u) return true;
       try {
-        // will throw on invalid URLs
-        // allow relative URLs? currently require absolute
         new URL(u);
         return true;
       } catch {
@@ -153,33 +147,28 @@ export default function PlateformRelationsManager() {
         toast.success("Platform created");
       }
 
-      // reset modal state and refresh list
       setPlatformModalOpen(false);
       setPlatformName("");
       setPlatformVideoSyncUrl("");
       setPlatformPostSyncUrl("");
       setEditingPlatform(null);
-      // refresh platforms list
       fetchPlatforms();
     } catch {
       toast.error("Error saving platform");
     }
   };
 
-  // Delete Platform
   const handleDeletePlatform = async (id: number) => {
     if (!confirm("Are you sure you want to delete this platform?")) return;
     try {
       await deletePlateformApi(id);
       toast.success("Platform deleted");
-      // if the deleted platform was selected, clear selection and relations
       if (selectedPlateform === id) {
         setSelectedPlateform(null);
         setCatRelations([]);
         setSubcatRelations([]);
         setTagCatRelations([]);
       }
-      // refresh platform list
       fetchPlatforms();
     } catch {
       toast.error("Error deleting platform");
@@ -200,7 +189,7 @@ export default function PlateformRelationsManager() {
               getCategoriesByPlateformApi(plateformId),
               getSubCategoriesForPlateformApi(plateformId),
             ]);
-        // Normalize categories response (backend may return different shapes)
+
         const normalizeCategories = (res: unknown): RelationItem[] => {
           const payload =
             ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
@@ -231,7 +220,6 @@ export default function PlateformRelationsManager() {
           });
         };
 
-        // Normalize subcategories and extract possible relation id (PlateformSubCategory.id)
         const normalizeSubcategories = (res: unknown) => {
           const payload =
             ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
@@ -281,14 +269,14 @@ export default function PlateformRelationsManager() {
 
         setCatRelations(normalizeCategories(catsRes));
         setSubcatRelations(normalizeSubcategories(subsRes));
-        // fetch tag categories linked to this platform
+
         try {
           const tagCatsRes = await getTagCategoriesByPlateformApi(plateformId);
           setTagCatRelations(normalizeCategories(tagCatsRes));
         } catch {
           setTagCatRelations([]);
         }
-        // fetch creators linked to this platform
+        
         try {
           const creatorsRes = await getCreatorsByPlateformApi(plateformId);
           const payload =
@@ -381,7 +369,6 @@ export default function PlateformRelationsManager() {
       if (!id) throw new Error("Invalid create response");
       await handleAddCategory(id);
 
-      //   toast.success("Category created and linked");
       setCategoryModalOpen(false);
       setSearch("");
     } catch (err) {
@@ -393,14 +380,21 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return toast.error("Select a platform first");
     if (!name.trim()) return toast.error("Name required");
     try {
-      const res = await createCastegoryApi(name.trim());
-      const newCat = res.data;
-      const id = newCat.category.id;
+      
+      const res = await createTagCategoryApi({ name: name.trim() });
+      
+      let id: number | null = (res && (res as any).data && (res as any).data.id) ?? null;
+      if (!id) id = (res && (res as any).data && (res as any).data.tagCategory && (res as any).data.tagCategory.id) ?? null;
+      
+      if (!id) {
+        await fetchTagCategories();
+        const found = tagCategories.find((t) => (t.name ?? "").toLowerCase() === name.trim().toLowerCase());
+        id = found?.id ?? null;
+      }
       if (!id) throw new Error("Invalid create response");
-      await handleAddCategory(id);
+      await handleAddCategoryTag(id);
 
-      //   toast.success("Category created and linked");
-      setCategoryModalOpen(false);
+      setTagCatModalOpen(false);
       setSearch("");
     } catch (err) {
       toast.error(JSON.stringify(err));
@@ -429,7 +423,7 @@ export default function PlateformRelationsManager() {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
       toast.success("Subcategory linked");
       fetchRelations(selectedPlateform);
-      // setSubCategoryModalOpen(false);
+      
     } catch {
       toast.error("Error adding subcategory");
     }
@@ -534,7 +528,7 @@ export default function PlateformRelationsManager() {
       toast.error("Error clearing categories");
     }
   };
-  
+
 
   const handleClearPostCategories = async () => {
     if (!selectedPlateform) return;
@@ -603,12 +597,7 @@ export default function PlateformRelationsManager() {
     allCategories?.filter((c) =>
       c.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
-
-  const videoFilteredTagCategories =
-    tagCategories?.filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase())
-    ) || [];
-
+    
   const postCategoriesList = allPostCategories?.categories || [];
 
   const filteredCategories = (
@@ -628,7 +617,7 @@ export default function PlateformRelationsManager() {
     allSubCategories?.SubCategorys?.filter((s) =>
       s.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
-  
+
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
   const filteredSubcategories = (
     relationMode === "post" ? postSubcategoriesList : videoFilteredSubcategories
@@ -652,7 +641,7 @@ export default function PlateformRelationsManager() {
             </h2>
             <button
               onClick={() => {
-                // prepare modal for creating a new platform
+                
                 setEditingPlatform(null);
                 setPlatformName("");
                 setPlatformVideoSyncUrl("");
@@ -922,7 +911,7 @@ export default function PlateformRelationsManager() {
                     ))
                   )}
                 </div>
-                
+
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
@@ -1017,7 +1006,7 @@ export default function PlateformRelationsManager() {
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2 flex-wrap">
                     <button
-                      onClick={() => setTagCatModalOpen(true)}
+                      onClick={() => setTagCatModalOpen(true)} // -----------------------------verifié
                       className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
                     >
                       <svg
@@ -1389,7 +1378,7 @@ export default function PlateformRelationsManager() {
       {/* dialog for tag category */}
       <dialog
         id="tagCatModal"
-        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}  
+        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
           <h3 className="font-bold text-lg mb-3">Add Tag Category</h3>
@@ -1405,11 +1394,11 @@ export default function PlateformRelationsManager() {
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
                   Create new{" "}
-                  Tag category "
-                  {search}"
+                  Tag category 
+                  "{search}"
                 </span>
                 <button
-                  onClick={() => handleCreateAndLinkTagCategory(search) }
+                  onClick={() => handleCreateAndLinkTagCategory(search)}
                   className="btn btn-xs btn-success"
                 >
                   Create & Link
@@ -1417,7 +1406,7 @@ export default function PlateformRelationsManager() {
               </div>
             ) : (
               filteredTagCategories?.map((Tagcat) => {
-                const isLinked = catRelations.some((rc) => rc.id === Tagcat.id);
+                const isLinked = tagCatRelations.some((rc) => rc.id === Tagcat.id); // ca sert a verifier si la categorie est deja lié
                 return (
                   <div
                     key={Tagcat.id}
@@ -1430,12 +1419,10 @@ export default function PlateformRelationsManager() {
                     ></span>
                     <span className="ml-7">{Tagcat.name}</span>
                     {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
-                        Linked
-                      </button>
+                      <button className="btn btn-xs btn-disabled">Linked</button>
                     ) : (
                       <button
-                        onClick={() =>  handleAddCategoryTag(Tagcat.id) }
+                        onClick={() => handleAddCategoryTag(Tagcat.id)}
                         className="btn btn-xs btn-primary"
                       >
                         Add
