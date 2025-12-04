@@ -21,9 +21,10 @@ interface Props {
   isPost?: boolean;
   /** if true, hides the "Touch again" link */
   hideTouchLink?: boolean;
+  isDetails?: boolean;
 }
 
-function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
+function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false, isDetails = false, reFetch }: Props) {
   const actual = resource ?? video;
 
   const update = async (check: string) => {
@@ -41,6 +42,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
         // @ts-ignore
         const Uv = await updateVideo(actual?.id, { checking: check });
         setChecking && setChecking(Uv.data.checking);
+        isDetails ? reFetch() : null;
       }
       
     } catch (err: any) {

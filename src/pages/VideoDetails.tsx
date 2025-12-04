@@ -186,6 +186,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           reFetch={reFetch}
                           video={video}
                           user={user}
+                          isDetails
                         />
                       </div>
 
