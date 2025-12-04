@@ -10,7 +10,6 @@ export default function useUpdatePost() {
 
     const updatePost = async (idPOst: number | string | undefined, payload: Payload) => {
         if (!idPOst) throw new Error("Post id is required");
-        console.log( "Identifiant de post à modifier: " + idPOst);
         
         try {
             setLoading(true);
@@ -30,7 +29,7 @@ export default function useUpdatePost() {
             });
 
             setLoading(false);
-            return response.data;
+            return response;
         } catch (err) {
             setLoading(false);
             if (axios.isAxiosError(err)) {
