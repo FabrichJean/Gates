@@ -107,7 +107,7 @@ export default function MediaUploader(props: {
                     {(() => {
                       const chosen = existingVideoCovers?.[video.id];
                       // prefer explicit local cover paths returned by backend
-                      const existingUrl = video.public_urls?.local_cover_path || video.local_cover_path;
+                      const existingUrl = video.s3_urls?.coverUrl || video.public_urls?.local_cover_path || video.local_cover_path;
                       const hasCover = Boolean(chosen) || Boolean(existingUrl);
                       return (
                         <label className={`border ${!hasCover ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center relative overflow-hidden h-[120px] w-full cursor-pointer`}>
