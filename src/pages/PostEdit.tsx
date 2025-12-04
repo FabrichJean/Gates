@@ -322,7 +322,7 @@ const PostEdit = () => {
     }));
   };
 
-  const handleCoverChange = (id: number, file: File | null, index?: number) => {
+  const handleCoverChange = (id: number, file: File | null) => {
     if (file) {
       const existingVideo = videos.find((v) => v.id === id);
       if (existingVideo) {
@@ -493,7 +493,7 @@ const PostEdit = () => {
 
         const fd = new FormData();
 
-        // fd.append("payload", JSON.stringify(payload));
+        fd.append("payload", JSON.stringify(payload));
 
         if (post?.id) fd.append("id", String(post.id));
         fd.append(
@@ -524,10 +524,16 @@ const PostEdit = () => {
           });
 
         const coversInOrder: (File | null)[] = [];
+        
+        // existing videos
+        videos.forEach((v) => {
+          const c = existingVideoCovers?.[v.id] ?? null;
+          coversInOrder.push(c);
+        });
 
         // new videoFields
         videoFields.forEach((f) => {
-          if (f.cover) coversInOrder.push(f.cover);
+          coversInOrder.push(f.cover ?? null);
         });
 
         fd.append('coverPost', JSON.stringify(coverPost));
@@ -688,6 +694,7 @@ const PostEdit = () => {
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
               handleCoverChange={handleCoverChange}
+              onExistingCoverSelect={handleExistingCoverSelect}
               handleVideoTypeChange={handleVideoTypeChange}
               handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
