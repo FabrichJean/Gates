@@ -51,11 +51,15 @@ import {
   removeTagCategoryFromPlateformApi,
   clearTagCategoriesFromPlateformApi,
 } from "../api/plateformTagCategory";
+import { createTagCategoryApi } from "../api/tagCategory";
 
-import { getTagCategoriesApi, createTagCategoryApi } from "../api/tagCategory";
+
+
+
 
 // Local types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
+
 type Platform = {
   id: number;
   name: string;
@@ -70,36 +74,19 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory();
-  const [tagCategories, setTagCategories] = useState<any[]>([]);
-
-  const fetchTagCategories = async () => {
-    try {
-      const res = await getTagCategoriesApi();
-      const items = (res && (res as any).data && (res as any).data.items) ?? (res && (res as any).data) ?? res;
-      setTagCategories(Array.isArray(items) ? items : []);
-    } catch (err) {
-      setTagCategories([]);
-    }
-  };
-
-
+  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory(); // ------------ TAG CATEGORIES
   const { data: allSubCategories } = UseSubCategory();
+
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
+  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]); //-------------TAG CATEGORIES
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
-  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
 
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
-
-  const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (tagCatModalOpen) fetchTagCategories();
-  }, [tagCatModalOpen]);
 
 
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
@@ -276,7 +263,7 @@ export default function PlateformRelationsManager() {
         } catch {
           setTagCatRelations([]);
         }
-        
+
         try {
           const creatorsRes = await getCreatorsByPlateformApi(plateformId);
           const payload =
@@ -333,16 +320,16 @@ export default function PlateformRelationsManager() {
   };
 
   // tag category linking handler
-  const handleAddCategoryTag = async (categoryId: number) => {
+  const handleAddTagCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
       await addTagCategoryToPlateformApi(selectedPlateform, categoryId);
-      toast.success("Category linked");
+      toast.success("Tag category linked");
       reFetchCategoriesTag();
       fetchRelations(selectedPlateform);
       // setCategoryModalOpen(false);
     } catch {
-      toast.error("Error adding category");
+      toast.error("Error adding tag category");
     }
   };
 
@@ -380,21 +367,10 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return toast.error("Select a platform first");
     if (!name.trim()) return toast.error("Name required");
     try {
-      
       const res = await createTagCategoryApi({ name: name.trim() });
-      
-      let id: number | null = (res && (res as any).data && (res as any).data.id) ?? null;
-      if (!id) id = (res && (res as any).data && (res as any).data.tagCategory && (res as any).data.tagCategory.id) ?? null;
-      
-      if (!id) {
-        await fetchTagCategories();
-        const found = tagCategories.find((t) => (t.name ?? "").toLowerCase() === name.trim().toLowerCase());
-        id = found?.id ?? null;
-      }
-      if (!id) throw new Error("Invalid create response");
-      await handleAddCategoryTag(id);
-
-      setTagCatModalOpen(false);
+      const newTagCat = res.data;
+      const id = newTagCat.tagCategory?.id ?? newTagCat.id ?? null;
+      await handleAddTagCategory(id);
       setSearch("");
     } catch (err) {
       toast.error(JSON.stringify(err));
@@ -423,7 +399,7 @@ export default function PlateformRelationsManager() {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
       toast.success("Subcategory linked");
       fetchRelations(selectedPlateform);
-      
+
     } catch {
       toast.error("Error adding subcategory");
     }
@@ -517,6 +493,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
+
   const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -597,9 +574,23 @@ export default function PlateformRelationsManager() {
     allCategories?.filter((c) =>
       c.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
-    
-  const postCategoriesList = allPostCategories?.categories || [];
 
+  console.log(allCategoriesTag);
+
+
+  const videoFilteredTagCategories =
+    allCategoriesTag?.items.filter((c) =>
+      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
+
+
+  const videoFilteredSubcategories =
+    allSubCategories?.SubCategorys?.filter((s) =>
+      s.name.toLowerCase().includes(search.toLowerCase())
+    ) || [];
+
+  const postCategoriesList = allPostCategories?.categories || [];
   const filteredCategories = (
     relationMode === "post" ? postCategoriesList : videoFilteredCategories
   ).filter((c: unknown) => {
@@ -607,16 +598,11 @@ export default function PlateformRelationsManager() {
     return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
-  const filteredTagCategories =
-    tagCategories?.filter((c) =>
-      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-    ) || [];
+  const filteredTagCategories = (videoFilteredTagCategories).filter((tc: unknown) => {
+    const tagcat = tc as { name?: string };
+    return (tagcat.name ?? "").toLowerCase().includes(search.toLowerCase());
+  });
 
-
-  const videoFilteredSubcategories =
-    allSubCategories?.SubCategorys?.filter((s) =>
-      s.name.toLowerCase().includes(search.toLowerCase())
-    ) || [];
 
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
   const filteredSubcategories = (
@@ -625,6 +611,8 @@ export default function PlateformRelationsManager() {
     const sub = s as { name?: string };
     return (sub.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
+
+
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto text-gray-900 dark:text-gray-100">
@@ -641,7 +629,7 @@ export default function PlateformRelationsManager() {
             </h2>
             <button
               onClick={() => {
-                
+
                 setEditingPlatform(null);
                 setPlatformName("");
                 setPlatformVideoSyncUrl("");
@@ -1051,11 +1039,11 @@ export default function PlateformRelationsManager() {
                     </button>
                   </div>
                   <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    Tag video category
+                    Limk Tag category
                   </h3>
-                  {tagCatRelations?.length === 0 ? (
+                  {relationMode === "post" ? (
                     <p className="text-gray-500 dark:text-gray-400">
-                      No tag category linked
+                      Tag categories are only available for video relations.
                     </p>
                   ) : (
                     tagCatRelations?.map((tc) => (
@@ -1078,7 +1066,8 @@ export default function PlateformRelationsManager() {
                         </button>
                       </div>
                     ))
-                  )}
+                  )
+                  }
                 </div>
               </div>
               {/* Creators block */}
@@ -1394,7 +1383,7 @@ export default function PlateformRelationsManager() {
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
                   Create new{" "}
-                  Tag category 
+                  Tag category
                   "{search}"
                 </span>
                 <button
@@ -1405,11 +1394,13 @@ export default function PlateformRelationsManager() {
                 </button>
               </div>
             ) : (
-              filteredTagCategories?.map((Tagcat) => {
-                const isLinked = tagCatRelations.some((rc) => rc.id === Tagcat.id); // ca sert a verifier si la categorie est deja lié
+              filteredTagCategories?.map((tagCat) => {
+                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name); // ca sert a verifier si la categorie est deja lié
+                console.log(tagCatRelations, tagCat);
+                
                 return (
                   <div
-                    key={Tagcat.id}
+                    key={tagCat.id}
                     className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
                   >
                     {/* Theme indicator node (light/dark) */}
@@ -1417,15 +1408,15 @@ export default function PlateformRelationsManager() {
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
                       title="Theme: light/dark"
                     ></span>
-                    <span className="ml-7">{Tagcat.name}</span>
+                    <span className="ml-7">{tagCat.name} { `(id: ${tagCat.id}), isLinked: ${isLinked}` }</span>
                     {isLinked ? (
                       <button className="btn btn-xs btn-disabled">Linked</button>
                     ) : (
                       <button
-                        onClick={() => handleAddCategoryTag(Tagcat.id)}
+                        onClick={() => handleAddTagCategory(tagCat.id)}
                         className="btn btn-xs btn-primary"
                       >
-                        Add
+                        Add { `id: ${tagCat.id}` }
                       </button>
                     )}
                   </div>

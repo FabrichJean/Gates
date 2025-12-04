@@ -2,7 +2,7 @@ import axios from "axios";
 import { apiURL, token } from "../constant";
 
 export type TagCategoryItem = {
-	id?: number;
+	id: number;
 	name: string;
 	meta?: string | object | null;
 };
