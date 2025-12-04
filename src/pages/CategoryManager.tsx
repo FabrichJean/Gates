@@ -8,11 +8,6 @@ import { createCastegoryApi, deleteCategoryApi } from "../api/categories";
 import toast from "react-hot-toast";
 
 export default function CategoryManager() {
-    // In this manager we always keep categories with numeric ids, so narrow the type
-    // const [categories, setCategories] = useState<(Partial<Category> & { id: number })[]>([
-    //     { id: 1, name: "Technologie", subcategories: [{ id: 11, name: "IA" }] },
-    //     { id: 2, name: "Musique", subcategories: [{ id: 21, name: "Guitare" }] },
-    // ]);
 
     const { data: categories, reFetch } = UseCategory()
 

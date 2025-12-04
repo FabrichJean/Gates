@@ -130,7 +130,7 @@ const VideoActions = ({
               - It's not a bot video (convertToMp4Fn is undefined), OR
               - It's a bot video AND it has been converted to MP4 (has temp_url)
             */}
-            {video.public_urls.temp_url && (
+            {(
               <button
                 disabled={
                   video.processing === "working" || video.processing === "done"
@@ -162,7 +162,7 @@ const VideoActions = ({
                     <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                     <span>Processing...</span>
                   </>
-                ) : video.upload_status === 1 && video.transfer_status === 1 ? (
+                ) : video.processing === "done" ? (
                   <span className="text-green-600 font-semibold flex gap-1 items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

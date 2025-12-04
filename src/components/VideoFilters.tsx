@@ -23,13 +23,11 @@ export type TFilter = {
 export default function VideoFilters({ onSubmit, params, filters, setFilters, scope = "videos" }: { params: any, filters: any, setFilters: any, onSubmit: (d: any) => void, scope?: "videos" | "bot" }) {
 
     const { data: users } = useUsers('');
-    const { data: cat } = UseCategory();
     const { data: creators } = UseCreators();
-
+    const { data: cat } = UseCategory();
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
 
-
-    // 🧩 Chargement des filtres sauvegardés
+    // Chargement des filtres sauvegardés
     useEffect(() => {
         try {
             const saved = localStorage.getItem('videos_filtered');
@@ -58,7 +56,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters, sc
         setFilters((prev: any) => ({ ...prev, [key]: value }));
     };
 
-    // 🧠 Soumission des filtres
+    // Soumission des filtres
     const submit = async () => {
         const data = {
             ...filters,
@@ -156,7 +154,7 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters, sc
                     </div>
                 </div>
 
-                {/* 📅 Filtres de date */}
+                {/* Filtres de date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Start Date</label>
@@ -206,7 +204,6 @@ export default function VideoFilters({ onSubmit, params, filters, setFilters, sc
                     ))}
                 </div>
 
-                {/* Boutons */}
                 <form method="dialog" className="pt-3 flex justify-end gap-3">
                     <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">Close</button>
 

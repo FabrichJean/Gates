@@ -7,21 +7,19 @@ import { Link } from "react-router-dom";
 
 interface Props {
   user: User | Partial<User> | any;
-  /** legacy: a video prop may be passed */
   video?: TVideo | any;
-  /** generic resource (video or post) */
   resource?: any;
+  checking?: string | null;
+  setChecking?: (check: string | null) => void;
   reFetch: () => void;
   openRefuseModal: () => void;
-  /** optional override to perform the update (id, payload) => Promise */
   updateFn?: (id: number | string | undefined, payload: any) => Promise<any>;
   isVideo?: boolean;
   isPost?: boolean;
-  /** if true, hides the "Touch again" link */
   hideTouchLink?: boolean;
 }
 
-function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
+function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseModal, updateFn, isPost = false, hideTouchLink = false }: Props) {
   const actual = resource ?? video;
 
   const update = async (check: string) => {
@@ -31,14 +29,8 @@ function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn
     }
 
     try {
-      if (updateFn) {
-        await updateFn(actual?.id, { checking: check });
-      } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        await updateVideo(actual?.id, { checking: check });
-      }
-      reFetch();
+      const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
+      setChecking && setChecking(Uv.data.post.checking);
     } catch (err: any) {
       toast.error("Error: " + (err.response?.data?.message || err.message));
     }
@@ -50,7 +42,7 @@ function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn
         tabIndex={-1}
         className="dropdown-content menu bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md z-100 w-52 p-2 shadow-sm dark:shadow-gray-700 transition-colors duration-300"
       >
-        {user?.role === "superadmin" && actual?.checking !== "null" ? (
+        {user?.role === "superadmin" && checking !== "null" ? (
           ["refused", "checked"]?.map((check) => (
             <div
               key={check}
@@ -63,14 +55,14 @@ function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn
                 <FiHexagon className="text-gray-500 dark:text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">{check}</span>
               </span>
-              {(check === "go ready" ? "null" : check) === actual?.checking ? (
+              {(check === "go ready" ? "null" : check) === checking ? (
                 <FaCheck className="text-green-600 dark:text-green-400" />
               ) : null}
             </div>
           ))
         ) : (
           <>
-            {actual?.checking === "null" && (
+            {checking === "null" && (
               <div
                 onClick={() => update("waiting for checking")}
                 tabIndex={actual?.id}
@@ -83,7 +75,7 @@ function CheckerDrop({ video, resource, reFetch, user, openRefuseModal, updateFn
                 </span>
               </div>
             )}
-            {actual?.checking === "refused" && (
+            {checking === "refused" && (
               <div className="flex flex-col items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300 overflow-auto">
                 {!hideTouchLink && (
                   <Link

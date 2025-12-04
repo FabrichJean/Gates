@@ -5,12 +5,7 @@ import { getToken } from "../utils/storage";
 import { toast } from "react-hot-toast";
 import { useAuth } from "./useAuth";
 
-/**
- * Hook personnalisé pour gérer la connexion Socket.IO pour les événements de checking des vidéos.
- * - Authentifie automatiquement l'utilisateur
- * - Écoute l'événement 'checking' du backend
- * - Déclenche un callback pour rafraîchir les données quand l'état de checking change
- */
+
 const useSocketCheckVideos = (
   onCheckingUpdated?: (data: {
     user_id: number;
@@ -41,16 +36,6 @@ const useSocketCheckVideos = (
       console.log("🟢 Connected to Socket.IO server for checking");
     });
 
-    // ⚠️ Connection error
-    socket.on("connect_error", (err) => {
-      console.error("🔴 Socket.IO checking connection error:", err.message);
-    });
-
-    // 🔁 Reconnection attempt
-    socket.on("reconnect_attempt", (attempt) => {
-      console.log(`🔄 Checking reconnection attempt (${attempt})...`);
-    });
-
     // mise à jour du statut de checking
     socket.on(
       "checking",
@@ -61,16 +46,12 @@ const useSocketCheckVideos = (
         comment?: string;
         role?: string;
       }) => {
-        console.log("📋 Mise à jour checking reçue :", data);
 
         const currentUserId = Number(user?.id);
         const isVideoOwner = data.user_id === currentUserId;
         const isSuperadmin = user?.role === "superadmin";
 
         if (!isVideoOwner && !isSuperadmin) {
-          console.log(
-            `🚫 Notification ignored - Video ${data.video_id} belongs to user ${data.user_id}, connected user: ${currentUserId} (role: ${user?.role})`
-          );
           return;
         }
 

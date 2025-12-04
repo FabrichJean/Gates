@@ -107,9 +107,7 @@ const VideoTableRow = ({
       </td>
 
       <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
-        {/* Pass a wrapper that requests a debounced list refresh instead of the raw reFetch
-            This avoids child components directly triggering immediate /videos reFetch storms.
-        */}
+        
         <CheckingSuperadmin
           index={index}
           reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}

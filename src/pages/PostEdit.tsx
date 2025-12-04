@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import axios from 'axios';
+import { getToken } from '../utils/storage';
+import ConfirmCoverUploadModal from './PostEdit/components/ConfirmCoverUploadModal';
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -11,6 +14,7 @@ import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
 import MediaUploader from "./PostEdit/components/MediaUploader";
 import { deleteManyImages, deleteManyVideos } from "../api/posts";
+import { apiURL } from "../constant";
 
 type Language = {
   code: string;
@@ -88,6 +92,16 @@ const PostEdit = () => {
   const [existingVideoCovers, setExistingVideoCovers] = useState<
     Record<number, File | null>
   >({});
+
+  const [coverPost, setCoverPost] = useState<{ cover_id: number | null; video_id: number }[]>(
+    []
+  );;
+
+  // mapping of existing video id -> uploaded cover image id returned by API
+  const [existingCoverIds, setExistingCoverIds] = useState<Record<number, number | null>>({});
+  const [pendingCover, setPendingCover] = useState<{ videoId: number; file: File } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
 
@@ -325,14 +339,72 @@ const PostEdit = () => {
     }
   };
 
+  const handleExistingCoverSelect = (videoId: number, file: File) => {
+    setPendingCover({ videoId, file });
+    setConfirmOpen(true);
+  };
+
+  const uploadExistingCover = async () => {
+    if (!pendingCover || !post) return;
+    const { videoId, file } = pendingCover;
+    setUploadingCover(true);
+    try {
+      const url = `${apiURL}/posts/${post.id}/images`;
+      const fd = new FormData();
+      fd.append('image', file, file.name);
+
+      const token = getToken();
+      const resp = await axios.post(url, fd, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      });
+
+      const image = resp.data?.image;
+      const localPath = image?.public_urls.local_image_url || image?.local_image_url || null;
+      
+
+      if (localPath) {
+        setMedia((prev) => ({
+          ...prev,
+          videos: prev.videos.map((v) => (v.id === videoId ? { ...v, public_urls: { ...v.public_urls, local_cover_path: localPath } } : v)),
+        }));
+
+        setCoverPost((prev) => [...prev, { cover_id: image.id, video_id: videoId }]);
+
+      } else {
+        toast.success('Cover uploaded (no path returned)');
+      }
+
+      if (image?.id) {
+        setExistingCoverIds((prev) => {
+          const next = { ...prev, [videoId]: image.id };
+          return next;
+        });
+      }
+
+      setExistingVideoCovers((prev) => ({ ...prev, [videoId]: null }));
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to upload cover');
+    } finally {
+      setUploadingCover(false);
+      setConfirmOpen(false);
+      setPendingCover(null);
+    }
+  };
+
   const { updatePost, loading: updating } = useUpdatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Build payload including existing videos followed by newly added video fields
+    if (uploadingCover) {
+      toast.error('A cover upload is in progress. Please wait until it finishes.');
+      return;
+    }
+    
     const videosPayload: any[] = [];
 
-    // existing videos currently in media state (preserve their backend 'type' if present)
     videos.forEach((v) => {
       videosPayload.push({
         id: v.id,
@@ -343,7 +415,6 @@ const PostEdit = () => {
       });
     });
 
-    // new video fields (user added in form) — include the chosen type (map front->backend)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
@@ -380,7 +451,6 @@ const PostEdit = () => {
       videos: videosPayload,
     };
 
-    // include creator or creator_id in payload
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
@@ -389,6 +459,17 @@ const PostEdit = () => {
       imageFields.some((f) => f.file) ||
       videoFields.some((f) => f.file || f.cover) ||
       Object.values(existingVideoCovers).some((f) => f);
+
+    const coversInOrder: (File | null)[] = [];
+    // existing videos
+    videos.forEach((v) => {
+      const c = existingVideoCovers?.[v.id] ?? null;
+      coversInOrder.push(c);
+    });
+    // new videoFields
+    videoFields.forEach((f) => {
+      coversInOrder.push(f.cover ?? null);
+    });
 
     try {
       if (deletedImageIds.length > 0) {
@@ -442,49 +523,37 @@ const PostEdit = () => {
             if (f.file) fd.append("videos", f.file, f.file.name);
           });
 
-        // New media handling: send videos and covers as structured arrays
-        // Videos: Array<{ id_video?: number, video: File }>
-        // Covers: Array<{ id_video?: number, cover: File }>
-
-        const videosToSend: Array<{ id_video?: number; file: File }> = [];
-        // Only new video files (user added) are sent as video files
-        videoFields
-          .filter((f) => f.file)
-          .forEach((f) => {
-            if (f.file) videosToSend.push({ file: f.file });
-          });
-
-        // Append videos with indexed form fields: videos[0][id_video], videos[0][video]
-        videosToSend.forEach((item, idx) => {
-          if (item.id_video) fd.append(`videos[${idx}][id_video]`, String(item.id_video));
-          fd.append(`videos[${idx}][video]`, item.file, item.file.name);
-        });
-
-        // Covers: include updates for existing videos and covers for new video fields
-        const coversToSend: Array<{ id_video?: number; file: File }> = [];
-
-        // existing videos: if user selected a new cover for an existing video, include it with id_video
+        const coversInOrder: (File | null)[] = [];
+        
+        // existing videos
         videos.forEach((v) => {
           const c = existingVideoCovers?.[v.id] ?? null;
           if (c) coversToSend.push({ id_video: v.id, file: c });
         });
 
-        // new video fields: include their cover if present (no id_video)
+        // new videoFields
         videoFields.forEach((f) => {
           if (f.cover) coversToSend.push({ file: f.cover });
         });
 
-        // Append covers with indexed form fields: covers[0][id_video], covers[0][cover]
-        coversToSend.forEach((item, idx) => {
-          if (item.id_video) fd.append(`covers[${idx}][id_video]`, String(item.id_video));
-          fd.append(`covers[${idx}][cover]`, item.file, item.file.name);
-        });
-
+        fd.append('coverPost', JSON.stringify(coverPost));
 
         await updatePost(post?.id, fd);
       } else {
+        (payload as any).covers_meta = coversInOrder.map((c) => (c ? c.name : null));
+        const coverPost: { cover_id: number | null; video_id: number }[] = [];
+        videos.forEach((v) => {
+          const cover_id = (existingCoverIds && existingCoverIds[v.id]) ? existingCoverIds[v.id] : null;
+          coverPost.push({ cover_id, video_id: v.id });
+        });
+        videoFields.forEach((f, i) => {
+          const c = coversInOrder[videos.length + i];
+          coverPost.push({ cover_id: c ? null : null, video_id: f.id });
+        });
+        (payload as any).coverPost = coverPost;
         (payload as any).mapShorts = videosPayload.map((v) => ({ id: v.id, isShort: String(v.type) === '1' }));
-        // Debug logs removed for production
+        // Removed JSON debug logging to keep console clean.
+
         await updatePost(post?.id, payload);
       }
 
@@ -544,7 +613,6 @@ const PostEdit = () => {
     );
   }
 
-  // record map for existing covers to pass down to MediaUploader (use state)
   const existingVideoCoversRecord = existingVideoCovers;
 
   return (
@@ -626,6 +694,7 @@ const PostEdit = () => {
               handleImageChange={handleImageChange}
               handleVideoChange={handleVideoChange}
               handleCoverChange={handleCoverChange}
+              onExistingCoverSelect={handleExistingCoverSelect}
               handleVideoTypeChange={handleVideoTypeChange}
               handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
@@ -636,6 +705,14 @@ const PostEdit = () => {
               setDeletedVideoIds={setDeletedVideoIds}
               existingVideoCovers={existingVideoCoversRecord}
               setMedia={setMedia}
+            />
+
+            <ConfirmCoverUploadModal
+              open={confirmOpen}
+              file={pendingCover?.file ?? null}
+              onCancel={() => { setConfirmOpen(false); setPendingCover(null); }}
+              onConfirm={uploadExistingCover}
+              uploading={uploadingCover}
             />
 
             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
@@ -651,8 +728,8 @@ const PostEdit = () => {
               </button>
               <button
                 type="submit"
-                disabled={updating}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
+                disabled={updating || uploadingCover}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating || uploadingCover
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-blue-700"
                   }`}
@@ -670,7 +747,7 @@ const PostEdit = () => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {updating ? "Updating..." : "Update"}
+                {uploadingCover ? 'Uploading cover...' : updating ? 'Updating...' : 'Update'}
               </button>
             </div>
           </form>
