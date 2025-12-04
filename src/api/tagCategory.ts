@@ -39,10 +39,6 @@ export async function deleteTagCategoryApi(id: number) {
 	});
 }
 
-/**
- * Bulk upsert tag categories.
- * The backend expects a payload like: { tagCategory: [ { id?, name, meta? }, ... ] }
- */
 export async function bulkUpsertTagCategoriesApi(items: TagCategoryItem[]) {
 	return await axios.post(
 		`${apiURL}/tag-category`,

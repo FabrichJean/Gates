@@ -575,8 +575,6 @@ export default function PlateformRelationsManager() {
       c.name.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
-  console.log(allCategoriesTag);
-
 
   const videoFilteredTagCategories =
     allCategoriesTag?.items.filter((c) =>
@@ -723,22 +721,26 @@ export default function PlateformRelationsManager() {
                 </div>
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
-                  className={`btn btn-sm flex-1 justify-start text-nowrap relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 ${selectedPlateform === p.id
-                    ? "bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-700"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className={`text-success flex flex-1 items-center gap-3 bg-neutral-primary border border-info hover:bg-slate-200 cursor-pointer hover:text-white focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none
+                     ${selectedPlateform === p.id
+                      ? "bg-blue-200 dark:text-red-700 dark:bg-blue-950 border-blue-200 dark:dark:hover:bg-gray-700 dark:border-info"
+                      : "hover:bg-slate-200 dark:hover:bg-gray-700"
                     }`}
                 >
                   <span
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${ selectedPlateform === p.id ? "bg-green-600" : "bg-transparent" } ring-2 ring-white dark:ring-gray-900`}
                     title="Theme: light/dark"
                   ></span>
-                  <span className="ml-5 text-gray-800 dark:text-gray-100">
+                  {/* <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg> */}
+
+                  <span className=" text-gray-800 dark:text-gray-100">
                     {p.name}
                   </span>
                 </button>
               </div>
             ))}
           </div>
+
           {/* // Platform Modal */}
           <dialog className={`modal ${platformModalOpen ? "modal-open" : ""}`}>
             <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
@@ -798,6 +800,7 @@ export default function PlateformRelationsManager() {
 
               <div className="mb-4 flex gap-2">
                 <button
+                type="button"
                   className={`btn btn-sm ${relationMode === "video" ? "btn-primary" : "btn-ghost"
                     }`}
                   onClick={() => setRelationMode("video")}
@@ -805,6 +808,7 @@ export default function PlateformRelationsManager() {
                   Video
                 </button>
                 <button
+                type="button"
                   className={`btn btn-sm ${relationMode === "post" ? "btn-primary" : "btn-ghost"
                     }`}
                   onClick={() => setRelationMode("post")}
@@ -1395,9 +1399,8 @@ export default function PlateformRelationsManager() {
               </div>
             ) : (
               filteredTagCategories?.map((tagCat) => {
-                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name); // ca sert a verifier si la categorie est deja lié
-                console.log(tagCatRelations, tagCat);
-                
+                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
+
                 return (
                   <div
                     key={tagCat.id}
@@ -1408,7 +1411,7 @@ export default function PlateformRelationsManager() {
                       className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
                       title="Theme: light/dark"
                     ></span>
-                    <span className="ml-7">{tagCat.name} { `(id: ${tagCat.id}), isLinked: ${isLinked}` }</span>
+                    <span className="ml-7">{tagCat.name}</span>
                     {isLinked ? (
                       <button className="btn btn-xs btn-disabled">Linked</button>
                     ) : (
@@ -1416,7 +1419,7 @@ export default function PlateformRelationsManager() {
                         onClick={() => handleAddTagCategory(tagCat.id)}
                         className="btn btn-xs btn-primary"
                       >
-                        Add { `id: ${tagCat.id}` }
+                        Add
                       </button>
                     )}
                   </div>

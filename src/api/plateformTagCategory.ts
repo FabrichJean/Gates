@@ -22,7 +22,7 @@ export const removeTagCategoryFromPlateformApi = async (
   categoryId: number
 ) =>
   await axios.delete(
-    `${apiURL}/plateform-tag-category/${plateformId}/${categoryId}`,
+    `${apiURL}/plateform-tag-category/${categoryId}`,
     {
       headers,
     }
