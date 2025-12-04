@@ -731,8 +731,6 @@ export default function PlateformRelationsManager() {
                     className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${ selectedPlateform === p.id ? "bg-green-600" : "bg-transparent" } ring-2 ring-white dark:ring-gray-900`}
                     title="Theme: light/dark"
                   ></span>
-                  {/* <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg> */}
-
                   <span className=" text-gray-800 dark:text-gray-100">
                     {p.name}
                   </span>
