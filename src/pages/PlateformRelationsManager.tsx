@@ -796,10 +796,10 @@ export default function PlateformRelationsManager() {
                 <div className="flex gap-2 flex-wrap justify-between w-full"></div>
               </div>
 
-              <div className="mb-4 flex gap-2">
+              <div className="mb-5 flex gap-2">
                 <button
                 type="button"
-                  className={`btn btn-sm ${relationMode === "video" ? "btn-primary" : "btn-ghost"
+                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "video" ? "bg-purple-700 text-white" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("video")}
                 >
@@ -807,7 +807,7 @@ export default function PlateformRelationsManager() {
                 </button>
                 <button
                 type="button"
-                  className={`btn btn-sm ${relationMode === "post" ? "btn-primary" : "btn-ghost"
+                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "post" ? "bg-purple-700 text-white" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("post")}
                 >
@@ -820,7 +820,7 @@ export default function PlateformRelationsManager() {
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setCategoryModalOpen(true)}
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400  dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -848,7 +848,7 @@ export default function PlateformRelationsManager() {
                           ? handleClearPostCategories
                           : handleClearCategories
                       }
-                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-red-500 border dark:border-red-600"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -906,7 +906,7 @@ export default function PlateformRelationsManager() {
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setSubCategoryModalOpen(true)}
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -997,7 +997,7 @@ export default function PlateformRelationsManager() {
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setTagCatModalOpen(true)} // -----------------------------verifié
-                      className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
