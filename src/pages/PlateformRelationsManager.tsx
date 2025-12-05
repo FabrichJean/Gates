@@ -634,7 +634,7 @@ export default function PlateformRelationsManager() {
                 setPlatformPostSyncUrl("");
                 setPlatformModalOpen(true);
               }}
-              className="text-body bg-neutral-secondary-medium rounded-lg box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading  cursor-pointer focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+              className="text-gray-700 dark:text-gray-200 bg-neutral-secondary-medium rounded-lg box-border border border-blue-400 dark:border-blue-400 hover:bg-neutral-tertiary-medium hover:text-heading  cursor-pointer focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -651,7 +651,7 @@ export default function PlateformRelationsManager() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span className="text-gray-600">add</span>
+              <span>add</span>
             </button>
           </div>
           <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
@@ -667,55 +667,19 @@ export default function PlateformRelationsManager() {
                       setPlatformModalOpen(true);
                     }}
                     aria-label="Edit platform"
-                    className="rounded-sm cursor-pointer focus:outline-none px-3 py-2 text-sm font-medium bg-transparent"
-                    style={{
-                      borderStyle: "solid",
-                      borderWidth: 2,
-                      borderImage: "linear-gradient(90deg,#7c3aed,#ec4899) 1",
-                      background: "transparent",
-                    }}
+                    className="rounded-sm cursor-pointer border border-teal-500 dark:border-teal-400 px-3 py-2 text-sm font-medium bg-transparent"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 inline-block text-purple-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.232 5.232l3.536 3.536M4 20l6.5-1.5L20.5 8.5 17 5 4 18v2z"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-teal-500 dark:text-teal-400">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                     </svg>
                   </button>
                   <button
                     onClick={() => handleDeletePlatform(p.id)}
                     aria-label="Delete platform"
-                    className="rounded-sm cursor-pointer focus:outline-none px-3 py-2 text-sm font-medium bg-transparent"
-                    style={{
-                      borderStyle: "solid",
-                      borderWidth: 2,
-                      borderImage: "linear-gradient(90deg,#ef4444,#fb923c) 1",
-                      background: "transparent",
-                    }}
+                    className="rounded-sm cursor-pointer border border-pink-500 dark:border-pink-400 px-3 py-2 text-sm font-medium bg-transparent"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 inline-block text-red-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-pink-500 dark:text-pink-400">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
                   </button>
                 </div>
@@ -728,7 +692,7 @@ export default function PlateformRelationsManager() {
                     }`}
                 >
                   <span
-                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${ selectedPlateform === p.id ? "bg-green-600" : "bg-transparent" } ring-2 ring-white dark:ring-gray-900`}
+                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${selectedPlateform === p.id ? "bg-green-600" : "bg-transparent"} ring-2 ring-white dark:ring-gray-900`}
                     title="Theme: light/dark"
                   ></span>
                   <span className=" text-gray-800 dark:text-gray-100">
@@ -748,7 +712,7 @@ export default function PlateformRelationsManager() {
               <input
                 type="text"
                 placeholder="WebApp name"
-                className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="input w-full mb-3 bg-white border border-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 maxLength={20}
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
@@ -757,7 +721,7 @@ export default function PlateformRelationsManager() {
               <input
                 type="text"
                 placeholder="Video sync URL"
-                className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 value={platformVideoSyncUrl}
                 onChange={(e) => setPlatformVideoSyncUrl(e.target.value)}
                 required
@@ -765,7 +729,7 @@ export default function PlateformRelationsManager() {
               <input
                 type="text"
                 placeholder="Post sync URL"
-                className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 value={platformPostSyncUrl}
                 onChange={(e) => setPlatformPostSyncUrl(e.target.value)}
                 required
@@ -773,15 +737,15 @@ export default function PlateformRelationsManager() {
               <div className="modal-action">
                 <button
                   onClick={() => setPlatformModalOpen(false)}
-                  className="btn btn-outline"
+                  className="px-3 py-1 rounded-sm bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-400 dark:hover:bg-gray-500"
                 >
                   Close
                 </button>
                 <button
                   onClick={handleSavePlatform}
-                  className="btn btn-primary"
+                  className="px-3 py-1 rounded-sm bg-blue-600 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-500"
                 >
-                  {editingPlatform ? "Save" : "Add"}
+                  {editingPlatform ? "Save" : "+ Add"}
                 </button>
               </div>
             </div>
@@ -796,31 +760,36 @@ export default function PlateformRelationsManager() {
                 <div className="flex gap-2 flex-wrap justify-between w-full"></div>
               </div>
 
-              <div className="mb-5 flex gap-2">
+              <div className="mb-2 flex gap-2">
                 <button
-                type="button"
-                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "video" ? "bg-purple-700 text-white" : "border-transparent"
+                  type="button"
+                  className={`px-4 font-bold py-1 cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "video" ? "border-b-2 border-purple-700 text-purple-500" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("video")}
                 >
                   Video
                 </button>
                 <button
-                type="button"
-                  className={`px-4 py-1 rounded-full cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "post" ? "bg-purple-700 text-white" : "border-transparent"
+                  type="button"
+                  className={`px-4 font-bold py-1 cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "post" ? "border-b-2 border-purple-700 text-purple-500" : "border-transparent"
                     }`}
                   onClick={() => setRelationMode("post")}
                 >
                   Post
                 </button>
               </div>
+              <div className="border border-slate-100 dark:border-gray-700 mb-5"></div>
 
-              <div className="grid sm:grid-cols-3 gap-6">
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2 flex-wrap">
+              <div className={`grid ${relationMode === "post" ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-6`}>
+                <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
+                  <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    Linked Categories
+                  </legend>
+
+                  <div className="flex flex-wrap gap-2 justify-between">
                     <button
                       onClick={() => setCategoryModalOpen(true)}
-                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400  dark:border-green-600 focus:ring-green-300 border"
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -831,24 +800,20 @@ export default function PlateformRelationsManager() {
                         strokeWidth={2}
                         aria-hidden="true"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v16m8-8H4"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
                       <span>
-                        link{" "}
-                        {relationMode === "post" ? "Post Category" : "Category"}
+                        link {relationMode === "post" ? "Post Category" : "Category"}
                       </span>
                     </button>
+
                     <button
                       onClick={
                         relationMode === "post"
                           ? handleClearPostCategories
                           : handleClearCategories
                       }
-                      className="btn btn-sm dark:bg-slate-700 text-red-500 border dark:border-red-600"
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -868,9 +833,7 @@ export default function PlateformRelationsManager() {
                       <span>Clear All</span>
                     </button>
                   </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    Linked Categories
-                  </h3>
+
                   {catRelations.length === 0 ? (
                     <p className="text-gray-500 dark:text-gray-400">
                       No categories linked
@@ -881,32 +844,50 @@ export default function PlateformRelationsManager() {
                         key={c.id}
                         className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
                       >
-                        {/* Theme indicator node (light/dark) */}
                         <span
                           className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
                           title="Theme: light/dark"
                         ></span>
+
                         <span className="ml-5">{c.name}</span>
+
                         <button
                           onClick={() =>
                             relationMode === "post"
                               ? handleRemovePostCategory(c.id)
                               : handleRemoveCategory(c.id)
                           }
-                          className="btn rounded shadow btn-sm text-red-500"
                         >
-                          Remove
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-6 text-pink-600 dark:text-pink-500"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                          </svg>
                         </button>
                       </div>
                     ))
                   )}
-                </div>
+                </fieldset>
 
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2 flex-wrap">
+
+                <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
+                  <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    Linked Subcategories
+                  </legend>
+
+                  <div className="flex gap-2 flex-wrap justify-between">
                     <button
                       onClick={() => setSubCategoryModalOpen(true)}
-                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -930,13 +911,14 @@ export default function PlateformRelationsManager() {
                           : "Subcategory"}
                       </span>
                     </button>
+
                     <button
                       onClick={
                         relationMode === "post"
                           ? handleClearPostSubCategories
                           : handleClearSubCategories
                       }
-                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -956,9 +938,7 @@ export default function PlateformRelationsManager() {
                       <span>Clear All</span>
                     </button>
                   </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    Linked Subcategories
-                  </h3>
+
                   {subcatRelations?.length === 0 ? (
                     <p className="text-gray-500 dark:text-gray-400">
                       No subcategories linked
@@ -974,7 +954,9 @@ export default function PlateformRelationsManager() {
                           className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
                           title="Theme: light/dark"
                         ></span>
+
                         <span className="ml-5">{s.name}</span>
+
                         <button
                           onClick={() => {
                             if (!s.relationId) return;
@@ -982,102 +964,127 @@ export default function PlateformRelationsManager() {
                               return handleRemovePostSubcategory(s.relationId);
                             return handleRemoveSubcategory(s.relationId);
                           }}
-                          className="btn rounded shadow btn-sm text-red-500"
                           disabled={!s.relationId}
                         >
-                          Remove
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-6 text-pink-600 dark:text-pink-500"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                          </svg>
                         </button>
                       </div>
                     ))
                   )}
-                </div>
+                </fieldset>
+
 
                 {/* link tag category */}
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => setTagCatModalOpen(true)} // -----------------------------verifié
-                      className="btn btn-sm dark:bg-slate-700 text-white-400 dark:text-white-400 dark:border-green-600 focus:ring-green-300 border"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      <span>
-                        Link tag category
-                      </span>
-                    </button>
-                    <button
-                      onClick={handleClearTagCategories}
-                      className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                        />
-                      </svg>
-                      <span>Clear All</span>
-                    </button>
-                  </div>
-                  <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    Limk Tag category
-                  </h3>
-                  {relationMode === "post" ? (
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Tag categories are only available for video relations.
-                    </p>
-                  ) : (
-                    tagCatRelations?.map((tc) => (
-                      <div
-                        key={tc.id}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                      >
-                        {/* Theme indicator node (light/dark) */}
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                          title="Theme: light/dark"
-                        ></span>
-                        <span className="ml-5">{tc.name}</span>
+                {
+                  relationMode === "video" && (
+                    <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
+                      <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                        Linked Tag Category
+                      </legend>
+
+                      <div className="flex gap-2 flex-wrap justify-between">
                         <button
-                          onClick={() => handleRemoveTagCategory(tc.id)}
-                          className="btn bg-slate-200 dark:bg-gray-700 rounded-lg shadow btn-sm text-red-600 dark:text-red-500 border border-red-500"
-                          disabled={!selectedPlateform}
+                          onClick={() => setTagCatModalOpen(true)}
+                          className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                         >
-                          Remove
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4 mr-2 inline-block"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Link tag category</span>
+                        </button>
+
+                        <button
+                          onClick={handleClearTagCategories}
+                          className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4 mr-2 inline-block"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                            />
+                          </svg>
+                          <span>Clear All</span>
                         </button>
                       </div>
-                    ))
+
+                      {tagCatRelations?.map((tc) => (
+                        <div
+                          key={tc.id}
+                          className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
+                        >
+                          {/* Theme indicator node (light/dark) */}
+                          <span
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
+                            title="Theme: light/dark"
+                          ></span>
+
+                          <span className="ml-5">{tc.name}</span>
+
+                          <button
+                            onClick={() => handleRemoveTagCategory(tc.id)}
+                            disabled={!selectedPlateform}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="size-6 text-pink-600 dark:text-pink-500"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </fieldset>
                   )
-                  }
-                </div>
+                }
               </div>
               {/* Creators block */}
-              <div className="mt-6">
-                <div className="flex gap-2 flex-wrap mb-3">
+              <fieldset className="mt-6 flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
+                <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                  Linked Creators
+                </legend>
+
+                <div className="flex gap-2 flex-wrap mb-3 justify-between">
                   <button
                     onClick={() => setCreatorModalOpen(true)}
-                    className="btn btn-sm bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 focus:ring-2 focus:ring-green-300 dark:focus:ring-green-900 border-0"
+                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1088,17 +1095,14 @@ export default function PlateformRelationsManager() {
                       strokeWidth={2}
                       aria-hidden="true"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 4v16m8-8H4"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                     <span>link Creator</span>
                   </button>
+
                   <button
                     onClick={handleClearCreators}
-                    className="btn btn-sm bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500 focus:ring-2 focus:ring-red-300 dark:focus:ring-red-900 border-0"
+                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1118,9 +1122,7 @@ export default function PlateformRelationsManager() {
                     <span>Clear All</span>
                   </button>
                 </div>
-                <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                  Linked Creators
-                </h3>
+
                 {creatorRelations.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400">
                     No creators linked
@@ -1132,16 +1134,28 @@ export default function PlateformRelationsManager() {
                       className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
                     >
                       <span className="ml-5">{c.name}</span>
-                      <button
-                        onClick={() => handleRemoveCreator(Number(c.id))}
-                        className="btn rounded shadow btn-sm text-green-500"
-                      >
-                        Remove
+
+                      <button onClick={() => handleRemoveCreator(Number(c.id))}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="size-6 text-pink-600 dark:text-pink-500"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
+                        </svg>
                       </button>
                     </div>
                   ))
                 )}
-              </div>
+              </fieldset>
+
             </>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
@@ -1411,11 +1425,11 @@ export default function PlateformRelationsManager() {
                     ></span>
                     <span className="ml-7">{tagCat.name}</span>
                     {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">Linked</button>
+                      <button className="disabled text-gray-200 dark:text-gray-700 border rounded-sm w-20 border-gray-200 dark:border-gray-700 px-3 py-1">Linked</button>
                     ) : (
                       <button
                         onClick={() => handleAddTagCategory(tagCat.id)}
-                        className="btn btn-xs btn-primary"
+                        className="text-purple-500 border w-20 bg-purple-100 dark:bg-purple-500 dark:hover:bg-purple-600 dark:text-white cursor-pointer rounded-sm border-purple-500 px-3 py-1"
                       >
                         Add
                       </button>
@@ -1428,7 +1442,7 @@ export default function PlateformRelationsManager() {
           <div className="modal-action">
             <button
               onClick={() => setTagCatModalOpen(false)}
-              className="btn btn-outline"
+              className="text-red-500 dark:text-pink-500 rounded-lg cursor-pointer bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
             >
               Close
             </button>
