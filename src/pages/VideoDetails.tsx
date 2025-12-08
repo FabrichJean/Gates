@@ -303,6 +303,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     }
                   }}
                 />
+                <Link to={`/touch/video/${video.id}`}>edit with video</Link>
               </div>
               {/* CDN URLs */}
               {video?.cdn_url && video?.s3_hls_path && (
