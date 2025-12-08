@@ -34,6 +34,7 @@ export type TVideo = {
   sequence: number | null;
   temp_url: string;
   titles: {
+    id: any;
     title: string;
     i18_language: string;
     video_id: number;

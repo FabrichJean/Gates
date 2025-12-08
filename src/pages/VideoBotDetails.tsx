@@ -117,6 +117,17 @@ const VideoBotDetails: React.FC = () => {
                 </div>
               )}
               <div>{video?.creatorObj?.name ?? video.creator ?? "-"}</div>
+
+              <span
+                aria-label={video.type === '1' ? 'Short video' : 'Long video'}
+                className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold transition-colors duration-200 ${
+                  video.type === '1'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
+                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
+                }`}
+              >
+                {video.type === '1' ? 'SHORT' : 'LONG'}
+              </span>
             </div>
             {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
               Bot Video - {formatDateFR(video?.createdAt)}
