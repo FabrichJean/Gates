@@ -70,12 +70,14 @@ function CheckingSuperadmin({
             try {
               if (updateFn) {
                 const Uv = await updateFn(actual?.id, { checking: "refused", comment });
-                setChecking(Uv.data.checking);
+                const next = (Uv && (Uv.data?.checking ?? (Uv.checking ?? null))) ?? null;
+                setChecking(next);
               } else {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 const Uv = await updateVideo(actual?.id, { checking: "refused", comment });
-                setChecking(Uv.data.checking);
+                const next = (Uv && (Uv.data?.checking ?? (Uv.checking ?? null))) ?? null;
+                setChecking(next);
                 isDetails ? reFetch() : null;
               }
 
