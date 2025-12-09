@@ -37,6 +37,8 @@ function VideoBotEdit() {
 
     const [duration, setDuration] = useState<number | null>(video?.duration);
 
+    const [videoType, setVideoType] = useState<string>(video?.type === '1' ? 'short' : 'long');
+
     const [category, setCategory] = useState<Category>(video?.category);
     const [subcategory, setSubCategory] = useState<SubCategory>(video?.subCategory);
     // suppress the explicit-any that comes from the shared Couple type
@@ -72,8 +74,13 @@ function VideoBotEdit() {
             if (coverFile) {
                 fd.append("cover", coverFile as File);
             }
-            fd.append("category_id", String(category.id));
-            if (subcategory) fd.append("sub_category_id", String(subcategory.id));
+            // only append ids when present to avoid reading properties of null
+            if (category && typeof category.id !== 'undefined' && category !== null) {
+                fd.append("category_id", String((category as any).id));
+            }
+            if (subcategory && typeof (subcategory as any).id !== 'undefined') {
+                fd.append("sub_category_id", String((subcategory as any).id));
+            }
             // backend expects 'plateform_id' (single id)
             // if (platform?.id) fd.append("plateform_id", String(platform.id));
             // prefer sending creator_id when an existing creator is selected,
@@ -82,8 +89,17 @@ function VideoBotEdit() {
             else if (creator) fd.append("creator", String(creator));
             // fd.append("ref", String(ref));
             fd.append("titles", JSON.stringify(coupleTitles));
+            // append type: backend expects '1' for short and '2' for long
+            if (videoType) fd.append("type", videoType === 'short' ? '1' : '2');
 
-            const res = await updateVideoBotWithProgress(video.id, fd, (progressEvent) => {
+            // prefer the route param videoId because `video` may be null while data loads
+            const targetId = video?.id ?? videoId;
+            if (!targetId) {
+                toast.error('Video id not available yet. Try again.');
+                return;
+            }
+
+            const res = await updateVideoBotWithProgress(targetId, fd, (progressEvent) => {
                 if (progressEvent.total) {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setProgress(percentCompleted);
@@ -129,6 +145,25 @@ function VideoBotEdit() {
                         <div>
                             <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Duration ( ms)</label>
                             <input type="number" className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300" defaultValue={duration || 0} onChange={(e) => setDuration(Number(e.currentTarget.value))} />
+                        </div>
+
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Type</label>
+                            <div className="relative w-full">
+                                <select
+                                    className="w-full appearance-none text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 pr-10 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-900 transition-all duration-300 shadow-sm cursor-pointer"
+                                    value={videoType}
+                                    onChange={(e) => setVideoType(e.target.value)}
+                                >
+                                    <option value="short" className="cursor-pointer">Short</option>
+                                    <option value="long" className="cursor-pointer">Long</option>
+                                </select>
+                                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                                        <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
 
                         <div>
