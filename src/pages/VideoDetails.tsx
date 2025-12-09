@@ -29,7 +29,6 @@ import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { useVideosContext } from "../context/VideosContext";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
-  console.log("details kbfjkdffkj,n");
 
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
@@ -655,7 +654,6 @@ function EditVideo({
       reFetchVideos();
 
       toast.success("✅ successfull !");
-      console.log("Video updated:", res.data);
 
       // Si une nouvelle cover a été uploadée, passer la nouvelle URL
       const newCoverUrl = coverFile
