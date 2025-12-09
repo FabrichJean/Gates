@@ -75,11 +75,13 @@ export type VideoPublicUrls = {
     local_mp4_url: string | null;
     hls_url: string | null;
     local_hls_url: string | null;
+    local_cover_path: string | null;
 };
 
 export type VideoS3Urls = {
     hlsUrl: string | null;
     cdnUrl: string | null;
+    coverUrl: string | null;
 };
 
 export type Video = {

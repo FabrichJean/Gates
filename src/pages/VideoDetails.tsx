@@ -132,6 +132,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   video={video}
                   user={user}
                 />
+                <Link to={`/touch/video/${video.id}`}>edit with video</Link>
               </div>
             </div>
             <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
