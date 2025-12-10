@@ -269,6 +269,18 @@ function Sidebar({
                 </Link>
 
                 <Link
+                  to="/bot-posts"
+                  onClick={() => handleNav("bot-posts")}
+                  className={linkClass("bot-posts")}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/5 to-green-400/0 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <RiRobot2Line className="w-6 h-6 text-current transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 relative z-10" />
+
+                  {!isCollapsed && <span className="ml-3 relative z-10">Post Bot</span>}
+                </Link>
+
+                <Link
                   to="/category-manager"
                   onClick={() => handleNav("category-manager")}
                   className={linkClass("category-manager")}

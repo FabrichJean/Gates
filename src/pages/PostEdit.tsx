@@ -40,6 +40,29 @@ const PostEdit = () => {
   const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
   const [deletedVideoIds, setDeletedVideoIds] = useState<number[]>([]);
 
+
+  const handleRemoveLanguage = (languageId: number) => {
+  // 1. Supprimer la langue de la liste
+  setLanguages((prev) => prev.filter((l) => l.id !== languageId));
+
+  // 2. Supprimer le titre associé
+  setTitles((prev) => {
+    const { [languageId]: _deleted, ...rest } = prev;
+    return rest;
+  });
+
+  // 3. Supprimer la description associée
+  setDescriptions((prev) => {
+    const { [languageId]: _deleted, ...rest } = prev;
+    return rest;
+  });
+
+  // 4. Si la langue supprimée était sélectionnée → reset
+  setSelectedLanguage((prev) =>
+    prev?.id === languageId ? null : prev
+  );
+};
+
   useEffect(() => {
     if (post) {
       setMedia({
@@ -851,6 +874,7 @@ const PostEdit = () => {
               handleTitleChange={handleTitleChange}
               handleDescriptionChange={handleDescriptionChange}
               setShowAddLanguageModal={setShowAddLanguageModal}
+              handleRemoveLanguage={handleRemoveLanguage}
             />
 
             <div className="w-full mt-4">

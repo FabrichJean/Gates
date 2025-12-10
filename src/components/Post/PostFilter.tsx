@@ -148,8 +148,8 @@ export default function PostFilter({
     };
 
     return (
-        <dialog id="search_modal_52" className="modal">
-            <div className="flex flex-col gap-4 modal-box w-max bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+        <dialog id="search_modal_52" className="modal modal-bottom sm:modal-middle">
+            <div className="flex flex-col gap-4 modal-box w-full max-w-lg sm:w-max h-[90vh] sm:h-auto overflow-auto p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div ref={categoryDropdownRef}>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Category</label>
@@ -361,7 +361,7 @@ export default function PostFilter({
                     ))}
                 </div>
 
-                <form method="dialog" className="pt-3 flex justify-end gap-3">
+                <form method="dialog" className="pt-3 flex justify-end gap-3 sm:gap-3 sm:pt-3 sm:static fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t sm:border-t-0 sm:bg-transparent">
                     <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">Close</button>
 
                     <div

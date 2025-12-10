@@ -8,14 +8,14 @@ import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
-import { PostsProvider, usePostsContext } from "../context/PostsContext";
 import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
 import PostFilter, { type TPostFilter } from "../components/Post/PostFilter"; // mbola miandry
+import { PostsBotProvider, usePostsBotContext } from "../context/PostsBotContext";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
-  const { page, setPage, data, loading, reFetch, activate } = usePostsContext();
+  const { page, setPage, data, loading, reFetch, activate } = usePostsBotContext();
 
   // local state to hold filter UI and optionally filtered results
   const [filters, setFilters] = useState<TPostFilter>({
@@ -67,7 +67,7 @@ const PostManagementInner = () => {
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post Management
+          Post Bot Management
         </h1>
 
         {/* header  */}
@@ -186,28 +186,28 @@ const PostManagementInner = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPosts.map((post: any, idx: number) => (
+              {filteredPosts.map((post_bot: any, idx: number) => (
                 <tr
-                  key={post.id}
+                  key={post_bot.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
                 >
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
-                    {post.id}
+                    {post_bot.id}
                   </th>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post.postCategory.name} / {post.postSubCategory.name}
+                      {post_bot.postCategory.name} / {post_bot.postSubCategory.name}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {(post).creatorObj ? (
+                    {(post_bot).creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
-                          src={(post).creatorObj.avatar!}
-                          alt={(post).creatorObj.name!}
+                          src={(post_bot).creatorObj.avatar!}
+                          alt={(post_bot).creatorObj.name!}
                           className="w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;
@@ -215,43 +215,43 @@ const PostManagementInner = () => {
                           }}
                         />
                         <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
-                          {(post as any).creatorObj.name}
+                          {(post_bot as any).creatorObj.name}
                         </span>
                       </div>
                     ) : (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                        {post.creator || "-"}
+                        {post_bot.creator || "-"}
                       </span>
                     )}
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                      {(post as any)?.user?.username || "-"}
+                      {(post_bot as any)?.user?.username || "-"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
-                      {post.plateform.name}
+                      {post_bot.plateform.name}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <PostChecking index={idx} reFetch={reFetch} post={post} />
+                    <PostChecking index={idx} reFetch={reFetch} post={post_bot} />
                   </td>
                   <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
                     <input
                       type="checkbox"
-                      checked={!post.isDeleted}
+                      checked={!post_bot.isDeleted}
                       className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] rounded-full"
                       onChange={
                         user?.role === RoleEnum.SUPERADMIN
-                          ? () => activate(post.id)
+                          ? () => activate(post_bot.id)
                           : undefined
                       }
                     />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
-                      {post.videos?.slice(0, 2).map((video: any) => (
+                      {post_bot.videos?.slice(0, 2).map((video: any) => (
                         <div key={video.id} className="relative group">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
                             <svg
@@ -267,14 +267,14 @@ const PostManagementInner = () => {
                           </div>
                         </div>
                       ))}
-                      {post.videos?.length > 2 && (
+                      {post_bot.videos?.length > 2 && (
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
                           <span className="text-xs text-gray-600 dark:text-gray-300">
-                            +{post.videos.length - 2}
+                            +{post_bot.videos.length - 2}
                           </span>
                         </div>
                       )}
-                      {post.videos?.length === 0 && (
+                      {post_bot.videos?.length === 0 && (
                         <span className="text-xs text-gray-400">
                           No video
                         </span>
@@ -283,7 +283,7 @@ const PostManagementInner = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
-                      {post.images?.slice(0, 2).map((image: any, index: number) => (
+                      {post_bot.images?.slice(0, 2).map((image: any, index: number) => (
                         <div key={image.id} className="relative group">
                           <img
                             src={image.s3_urls?.imageUrl || image.public_urls.local_image_url}
@@ -297,14 +297,14 @@ const PostManagementInner = () => {
                           />
                         </div>
                       ))}
-                      {post.images?.length > 2 && (
+                      {post_bot.images?.length > 2 && (
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
                           <span className="text-xs text-gray-600 dark:text-gray-300">
-                            +{post.images.length - 2}
+                            +{post_bot.images.length - 2}
                           </span>
                         </div>
                       )}
-                      {post.images?.length === 0 && (
+                      {post_bot.images?.length === 0 && (
                         <span className="text-xs text-gray-400">
                           No image
                         </span>
@@ -312,15 +312,15 @@ const PostManagementInner = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {new Date(post.createdAt).toLocaleDateString()}
+                    {new Date(post_bot.createdAt).toLocaleDateString()}
                   </td>
                   <td className="flex justify-center gap-2 px-6 py-4">
-                    {user?.role === 'superadmin' ? <BtnTranscodeComponent
-                      post={post as any}
+                    {user?.role === RoleEnum.SUPERADMIN ? <BtnTranscodeComponent
+                      post={post_bot as any}
                       reFetch={reFetch}
                     /> : null}
                     <Link
-                      to={`/post/${post.id}`}
+                      to={`/bot-posts/${post_bot.id}`}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
@@ -352,10 +352,10 @@ const PostManagementInner = () => {
   );
 };
 
-const PostManagement = () => (
-  <PostsProvider>
+const PostBotManagement = () => (
+  <PostsBotProvider>
     <PostManagementInner />
-  </PostsProvider>
+  </PostsBotProvider>
 );
 
 // --- SendToWebApp component ---
@@ -429,4 +429,4 @@ function SendToWebApp() {
   );
 }
 
-export default PostManagement;
+export default PostBotManagement;

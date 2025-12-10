@@ -8,21 +8,48 @@ export default function TitlesEditor(props: {
   handleTitleChange: (languageId: number, value: string) => void;
   handleDescriptionChange: (languageId: number, value: string) => void;
   setShowAddLanguageModal: (v: boolean) => void;
+  handleRemoveLanguage: (languageId: number) => void;
 }) {
-  const { languages, selectedLanguage, setSelectedLanguage, titles, descriptions, handleTitleChange, handleDescriptionChange, setShowAddLanguageModal } = props;
+  const { languages, selectedLanguage, setSelectedLanguage, titles, descriptions, handleTitleChange, handleDescriptionChange, setShowAddLanguageModal, handleRemoveLanguage } = props;
+
+
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Title and description by language:</label>
 
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         {languages.length > 0 && languages.map((language) => (
-          <button key={language.id} type="button" onClick={() => setSelectedLanguage(language)} className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors border-b-2 ${selectedLanguage?.id === language.id ? "bg-transparent border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold" : "bg-gray-100 dark:bg-gray-700 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"}`}>
-            {language.name}
-          </button>
+          <>
+            <div className="relative inline-block">
+              <button
+                key={language.id}
+                type="button"
+                onClick={() => setSelectedLanguage(language)}
+                className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors border-b-2 ${selectedLanguage?.id === language.id
+                  ? "bg-transparent border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold"
+                  : "bg-gray-100 dark:bg-gray-700 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+              >
+                {language.name}
+              </button>
+
+              {/* Bouton X superposé */}
+              <button
+                onClick={() => handleRemoveLanguage(language.id)}
+                className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2
+               bg-red-400 dark:bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+
+              </button>
+            </div>
+          </>
         ))}
 
         <button type="button" onClick={() => setShowAddLanguageModal(true)} className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1" title="Add new language">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
           <span>Add Title</span>
         </button>
       </div>
