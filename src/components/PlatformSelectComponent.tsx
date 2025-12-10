@@ -4,12 +4,13 @@ import { usePlatformReactive } from "../hooks/usePlatform";
 
 interface Props {
     onSelect?: (platform: Platform) => void;
+    defaultValue?: Platform;
 }
 
-const PlatformSelectComponent = ({ onSelect }: Props) => {
+const PlatformSelectComponent = ({ onSelect, defaultValue }: Props) => {
     const [platforms, setPlatforms] = useState<Platform[]>([]);
     const { data } = usePlatformReactive();
-    const [selected, setSelected] = useState<number | "">("");
+    const [selected, setSelected] = useState<number | "">(defaultValue ? defaultValue.id : "");
 
     useEffect(() => {
         if (data) {

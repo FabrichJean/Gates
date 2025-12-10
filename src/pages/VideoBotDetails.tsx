@@ -128,10 +128,17 @@ const VideoBotDetails: React.FC = () => {
                 {video.type === "1" ? "SHORT" : "LONG"}
               </span>
             </div>
-            {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
-              Bot Video - {formatDateFR(video?.createdAt)}
-            </h2> */}
             <div className="flex gap-2">
+              {video?.plateform?.name && (
+                <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs font-medium">
+                  {video.plateform.name}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="w-max">
               <CheckingSuperadmin
                 index={0}
                 reFetch={reFetch}

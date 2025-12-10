@@ -28,6 +28,8 @@ import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { useVideosContext } from "../context/VideosContext";
 import { getTagCategoriesApi } from "../api/tagCategory";
+import type { Platform } from "../hooks/usePlatform";
+import PlatformSelectComponent from "../components/PlatformSelectComponent";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -133,13 +135,19 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">
                   {video.type === "1" ? "short" : "long"}
                 </span>
+                <div className="flex gap-2">
+                  {video?.plateform?.name && (
+                    <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs font-medium">
+                      {video.plateform.name}
+                    </span>
+                  )}
+                </div>
                 <CheckingSuperadmin
                   index={0}
                   reFetch={reFetch}
                   video={video}
                   user={user}
                 />
-                <Link to={`/touch/video/${video.id}`}>edit with video</Link>
               </div>
             </div>
             <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
@@ -594,7 +602,7 @@ function EditVideo({
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [duration, setDuration] = useState<number | null>(video?.duration);
-
+  const [platform, setPlatform] = useState<Platform>(video?.plateform);
   const [category, setCategory] = useState<Category>(video?.category);
   const [subcategory, setSubCategory] = useState<SubCategory>(
     video?.subCategory
@@ -643,7 +651,9 @@ function EditVideo({
       ...(category && { category_id: category.id }),
       ...(subcategory && { sub_category_id: subcategory.id }),
       ...(creatorId ? { creator_id: creatorId } : creator ? { creator } : {}),
+      ...(platform?.id ? { plateform_id: platform.id } : {}),
       ...(videoType ? { type: videoType === "short" ? "1" : "2" } : {}),
+
       isShort: videoType === "short",
       titles: JSON.stringify(coupleTitles),
       duration,
@@ -816,6 +826,13 @@ function EditVideo({
                 defaultValue={duration || 0}
                 onChange={(e) => setDuration(Number(e.currentTarget.value))}
               />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Platform
+              </label>
+              <PlatformSelectComponent defaultValue={platform} onSelect={setPlatform} />
             </div>
 
             <div>

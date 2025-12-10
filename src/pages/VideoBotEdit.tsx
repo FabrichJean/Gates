@@ -12,6 +12,8 @@ import { TitlesForm } from "./Upload";
 import { UseBotVideo } from "../hooks/bot/useBotVideos";
 import { updateVideoBotWithProgress } from "../api/videoBot";
 import { getTagCategoriesApi } from "../api/tagCategory";
+import PlatformSelectComponent from "../components/PlatformSelectComponent";
+import type { Platform } from "../hooks/usePlatform";
 
 function VideoBotEdit() {
   const { id: videoId } = useParams<{ id: string }>();
@@ -77,6 +79,8 @@ function VideoBotEdit() {
   const [creator, setCreator] = useState<string | null>(initialCreatorName);
   const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
 
+  const [platform, setPlatform] = useState<Platform>(video?.plateform)
+
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -112,6 +116,8 @@ function VideoBotEdit() {
       else if (creator) fd.append("creator", String(creator));
       // fd.append("ref", String(ref));
       fd.append("titles", JSON.stringify(coupleTitles));
+      fd.append("titles", JSON.stringify(coupleTitles));
+      if (platform) fd.append("platform_id", String(platform.id));
       // append type: backend expects '1' for short and '2' for long
       if (videoType) fd.append("type", videoType === "short" ? "1" : "2");
 
@@ -286,6 +292,13 @@ function VideoBotEdit() {
                 defaultValue={duration || 0}
                 onChange={(e) => setDuration(Number(e.currentTarget.value))}
               />
+            </div>
+
+             <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Platform
+              </label>
+              <PlatformSelectComponent defaultValue={platform} onSelect={setPlatform} />
             </div>
 
             <div>
