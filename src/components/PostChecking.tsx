@@ -48,7 +48,6 @@ export default function PostChecking({ post, index = 0, reFetch }: Props) {
             try {
               const U = await updatePost(actual.id, { checking: "refused", comment });
               const newChecking = U?.data?.post?.checking ?? null;
-              alert(newChecking);
               setChecking(newChecking);
             } catch (err: any) {
               console.error("Error updating post checking status:", err);

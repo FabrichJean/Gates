@@ -40,6 +40,8 @@ const Synchronisation = () => {
   ) => {
 
     try {
+      // Close the modal
+      // setModalOpen(false);
       show();
       await sync({
         isForce: optionId === "true",
