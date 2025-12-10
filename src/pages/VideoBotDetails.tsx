@@ -140,6 +140,7 @@ const VideoBotDetails: React.FC = () => {
                 user={user}
                 updateFn={updateVideoBot}
                 hideTouchLink={true}
+                isDetails
               />
             </div>
           </div>
@@ -304,6 +305,28 @@ const VideoBotDetails: React.FC = () => {
           <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <Titles postTitles={(video.titles as any)} />
           </div>
+
+          {video?.cdn_url && video?.s3_hls_path && (
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  CDN playback URL
+                </h1>
+                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                  {video?.cdn_url + video?.s3_hls_path}
+                </a>
+              </div>
+            )}
+
+            {video?.cdn_url && video?.s3_cover_path && (
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  CDN Cover URL
+                </h1>
+                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                  {video?.cdn_url + video?.s3_cover_path}
+                </a>
+              </div>
+            )}
         </div>
       </div>
     </>

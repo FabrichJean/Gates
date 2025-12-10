@@ -45,6 +45,7 @@ const useSocketCheckVideos = (
         checking: string;
         comment?: string;
         role?: string;
+        isBot?: boolean
       }) => {
 
         const currentUserId = Number(user?.id);

@@ -142,7 +142,7 @@ export const useBotVideoManagement = () => {
     safeRefetch(700);
   });
 
-  useSocketCheckVideos(() => safeRefetch(800));
+  // useSocketCheckVideos(() => safeRefetch(800));
 
   const [selectedPlatformIds, setSelectedPlatformIds] = useState<number[]>([]);
   const togglePlatformSelection = (id: number) =>
