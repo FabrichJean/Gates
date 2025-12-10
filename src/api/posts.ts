@@ -40,6 +40,20 @@ export async function getPosts(params?: any) {
   return res;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getPostsBot(params?: any) {
+  const res = await axios.get(`${apiURL}/posts-bot`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    params,
+  });
+
+  console.log(res.data);
+
+  return res;
+}
+
 // Delete a post image by postId and imageId
 export async function deletePostImage(imageId: number | string) {
   return await axios.delete(`${apiURL}/post-images/${imageId}`, {

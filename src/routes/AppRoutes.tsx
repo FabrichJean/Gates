@@ -38,6 +38,9 @@ import Synchronisation from "../pages/Synchronisation";
 import CardFlottant from "../components/CardFlottant";
 import useCardFlottant from "../hooks/useCardFlottant";
 import TagCategory from "../pages/TagCategory";
+import PostBotManagement from "../pages/PostBotManagement";
+import PostBotDetails from "../pages/PostBotDetails";
+import PostBotEdit from "../pages/PostBotEdit";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -93,12 +96,46 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/bot-posts"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <PostBotManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/bot-post/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <PostBotDetails />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/bot-videos/:id"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
                   <VideoBotDetails />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/bot-posts/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <PostBotDetails />
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -113,6 +150,18 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/bot-posts/edit/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <PostBotEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/post"
             element={
@@ -300,9 +349,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                <InsideSidebar>
-                  <Conversion />
-                </InsideSidebar>
+                  <InsideSidebar>
+                    <Conversion />
+                  </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
             }
@@ -354,9 +403,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                <InsideSidebar>
-                  <Synchronisation />
-                </InsideSidebar>
+                  <InsideSidebar>
+                    <Synchronisation />
+                  </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
             }
