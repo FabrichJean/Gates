@@ -37,8 +37,8 @@ const VideoBotDetails: React.FC = () => {
         (video?.s3_urls?.coverUrl ||
           video?.public_urls.cover_url ||
           video?.cover) +
-        "?t=" +
-        Date.now()
+          "?t=" +
+          Date.now()
       );
     }
   }, [video]);
@@ -88,7 +88,6 @@ const VideoBotDetails: React.FC = () => {
     }
   };
 
-
   // cancel and convert actions are handled by VideoActions via passed functions
 
   if (!video)
@@ -119,20 +118,27 @@ const VideoBotDetails: React.FC = () => {
               <div>{video?.creatorObj?.name ?? video.creator ?? "-"}</div>
 
               <span
-                aria-label={video.type === '1' ? 'Short video' : 'Long video'}
+                aria-label={video.type === "1" ? "Short video" : "Long video"}
                 className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold transition-colors duration-200 ${
-                  video.type === '1'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
-                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
+                  video.type === "1"
+                    ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200"
+                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
                 }`}
               >
-                {video.type === '1' ? 'SHORT' : 'LONG'}
+                {video.type === "1" ? "SHORT" : "LONG"}
               </span>
             </div>
-            {/* <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
-              Bot Video - {formatDateFR(video?.createdAt)}
-            </h2> */}
             <div className="flex gap-2">
+              {video?.plateform?.name && (
+                <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs font-medium">
+                  {video.plateform.name}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="w-max">
               <CheckingSuperadmin
                 index={0}
                 reFetch={reFetch}
@@ -158,7 +164,11 @@ const VideoBotDetails: React.FC = () => {
                 <FaPlayCircle
                   className="absolute text-8xl text-white cursor-pointer z-10"
                   onClick={() =>
-                    setVideoPlayed((video.s3_urls.hlsUrl || video.public_urls.temp_url) ? true : false)
+                    setVideoPlayed(
+                      video.s3_urls.hlsUrl || video.public_urls.temp_url
+                        ? true
+                        : false
+                    )
                   }
                 />
                 <img
@@ -171,6 +181,29 @@ const VideoBotDetails: React.FC = () => {
                   className="w-full h-full object-cover rounded-lg"
                 />
               </>
+            )}
+          </div>
+
+          {/* Tag Category chips */}
+          <div className="col-span-2 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Tags</p>
+            {Array.isArray(video?.tagCategoryVideos) &&
+            video?.tagCategoryVideos.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {video.tagCategoryVideos.map((tg: any) => (
+                  <span
+                    key={`${tg?.id ?? tg?.name}-chip`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                    title={tg?.meta ? JSON.stringify(tg.meta) : undefined}
+                  >
+                    #{tg?.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                No tags
+              </span>
             )}
           </div>
 
@@ -217,34 +250,36 @@ const VideoBotDetails: React.FC = () => {
               />
 
               {/* Download MP4 button - visible when temp_url exists and user is superadmin */}
-              {user?.role === RoleEnum.SUPERADMIN && (video.public_urls?.temp_url || video.s3_urls.hlsUrl) && (
-                <button
-                  onClick={() =>
-                    downloadAsMp4(
-                      video.public_urls.temp_url || video.s3_urls.hlsUrl,
-                      video?.ref ? `${video.ref}.mp4` : `video-${video.id}.mp4`
-                    )
-                  }
-                  className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700 cursor-pointer"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-4 h-4"
+              {user?.role === RoleEnum.SUPERADMIN &&
+                (video.public_urls?.temp_url || video.s3_urls.hlsUrl) && (
+                  <button
+                    onClick={() =>
+                      downloadAsMp4(
+                        video.public_urls.temp_url || video.s3_urls.hlsUrl,
+                        video?.ref
+                          ? `${video.ref}.mp4`
+                          : `video-${video.id}.mp4`
+                      )
+                    }
+                    className="relative flex items-center justify-center gap-2 px-4 py-2 font-medium text-sm rounded-md transition-all duration-300 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700 cursor-pointer"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5L16.5 12M12 3v13.5"
-                    />
-                  </svg>
-                  <span>Download MP4</span>
-                </button>
-
-              )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5L16.5 12M12 3v13.5"
+                      />
+                    </svg>
+                    <span>Download MP4</span>
+                  </button>
+                )}
             </div>
 
             <Link
@@ -303,7 +338,7 @@ const VideoBotDetails: React.FC = () => {
 
           {/* Video Info */}
           <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <Titles postTitles={(video.titles as any)} />
+            <Titles postTitles={video.titles as any} />
           </div>
 
           {video?.cdn_url && video?.s3_hls_path && (

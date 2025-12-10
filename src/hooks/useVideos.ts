@@ -16,6 +16,8 @@ export interface VideoTagCategory {
 }
 
 export type TVideo = {
+  plateform: any;
+  tagCategoryVideos: any;
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
