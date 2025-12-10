@@ -27,10 +27,10 @@ import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { useVideosContext } from "../context/VideosContext";
+import { getTagCategoriesApi } from "../api/tagCategory";
 import GetPostTitles from "./posts/GetPostTitles";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
-
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
@@ -52,7 +52,13 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   // Mettre à jour l'URL de cover quand les données vidéo changent
   useEffect(() => {
-    setCurrentCoverUrl((video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover) + "?t=" + Date.now());
+    setCurrentCoverUrl(
+      (video?.s3_urls?.coverUrl ||
+        video?.public_urls.cover_url ||
+        video?.cover) +
+        "?t=" +
+        Date.now()
+    );
   }, [video]);
 
   if (!video)
@@ -125,7 +131,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 {formatDateFR(video?.createdAt)}
               </h2>
               <div className="flex gap-2">
-                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{ video.type === '1' ? 'short' : 'long' }</span>
+                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">
+                  {video.type === "1" ? "short" : "long"}
+                </span>
                 <CheckingSuperadmin
                   index={0}
                   reFetch={reFetch}
@@ -150,7 +158,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     onClick={() => setVideoPlayed(true)}
                   />
                   <img
-                    src={currentCoverUrl || video.s3_urls.coverUrl || video.public_urls.cover_url}
+                    src={
+                      currentCoverUrl ||
+                      video.s3_urls.coverUrl ||
+                      video.public_urls.cover_url
+                    }
                     alt="cover"
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -238,11 +250,12 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       }
                       send(video.id);
                     }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
-                        (video.upload_status === 1 && video.transfer_status === 1)
+                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
+                      video.processing === "working" ||
+                      (video.upload_status === 1 && video.transfer_status === 1)
                         ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                         : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      }`}
+                    }`}
                   >
                     {video.processing === "working" ? (
                       <>
@@ -522,8 +535,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 <div className="flex items-center gap-3">
                   {(video as any).creatorObj.avatar ? (
                     <img
-                      src={(video).creatorObj.avatar!}
-                      alt={(video).creatorObj.name!}
+                      src={video.creatorObj.avatar!}
+                      alt={video.creatorObj.name!}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
@@ -598,7 +611,7 @@ function EditVideo({
       language: title.language,
       i18_language: title.i18_language,
       title: title.title,
-      description: title.description
+      description: title.description,
     })) || []
   );
   // prefer creatorObj when available; keep both creator name and possible id
@@ -639,9 +652,13 @@ function EditVideo({
       isShort: videoType === "short",
       titles: JSON.stringify(coupleTitles),
       duration,
+      tagCategory: JSON.stringify(
+        selectedPostTagCategories.map((t) => ({
+          id: t.id ?? null,
+          name: t.name,
+        }))
+      ),
     };
-
-
 
     try {
       setUploading(true);
@@ -672,6 +689,86 @@ function EditVideo({
       setUploading(false);
       setProgress(0);
     }
+  };
+
+  const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
+  // TAGS
+  const [postTagQuery, setPostTagQuery] = useState("");
+  const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
+
+  // suggestions récupérées depuis API (à adapter)
+  const [postTagSuggestions, setPostTagSuggestions] = useState<any[]>([]);
+    const [availablePostTags, setAvailablePostTags] = useState<
+      Array<{ id?: number; name: string; meta?: any }>
+    >([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getTagCategoriesApi();
+        const items = res?.data?.items ?? res?.data ?? [];
+        const normalized = (Array.isArray(items) ? items : []).map(
+          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
+        );
+        
+        setAvailablePostTags(normalized);
+        setPostTagSuggestions(normalized);
+      } catch (err) {
+        console.warn("Failed to load post tag categories", err);
+      }
+    };
+    load();
+  }, []);
+
+    useEffect(() => {
+    if (!postTagQuery) {
+      setPostTagSuggestions(availablePostTags);
+      return;
+    }
+    const q = postTagQuery.toLowerCase();
+    setPostTagSuggestions(
+      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
+    );
+  }, [postTagQuery, availablePostTags]);
+  
+  // tags sélectionnés
+  const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
+    { id?: number; name: string }[]
+  >(
+    video.tagCategory?.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+    })) ?? []
+  );
+
+  const addPostTagSuggestion = (tag: any) => {
+    // éviter les doublons
+    if (
+      selectedPostTagCategories.some(
+        (existing) => existing.name.toLowerCase() === tag.name.toLowerCase()
+      )
+    ) {
+      return;
+    }
+
+    setSelectedPostTagCategories((prev) => [...prev, tag]);
+    setPostTagQuery("");
+  };
+
+  const addPostTagByName = (name: string) => {
+    if (!name.trim()) return;
+
+    const existed = selectedPostTagCategories.some(
+      (t) => t.name.toLowerCase() === name.toLowerCase()
+    );
+    if (existed) return;
+
+    setSelectedPostTagCategories((prev) => [...prev, { name }]);
+    setPostTagQuery("");
+  };
+
+  const removeSelectedPostTag = (index: number) => {
+    setSelectedPostTagCategories((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -736,14 +833,99 @@ function EditVideo({
                   value={videoType}
                   onChange={(e) => setVideoType(e.target.value)}
                 >
-                  <option value="short" className="cursor-pointer">Short</option>
-                  <option value="long" className="cursor-pointer">Long</option>
+                  <option value="short" className="cursor-pointer">
+                    Short
+                  </option>
+                  <option value="long" className="cursor-pointer">
+                    Long
+                  </option>
                 </select>
                 <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                   <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                    <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M7 8l3 3 3-3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </span>
+              </div>
+            </div>
+
+            <div className="relative w-full" ref={postTagWrapperRef}>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                Tags:
+              </label>
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={postTagQuery}
+                    onChange={(e) => {
+                      setPostTagQuery(e.target.value);
+                      setShowPostTagDropdown(true);
+                    }}
+                    onFocus={() => setShowPostTagDropdown(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addPostTagByName(postTagQuery);
+                        setShowPostTagDropdown(false);
+                      }
+                    }}
+                    placeholder="Type tag name or select suggestion..."
+                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
+                  />
+
+                  {showPostTagDropdown &&
+                    postTagSuggestions &&
+                    postTagSuggestions.length > 0 && (
+                      <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+                        {postTagSuggestions.slice(0, 8).map((s) => (
+                          <li
+                            key={s.id ?? s.name}
+                            onClick={() => {
+                              addPostTagSuggestion(s);
+                              setShowPostTagDropdown(false);
+                            }}
+                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                          >
+                            {s.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    addPostTagByName(postTagQuery);
+                    setShowPostTagDropdown(false);
+                  }}
+                  className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedPostTagCategories.map((t, i) => (
+                  <span
+                    key={`${t.id ?? "new"}-${t.name}-${i}`}
+                    className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    <span>{t.name}</span>
+                    <button
+                      onClick={() => removeSelectedPostTag(i)}
+                      className="text-red-500"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
               </div>
             </div>
 
