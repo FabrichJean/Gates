@@ -693,9 +693,9 @@ function EditVideo({
 
   // suggestions récupérées depuis API (à adapter)
   const [postTagSuggestions, setPostTagSuggestions] = useState<any[]>([]);
-    const [availablePostTags, setAvailablePostTags] = useState<
-      Array<{ id?: number; name: string; meta?: any }>
-    >([]);
+  const [availablePostTags, setAvailablePostTags] = useState<
+    Array<{ id?: number; name: string; meta?: any }>
+  >([]);
 
   useEffect(() => {
     const load = async () => {
@@ -705,7 +705,7 @@ function EditVideo({
         const normalized = (Array.isArray(items) ? items : []).map(
           (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
         );
-        
+
         setAvailablePostTags(normalized);
         setPostTagSuggestions(normalized);
       } catch (err) {
@@ -715,7 +715,7 @@ function EditVideo({
     load();
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!postTagQuery) {
       setPostTagSuggestions(availablePostTags);
       return;
@@ -725,7 +725,7 @@ function EditVideo({
       availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
     );
   }, [postTagQuery, availablePostTags]);
-  
+
   // tags sélectionnés
   const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
     { id?: number; name: string }[]

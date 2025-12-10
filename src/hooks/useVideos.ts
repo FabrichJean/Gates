@@ -16,6 +16,7 @@ export interface VideoTagCategory {
 }
 
 export type TVideo = {
+  tagCategoryVideos: any;
   // Champs de votre type existant (prioritaires)
   id: number;
   user_id: number;
