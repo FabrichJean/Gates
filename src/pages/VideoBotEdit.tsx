@@ -117,7 +117,7 @@ function VideoBotEdit() {
       // fd.append("ref", String(ref));
       fd.append("titles", JSON.stringify(coupleTitles));
       fd.append("titles", JSON.stringify(coupleTitles));
-      if (platform) fd.append("platform_id", String(platform.id));
+      if (platform) fd.append("plateform_id", String(platform.id));
       // append type: backend expects '1' for short and '2' for long
       if (videoType) fd.append("type", videoType === "short" ? "1" : "2");
 
