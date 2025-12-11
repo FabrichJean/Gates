@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import CreatorPost from "./Creator/CreatorPost";
+import CreatorVideosCard from "../components/CardVideoCreator";
 
 
 

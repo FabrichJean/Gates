@@ -12,10 +12,63 @@ interface Video {
     videos: TVideo[];
 }
 
+
+const StatsPosts = ({ data }) => {
+
+    
+  // Total posts
+  const totalPosts = data?.length || 0;
+
+  // Total long videos (type = "2")
+  const totalLong =
+    data?.filter((post) => {
+        return post.type === "2"
+    }).length || 0;
+
+  // Total short videos (type = "1")
+  const totalShort =
+    data?.filter((post) => {
+        return post.type === "1"
+    }).length || 0;
+
+  return (
+    <div className="flex gap-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-md">
+      {/* Total Posts */}
+      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border border-transparent dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          Total
+        </h3>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          {totalPosts}
+        </p>
+      </div>
+
+      {/* Total Long */}
+      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          Long
+        </h3>
+        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          {totalLong}
+        </p>
+      </div>
+
+      {/* Total Short */}
+      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          Short
+        </h3>
+        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+          {totalShort}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
     const [videos, setVideos] = useState<TVideo[]>([]);
     const [loading, setLoading] = useState(true);
-      const [videoPlayed, setVideoPlayed] = useState(false);
 
     useEffect(() => {
         const fetchVideos = async () => {
@@ -40,11 +93,13 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
     if (loading) return <div className="p-4 text-center">Chargement des vidéos...</div>;
 
     return (
+        <div>
+         {videos && <StatsPosts data={videos} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
             {videos.map((video) => (
                 <div key={video.id} className="card bg-base-200 shadow-md hover:shadow-xl transition rounded-md">
                     <figure>
-                        <img src={video.public_urls.local_cover_url || `https://placehold.co/600x400` } alt={video.public_urls.local_cover_url} className="w-full h-40 object-cover" />
+                        <img src={video.s3_urls.coverUrl || video.public_urls.local_cover_url || `https://placehold.co/600x400` } alt={video.public_urls.local_cover_url} className="w-full h-40 object-cover" />
                     </figure>
                     <div className="card-body p-4">
                         <h2 className="card-title text-base">{video.id}</h2>
@@ -56,6 +111,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
                     </div>
                 </div>
             ))}
+        </div>
         </div>
     );
 };
