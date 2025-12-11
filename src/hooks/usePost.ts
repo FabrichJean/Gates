@@ -6,6 +6,7 @@ import axios from "axios";
 import useFetch from "http-react";
 import type { Creator } from "./useCreators";
 import type { TagCategoryItem } from "../api/tagCategory";
+import { UsePostBot } from "./usePostBot";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";

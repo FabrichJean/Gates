@@ -6,6 +6,7 @@ import axios from "axios";
 import useFetch from "http-react";
 import type { Creator } from "./useCreators";
 import type { TagCategoryItem } from "../api/tagCategory";
+import usePostBotManagement from "./usePostBotManagement";
 
 export type PostBotStatus = "approved" | "pending" | "rejected";
 export type PostBotChecking = "verified" | "pending" | "rejected";
@@ -231,7 +232,7 @@ export function UsePostsBot() {
 
 // Hook pour navigation entre posts
 export function useNextPostBot(currentId: string | number | undefined) {
-    const { data: posts_bot, loading } = UsePostsBot();
+    const { data: posts_bot, loading } = usePostBotManagement();
 
     // Vérifier si posts est un tableau, sinon retourner des valeurs par défaut
     if (!posts_bot || !Array.isArray(posts_bot)) {
