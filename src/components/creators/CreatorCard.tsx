@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type UseCreators from '../../hooks/useCreators';
+import { useNavigate } from 'react-router-dom';
 
 type Creator = Exclude<ReturnType<typeof UseCreators>['data'], undefined> extends Array<infer T> ? T : any;
 
@@ -10,9 +11,9 @@ export default function CreatorCard({ creator, onEdit, onDelete, isLoading }: {
   isLoading?: boolean;
 }) {
 
+  const navigate = useNavigate();
   const handleSwitch = (id: number) => () => {
-    window.location.href = `/creators/${id}`;
-
+    navigate(`/creators/${id}`);
   };
 
   return (
