@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import CreatorVideosCard from "../components/CardVideoCreator";
+import CreatorPost from "./Creator/CreatorPost";
+
 
 
 const Creator = () => {
@@ -19,9 +20,9 @@ const Creator = () => {
           <CreatorVideosCard creatorId={id!} />
         </div>
 
-        <input type="radio" name="my_tabs_2" className="tab" aria-label="Posts" />
+        <input type="radio" name="my_tabs_2" className="tab" aria-label="Posts" defaultChecked />
         <div className="tab-content border-base-300 p-10">
-          Posts
+          <CreatorPost id={id}/>
         </div>
       </div>
     </>
