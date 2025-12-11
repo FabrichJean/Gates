@@ -334,7 +334,7 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="/creator/:id"
+            path="/creators/:id"
             element={
               <ProtectedRoute>
                 <SuperProtected>

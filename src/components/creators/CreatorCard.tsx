@@ -10,7 +10,7 @@ export default function CreatorCard({ creator, onEdit, onDelete, isLoading }: {
 }) {
 
   const handleSwitch = (id: number) => () => {
-    window.location.href = `/creator/${id}`;
+    window.location.href = `/creators/${id}`;
 
   };
 
