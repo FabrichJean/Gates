@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import CreatorPost from "./Creator/CreatorPost";
 
 
 
@@ -18,7 +19,9 @@ const Creator = () => {
         <div className="tab-content border-base-300  p-10 ">Videos</div>
 
         <input type="radio" name="my_tabs_2" className="tab" aria-label="Posts" defaultChecked />
-        <div className="tab-content border-base-300 p-10">Posts</div>
+        <div className="tab-content border-base-300 p-10">
+          <CreatorPost id={id}/>
+        </div>
       </div>
     </>
   );
