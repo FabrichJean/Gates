@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
 import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
@@ -6,6 +6,9 @@ import axios from "axios";
 import useFetch from "http-react";
 import type { Creator } from "./useCreators";
 import type { TagCategoryItem } from "../api/tagCategory";
+import { usePostBotManagement } from "./usePostBotManagement";
+import { usePostManagement } from "./usePostManagement";
+import type { TPost } from "./usePost";
 
 export type PostBotStatus = "approved" | "pending" | "rejected";
 export type PostBotChecking = "verified" | "pending" | "rejected";
@@ -125,7 +128,7 @@ export type Image = {
     s3_urls: ImageS3Urls;
 };
 
-export type TPostBot = {
+export type TPostBot = TPost & {
     id: number;
     category_id: number;
     sub_category_id: number;
@@ -231,7 +234,8 @@ export function UsePostsBot() {
 
 // Hook pour navigation entre posts
 export function useNextPostBot(currentId: string | number | undefined) {
-    const { data: posts_bot, loading } = UsePostsBot();
+    const { data, loading } = usePostBotManagement();
+    const posts_bot = useMemo(() => data?.posts || [], [data]);
 
     // Vérifier si posts est un tableau, sinon retourner des valeurs par défaut
     if (!posts_bot || !Array.isArray(posts_bot)) {
@@ -245,6 +249,7 @@ export function useNextPostBot(currentId: string | number | undefined) {
     }
 
     const currentPostIndex = posts_bot.findIndex(post_bot => post_bot.id === Number(currentId));
+    // alert(currentPostIndex)
     const hasNext = currentPostIndex !== -1 && currentPostIndex < (posts_bot.length - 1);
     const hasPrev = currentPostIndex !== -1 && currentPostIndex > 0;
 
