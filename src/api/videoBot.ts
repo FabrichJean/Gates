@@ -36,7 +36,7 @@ export const updateVideoBot = async (videoId: number | string | undefined, paylo
     payload,
     { headers: headers() }
   );
-  return response.data;
+  return response;
 };
 
 export const cancelVideoBotUpload = async (videoId: number) => {

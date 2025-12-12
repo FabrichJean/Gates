@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type UseCreators from '../../hooks/useCreators';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,9 +27,7 @@ export default function CreatorCard({ creator, onEdit, onDelete, isLoading }: {
           )}
         </div>
         <div className="flex-1">
-          <div className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-400 dark:hover:text-blue-400" onClick={handleSwitch(creator.id)}>
-            {creator.name}
-          </div>
+          <Link className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-400 dark:hover:text-blue-400" to={`/creators/${creator.id}`}>{creator.name}</Link>
           <div className="text-xs text-gray-500 dark:text-gray-300">{(creator as any).gender || '-'}</div>
           <div className="mt-2 flex items-center gap-2">
             <button

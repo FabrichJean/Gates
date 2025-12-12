@@ -30,6 +30,7 @@ import { useVideosContext } from "../context/VideosContext";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import type { Platform } from "../hooks/usePlatform";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
+import GetPostTitles from "./posts/GetPostTitles";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -176,6 +177,21 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 </>
               )}
             </div>
+            {Array.isArray((video as any)?.tagCategory) && (video as any)?.tagCategory.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(video as any).tagCategory.map((tg: any) => (
+                  <span
+                    key={`${tg?.id ?? tg?.name}-chip`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                    title={tg?.meta ? JSON.stringify(tg.meta) : undefined}
+                  >
+                    #{tg?.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
+            )}
 
             <div className="flex flex-wrap gap-4 w-full">
               {video.checking !== "refused" ? (
@@ -502,6 +518,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </div>
             )}
 
+            {/* Video Info */}
+            <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <GetPostTitles postTitles={(video.titles as any)} />
+            </div>
+
             <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
               <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 Author
@@ -544,22 +565,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 </div>
               </div>
             )}
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Titles
-              </h1>
-              {video?.titles?.map((t, i) => (
-                <div key={i} className="flex gap-3 items-center p-2">
-                  <span className="w-20 font-bold text-blue-600 dark:text-blue-400 uppercase text-sm tracking-wide">
-                    {t.i18_language} :
-                  </span>
-                  <span className="flex-1 text-gray-800 dark:text-gray-200 font-medium text-sm">
-                    {t.title}
-                  </span>
-                </div>
-              ))}
-            </div>
 
             <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
               <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">

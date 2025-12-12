@@ -53,11 +53,11 @@ const VideoTableRow = ({
       <td className="py-3 px-6 font-light text-gray-800 dark:text-gray-300 border-r border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2">
           {(video?.creatorObj?.avatar) ? (
-            <img src={video?.creatorObj.avatar} alt={video?.creatorObj.name} className="w-8 h-8 rounded-full object-cover" />
+            <img src={video?.creatorObj.avatar} alt={video?.creatorObj.name} className="min-w-8 h-8 rounded-full object-cover" />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">No</div>
           )}
-          <div>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</div>
+          <Link to={`/creators/`+video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
         </div>
       </td>
 
@@ -97,7 +97,7 @@ const VideoTableRow = ({
         <input
           type="checkbox"
           checked={!video.isDeleted}
-          className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] rounded-full"
+          className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
           onChange={
             user?.role === RoleEnum.SUPERADMIN
               ? () => onActivate(video.id)

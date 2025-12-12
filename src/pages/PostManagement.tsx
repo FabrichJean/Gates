@@ -83,7 +83,7 @@ const PostManagementInner = () => {
               
               <SendToWebApp />
               {/* @ts-ignore */}
-              <small>(video sent) : {totalSent}</small>
+              {/* <small>(video sent) : {totalSent}</small> */}
 
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>
@@ -208,15 +208,15 @@ const PostManagementInner = () => {
                         <img
                           src={(post).creatorObj.avatar!}
                           alt={(post).creatorObj.name!}
-                          className="w-8 h-8 rounded-full object-cover"
+                          className="min-w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;
                             t.src = "";
                           }}
                         />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                        <Link to={`/creators/`+post?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
                           {(post as any).creatorObj.name}
-                        </span>
+                        </Link>
                       </div>
                     ) : (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
@@ -241,7 +241,7 @@ const PostManagementInner = () => {
                     <input
                       type="checkbox"
                       checked={!post.isDeleted}
-                      className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] rounded-full"
+                      className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                       onChange={
                         user?.role === RoleEnum.SUPERADMIN
                           ? () => activate(post.id)

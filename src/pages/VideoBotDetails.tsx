@@ -26,7 +26,7 @@ const VideoBotDetails: React.FC = () => {
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextBotVideo(routeId);
 
   const [videoPlayed, setVideoPlayed] = useState(false);
-  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>();
 
   // no local animated alert; VideoActions uses its own hooks
 
@@ -36,7 +36,7 @@ const VideoBotDetails: React.FC = () => {
       setCurrentCoverUrl(
         (video?.s3_urls?.coverUrl ||
           video?.public_urls.cover_url ||
-          video?.cover) +
+          video?.cover || "https://placehold.co/600x400") +
           "?t=" +
           Date.now()
       );
@@ -108,7 +108,7 @@ const VideoBotDetails: React.FC = () => {
                 <img
                   src={video?.creatorObj.avatar}
                   alt={video?.creatorObj.name}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="min-w-8 h-8 rounded-full object-cover"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
@@ -146,6 +146,7 @@ const VideoBotDetails: React.FC = () => {
                 user={user}
                 updateFn={updateVideoBot}
                 hideTouchLink={true}
+                isDetails
               />
             </div>
           </div>
@@ -172,9 +173,10 @@ const VideoBotDetails: React.FC = () => {
                 />
                 <img
                   src={
-                    currentCoverUrl ||
-                    video.s3_urls.coverUrl ||
+                    currentCoverUrl ??
+                    video.s3_urls.coverUrl ??
                     video.public_urls.cover_url
+                    ?? "https://placehold.co/600x400"
                   }
                   alt="cover"
                   className="w-full h-full object-cover rounded-lg"
@@ -339,6 +341,28 @@ const VideoBotDetails: React.FC = () => {
           <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <Titles postTitles={video.titles as any} />
           </div>
+
+          {video?.cdn_url && video?.s3_hls_path && (
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  CDN playback URL
+                </h1>
+                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                  {video?.cdn_url + video?.s3_hls_path}
+                </a>
+              </div>
+            )}
+
+            {video?.cdn_url && video?.s3_cover_path && (
+              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  CDN Cover URL
+                </h1>
+                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
+                  {video?.cdn_url + video?.s3_cover_path}
+                </a>
+              </div>
+            )}
         </div>
       </div>
     </>
