@@ -139,7 +139,7 @@ function Sidebar({
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-300 overflow-hidden
         ${isActive(name)
-          ? 'bg-gradient-to-r from-blue-300/50 to-indigo-300/50 shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+          ? 'bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20'
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50'
         }
       `}
