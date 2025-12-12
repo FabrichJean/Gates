@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { apiURL } from "../constant";
 import axios from "axios";
-import type { TVideo } from "../hooks/useVideos";
-import { getToken } from "../utils/storage";
 import { useNavigate } from "react-router-dom";
+import type { TVideo } from "../../hooks/useVideos";
+import { getToken } from "../../utils/storage";
+import { apiURL } from "../../constant";
 
 interface VideoResponse {
   total: number;
@@ -71,7 +71,7 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
 /* ---------------------------------------------------
  * CreatorVideosCard : liste des vidéos + filtres
  * --------------------------------------------------- */
-const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
+const CardVideoBotCreator = ({ creatorId }: { creatorId: string }) => {
   const [videos, setVideos] = useState<TVideo[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<TVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
     const fetchVideos = async () => {
       try {
         const res = await axios.get<VideoResponse>(
-          `${apiURL}/creators/videos/${creatorId}`,
+          `${apiURL}/creators/videos-bot/${creatorId}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -137,6 +137,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
                 src={
                   video.s3_urls?.coverUrl ||
                   video.public_urls?.local_cover_url ||
+                  video.public_urls?.cover_url ||
                   "https://placehold.co/600x400"
                 }
                 alt="cover"
@@ -156,8 +157,8 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
                 })()}
               </h2>
               <p className="text-sm opacity-70 flex gap-4">
-                <span>{video.category.name}</span>
-                <span>{video.subCategory.name}</span>
+                <span>{video.category?.name}</span>
+                <span>{video.subCategory?.name}</span>
               </p>
               <div className="flex text-green-600 w-full items-center font-medium mt-2">
                 <span className="bg-blue-500/20 dark:bg-blue-800/80 px-3 text-gray-600 dark:text-teal-200 rounded-full">
@@ -188,4 +189,4 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
   );
 };
 
-export default CreatorVideosCard;
+export default CardVideoBotCreator;
