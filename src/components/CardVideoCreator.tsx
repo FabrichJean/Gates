@@ -13,7 +13,7 @@ interface Video {
 }
 
 
-const StatsPosts = ({ data }) => {
+const StatsPosts = ({ data }: { data: TVideo[] }) => {
 
     
   // Total posts
@@ -21,26 +21,26 @@ const StatsPosts = ({ data }) => {
 
   // Total long videos (type = "2")
   const totalLong =
-    data?.filter((post) => {
-        return post.type === "2"
+    data?.filter((d) => {
+        return d.type === "2"
     }).length || 0;
 
   // Total short videos (type = "1")
   const totalShort =
-    data?.filter((post) => {
-        return post.type === "1"
+    data?.filter((d) => {
+        return d.type === "1"
     }).length || 0;
 
   return (
-    <div className="flex gap-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-md">
+    <div className="flex gap-4">
       {/* Total Posts */}
       <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border border-transparent dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           Total
         </h3>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+        <span className="inline text-2xl font-bold text-gray-900 dark:text-white">
           {totalPosts}
-        </p>
+        </span>
       </div>
 
       {/* Total Long */}
