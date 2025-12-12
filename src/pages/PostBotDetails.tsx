@@ -69,7 +69,7 @@ const PostBotDetails = () => {
 
                     {hasPrev ? (
                         <Link
-                            to={"/post/" + prevPost}
+                            to={"/bot-posts/" + prevPost}
                             className="relative flex items-center justify-center gap-2 px-4 py-2
     font-medium text-sm rounded-md transition-all duration-300
     bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
@@ -118,7 +118,7 @@ const PostBotDetails = () => {
                     )}
                     {hasNext ? (
                         <Link
-                            to={"/post/" + nextPost}
+                            to={"/bot-posts/" + nextPost}
                             className="relative flex items-center justify-center gap-2 px-4 py-2
     font-medium text-sm rounded-md transition-all duration-300
     bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 

@@ -27,9 +27,10 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
 
   useEffect(() => {
     const list = creators || [];
-    const q = query?.trim().toLowerCase();
-    if (!q) setFiltered(list.slice(0, 20));
-    else setFiltered(list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30));
+    setFiltered(list)
+    // const q = query?.trim().toLowerCase();
+    // if (!q) setFiltered(list.slice(0, 20));
+    // else setFiltered(list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30));
   }, [creators, query]);
 
   useEffect(() => {

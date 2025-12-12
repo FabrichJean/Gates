@@ -33,7 +33,7 @@ const BtnTranscodeComponent = ({
     }
   };
 
-  const isDisabled =
+  const isDisabled = post.checking !== "checked" ||
     post.processing === "working" || post.processing === "done";
 
   const getButtonStyles = () => {

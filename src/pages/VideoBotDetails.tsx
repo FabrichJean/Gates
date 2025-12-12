@@ -26,7 +26,7 @@ const VideoBotDetails: React.FC = () => {
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextBotVideo(routeId);
 
   const [videoPlayed, setVideoPlayed] = useState(false);
-  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
+  const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>();
 
   // no local animated alert; VideoActions uses its own hooks
 
@@ -36,7 +36,7 @@ const VideoBotDetails: React.FC = () => {
       setCurrentCoverUrl(
         (video?.s3_urls?.coverUrl ||
           video?.public_urls.cover_url ||
-          video?.cover) +
+          video?.cover || "https://placehold.co/600x400") +
           "?t=" +
           Date.now()
       );
@@ -108,7 +108,7 @@ const VideoBotDetails: React.FC = () => {
                 <img
                   src={video?.creatorObj.avatar}
                   alt={video?.creatorObj.name}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="min-w-8 h-8 rounded-full object-cover"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
@@ -173,9 +173,10 @@ const VideoBotDetails: React.FC = () => {
                 />
                 <img
                   src={
-                    currentCoverUrl ||
-                    video.s3_urls.coverUrl ||
+                    currentCoverUrl ??
+                    video.s3_urls.coverUrl ??
                     video.public_urls.cover_url
+                    ?? "https://placehold.co/600x400"
                   }
                   alt="cover"
                   className="w-full h-full object-cover rounded-lg"
