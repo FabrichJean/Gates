@@ -11,20 +11,17 @@ import {
 import { useProcessingCount } from "../useProcessingCount";
 import { useState } from "react";
 import { useVideosContext } from "../../context/VideosContext";
+import { useProgressStore } from "../../hooks/useProgressStore";
 
 interface VideoActionsProps {
   video: TVideo;
   user: User | Partial<User> | null;
   onSend: (videoId: number) => void;
-  /** Optional cancel function for custom API (e.g. bot videos) */
   cancelFn?: (videoId: number) => Promise<any>;
-  /** Optional refetch function for custom context */
   reFetchFn?: (delay?: number) => void;
-  /** Optional base path for details link (default: "/videos") */
   detailsPath?: string;
-  /** Optional convert to mp4 function (for bot videos) */
   convertToMp4Fn?: (videoId: number) => Promise<any>;
-  hidetails?: boolean
+  hidetails?: boolean;
 }
 
 const VideoActions = ({
@@ -37,22 +34,21 @@ const VideoActions = ({
   detailsPath = "/videos",
   convertToMp4Fn,
 }: VideoActionsProps) => {
+  const {uploads} = useProgressStore()
   const { showAlert } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
   const { count: processingCount } = useProcessingCount();
-  // // use videos context for debounced refresh
   const ctx = useVideosContext();
-
-  // Use custom refetch if provided, otherwise fall back to context
   const refetch = reFetchFn || ctx?.reFetch;
+
+  const [resending, setResending] = useState(false);
+  const [converting, setConverting] = useState(false);
 
   const extractErrorMessage = (err: unknown) => {
     try {
       if (!err) return "Error";
       if (typeof err === "string") return err;
       if (typeof err === "object" && err !== null) {
-        // try common axios shape
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (
           (err as any)?.response?.data?.message ??
           (err as any)?.message ??
@@ -67,34 +63,27 @@ const VideoActions = ({
 
   const cancel = async () => {
     try {
-      // Use custom cancel function if provided, otherwise use default
       if (cancelFn) {
         await cancelFn(video.id);
       } else {
         await cancelUpload(video.id);
       }
-      // request a debounced list refresh
       refetch?.(500);
     } catch (err) {
       toast.error(extractErrorMessage(err));
     }
   };
 
-  const [resending, setResending] = useState(false);
-
   const resend = async () => {
     if (resending) return;
     setResending(true);
     try {
-      // first cancel the current processing
       if (cancelFn) {
         await cancelFn(video.id);
       } else {
         await cancelUpload(video.id);
       }
-      // then immediately send again
       onSend(video.id);
-      // schedule a debounced refresh
       refetch?.(500);
     } catch (err) {
       toast.error(extractErrorMessage(err) || "Error during resend");
@@ -102,8 +91,6 @@ const VideoActions = ({
       setResending(false);
     }
   };
-
-  const [converting, setConverting] = useState(false);
 
   const convertToMp4 = async () => {
     if (!convertToMp4Fn) return;
@@ -120,171 +107,197 @@ const VideoActions = ({
     }
   };
 
-  return (
-    <>
-      {/* <AnimatedAlert {...alertProps} /> */}
-      <div className="flex justify-center gap-2 flex-wrap">
-        {user?.role === RoleEnum.SUPERADMIN && (
-          <div className="relative flex items-center gap-3">
-            {/* Show Send button only if:
-              - It's not a bot video (convertToMp4Fn is undefined), OR
-              - It's a bot video AND it has been converted to MP4 (has temp_url)
-            */}
-            {(
-              <button
-                disabled={
-                  video.processing === "working" || video.processing === "done"
-                }
-                onClick={() => {
-                  if (video.checking !== "checked") {
-                    return alert.warning(
-                      "We need to check this video",
-                      "Video Check Required"
-                    );
-                  }
-                  if (processingCount >= 5) {
-                    toast.error(
-                      "The maximum number of videos in process (5) has been reached. Please wait until a video finishes processing before sending another."
-                    );
-                    return;
-                  }
-                  onSend(video.id);
-                }}
-                className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                  video.processing === "working" ||
-                  (video.upload_status === 1 && video.transfer_status === 1)
-                    ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
-                    : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                }`}
-              >
-                {video.processing === "working" ? (
-                  <>
-                    <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                    <span>Processing...</span>
-                  </>
-                ) : video.processing === "done" ? (
-                  <span className="text-green-600 font-semibold flex gap-1 items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                      />
-                    </svg>
-                    Uploaded
-                  </span>
-                ) : (
-                  <span className="hover:text-blue-500 flex gap-3 items-center">
-                    <span>🚀</span>
-                    <span>Send</span>
-                  </span>
-                )}
-              </button>
-            )}
+  const isProcessing = video.processing === "working";
+  const isDone = video.processing === "done";
+  const isDisabled = isProcessing || isDone;
 
-            {/* --- BOUTON ANNULER --- */}
-            {video.processing === "working" && (
-              <>
-              <button
-                onClick={cancel}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
+  return (
+    <div className="flex items-center justify-center gap-2">
+      {user?.role === RoleEnum.SUPERADMIN && (
+        <>
+          {/* Main Action Button - Send or Status */}
+          {!isProcessing && (
+            <button
+              disabled={isDisabled}
+              onClick={() => {
+                if (video.checking !== "checked") {
+                  return alert.warning(
+                    "We need to check this video",
+                    "Video Check Required"
+                  );
+                }
+                if (processingCount >= 5) {
+                  toast.error(
+                    "Maximum 5 videos in process. Please wait."
+                  );
+                  return;
+                }
+                onSend(video.id);
+              }}
+              className={`
+                inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                text-sm font-medium transition-all duration-200
+                ${
+                  isDone
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                    : isDisabled
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
+                }
+              `}
+            >
+              {isDone ? (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>Uploaded</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <span>Send</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Processing State with Cancel & Resend */}
+          {isProcessing && (
+            <>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18 18 6M6 6l12 12"
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Cancel
+                <span className="text-sm font-medium">Processing ({uploads.find(v => Number(v.videoId) === Number(video.id))?.progress}%)</span>
+              </div>
+
+              <button
+                onClick={cancel}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
+                title="Cancel"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+
               <button
                 onClick={resend}
                 disabled={resending}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 rounded-xl shadow-md transition-all duration-200"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200 disabled:opacity-50"
+                title="Resend"
               >
                 {resending ? (
-                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M21 12a9 9 0 11-9-9"
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
                     />
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M21 3v6h-6"
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                )}
-                <span>{resending ? "Resending..." : "Resend"}</span>
-              </button>
-              </>
-            )}
-            {/* Convert to MP4 button (only for bot videos) */}
-            {/* Convert to MP4 button (only for bot videos and only before MP4 exists) */}
-            {convertToMp4Fn && !video.public_urls?.temp_url && (
-              <button
-                onClick={convertToMp4}
-                disabled={converting}
-                className="relative flex items-center justify-center gap-2 px-6 py-2.5 font-medium text-sm rounded-md transition-all duration-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed "
-              >
-                {converting ? (
-                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
-                    />
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 )}
-                <span>{converting ? "Converting..." : "Convert MP4"}</span>
               </button>
-            )}
-          </div>
-        )}
+            </>
+          )}
 
-        {!hidetails && <Link
+          {/* Convert to MP4 Button */}
+          {convertToMp4Fn && !video.public_urls?.temp_url && (
+            <button
+              onClick={convertToMp4}
+              disabled={converting}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+            >
+              {converting ? (
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              <span>{converting ? "Converting..." : "Convert MP4"}</span>
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Details Link */}
+      {!hidetails && (
+        <Link
           to={`${detailsPath}/${video.id}`}
-          className="px-4 py-2 hover:bg-gray-100/10 cursor-pointer underline rounded-md font-light hover:text-blue-400 transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 text-sm font-medium"
         >
-          Details
-        </Link>}
-      </div>
-    </>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Details</span>
+        </Link>
+      )}
+    </div>
   );
 };
 
