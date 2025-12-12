@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import type { TPost } from "../../hooks/usePost";
 import usePostCreators from "../../hooks/usePostCreators";
 
 
@@ -9,18 +8,6 @@ interface Title {
   title: string;
   description: string;
   i18_language: string;
-}
-
-interface ImageItem {
-  id: number;
-  public_urls: { local_image_url?: string };
-  s3_urls: { imageUrl?: string };
-}
-
-interface CreatorObj {
-  id: number;
-  name: string;
-  avatar: string;
 }
 
 interface PostCardProps {

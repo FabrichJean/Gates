@@ -17,9 +17,6 @@ interface StatsPostsProps {
   onFilter: (type: "all" | "long" | "short") => void;
 }
 
-/* ---------------------------------------------------
- * StatsPosts : Composant affichant Total / Long / Short
- * --------------------------------------------------- */
 const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
   const totalPosts = data?.length || 0;
   const totalLong = data?.filter((post) => post.type === "2").length || 0;
@@ -68,9 +65,7 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
   );
 };
 
-/* ---------------------------------------------------
- * CreatorVideosCard : liste des vidéos + filtres
- * --------------------------------------------------- */
+
 const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
   const [videos, setVideos] = useState<TVideo[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<TVideo[]>([]);
