@@ -13,21 +13,19 @@ interface Video {
 }
 
 
-const StatsPosts = ({ data }) => {
-
-    
+const StatsPosts = ({ data }: { data: TVideo[] }) => {
   // Total posts
   const totalPosts = data?.length || 0;
 
   // Total long videos (type = "2")
   const totalLong =
-    data?.filter((post) => {
+    data?.filter((post: { type: string; }) => {
         return post.type === "2"
     }).length || 0;
 
   // Total short videos (type = "1")
   const totalShort =
-    data?.filter((post) => {
+    data?.filter((post: { type: string; }) => {
         return post.type === "1"
     }).length || 0;
 
