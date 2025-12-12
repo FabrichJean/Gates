@@ -554,7 +554,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   )}
                   <div>
                     <div className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(video as any).creatorObj.name}
+                      <Link to={`/creators/`+video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
                     </div>
                     {(video as any).creatorObj.gender && (
                       <div className="text-xs text-gray-500">

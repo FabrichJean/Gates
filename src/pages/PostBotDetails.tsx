@@ -201,7 +201,7 @@ const PostBotDetails = () => {
                                     />
                                     <div>
                                         <p className="font-medium text-gray-900 dark:text-white">
-                                            {(post as any)?.creatorObj.name}
+                                            <Link className="hover:text-blue-500" to={`/creators/`+post?.creatorObj?.id}>{(post)?.creatorObj?.name ?? post.creator ?? '-'}</Link>
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
                                             {(post as any)?.creatorObj.gender || ""}
