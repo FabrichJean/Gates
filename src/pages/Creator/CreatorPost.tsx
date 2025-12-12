@@ -1,8 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import type { TPost } from "../../hooks/usePost";
 import usePostCreators from "../../hooks/usePostCreators";
-
-
 
 interface Title {
   id: number;
@@ -11,81 +8,12 @@ interface Title {
   i18_language: string;
 }
 
-interface ImageItem {
-  id: number;
-  public_urls: { local_image_url?: string };
-  s3_urls: { imageUrl?: string };
-}
-
-interface CreatorObj {
-  id: number;
-  name: string;
-  avatar: string;
-}
-
 interface PostCardProps {
   post: any; // tu peux typer plus fort si tu veux
 }
 
-const StatsPosts = ({ data }) => {
-
-    
-  // Total posts
-  const totalPosts = data?.length || 0;
-
-  // Total long videos (type = "2")
-  const totalLong =
-    data?.filter((post: { type: string; }) => {
-        return post.type === "2"
-    }).length || 0;
-
-  // Total short videos (type = "1")
-  const totalShort =
-    data?.filter((post: { type: string; }) => {
-        return post.type === "1"
-    }).length || 0;
-
-  return (
-    <div className="flex gap-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-md">
-      {/* Total Posts */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border border-transparent dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Total
-        </h3>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-          {totalPosts}
-        </p>
-      </div>
-
-      {/* Total Long */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Long
-        </h3>
-        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-          {totalLong}
-        </p>
-      </div>
-
-      {/* Total Short */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Short
-        </h3>
-        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-          {totalShort}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-
-
-
 export function PostCard({ post }: PostCardProps) {
-
-    const nav = useNavigate()
+  const nav = useNavigate();
   // choisir un titre
   const mainTitle =
     post.titles?.find((t: Title) => t.i18_language === "en")?.title ||
@@ -98,7 +26,16 @@ export function PostCard({ post }: PostCardProps) {
     post.images?.[0]?.s3_urls?.imageUrl;
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-gray-900 shadow-md hover:shadow-xl transition p-3 flex flex-col overflow-hidden cursor-pointer" onClick={() => nav(post.user.username === "userbot" ? `/bot-posts/${post.id}` : `/post/${post.id}`)}>
+    <div
+      className="rounded-2xl bg-white dark:bg-gray-900 shadow-md hover:shadow-xl transition p-3 flex flex-col overflow-hidden cursor-pointer"
+      onClick={() =>
+        nav(
+          post.user.username === "userbot"
+            ? `/bot-posts/${post.id}`
+            : `/post/${post.id}`
+        )
+      }
+    >
       {cover && (
         <img
           src={cover}
@@ -159,19 +96,19 @@ export function PostCard({ post }: PostCardProps) {
 }
 
 export default function CreatorPost({ id }: { id: any }) {
-  const {data} = usePostCreators(id);
+  const { data } = usePostCreators(id);
 
   console.log(data);
-  
 
-  return <div>
-         {/* {data && <StatsPosts data={data.posts} />} */}
+  return (
+    <div>
+      {/* {data && <StatsPosts data={data.posts} />} */}
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-
-      {data?.posts.map((p) => (
-        <PostCard key={p.id} post={p} />
-      ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        {data?.posts.map((p) => (
+          <PostCard key={p.id} post={p} />
+        ))}
+      </div>
     </div>
-    </div>
+  );
 }
