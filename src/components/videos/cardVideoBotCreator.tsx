@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { apiURL } from "../constant";
 import axios from "axios";
-import type { TVideo } from "../hooks/useVideos";
-import { getToken } from "../utils/storage";
 import { useNavigate } from "react-router-dom";
+import type { TVideo } from "../../hooks/useVideos";
+import { getToken } from "../../utils/storage";
+import { apiURL } from "../../constant";
 
 interface VideoResponse {
   total: number;
@@ -17,6 +17,9 @@ interface StatsPostsProps {
   onFilter: (type: "all" | "long" | "short") => void;
 }
 
+/* ---------------------------------------------------
+ * StatsPosts : Composant affichant Total / Long / Short
+ * --------------------------------------------------- */
 const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
   const totalPosts = data?.length || 0;
   const totalLong = data?.filter((post) => post.type === "2").length || 0;
@@ -65,8 +68,10 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
   );
 };
 
-
-const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
+/* ---------------------------------------------------
+ * CreatorVideosCard : liste des vidéos + filtres
+ * --------------------------------------------------- */
+const CardVideoBotCreator = ({ creatorId }: { creatorId: string }) => {
   const [videos, setVideos] = useState<TVideo[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<TVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +82,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
     const fetchVideos = async () => {
       try {
         const res = await axios.get<VideoResponse>(
-          `${apiURL}/creators/videos/${creatorId}`,
+          `${apiURL}/creators/videos-bot/${creatorId}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -132,6 +137,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
                 src={
                   video.s3_urls?.coverUrl ||
                   video.public_urls?.local_cover_url ||
+                  video.public_urls?.cover_url ||
                   "https://placehold.co/600x400"
                 }
                 alt="cover"
@@ -151,8 +157,8 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
                 })()}
               </h2>
               <p className="text-sm opacity-70 flex gap-4">
-                <span>{video.category.name}</span>
-                <span>{video.subCategory.name}</span>
+                <span>{video.category?.name}</span>
+                <span>{video.subCategory?.name}</span>
               </p>
               <div className="flex text-green-600 w-full items-center font-medium mt-2">
                 <span className="bg-blue-500/20 dark:bg-blue-800/80 px-3 text-gray-600 dark:text-teal-200 rounded-full">
@@ -183,4 +189,4 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
   );
 };
 
-export default CreatorVideosCard;
+export default CardVideoBotCreator;

@@ -32,6 +32,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
     try {
       const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
       setChecking && setChecking(Uv.data.checking);
+      isDetails ? reFetch() : null;
     } catch (err: any) {
       toast.error("Error: " + (err.response?.data?.message || err.message));
     }

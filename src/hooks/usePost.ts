@@ -6,6 +6,7 @@ import axios from "axios";
 import useFetch from "http-react";
 import type { Creator } from "./useCreators";
 import type { TagCategoryItem } from "../api/tagCategory";
+import { UsePostBot } from "./usePostBot";
 
 export type PostStatus = "approved" | "pending" | "rejected";
 export type PostChecking = "verified" | "pending" | "rejected";
@@ -131,6 +132,7 @@ export type TPost = {
     id: number;
     category_id: number;
     sub_category_id: number;
+    checking: string | null;
     plateform_id: number;
     published_at: string;
     creatorObj: Creator
@@ -148,32 +150,6 @@ export type TPost = {
     videos: Video[];
     images: Image[];
 };
-
-
-// Données statiques pour la table (temporaire - sera remplacé par API)
-// Pour récupérer les données de l'API, décommenter le code ci-dessous:
-/*
-export const getPostsFromAPI = async (): Promise<TPost[]> => {
-    try {
-        const response = await fetch(`${apiURL}/posts`, {
-            headers: { 
-                'Authorization': `Bearer ${getToken()}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const posts = await response.json();
-        return posts;
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        return [];
-    }
-};
-*/
 
 
 // Hook pour récupérer un post par ID

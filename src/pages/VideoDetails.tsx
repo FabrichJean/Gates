@@ -30,6 +30,7 @@ import { useVideosContext } from "../context/VideosContext";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import type { Platform } from "../hooks/usePlatform";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
+import GetPostTitles from "./posts/GetPostTitles";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -57,8 +58,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       (video?.s3_urls?.coverUrl ||
         video?.public_urls.cover_url ||
         video?.cover) +
-        "?t=" +
-        Date.now()
+      "?t=" +
+      Date.now()
     );
   }, [video]);
 
@@ -176,6 +177,21 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 </>
               )}
             </div>
+            {Array.isArray((video as any)?.tagCategory) && (video as any)?.tagCategory.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(video as any).tagCategory.map((tg: any) => (
+                  <span
+                    key={`${tg?.id ?? tg?.name}-chip`}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
+                    title={tg?.meta ? JSON.stringify(tg.meta) : undefined}
+                  >
+                    #{tg?.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
+            )}
 
             <div className="flex flex-wrap gap-4 w-full">
               {video.checking !== "refused" ? (
@@ -242,12 +258,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       }
                       send(video.id);
                     }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                      video.processing === "working" ||
-                      (video.upload_status === 1 && video.transfer_status === 1)
+                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
+                        (video.upload_status === 1 && video.transfer_status === 1)
                         ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                         : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    }`}
+                      }`}
                   >
                     {video.processing === "working" ? (
                       <>
@@ -502,6 +517,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
               </div>
             )}
 
+            {/* Video Info */}
+            <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <GetPostTitles postTitles={(video.titles as any)} />
+            </div>
+
             <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
               <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 Author
@@ -533,7 +553,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   )}
                   <div>
                     <div className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(video as any).creatorObj.name}
+                      <Link to={`/creators/` + video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
                     </div>
                     {(video as any).creatorObj.gender && (
                       <div className="text-xs text-gray-500">
@@ -544,22 +564,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 </div>
               </div>
             )}
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Titles
-              </h1>
-              {video?.titles?.map((t, i) => (
-                <div key={i} className="flex gap-3 items-center p-2">
-                  <span className="w-20 font-bold text-blue-600 dark:text-blue-400 uppercase text-sm tracking-wide">
-                    {t.i18_language} :
-                  </span>
-                  <span className="flex-1 text-gray-800 dark:text-gray-200 font-medium text-sm">
-                    {t.title}
-                  </span>
-                </div>
-              ))}
-            </div>
 
             <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
               <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -609,7 +613,7 @@ function EditVideo({
   );
   // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(
-    video?.titles?.map((title, index) => ({
+    video?.titles?.map((title) => ({
       id: title.id, // or title.video_id if that's more appropriate
       language: title.language,
       i18_language: title.i18_language,

@@ -40,7 +40,7 @@ const PostManagementInner = () => {
 
   const posts = filteredData?.posts || data?.posts || [];
   const total = filteredData?.total || data?.total || 0;
-  const totalSent = filteredData?.totalSent ?? data?.total;
+  // const totalSent = filteredData?.totalSent ?? data?.total;
   const limit = filteredData?.limit || data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,10 +80,10 @@ const PostManagementInner = () => {
               >
                 <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </Link>
-              
+
               <SendToWebApp />
               {/* @ts-ignore */}
-              <small>(video sent) : {totalSent}</small>
+              {/* <small>(video sent) : {totalSent}</small> */}
 
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>
@@ -108,7 +108,7 @@ const PostManagementInner = () => {
                     try {
                       const p = Number(d?.page || page);
                       if (!Number.isNaN(p)) setPage(p);
-                    } catch {}
+                    } catch { }
                   }}
                 />
               </div>
@@ -167,7 +167,7 @@ const PostManagementInner = () => {
                 <th scope="col" className="px-6 py-3">
                   Checking
                 </th>
-                
+
                 <th scope="col" className="px-6 py-3">
                   Activate
                 </th>
@@ -208,15 +208,15 @@ const PostManagementInner = () => {
                         <img
                           src={(post).creatorObj.avatar!}
                           alt={(post).creatorObj.name!}
-                          className="w-8 h-8 rounded-full object-cover"
+                          className="min-w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;
                             t.src = "";
                           }}
                         />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                        <Link to={`/creators/` + post?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
                           {(post as any).creatorObj.name}
-                        </span>
+                        </Link>
                       </div>
                     ) : (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
@@ -241,7 +241,7 @@ const PostManagementInner = () => {
                     <input
                       type="checkbox"
                       checked={!post.isDeleted}
-                      className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-gray-300 dark:checked:bg-blue-300/20 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] rounded-full"
+                      className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                       onChange={
                         user?.role === RoleEnum.SUPERADMIN
                           ? () => activate(post.id)
@@ -342,8 +342,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-              ? "No posts found for this search"
-              : "No posts available"}
+                ? "No posts found for this search"
+                : "No posts available"}
             </div>
           )}
         </div>

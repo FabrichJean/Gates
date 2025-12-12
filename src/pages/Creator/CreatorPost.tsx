@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import type { TPost } from "../../hooks/usePost";
 import usePostCreators from "../../hooks/usePostCreators";
 
 
@@ -11,76 +10,9 @@ interface Title {
   i18_language: string;
 }
 
-interface ImageItem {
-  id: number;
-  public_urls: { local_image_url?: string };
-  s3_urls: { imageUrl?: string };
-}
-
-interface CreatorObj {
-  id: number;
-  name: string;
-  avatar: string;
-}
-
 interface PostCardProps {
   post: any; // tu peux typer plus fort si tu veux
 }
-
-const StatsPosts = ({ data }) => {
-
-    
-  // Total posts
-  const totalPosts = data?.length || 0;
-
-  // Total long videos (type = "2")
-  const totalLong =
-    data?.filter((post) => {
-        return post.type === "2"
-    }).length || 0;
-
-  // Total short videos (type = "1")
-  const totalShort =
-    data?.filter((post) => {
-        return post.type === "1"
-    }).length || 0;
-
-  return (
-    <div className="flex gap-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-md">
-      {/* Total Posts */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border border-transparent dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Total
-        </h3>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-          {totalPosts}
-        </p>
-      </div>
-
-      {/* Total Long */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Long
-        </h3>
-        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-          {totalLong}
-        </p>
-      </div>
-
-      {/* Total Short */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center border dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-          Short
-        </h3>
-        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-          {totalShort}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-
 
 
 export function PostCard({ post }: PostCardProps) {
