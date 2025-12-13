@@ -4,11 +4,11 @@ import { apiURL, token } from "../constant";
 import { getToken } from "../utils/storage";
 import axios from "axios";
 import useFetch from "http-react";
-import type { Creator } from "./useCreators";
 import type { TagCategoryItem } from "../api/tagCategory";
 import { usePostBotManagement } from "./usePostBotManagement";
 import { usePostManagement } from "./usePostManagement";
 import type { TPost } from "./usePost";
+import type { Creator } from "../components/creators/CreatorList";
 
 export type PostBotStatus = "approved" | "pending" | "rejected";
 export type PostBotChecking = "verified" | "pending" | "rejected";
@@ -149,33 +149,6 @@ export type TPostBot = TPost & {
     videos: Video[];
     images: Image[];
 };
-
-
-// Données statiques pour la table (temporaire - sera remplacé par API)
-// Pour récupérer les données de l'API, décommenter le code ci-dessous:
-/*
-export const getPostsFromAPI = async (): Promise<TPost[]> => {
-    try {
-        const response = await fetch(`${apiURL}/posts`, {
-            headers: { 
-                'Authorization': `Bearer ${getToken()}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const posts = await response.json();
-        return posts;
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-        return [];
-    }
-};
-*/
-
 
 // Hook pour récupérer un post par ID
 export function UsePostBot(id: postBotID) {

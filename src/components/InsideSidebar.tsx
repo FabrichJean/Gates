@@ -133,6 +133,7 @@ import { MdDynamicFeed } from "react-icons/md";
 import { useCardFlottant } from "../hooks/useCardFlottant";
 import useSyncOption from "../hooks/useSyncOption";
 import useSyncErrors from "../hooks/useSyncErrors";
+import { useSocketProgress } from "../hooks/useSocketProgress";
 
 // Composant Breadcrumb
 const Breadcrumb: React.FC = () => {
@@ -299,7 +300,7 @@ const Breadcrumb: React.FC = () => {
 };
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-
+  useSocketProgress()
   const initialIsCollapsed =
     typeof window !== "undefined" &&
     localStorage.getItem("is-collapsed") === "true";

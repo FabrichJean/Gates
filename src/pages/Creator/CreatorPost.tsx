@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import usePostCreators from "../../hooks/usePostCreators";
 
-
-
 interface Title {
   id: number;
   title: string;
@@ -16,8 +14,7 @@ interface PostCardProps {
 
 
 export function PostCard({ post }: PostCardProps) {
-
-    const nav = useNavigate()
+  const nav = useNavigate();
   // choisir un titre
   const mainTitle =
     post.titles?.find((t: Title) => t.i18_language === "en")?.title ||
@@ -30,7 +27,16 @@ export function PostCard({ post }: PostCardProps) {
     post.images?.[0]?.s3_urls?.imageUrl;
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-gray-900 shadow-md hover:shadow-xl transition p-3 flex flex-col overflow-hidden cursor-pointer" onClick={() => nav(post.user.username === "userbot" ? `/bot-posts/${post.id}` : `/post/${post.id}`)}>
+    <div
+      className="rounded-2xl bg-white dark:bg-gray-900 shadow-md hover:shadow-xl transition p-3 flex flex-col overflow-hidden cursor-pointer"
+      onClick={() =>
+        nav(
+          post.user.username === "userbot"
+            ? `/bot-posts/${post.id}`
+            : `/post/${post.id}`
+        )
+      }
+    >
       {cover && (
         <img
           src={cover}
@@ -91,19 +97,19 @@ export function PostCard({ post }: PostCardProps) {
 }
 
 export default function CreatorPost({ id }: { id: any }) {
-  const {data} = usePostCreators(id);
+  const { data } = usePostCreators(id);
 
   console.log(data);
-  
 
-  return <div>
-         {/* {data && <StatsPosts data={data.posts} />} */}
+  return (
+    <div>
+      {/* {data && <StatsPosts data={data.posts} />} */}
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-
-      {data?.posts.map((p) => (
-        <PostCard key={p.id} post={p} />
-      ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        {data?.posts.map((p) => (
+          <PostCard key={p.id} post={p} />
+        ))}
+      </div>
     </div>
-    </div>
+  );
 }

@@ -1,15 +1,7 @@
 import useFetch from 'http-react';
 import { apiURL } from '../constant';
 import { getToken } from '../utils/storage';
-
-export interface Creator {
-  id: number
-  name: string
-  gender: string | null
-  avatar?: string | null
-  createdAt?: string
-  updatedAt?: string
-};
+import type { Creator } from '../components/creators/CreatorList';
 
 export default function UseCreators() {
   return useFetch<Creator[]>(`${apiURL}/creators`, {

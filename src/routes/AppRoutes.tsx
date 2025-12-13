@@ -27,7 +27,7 @@ import PlateformSubCategoryManager from "../pages/PlateformSubCategoryManager";
 import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
 import PostCategoryManager from "../pages/PostCategoryManager";
-import CreatorManager from "../pages/CreatorManager";
+import CreatorManager from "../pages/CreatorsManager";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";

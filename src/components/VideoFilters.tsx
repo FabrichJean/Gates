@@ -88,6 +88,7 @@ export default function VideoFilters({
     const submit = async () => {
         const data = {
             ...filters,
+            page: "1",
             isDeleted: mapStatus(filters.isDeleted),
             cover_upload_status: mapStatus(filters.cover_upload_status),
             transfer_status: mapStatus(filters.transfer_status),

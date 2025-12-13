@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import UseCreators, { type Creator } from '../hooks/useCreators';
+import UseCreators from '../hooks/useCreators';
 import { deleteCreator } from '../api/creators';
 import toast from 'react-hot-toast';
-import CreatorList from '../components/creators/CreatorList';
+import CreatorList, { type Creator } from '../components/creators/CreatorList';
 import CreatorFormModal from '../components/creators/CreatorFormModal';
 
 export default function CreatorManager() {

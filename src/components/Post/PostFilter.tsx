@@ -139,7 +139,7 @@ export default function PostFilter({
             cover_upload_status: mapStatus(filters.cover_upload_status || "all"),
             transfer_status: mapStatus(filters.transfer_status || "all"),
             isDeleted: mapStatus(filters.isDeleted || "all"),
-            page: safeParams.page || filters.page || "1",
+            page: "1",
             limit: filters.limit || "20",
             sort: filters.sort || "createdAt",
             order: filters.order || "DESC",
