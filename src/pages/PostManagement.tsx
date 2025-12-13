@@ -40,7 +40,7 @@ const PostManagementInner = () => {
 
   const posts = filteredData?.posts || data?.posts || [];
   const total = filteredData?.total || data?.total || 0;
-  const totalSent = filteredData?.totalSent ?? data?.total;
+  // const totalSent = filteredData?.totalSent ?? data?.total;
   const limit = filteredData?.limit || data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,7 +80,7 @@ const PostManagementInner = () => {
               >
                 <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </Link>
-              
+
               <SendToWebApp />
               {/* @ts-ignore */}
               {/* <small>(video sent) : {totalSent}</small> */}
@@ -108,7 +108,7 @@ const PostManagementInner = () => {
                     try {
                       const p = Number(d?.page || page);
                       if (!Number.isNaN(p)) setPage(p);
-                    } catch {}
+                    } catch { }
                   }}
                 />
               </div>
@@ -167,7 +167,7 @@ const PostManagementInner = () => {
                 <th scope="col" className="px-6 py-3">
                   Checking
                 </th>
-                
+
                 <th scope="col" className="px-6 py-3">
                   Activate
                 </th>
@@ -214,7 +214,7 @@ const PostManagementInner = () => {
                             t.src = "";
                           }}
                         />
-                        <Link to={`/creators/`+post?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                        <Link to={`/creators/` + post?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
                           {(post as any).creatorObj.name}
                         </Link>
                       </div>
@@ -342,8 +342,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-              ? "No posts found for this search"
-              : "No posts available"}
+                ? "No posts found for this search"
+                : "No posts available"}
             </div>
           )}
         </div>
