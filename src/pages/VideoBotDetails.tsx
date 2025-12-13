@@ -97,42 +97,39 @@ const VideoBotDetails: React.FC = () => {
     <>
       {/* Alerts are handled inside child components */}
       <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-        <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
+        <div className="w-full  bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
           <div className="flex justify-between gap-4 items-center w-full">
-            <div className="flex items-center gap-2">
-              {video?.creatorObj?.avatar ? (
-                <img
-                  src={video?.creatorObj.avatar}
-                  alt={video?.creatorObj.name}
-                  className="min-w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
-                  No
-                </div>
-              )}
-              <div>
-                <Link className="hover:text-blue-500" to={`/creators/` + video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
+          <div className="flex items-center gap-2">
+            {video?.creatorObj?.avatar ? (
+              <img
+                src={video.creatorObj.avatar}
+                alt={video.creatorObj.name}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs">
+                No
               </div>
+            )}
 
-              <span
-                aria-label={video.type === "1" ? "Short video" : "Long video"}
-                className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold transition-colors duration-200 ${video.type === "1"
+            <Link
+              className="hover:text-blue-500 font-medium"
+              to={`/creators/${video?.creatorObj?.id}`}
+            >
+              {video?.creatorObj?.name ?? video.creator ?? "-"}
+            </Link>
+
+            <span
+              className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                video.type === "1"
                   ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200"
                   : "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200"
-                  }`}
-              >
-                {video.type === "1" ? "SHORT" : "LONG"}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              {video?.plateform?.name && (
-                <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs font-medium">
-                  {video.plateform.name}
-                </span>
-              )}
-            </div>
+              }`}
+            >
+              {video.type === "1" ? "SHORT" : "LONG"}
+            </span>
           </div>
+        </div>
 
           <div className="mb-4">
             <div className="w-max">

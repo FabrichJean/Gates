@@ -28,8 +28,8 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
       {/* TOTAL */}
       <div
         onClick={() => onFilter("all")}
-        className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center 
-                   border dark:border-gray-700 hover:bg-slate-600 cursor-pointer"
+        className="p-4 bg-white dark:bg-gray-800 rounded text-center
+                   border dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
       >
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           Total
@@ -40,8 +40,8 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
       {/* LONG */}
       <div
         onClick={() => onFilter("long")}
-        className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center
-                   border dark:border-gray-700 hover:bg-slate-600 cursor-pointer"
+        className="p-4 bg-white dark:bg-gray-800 rounded text-center
+                   border dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
       >
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           Long
@@ -52,8 +52,8 @@ const StatsPosts = ({ data, onFilter }: StatsPostsProps) => {
       {/* SHORT */}
       <div
         onClick={() => onFilter("short")}
-        className="p-4 bg-white dark:bg-gray-800 rounded shadow text-center
-                   border dark:border-gray-700 hover:bg-slate-600 cursor-pointer"
+        className="p-4 bg-white dark:bg-gray-800 rounded text-center
+                   border dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
       >
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
           Short
