@@ -8,3 +8,9 @@ export default function UseCreators() {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 }
+
+export function UseOneCreator(id: any) {
+  return useFetch<Creator>(`${apiURL}/creators/${id}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+}
