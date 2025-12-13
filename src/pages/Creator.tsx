@@ -6,10 +6,9 @@ import CreatorVideosCard from "../components/CardVideoCreator";
 import CardVideoBotCreator from "../components/videos/cardVideoBotCreator";
 import { UseOneCreator } from "../hooks/useCreators";
 import CreatorFormModal from "../components/creators/CreatorFormModal";
-import type { Creator } from "../components/creators/CreatorList";
 
 
-const Creator = () => {
+const Creatorr = () => {
   const { id } = useParams<{ id: string }>();
   const { data: creator, loading, reFetch } = UseOneCreator(id)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,4 +112,4 @@ const Creator = () => {
   );
 };
 
-export default Creator;
+export default Creatorr;
