@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, Pause, Upload, X } from "lucide-react";
+import { AlertCircle, CheckCircle, Pause, Upload } from "lucide-react";
 import { useProgressStore } from "../../hooks/useProgressStore";
 import { Link } from "react-router-dom";
 
@@ -36,21 +36,6 @@ export default function ProcessVideo() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'uploading':
-        return 'En cours';
-      case 'completed':
-        return 'Terminé';
-      case 'error':
-        return 'Erreur';
-      case 'paused':
-        return 'En pause';
-      default:
-        return 'En attente';
-    }
-  };
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -58,12 +43,6 @@ export default function ProcessVideo() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
-  const calculateTotalProgress = () => {
-    if (taskList.length === 0) return 0;
-    const totalProgress = taskList.reduce((sum, task) => sum + (task.progress || 0), 0);
-    return Math.round(totalProgress / taskList.length);
-  }
 
   return (
     <div className="p-4 overflow-y-auto max-h-96">
@@ -81,15 +60,6 @@ export default function ProcessVideo() {
                     <Link to={`/videos/${task.videoId}}`} className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       Vidéo #{task.videoId}
                     </Link>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        task.status
-                      )} bg-opacity-20 text-${
-                        getStatusColor(task.status).split("-")[1]
-                      }-700`}
-                    >
-                      {getStatusText(task.status)}
-                    </span>
                   </div>
                   <p className="text-xs dark:text-white text-gray-500 mt-1 break-all">
                     {task.file}
