@@ -26,7 +26,7 @@ export default function CreatorFormModal({
 }) {
   const { previewUrl, setFile, clear, getFile } = useImagePreview();
   const [name, setName] = useState("");
-  const [need_vip, setVip] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,7 +54,7 @@ export default function CreatorFormModal({
     try {
       const fd = new FormData();
       fd.append("name", name);
-      fd.append("need_vip", need_vip ? "true" : "false");
+      fd.append("verified", verified ? "true" : "false");
       fd.append("gender", gender || "");
       const file = getFile();
       if (file) fd.append("avatar", file);
@@ -92,10 +92,10 @@ export default function CreatorFormModal({
           </h4>
            <div className="flex items-center gap-3">
               <label className="text-sm text-gray-700 dark:text-gray-200">
-                VIP
+                Verified
               </label>
               {/* @ts-ignore */}
-              <input type="checkbox" defaultChecked className="checkbox border" checked={need_vip} onChange={(e) => setVip(e.target.checked)} />
+              <input type="checkbox" defaultChecked className="checkbox border" checked={verified} onChange={(e) => setVerified(e.target.checked)} />
             </div>
         </div>
 

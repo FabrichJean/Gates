@@ -11,9 +11,6 @@ export default function CategoryManager() {
 
     const { data: categories, reFetch } = UseCategory()
 
-    console.log(categories);
-    
-
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [newCat, setNewCat] = useState("");
     const NON_SPACE_LIMIT = 324;
