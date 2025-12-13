@@ -156,31 +156,28 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Video Details
-                    </h1> */}
                     {/* Creator Info */}
-                    {(video as any)?.creatorObj && (
+                    {(video)?.creatorObj && (
                       <div className="">
                         <div className="flex items-start gap-3">
-                          {(video as any).creatorObj.avatar ? (
+                          {(video).creatorObj.avatar ? (
                             <img
-                              src={(video as any).creatorObj.avatar}
-                              alt={(video as any).creatorObj.name}
+                              src={(video).creatorObj.avatar}
+                              alt={(video).creatorObj.name}
                               className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold">
-                              {(video as any).creatorObj.name?.charAt(0) || "U"}
-                            </div>
+                            <Link to={'/creators/'+video.creatorObj.id} className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                              {(video).creatorObj.name?.charAt(0) || "U"}
+                            </Link>
                           )}
                           <div>
-                            <div className="text-gray-800 dark:text-gray-200 font-medium">
-                              {(video as any).creatorObj.name}
-                            </div>
-                            {(video as any).creatorObj.gender && (
+                            <Link to={'/creators/'+video.creatorObj.id} className="text-gray-800 dark:text-gray-200 font-medium">
+                              {(video).creatorObj.name}
+                            </Link>
+                            {(video).creatorObj.gender && (
                               <div className="text-xs text-gray-500">
-                                {(video as any).creatorObj.gender}
+                                {(video).creatorObj.gender}
                               </div>
                             )}
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -337,7 +334,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       ) : (
                         <Link
                           to={"/touch/video/" + videoId}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:border-orange-300 dark:hover:border-orange-700 rounded-lg"
                         >
                           <Edit3 className="w-4 h-4" />
                           Touch Again
@@ -367,7 +364,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               (video.upload_status === 1 &&
                                 video.transfer_status === 1)
                                 ? "cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400"
-                                : "cursor-pointer bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-md hover:shadow-lg"
+                                : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
                             }`}
                           >
                             {video.processing === "working" ? (
