@@ -1,3 +1,4 @@
+import { MdOutlineVerifiedUser } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 export interface Creator {
@@ -11,6 +12,7 @@ export interface Creator {
   totalSales?: string;
   followers?: number;
   need_vip?: boolean;
+  verified?: boolean;
 }
 
 export default function CreatorList({
@@ -64,9 +66,9 @@ export default function CreatorList({
                   </div>
 
                   <div className="flex-1">
-                    <Link to={`/creators/${creator.id}`} className="text-sm text-nowrap font-semibold text-teal-700 dark:text-white hover:underline">
+                    <Link to={`/creators/${creator.id}`} className="text-sm text-nowrap font-semibold text-gray-700 hover:text-blue-400 dark:text-white hover:underline">
                       {creator.name}
-                      {creator.need_vip && <MdOutlineVerifiedUser className="inline ml-2 text-blue-500" />}
+                      {creator.verified && <MdOutlineVerifiedUser size={14} className="inline ml-2 text-blue-500" />}
                     </Link>
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
                       {creator.followers ?? 0} followers

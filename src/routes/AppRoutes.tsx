@@ -41,7 +41,9 @@ import TagCategory from "../pages/TagCategory";
 import PostBotManagement from "../pages/PostBotManagement";
 import PostBotDetails from "../pages/PostBotDetails";
 import PostBotEdit from "../pages/PostBotEdit";
-import Creator from "../pages/Creator";
+import Creatorr from "../pages/Creator";
+
+
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -339,7 +341,7 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <SuperProtected>
                   <InsideSidebar>
-                    <Creator />
+                    <Creatorr />
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
