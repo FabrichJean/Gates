@@ -40,7 +40,6 @@ const PostManagementInner = () => {
 
   const posts = filteredData?.posts || data?.posts || [];
   const total = filteredData?.total || data?.total || 0;
-  const totalSent = filteredData?.totalSent ?? data?.total;
   const limit = filteredData?.limit || data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,8 +81,6 @@ const PostManagementInner = () => {
               </Link>
               
               <SendToWebApp />
-              {/* @ts-ignore */}
-              {/* <small>(video sent) : {totalSent}</small> */}
 
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>
