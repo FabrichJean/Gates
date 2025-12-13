@@ -46,7 +46,7 @@ export function TitlesForm({
 }: {
   coupleTitles: Couple[];
   setCoupleTitles: React.Dispatch<React.SetStateAction<Couple[]>>;
-  btnSubmit?: string;
+  btnSubmit?: React.ReactNode;
   uploading?: boolean;
   progress?: number;
   handleSubmit: () => void;
