@@ -82,8 +82,6 @@ const PostManagementInner = () => {
               </Link>
 
               <SendToWebApp />
-              {/* @ts-ignore */}
-              {/* <small>(video sent) : {totalSent}</small> */}
 
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>

@@ -40,8 +40,6 @@ const Synchronisation = () => {
   ) => {
 
     try {
-      // Close the modal
-      // setModalOpen(false);
       show();
       await sync({
         isForce: optionId === "true",
@@ -96,11 +94,9 @@ const Synchronisation = () => {
                     setProcessedCount((c) => c + 1);
                   }
                 }
-
-                // finished
+                
                 setProcessingAll(false);
                 setCurrentItem(null);
-                // refresh list
                 reFetch();
               }}
               disabled={processingAll || loading}

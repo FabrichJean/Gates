@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
 import toast from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
-// creator removed as object; it's an optional string attribute on video
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { TitlesForm } from "./Upload";
