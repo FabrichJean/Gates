@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { CgMoreVertical } from "react-icons/cg";
+import { MdOutlineVerifiedUser } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 export interface Creator {
@@ -12,12 +11,11 @@ export interface Creator {
   highestNFTPrice?: string;
   totalSales?: string;
   followers?: number;
+  need_vip?: boolean;
 }
 
 export default function CreatorList({
   creators,
-  onEdit,
-  onDelete,
   isLoading,
 }: {
   creators: Creator[];
@@ -25,15 +23,6 @@ export default function CreatorList({
   onDelete: (id: number) => void;
   isLoading?: boolean;
 }) {
-  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-
-  const toggleDropdown = (id: number) => {
-    setOpenDropdownId(openDropdownId === id ? null : id);
-  };
-
-  const handleEdit = (id: number) => onEdit(creators.find((c) => c.id === id)!);
-  const handleDelete = (id: number) => onDelete(id);
-
   // Répartir les créateurs en 3 lignes
   const rows = [[], [], []] as Creator[][];
   creators.forEach((creator, index) => {
@@ -69,57 +58,14 @@ export default function CreatorList({
                   </div>
 
                   <div className="flex-1">
-                    <Link to={`/creators/${creator.id}`} className="text-lg font-semibold text-gray-900 hover:underline">
+                   <Link to={`/creators/${creator.id}`} className="text-lg font-semibold text-gray-900 hover:underline text-nowrap">
                       {creator.name}
+                      {creator.need_vip && <MdOutlineVerifiedUser className="inline ml-2 text-blue-500" />}
                     </Link>
                     <p className="text-sm text-gray-500 text-nowrap">
                       {creator.followers ?? 0} followers
                     </p>
                   </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={() => toggleDropdown(creator.id)}
-                      className="px-3 py-1 bg-gray-100 rounded-md hover:bg-gray-200 transition cursor-pointer"
-                    >
-                      <CgMoreVertical />
-                    </button>
-                    {openDropdownId === creator.id && (
-                      <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg flex flex-col">
-                        <button
-                          onClick={() => handleEdit(creator.id)}
-                          className="px-4 py-2 text-left hover:bg-blue-500 hover:text-white transition"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(creator.id)}
-                          className="px-4 py-2 text-left hover:bg-red-500 hover:text-white transition"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 text-sm text-gray-700">
-                  {creator.highestNFTPrice && (
-                    <p>
-                      Highest NFT Price:{" "}
-                      <span className="font-semibold text-green-600">
-                        {creator.highestNFTPrice}
-                      </span>
-                    </p>
-                  )}
-                  {creator.totalSales && (
-                    <p>
-                      Total Sale Proceeds:{" "}
-                      <span className="font-semibold text-purple-600">
-                        {creator.totalSales}
-                      </span>
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
