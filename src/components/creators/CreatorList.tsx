@@ -10,6 +10,7 @@ export interface Creator {
   highestNFTPrice?: string;
   totalSales?: string;
   followers?: number;
+  need_vip?: boolean;
 }
 
 export default function CreatorList({
@@ -65,6 +66,7 @@ export default function CreatorList({
                   <div className="flex-1">
                     <Link to={`/creators/${creator.id}`} className="text-sm text-nowrap font-semibold text-teal-700 dark:text-white hover:underline">
                       {creator.name}
+                      {creator.need_vip && <MdOutlineVerifiedUser className="inline ml-2 text-blue-500" />}
                     </Link>
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
                       {creator.followers ?? 0} followers

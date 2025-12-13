@@ -3,9 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { TitlesForm, type Couple } from "./Upload";
 import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
-import { FaPlayCircle } from "react-icons/fa";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
@@ -20,7 +20,6 @@ import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
-// creator is an optional string attribute on video; no creators fetch here
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
@@ -31,6 +30,28 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import type { Platform } from "../hooks/usePlatform";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import GetPostTitles from "./posts/GetPostTitles";
+import {
+  Play,
+  Edit3,
+  Send,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Archive,
+  Film,
+  User,
+  Calendar,
+  Tag,
+  Globe,
+  Clock,
+  Upload,
+  Image,
+  ChevronDown,
+  Plus,
+  Loader2,
+  Save,
+} from "lucide-react";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -44,7 +65,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
-
   const navigate = useNavigate();
 
   const { showAlert, alertProps } = useAnimatedAlert();
@@ -52,43 +72,28 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   useSocketSend(reFetch);
 
-  // Mettre à jour l'URL de cover quand les données vidéo changent
   useEffect(() => {
     setCurrentCoverUrl(
       (video?.s3_urls?.coverUrl ||
         video?.public_urls.cover_url ||
         video?.cover) +
-      "?t=" +
-      Date.now()
+        "?t=" +
+        Date.now()
     );
   }, [video]);
 
   if (!video)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500">Video not found</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-red-500 text-xl font-medium"
+        >
+          Video not found
+        </motion.div>
       </div>
     );
-
-  const deleteVideo = async (
-    id: string | number,
-    type: "archive" | "delete"
-  ) => {
-    try {
-      if (type === "archive") {
-        await archiveVideo(id);
-        toast.success("Video archived successfully");
-        navigate("/videos");
-      } else {
-        await deletePerm(id);
-        toast.success("Video deleted successfully");
-        navigate("/videos");
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      toast.error("Error deleting video");
-    }
-  };
 
   const send = async (videoId: number) => {
     try {
@@ -96,7 +101,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       toast.success("✅ upload workflow started");
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ Erreur d’envoi !");
+      toast.error(err?.response?.data?.message || "❌ Erreur d'envoi !");
     }
   };
 
@@ -111,479 +116,412 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   return (
     <>
       <AnimatedAlert {...alertProps} />
-      {modifying ? (
-        <EditVideo
-          video={video}
-          onSubmit={(newCoverUrl?: string) => {
-            setModifying(false);
-            if (newCoverUrl) {
-              setCurrentCoverUrl(newCoverUrl + "?t=" + Date.now());
-            }
-            reFetch();
-          }}
-        />
-      ) : (
-        <div className="flex flex-col md:flex-row gap-8 p-6 items-start justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
-          {/* <Toaster position="top-right" /> */}
-
-          {/* Formulaire */}
-          <div className="w-full md:w-[60%] bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 space-y-6 transition-all duration-300">
-            <div className="flex justify-between gap-4 items-center w-full">
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 transition-colors duration-300">
-                {formatDateFR(video?.createdAt)}
-              </h2>
-              <div className="flex gap-2">
-                <span className=" px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">
-                  {video.type === "1" ? "short" : "long"}
-                </span>
-                <div className="flex gap-2">
-                  {video?.plateform?.name && (
-                    <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200 text-xs font-medium">
-                      {video.plateform.name}
-                    </span>
-                  )}
-                </div>
-                <CheckingSuperadmin
-                  index={0}
-                  reFetch={reFetch}
-                  video={video}
-                  user={user}
-                />
-              </div>
-            </div>
-            <div className="relative w-full h-[400px] rounded-lg flex items-center justify-center bg-black">
-              {videoPlayed ? (
-                <video
-                  src={video.s3_urls.hlsUrl || video.public_urls.temp_url}
-                  className="w-full h-full object-cover rounded-lg"
-                  controls
-                  autoPlay
-                ></video>
-              ) : (
-                <>
-                  <FaPlayCircle
-                    className="absolute text-8xl text-white cursor-pointer z-10"
-                    onClick={() => setVideoPlayed(true)}
-                  />
-                  <img
-                    src={
-                      currentCoverUrl ||
-                      video.s3_urls.coverUrl ||
-                      video.public_urls.cover_url
-                    }
-                    alt="cover"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </>
-              )}
-            </div>
-            {Array.isArray((video as any)?.tagCategory) && (video as any)?.tagCategory.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mt-1">
-                {(video as any).tagCategory.map((tg: any) => (
-                  <span
-                    key={`${tg?.id ?? tg?.name}-chip`}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
-                    title={tg?.meta ? JSON.stringify(tg.meta) : undefined}
+      <AnimatePresence mode="wait">
+        {modifying ? (
+          <motion.div
+            key="edit"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+          >
+            <EditVideo
+              video={video}
+              onSubmit={(newCoverUrl?: string) => {
+                setModifying(false);
+                if (newCoverUrl) {
+                  setCurrentCoverUrl(newCoverUrl + "?t=" + Date.now());
+                }
+                reFetch();
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="details"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen bg-gray-50 dark:bg-gray-950"
+          >
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800"
+            >
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="flex justify-between items-center">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
                   >
-                    #{tg?.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
-            )}
-
-            <div className="flex flex-wrap gap-4 w-full">
-              {video.checking !== "refused" ? (
-                <button
-                  onClick={() => setModifying(true)}
-                  className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-    font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  modify
-                </button>
-              ) : (
-                <Link
-                  to={"/touch/video/" + videoId}
-                  className="btn flex-shrink-0 relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-    font-medium text-sm rounded-md transition-all duration-300
-    backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  touch again
-                </Link>
-              )}
-
-              {user?.role === RoleEnum.SUPERADMIN && (
-                <div className="relative flex items-center gap-3">
-                  <button
-                    disabled={
-                      video.processing === "working" ||
-                      video.processing === "done"
-                    }
-                    onClick={() => {
-                      if (video.checking !== "checked") {
-                        return alert.warning(
-                          "We need to check this video",
-                          "Video Check Required"
-                        );
-                      }
-                      send(video.id);
-                    }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
-                        (video.upload_status === 1 && video.transfer_status === 1)
-                        ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
-                        : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      }`}
-                  >
-                    {video.processing === "working" ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : video.upload_status === 1 &&
-                      video.transfer_status === 1 ? (
-                      <span className="text-green-600 font-semibold flex gap-1 items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                          />
-                        </svg>
-                        Uploaded
-                      </span>
-                    ) : (
-                      <span className="hover:text-blue-500 flex gap-3 items-center">
-                        <span>🚀</span>
-                        <span>Send</span>
-                      </span>
+                    {/* Creator Info */}
+                    {(video)?.creatorObj && (
+                      <div className="">
+                        <div className="flex items-start gap-3">
+                          {(video).creatorObj.avatar ? (
+                            <img
+                              src={(video).creatorObj.avatar}
+                              alt={(video).creatorObj.name}
+                              className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
+                            />
+                          ) : (
+                            <Link to={'/creators/'+video.creatorObj.id} className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                              {(video).creatorObj.name?.charAt(0) || "U"}
+                            </Link>
+                          )}
+                          <div>
+                            <Link to={'/creators/'+video.creatorObj.id} className="text-gray-800 dark:text-gray-200 font-medium">
+                              {(video).creatorObj.name}
+                            </Link>
+                            {(video).creatorObj.gender && (
+                              <div className="text-xs text-gray-500">
+                                {(video).creatorObj.gender}
+                              </div>
+                            )}
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
+                              {formatDateFR(video?.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     )}
-                  </button>
+                  </motion.div>
 
-                  {/* --- BOUTON ANNULER --- */}
-                  {video.processing === "working" && (
-                    <button
-                      onClick={cancel.bind(null, video.id)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl shadow-md transition-all duration-200"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-5 h-5"
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          video.type === "1"
+                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                        }`}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18 18 6M6 6l12 12"
+                        {video.type === "1" ? "Short" : "Long"}
+                      </span>
+                      {video?.plateform?.name && (
+                        <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium">
+                          {video.plateform.name}
+                        </span>
+                      )}
+                    </div>
+                    <CheckingSuperadmin
+                      index={0}
+                      reFetch={reFetch}
+                      video={video}
+                      user={user}
+                    />
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Video Player */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="lg:col-span-2"
+                >
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+                    <div className="relative aspect-video bg-black group">
+                      {videoPlayed ? (
+                        <video
+                          src={
+                            video.s3_urls.hlsUrl || video.public_urls.temp_url
+                          }
+                          className="w-full h-full object-cover"
+                          controls
+                          autoPlay
                         />
-                      </svg>
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              )}
+                      ) : (
+                        <>
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setVideoPlayed(true)}
+                            className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+                          >
+                            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                              <Play className="w-10 h-10 text-white ml-1" />
+                            </div>
+                          </motion.div>
+                          <img
+                            src={
+                              currentCoverUrl ||
+                              video.s3_urls.coverUrl ||
+                              video.public_urls.cover_url
+                            }
+                            alt="cover"
+                            className="w-full h-full object-cover"
+                          />
+                        </>
+                      )}
+                    </div>
 
-              {hasPrev ? (
-                <Link
-                  to={"/videos/" + prevVideo}
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
-    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
-    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  prev
-                </Link>
-              ) : (
-                <div
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-gray-100 dark:bg-gray-800 
-    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
-    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  prev
-                </div>
-              )}
-
-              {hasNext ? (
-                <Link
-                  to={"/videos/" + nextVideo}
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 
-    text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
-    hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
-                >
-                  next
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              ) : (
-                <div
-                  className="relative flex items-center justify-center gap-2 px-4 py-2
-    font-medium text-sm rounded-md transition-all duration-300
-    bg-gray-100 dark:bg-gray-800 
-    text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
-    flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
-                >
-                  next
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              )}
-
-              <Link
-                to={"/videos"}
-                className="relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
-        font-medium text-sm rounded-md transition-all duration-300
-        backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500 bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 flex-shrink-0"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 hidden sm:block"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                  />
-                </svg>
-                <span className="sm:hidden">←</span>
-                <span className="hidden sm:inline">Back</span>
-                <span className="sm:hidden">Back</span>
-              </Link>
-
-              <dialog
-                id="my_modal_6"
-                className="modal modal-bottom sm:modal-middle"
-              >
-                <div className="modal-box bg-white dark:bg-gray-800 border dark:border-gray-700">
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                    Delete
-                  </h3>
-                  <div className="modal-action">
-                    <form
-                      method="dialog"
-                      className="flex flex-col gap-4 w-full"
-                    >
-                      <div
-                        className="px-1 btn w-full bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 border dark:border-gray-600"
-                        onClick={deleteVideo.bind(null, video.id, "delete")}
-                      >
-                        <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300">
-                          <span className="inline-flex justify-center items-center ml-3.5"></span>
-                          <span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                            delete permanently
-                          </span>
-                        </div>
+                    {/* Tags Section */}
+                    <div className="px-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Tag className="w-4 h-4 text-gray-500" />
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tags
+                        </h3>
                       </div>
-
-                      <div
-                        className="px-1 btn w-full bg-white dark:bg-gray-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 border dark:border-gray-600"
-                        onClick={deleteVideo.bind(null, video.id, "archive")}
-                      >
-                        <div className="flex flex-row items-center  justify-center lg:justify-start rounded-md h-12 focus:outline-none pr-3.5  lg:pr-6 font-semibold hover:text-primary-400 cursor-pointer text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300">
-                          <span className="inline-flex justify-center items-center ml-3.5"></span>
-                          <span className="ml-2 text-sm tracking-wide truncate capitalize hidden lg:block">
-                            archive
-                          </span>
+                      {Array.isArray((video as any)?.tagCategory) &&
+                      (video as any)?.tagCategory.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(video as any).tagCategory.map((tg: any) => (
+                            <motion.span
+                              key={`${tg?.id ?? tg?.name}-chip`}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                              title={
+                                tg?.meta ? JSON.stringify(tg.meta) : undefined
+                              }
+                            >
+                              #{tg?.name}
+                            </motion.span>
+                          ))}
                         </div>
-                      </div>
-
-                      <button className="btn w-full bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        cancel
-                      </button>
-                    </form>
+                      ) : (
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          No tags
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Post Titles */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                      <GetPostTitles postTitles={video.titles as any} />
+                    </div>
                   </div>
-                </div>
-              </dialog>
-            </div>
+                </motion.div>
 
-            {video?.cdn_url && video?.s3_hls_path && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  CDN playback URL
-                </h1>
-                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
-                  {video?.cdn_url + video?.s3_hls_path}
-                </a>
-              </div>
-            )}
+                {/* Sidebar */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-6"
+                >
+                  {/* Actions Card */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                      Actions
+                    </h2>
 
-            {video?.cdn_url && video?.s3_cover_path && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  CDN Cover URL
-                </h1>
-                <a className="block w-full font-semibold text-blue-600 dark:text-blue-400 text-xs tracking-wide break-all overflow-hidden">
-                  {video?.cdn_url + video?.s3_cover_path}
-                </a>
-              </div>
-            )}
+                    <div className="space-y-3">
+                      {video.checking !== "refused" ? (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setModifying(true)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-transparent rounded-lg border transition-all duration-200 shadow-lg hover:shadow-lg"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Edit Video
+                        </motion.button>
+                      ) : (
+                        <Link
+                          to={"/touch/video/" + videoId}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:border-orange-300 dark:hover:border-orange-700 rounded-lg"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Touch Again
+                        </Link>
+                      )}
 
-            {/* Video Info */}
-            <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <GetPostTitles postTitles={(video.titles as any)} />
-            </div>
+                      {user?.role === RoleEnum.SUPERADMIN && (
+                        <>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            disabled={
+                              video.processing === "working" ||
+                              video.processing === "done"
+                            }
+                            onClick={() => {
+                              if (video.checking !== "checked") {
+                                return alert.warning(
+                                  "We need to check this video",
+                                  "Video Check Required"
+                                );
+                              }
+                              send(video.id);
+                            }}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              video.processing === "working" ||
+                              (video.upload_status === 1 &&
+                                video.transfer_status === 1)
+                                ? "cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400"
+                                : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
+                            }`}
+                          >
+                            {video.processing === "working" ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                Processing...
+                              </>
+                            ) : video.upload_status === 1 &&
+                              video.transfer_status === 1 ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                <span>Uploaded</span>
+                              </div>
+                            ) : (
+                              <>
+                                <Send className="w-4 h-4" />
+                                Send to Process
+                              </>
+                            )}
+                          </motion.button>
 
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Author
-              </h1>
-              <Link
-                to={`/users/${video.user?.id}`}
-                className="text-blue-600 dark:text-blue-400 hover:underline transition-colors duration-300"
-              >
-                {video.user?.username}
-              </Link>
-            </div>
+                          {video.processing === "working" && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={cancel.bind(null, video.id)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              <X className="w-4 h-4" />
+                              Cancel
+                            </motion.button>
+                          )}
+                        </>
+                      )}
 
-            {(video as any)?.creatorObj && (
-              <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 transition-colors duration-300">
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  Creator
-                </h1>
-                <div className="flex items-center gap-3">
-                  {(video as any).creatorObj.avatar ? (
-                    <img
-                      src={video.creatorObj.avatar!}
-                      alt={video.creatorObj.name!}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">
-                      No
+                      <div className="flex gap-2 pt-2">
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="flex-1"
+                        >
+                          <Link
+                            to={"/videos/" + prevVideo}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              hasPrev
+                                ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Previous
+                          </Link>
+                        </motion.div>
+
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="flex-1"
+                        >
+                          <Link
+                            to={"/videos/" + nextVideo}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              hasNext
+                                ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4" />
+                          </Link>
+                        </motion.div>
+                      </div>
+
+                      <motion.div whileHover={{ scale: 1.02 }}>
+                        <Link
+                          to="/videos"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200"
+                        >
+                          <Film className="w-4 h-4" />
+                          Back to Videos
+                        </Link>
+                      </motion.div>
                     </div>
-                  )}
-                  <div>
-                    <div className="text-gray-800 dark:text-gray-200 font-medium">
-                      <Link to={`/creators/` + video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
+                  </div>
+
+                  {/* Info Cards */}
+                  <div className="space-y-4">
+
+                    {/* Category Info */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Globe className="w-4 h-4 text-gray-500" />
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Category
+                        </h3>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-gray-900 dark:text-gray-100 font-medium">
+                          {video?.category?.name}
+                        </span>
+                        <span className="text-gray-500 mx-2">/</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {video?.subCategory?.name}
+                        </span>
+                      </div>
                     </div>
-                    {(video as any).creatorObj.gender && (
-                      <div className="text-xs text-gray-500">
-                        {(video as any).creatorObj.gender}
+
+                    {/* URLs */}
+                    {video?.cdn_url && video?.s3_hls_path && (
+                      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Globe className="w-4 h-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            CDN Playback URL
+                          </h3>
+                        </div>
+                        <a
+                          href={video?.cdn_url + video?.s3_hls_path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 dark:text-blue-400 break-all hover:underline"
+                        >
+                          {video?.cdn_url + video?.s3_hls_path}
+                        </a>
+                      </div>
+                    )}
+
+                    {video?.cdn_url && video?.s3_cover_path && (
+                      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Globe className="w-4 h-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            CDN Cover URL
+                          </h3>
+                        </div>
+                        <a
+                          href={video?.cdn_url + video?.s3_cover_path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 dark:text-blue-400 break-all hover:underline"
+                        >
+                          {video?.cdn_url + video?.s3_cover_path}
+                        </a>
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               </div>
-            )}
-
-            <div className="space-y-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-2 mt-5 transition-colors duration-300">
-              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Category
-              </h1>
-              <span className="w-20 font-semibold text-blue-600 dark:text-blue-400 uppercase text-xs tracking-wide">
-                {video?.category?.name} / {video?.subCategory?.name}
-              </span>
             </div>
-          </div>
-
-          <div className="w-full md:w-[35%] flex flex-col gap-4" />
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
 
 export default VideoDetails;
 
+// EditVideo component remains the same but with improved styling
 function EditVideo({
   video,
   onSubmit,
@@ -611,17 +549,17 @@ function EditVideo({
   const [subcategory, setSubCategory] = useState<SubCategory>(
     video?.subCategory
   );
-  // @ts-ignore
+
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(
     video?.titles?.map((title) => ({
-      id: title.id, // or title.video_id if that's more appropriate
+      id: title.id,
       language: title.language,
       i18_language: title.i18_language,
       title: title.title,
       description: title.description,
     })) || []
   );
-  // prefer creatorObj when available; keep both creator name and possible id
+
   const initialCreatorName =
     (video as any)?.creatorObj?.name ??
     (typeof (video as any)?.creator === "string"
@@ -633,11 +571,74 @@ function EditVideo({
     (video as any)?.creator?.id ??
     (video as any)?.creator_id ??
     null;
+
   const [creator, setCreator] = useState<string | null>(initialCreatorName);
   const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
   const [videoType, setVideoType] = useState<string>(
     video?.type === "1" ? "short" : "long"
   );
+
+  const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
+    { id?: number; name: string }[]
+  >(
+    video.tagCategory?.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+    })) ?? []
+  );
+
+  const [postTagQuery, setPostTagQuery] = useState("");
+  const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
+  const [postTagSuggestions, setPostTagSuggestions] = useState<any[]>([]);
+  const [availablePostTags, setAvailablePostTags] = useState<
+    Array<{ id?: number; name: string; meta?: any }>
+  >([]);
+
+  const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Load available tags
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getTagCategoriesApi();
+        const items = res?.data?.items ?? res?.data ?? [];
+        const normalized = (Array.isArray(items) ? items : []).map(
+          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
+        );
+        setAvailablePostTags(normalized);
+        setPostTagSuggestions(normalized);
+      } catch (err) {
+        console.warn("Failed to load post tag categories", err);
+      }
+    };
+    load();
+  }, []);
+
+  // Filter tag suggestions
+  useEffect(() => {
+    if (!postTagQuery) {
+      setPostTagSuggestions(availablePostTags);
+      return;
+    }
+    const q = postTagQuery.toLowerCase();
+    setPostTagSuggestions(
+      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
+    );
+  }, [postTagQuery, availablePostTags]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        postTagWrapperRef.current &&
+        !postTagWrapperRef.current.contains(event.target as Node)
+      ) {
+        setShowPostTagDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -657,7 +658,6 @@ function EditVideo({
       ...(creatorId ? { creator_id: creatorId } : creator ? { creator } : {}),
       ...(platform?.id ? { plateform_id: platform.id } : {}),
       ...(videoType ? { type: videoType === "short" ? "1" : "2" } : {}),
-
       isShort: videoType === "short",
       titles: JSON.stringify(coupleTitles),
       duration,
@@ -683,10 +683,8 @@ function EditVideo({
       });
 
       reFetchVideos();
+      toast.success("✅ Video updated successfully!");
 
-      toast.success("✅ successfull !");
-
-      // Si une nouvelle cover a été uploadée, passer la nouvelle URL
       const newCoverUrl = coverFile
         ? res.data?.public_urls?.cover_url || video.public_urls.cover_url
         : undefined;
@@ -700,58 +698,7 @@ function EditVideo({
     }
   };
 
-  const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
-  // TAGS
-  const [postTagQuery, setPostTagQuery] = useState("");
-  const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
-
-  // suggestions récupérées depuis API (à adapter)
-  const [postTagSuggestions, setPostTagSuggestions] = useState<any[]>([]);
-  const [availablePostTags, setAvailablePostTags] = useState<
-    Array<{ id?: number; name: string; meta?: any }>
-  >([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getTagCategoriesApi();
-        const items = res?.data?.items ?? res?.data ?? [];
-        const normalized = (Array.isArray(items) ? items : []).map(
-          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
-        );
-
-        setAvailablePostTags(normalized);
-        setPostTagSuggestions(normalized);
-      } catch (err) {
-        console.warn("Failed to load post tag categories", err);
-      }
-    };
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (!postTagQuery) {
-      setPostTagSuggestions(availablePostTags);
-      return;
-    }
-    const q = postTagQuery.toLowerCase();
-    setPostTagSuggestions(
-      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
-    );
-  }, [postTagQuery, availablePostTags]);
-
-  // tags sélectionnés
-  const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
-    { id?: number; name: string }[]
-  >(
-    video.tagCategory?.map((t: any) => ({
-      id: t.id,
-      name: t.name,
-    })) ?? []
-  );
-
   const addPostTagSuggestion = (tag: any) => {
-    // éviter les doublons
     if (
       selectedPostTagCategories.some(
         (existing) => existing.name.toLowerCase() === tag.name.toLowerCase()
@@ -759,19 +706,16 @@ function EditVideo({
     ) {
       return;
     }
-
     setSelectedPostTagCategories((prev) => [...prev, tag]);
     setPostTagQuery("");
   };
 
   const addPostTagByName = (name: string) => {
     if (!name.trim()) return;
-
     const existed = selectedPostTagCategories.some(
       (t) => t.name.toLowerCase() === name.toLowerCase()
     );
     if (existed) return;
-
     setSelectedPostTagCategories((prev) => [...prev, { name }]);
     setPostTagQuery("");
   };
@@ -781,205 +725,88 @@ function EditVideo({
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
-      {/* <Toaster position="top-right" /> */}
-      <div className="flex flex-col w-full">
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-          Edit
-        </h1>
-        <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
-          <div className="space-y-6">
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Category
-              </label>
-              <CategoryAutoComplete
-                defaultValue={category}
-                onSelect={(cat) => setCategory(cat)}
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Sub Category
-              </label>
-              <SubCategoryAutoComplete
-                categoryId={category?.id}
-                defaultValue={subcategory}
-                onSelect={(cat) => setSubCategory(cat)}
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 p-4 sm:p-6 transition-all duration-300">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-6xl mx-auto"
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Edit Video
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Update video information and settings
+          </p>
+        </motion.div>
 
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator (optional)
-              </label>
-              <CreatorAutoComplete
-                value={creator}
-                onChange={(v: string | null) => setCreator(v)}
-                onSelect={(c) => setCreatorId(c?.id ?? null)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Duration ( ms)
-              </label>
-              <input
-                type="number"
-                className="input w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
-                defaultValue={duration || 0}
-                onChange={(e) => setDuration(Number(e.currentTarget.value))}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Platform
-              </label>
-              <PlatformSelectComponent defaultValue={platform} onSelect={setPlatform} />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Type
-              </label>
-              <div className="relative w-full">
-                <select
-                  className="w-full appearance-none text-black dark:text-white border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 pr-10 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:border-blue-400 dark:focus:ring-blue-900 transition-all duration-300 shadow-sm cursor-pointer"
-                  value={videoType}
-                  onChange={(e) => setVideoType(e.target.value)}
-                >
-                  <option value="short" className="cursor-pointer">
-                    Short
-                  </option>
-                  <option value="long" className="cursor-pointer">
-                    Long
-                  </option>
-                </select>
-                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 dark:text-gray-500">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                    <path
-                      d="M7 8l3 3 3-3"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              </div>
-            </div>
-
-            <div className="relative w-full" ref={postTagWrapperRef}>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Tags:
-              </label>
-              <div className="flex gap-2 items-center">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={postTagQuery}
-                    onChange={(e) => {
-                      setPostTagQuery(e.target.value);
-                      setShowPostTagDropdown(true);
-                    }}
-                    onFocus={() => setShowPostTagDropdown(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addPostTagByName(postTagQuery);
-                        setShowPostTagDropdown(false);
-                      }
-                    }}
-                    placeholder="Type tag name or select suggestion..."
-                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
-                  />
-
-                  {showPostTagDropdown &&
-                    postTagSuggestions &&
-                    postTagSuggestions.length > 0 && (
-                      <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
-                        {postTagSuggestions.slice(0, 8).map((s) => (
-                          <li
-                            key={s.id ?? s.name}
-                            onClick={() => {
-                              addPostTagSuggestion(s);
-                              setShowPostTagDropdown(false);
-                            }}
-                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                          >
-                            {s.name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    addPostTagByName(postTagQuery);
-                    setShowPostTagDropdown(false);
-                  }}
-                  className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {selectedPostTagCategories.map((t, i) => (
-                  <span
-                    key={`${t.id ?? "new"}-${t.name}-${i}`}
-                    className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    <span>{t.name}</span>
-                    <button
-                      onClick={() => removeSelectedPostTag(i)}
-                      className="text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+        <div className="flex flex-col gap-8">
+          {/* Left Column - Basic Info */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex md:flex-row flex-col gap-4"
+          >
+            {/* Cover Image */}
+            <div className="bg-white flex-1 dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                <Image className="w-5 h-5" />
                 Cover Image
-              </label>
+              </h2>
+
               <div
                 onClick={handleCoverClick}
-                className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer relative"
+                className="relative border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer group"
               >
-                {coverPreview ? (
-                  <img
-                    src={coverPreview}
-                    alt="Preview"
-                    className="rounded-lg object-cover w-full h-52"
-                  />
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-gray-400 dark:text-gray-500 mb-2 transition-colors duration-300"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                <AnimatePresence mode="wait">
+                  {coverPreview ? (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="relative w-full"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A4.5 4.5 0 1115.9 6H16a4 4 0 110 8h-1m-3 4l-4-4m0 0l4-4m-4 4h12"
+                      <img
+                        src={coverPreview}
+                        alt="Preview"
+                        className="rounded-lg object-cover w-full h-64"
                       />
-                    </svg>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm text-center transition-colors duration-300">
-                      Click or drag an image (PNG, JPG, WEBP)
-                    </p>
-                  </>
-                )}
+                      <motion.div
+                        whileHover={{ opacity: 1 }}
+                        className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 transition-opacity duration-300"
+                      >
+                        <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-lg flex items-center gap-2">
+                          <Upload className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            Change Image
+                          </span>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-center"
+                    >
+                      <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-3" />
+                      <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+                        Click to upload cover image
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
+                        PNG, JPG, WEBP up to 10MB
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <input
                   type="file"
                   ref={coverInputRef}
@@ -990,27 +817,226 @@ function EditVideo({
               </div>
             </div>
 
-            {/* Barre de progression */}
-            {uploading && (
-              <div className="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full overflow-hidden transition-colors duration-300">
-                <div
-                  className="bg-blue-600 dark:bg-blue-500 h-3 rounded-full transition-colors duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            )}
-          </div>
+            {/* Basic Information */}
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
+                <Film className="w-5 h-5" />
+                Basic Information
+              </h2>
 
-          <TitlesForm
-            btnSubmit="✏️ update"
-            coupleTitles={coupleTitles}
-            setCoupleTitles={setCoupleTitles}
-            progress={progress}
-            uploading={uploading}
-            handleSubmit={handleSubmit}
-          />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Category */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Category
+                  </label>
+                  <CategoryAutoComplete
+                    defaultValue={category}
+                    onSelect={(cat) => setCategory(cat)}
+                  />
+                </div>
+
+                {/* Sub Category */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Sub Category
+                  </label>
+                  <SubCategoryAutoComplete
+                    categoryId={category?.id}
+                    defaultValue={subcategory}
+                    onSelect={(cat) => setSubCategory(cat)}
+                  />
+                </div>
+
+                {/* Creator */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Creator (optional)
+                  </label>
+                  <CreatorAutoComplete
+                    value={creator}
+                    onChange={(v: string | null) => setCreator(v)}
+                    onSelect={(c) => setCreatorId(c?.id ?? null)}
+                  />
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Duration (milliseconds)
+                  </label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="number"
+                      className="input w-full pl-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
+                      defaultValue={duration || 0}
+                      onChange={(e) =>
+                        setDuration(Number(e.currentTarget.value))
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Platform
+                  </label>
+                  <PlatformSelectComponent
+                    defaultValue={platform}
+                    onSelect={setPlatform}
+                  />
+                </div>
+
+                {/* Video Type */}
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
+                    Video Type
+                  </label>
+                  <div className="relative">
+                    <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select
+                      className="w-full appearance-none pl-10 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
+                      value={videoType}
+                      onChange={(e) => setVideoType(e.target.value)}
+                    >
+                      <option value="short">Short Video</option>
+                      <option value="long">Long Video</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          {/* Tags Section */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Tags
+            </h2>
+
+            <div className="space-y-4">
+              <div className="relative" ref={postTagWrapperRef}>
+                <div className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={postTagQuery}
+                      onChange={(e) => {
+                        setPostTagQuery(e.target.value);
+                        setShowPostTagDropdown(true);
+                      }}
+                      onFocus={() => setShowPostTagDropdown(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addPostTagByName(postTagQuery);
+                          setShowPostTagDropdown(false);
+                        }
+                      }}
+                      placeholder="Type tag name or select suggestion..."
+                      className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 pr-10 outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
+                    />
+                    <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => {
+                      addPostTagByName(postTagQuery);
+                      setShowPostTagDropdown(false);
+                    }}
+                    className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </motion.button>
+                </div>
+
+                <AnimatePresence>
+                  {showPostTagDropdown &&
+                    postTagSuggestions &&
+                    postTagSuggestions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
+                      >
+                        {postTagSuggestions.slice(0, 8).map((s, index) => (
+                          <motion.button
+                            key={s.id ?? s.name}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            type="button"
+                            onClick={() => {
+                              addPostTagSuggestion(s);
+                              setShowPostTagDropdown(false);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 text-gray-700 dark:text-gray-300"
+                          >
+                            {s.name}
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                </AnimatePresence>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <AnimatePresence>
+                  {selectedPostTagCategories.map((t, i) => (
+                    <motion.span
+                      key={`${t.id ?? "new"}-${t.name}-${i}`}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 px-4 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                    >
+                      <Tag className="w-3 h-3" />
+                      <span>{t.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeSelectedPostTag(i)}
+                        className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </motion.span>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Column - Titles Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
+            <TitlesForm
+              btnSubmit={
+                <div className="flex items-center gap-2">
+                  {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <Save className="w-4 h-4" />
+                  Update Video
+                </div>
+              }
+              coupleTitles={coupleTitles}
+              setCoupleTitles={setCoupleTitles}
+              progress={progress}
+              uploading={uploading}
+              handleSubmit={handleSubmit}
+            />
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
