@@ -1,24 +1,13 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 
 import CreatorPost from "./Creator/CreatorPost";
 import CreatorVideosCard from "../components/CardVideoCreator";
 import CardVideoBotCreator from "../components/videos/cardVideoBotCreator";
-
-import { apiURL } from "../constant";
-import { getToken } from "../utils/storage";
 import { UseOneCreator } from "../hooks/useCreators";
 import CreatorFormModal from "../components/creators/CreatorFormModal";
 import type { Creator } from "../components/creators/CreatorList";
 
-type CreatorType = {
-  id: number;
-  name: string;
-  avatar: string | null;
-  gender?: string;
-  description?: string | null;
-};
 
 const Creator = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,10 +17,7 @@ const Creator = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const closeModal = () => setIsModalOpen(false);
-    const openEditModal = (c: Creator) => { setIsModalOpen(true); };
-  
-
-
+  const openEditModal = () => { setIsModalOpen(true); };
 
 
   return (
@@ -46,14 +32,8 @@ const Creator = () => {
 
         {/* Cover */}
         <div className="relative h-40 bg-slate-100 dark:bg-slate-800">
-          {/* <img
-            src=""
-            alt="Cover"
-            className="w-full h-full object-cover"
-          /> */}
-
           <div className="absolute top-2 right-2 flex gap-2">
-            <button onClick={openEditModal.bind(null, creator)} className="px-2 py-1 border border-info rounded-sm text-info hover:bg-info/20">
+            <button onClick={openEditModal.bind(null)} className="px-2 py-1 border border-info rounded-sm text-info hover:bg-info/20">
               Edit
             </button>
             <button className="px-2 py-1 border border-error rounded-sm text-error hover:bg-error/20">
