@@ -24,6 +24,8 @@ export type TPostFilter = {
     limit: string;
     sort: string;
     order: string;
+    // ajout utile pour la recherche créateur côté UI
+    creatorSearch?: string;
 };
 
 export default function PostFilter({
@@ -37,7 +39,6 @@ export default function PostFilter({
     setFilters: (f: any) => void;
     onSubmit: (d: any) => void;
 }) {
-
     const { data: users } = useUsers("");
     const { data: creators } = UseCreators();
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
@@ -45,11 +46,14 @@ export default function PostFilter({
 
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
+    const [creatorOpen, setCreatorOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>(
         filters?.category_id ? [String(filters.category_id)] : []
     );
+
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
+    const creatorRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (filters?.category_id && categoriesResponse?.categories) {
@@ -68,6 +72,9 @@ export default function PostFilter({
             }
             if (subCategoryDropdownRef.current && !subCategoryDropdownRef.current.contains(event.target as Node)) {
                 setSubOpen(false);
+            }
+            if (creatorRef.current && !creatorRef.current.contains(event.target as Node)) {
+                setCreatorOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -96,9 +103,11 @@ export default function PostFilter({
             console.warn("⚠️ Impossible de lire le filtre sauvegardé posts:", e);
             localStorage.removeItem("posts_filtered");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleChange = (key: string, value: string) => {
+    // accepte maintenant n'importe quel type de valeur (string | number)
+    const handleChange = (key: string, value: any) => {
         setFilters((prev: any) => ({ ...prev, [key]: value }));
     };
 
@@ -284,18 +293,75 @@ export default function PostFilter({
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
-                        <select
-                            className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-                            value={filters.creator_id || filters.creator}
-                            onChange={(e) => handleChange("creator_id", e.target.value)}
-                        >
-                            <option value=''>all</option>
-                            {creators?.map((c, i) => (
-                                <option key={i} value={c.id}>{c.name}</option>
-                            ))}
-                        </select>
+                    <div ref={creatorRef} className="relative">
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+                            Creator
+                        </label>
+
+                        {/* Champ de recherche */}
+                        <input
+                            type="text"
+                            placeholder="Search creator..."
+                            // on affiche uniquement creatorSearch — ainsi si l'utilisateur efface, la valeur n'est pas ré-écrasée par creator_id
+                            value={filters.creatorSearch || ""}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                // si l'utilisateur vide le champ, on vide aussi creator_id pour permettre la suppression
+                                if (value === "") {
+                                    handleChange("creatorSearch", "");
+                                    handleChange("creator_id", "");
+                                } else {
+                                    handleChange("creatorSearch", value);
+                                }
+                            }}
+                            onFocus={() => setCreatorOpen(true)}
+                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                        />
+
+                        {/* Liste déroulante filtrée */}
+                        {creatorOpen && (
+                            <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
+
+                                {/* Option ALL */}
+                                <div
+                                    className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+                                    onClick={() => {
+                                        handleChange("creator_id", "");
+                                        handleChange("creatorSearch", "");
+                                        setCreatorOpen(false);
+                                    }}
+                                >
+                                    all
+                                </div>
+
+                                {/* Si aucun creator */}
+                                {(!creators || creators.length === 0) && (
+                                    <div className="px-3 py-2 text-gray-500">No creators found</div>
+                                )}
+
+                                {/* Résultats filtrés */}
+                                {creators
+                                    ?.filter((c) =>
+                                        c.name
+                                            .toLowerCase()
+                                            .includes((filters.creatorSearch || "").toLowerCase())
+                                    )
+                                    .map((c) => (
+                                        <div
+                                            key={c.id}
+                                            className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+                                            onClick={() => {
+                                                // stocke l'id en string pour garder la cohérence côté filters (backend attend string souvent)
+                                                handleChange("creator_id", String(c.id));
+                                                handleChange("creatorSearch", c.name);
+                                                setCreatorOpen(false);
+                                            }}
+                                        >
+                                            {c.name}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
                     </div>
 
                     <div>
@@ -370,7 +436,8 @@ export default function PostFilter({
                             setFilters({
                                 category_id: "",
                                 sub_category_id: "",
-                                creator: "",
+                                creator_id: "",
+                                creatorSearch: "",
                                 startDate: "",
                                 endDate: "",
                                 uploaded: "all",

@@ -58,8 +58,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       (video?.s3_urls?.coverUrl ||
         video?.public_urls.cover_url ||
         video?.cover) +
-        "?t=" +
-        Date.now()
+      "?t=" +
+      Date.now()
     );
   }, [video]);
 
@@ -258,12 +258,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       }
                       send(video.id);
                     }}
-                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${
-                      video.processing === "working" ||
-                      (video.upload_status === 1 && video.transfer_status === 1)
+                    className={`relative flex w-[150px] items-center justify-center gap-2 px-6 py-2.5 font-medium hover:text-blue-500 text-sm rounded-md transition-all duration-300 ${video.processing === "working" ||
+                        (video.upload_status === 1 && video.transfer_status === 1)
                         ? "cursor-not-allowed bg-gray-100 dark:bg-gray-100/10 text-gray-500"
                         : "cursor-pointer bg-transparent hover:bg-white text-gray-700 dark:text-gray-100 border border-blue-300 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    }`}
+                      }`}
                   >
                     {video.processing === "working" ? (
                       <>
@@ -554,7 +553,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   )}
                   <div>
                     <div className="text-gray-800 dark:text-gray-200 font-medium">
-                      {(video as any).creatorObj.name}
+                      <Link to={`/creators/` + video?.creatorObj?.id}>{(video)?.creatorObj?.name ?? video.creator ?? '-'}</Link>
                     </div>
                     {(video as any).creatorObj.gender && (
                       <div className="text-xs text-gray-500">
@@ -614,7 +613,7 @@ function EditVideo({
   );
   // @ts-ignore
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(
-    video?.titles?.map((title, index) => ({
+    video?.titles?.map((title) => ({
       id: title.id, // or title.video_id if that's more appropriate
       language: title.language,
       i18_language: title.i18_language,

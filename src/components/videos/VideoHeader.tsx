@@ -27,7 +27,7 @@ const VideoHeader = ({
   setFilters,
   params,
   onMutate,
-  onWebApp, sent,
+  onWebApp,
   scope = "videos",
 }: VideoHeaderProps) => {
   const fabControls = useAnimation();

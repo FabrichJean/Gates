@@ -12,6 +12,7 @@ interface PostCardProps {
   post: any; // tu peux typer plus fort si tu veux
 }
 
+
 export function PostCard({ post }: PostCardProps) {
   const nav = useNavigate();
   // choisir un titre
