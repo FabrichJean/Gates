@@ -21,6 +21,7 @@ import {
   X,
   Loader2,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import toast from "react-hot-toast";
@@ -39,6 +40,8 @@ import type { Platform } from "../hooks/usePlatform";
 import { useVideosContext } from "../context/VideosContext";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import { BiUpload } from "react-icons/bi";
+import axios from "axios";
+import { translateServer } from "../constant";
 
 export type Couple = {
   language: any;
@@ -49,6 +52,15 @@ export type Couple = {
   description?: string;
 };
 
+type Props = {
+  coupleTitles: Couple[];
+  setCoupleTitles: React.Dispatch<React.SetStateAction<Couple[]>>;
+  btnSubmit?: React.ReactNode;
+  uploading?: boolean;
+  progress?: number;
+  handleSubmit: () => void;
+};
+
 export function TitlesForm({
   progress,
   uploading,
@@ -56,54 +68,95 @@ export function TitlesForm({
   btnSubmit,
   coupleTitles,
   setCoupleTitles,
-}: {
-  coupleTitles: Couple[];
-  setCoupleTitles: React.Dispatch<React.SetStateAction<Couple[]>>;
-  btnSubmit?: React.ReactNode;
-  uploading?: boolean;
-  progress?: number;
-  handleSubmit: () => void;
-}) {
+}: Props) {
+  /* ---------- logique existante ---------- */
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...coupleTitles];
-    newCouples[index][field] = value;
+    (newCouples[index] as any)[field] = value;
     setCoupleTitles(newCouples);
   };
 
   const addCouple = () =>
     setCoupleTitles((c) => [
       ...c,
-      { id: null, language: null, i18_language: "", title: "" },
+      {
+        id: null,
+        language: null,
+        i18_language: "",
+        title: "",
+        description: "",
+      },
     ]);
 
   const removeCouple = (index: number) => {
     setCoupleTitles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
-    submit();
+  /* ---------- nouveau : modal “auto” ---------- */
+  const [isLoading, setLoading] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoTitle, setAutoTitle] = useState("");
+  const [autoDesc, setAutoDesc] = useState("");
+  const [server, setServer] = useState(translateServer);
+
+  const applyAuto = async () => {
+    setLoading(true);
+    const i18ns = await axios.post<Couple[]>(server, {
+      title: autoTitle,
+      description: autoDesc,
+    });
+
+    setCoupleTitles(i18ns.data);
+
+    setLoading(false);
+    setAutoOpen(false);
+    setAutoTitle("");
+    setAutoDesc("");
   };
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+      {/* ---------- header ---------- */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
           <FileVideo className="w-5 h-5" />
           Titles & Descriptions
         </h3>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          type="button"
-          onClick={addCouple}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
-        >
-          <Plus className="w-4 h-4" />
-          Add Language
-        </motion.button>
+        <div className="flex items-center gap-2">
+          {/* bouton Auto */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => setAutoOpen(true)}
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <Sparkles className="w-4 h-4" />
+            Auto
+          </motion.button>
+
+          {/* bouton Add Language */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={addCouple}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <Plus className="w-4 h-4" />
+            Add Language
+          </motion.button>
+        </div>
       </div>
 
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {/* ---------- liste des couples ---------- */}
       <div className="space-y-6">
         <AnimatePresence>
           {coupleTitles?.map((c, i) => (
@@ -176,10 +229,11 @@ export function TitlesForm({
         </AnimatePresence>
       </div>
 
+      {/* ---------- bouton principal ---------- */}
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={handleSubmit}
+        onClick={submit}
         disabled={uploading}
         className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
           uploading
@@ -200,6 +254,72 @@ export function TitlesForm({
           </>
         )}
       </motion.button>
+
+      {/* ---------- Modal DaisyUI ---------- */}
+      <input
+        type="checkbox"
+        checked={autoOpen}
+        onChange={() => setAutoOpen((o) => !o)}
+        className="modal-toggle"
+      />
+      <div className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+          <h3 className="font-bold text-lg mb-4">
+            Auto-fill titles & descriptions
+          </h3>
+
+          <div className="form-control w-full mb-4">
+            <label className="label">
+              <span className="label-text">Title</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Global title"
+              className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
+              value={autoTitle}
+              onChange={(e) => setAutoTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="form-control w-full mb-6">
+            <label className="label">
+              <span className="label-text">Description</span>
+            </label>
+            <textarea
+              placeholder="Global description"
+              className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
+              rows={3}
+              value={autoDesc}
+              onChange={(e) => setAutoDesc(e.target.value)}
+            />
+          </div>
+
+          <div className="form-control w-full mb-4">
+            <label className="label">
+              <span className="label-text">Server</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Global title"
+              className="text-xs w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
+              value={server}
+              onChange={(e) => setServer(e.target.value)}
+            />
+          </div>
+
+          <div className="modal-action">
+            <button
+              className="btn btn-ghost"
+              onClick={() => setAutoOpen(false)}
+            >
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={applyAuto}>
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -456,9 +576,6 @@ const Upload = () => {
     reFetch,
   ]);
 
-  console.log('sss', suggestions);
-  
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
       <motion.div
@@ -666,7 +783,7 @@ const Upload = () => {
                   <Plus className="w-4 h-4" />
                 </motion.button>
               </div>
-                  
+
               <AnimatePresence>
                 {showTagDropdown && suggestions && suggestions.length > 0 && (
                   <motion.div
