@@ -65,7 +65,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
-  const navigate = useNavigate();
+  const isPortrait = React.useMemo(() => {
+    return video?.type === "1";
+  }, [video]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
@@ -157,27 +159,33 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                     transition={{ delay: 0.1 }}
                   >
                     {/* Creator Info */}
-                    {(video)?.creatorObj && (
+                    {video?.creatorObj && (
                       <div className="">
                         <div className="flex items-start gap-3">
-                          {(video).creatorObj.avatar ? (
+                          {video.creatorObj.avatar ? (
                             <img
-                              src={(video).creatorObj.avatar}
-                              alt={(video).creatorObj.name}
+                              src={video.creatorObj.avatar}
+                              alt={video.creatorObj.name}
                               className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                             />
                           ) : (
-                            <Link to={'/creators/'+video.creatorObj.id} className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold">
-                              {(video).creatorObj.name?.charAt(0) || "U"}
+                            <Link
+                              to={"/creators/" + video.creatorObj.id}
+                              className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold"
+                            >
+                              {video.creatorObj.name?.charAt(0) || "U"}
                             </Link>
                           )}
                           <div>
-                            <Link to={'/creators/'+video.creatorObj.id} className="text-gray-800 dark:text-gray-200 font-medium">
-                              {(video).creatorObj.name}
+                            <Link
+                              to={"/creators/" + video.creatorObj.id}
+                              className="text-gray-800 dark:text-gray-200 font-medium"
+                            >
+                              {video.creatorObj.name}
                             </Link>
-                            {(video).creatorObj.gender && (
+                            {video.creatorObj.gender && (
                               <div className="text-xs text-gray-500">
-                                {(video).creatorObj.gender}
+                                {video.creatorObj.gender}
                               </div>
                             )}
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -233,39 +241,78 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   className="lg:col-span-2"
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
-                    <div className="relative aspect-video bg-black group">
-                      {videoPlayed ? (
-                        <video
-                          src={
-                            video.s3_urls.hlsUrl || video.public_urls.temp_url
-                          }
-                          className="w-full h-full object-cover"
-                          controls
-                          autoPlay
-                        />
-                      ) : (
-                        <>
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setVideoPlayed(true)}
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
-                          >
-                            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
-                              <Play className="w-10 h-10 text-white ml-1" />
-                            </div>
-                          </motion.div>
-                          <img
+                    <div
+                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${
+                        isPortrait
+                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                      }`}
+                    >
+                      <AnimatePresence mode="wait">
+                        {videoPlayed ? (
+                          <motion.video
+                            key="video"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
                             src={
-                              currentCoverUrl ||
-                              video.s3_urls.coverUrl ||
-                              video.public_urls.cover_url
+                              video.s3_urls.hlsUrl || video.public_urls.temp_url
                             }
-                            alt="cover"
                             className="w-full h-full object-cover"
+                            controls
+                            autoPlay
+                            playsInline
+                            // onLoadedMetadata permet de forcer la bonne orientation
+                            onLoadedMetadata={(e) => {
+                              const el = e.currentTarget;
+                              el.style.objectFit = "cover"; // remplit tout
+                              el.style.objectPosition = "center";
+                            }}
                           />
-                        </>
-                      )}
+                        ) : (
+                          <motion.div
+                            key="poster"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="relative w-full h-full"
+                          >
+                            {/* poster */}
+                            <motion.img
+                              src={
+                                currentCoverUrl ||
+                                video.s3_urls.coverUrl ||
+                                video.public_urls.cover_url
+                              }
+                              alt="cover"
+                              className="w-full h-full object-cover"
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                            />
+
+                            {/* overlay léger */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                            {/* bouton play centré */}
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => setVideoPlayed(true)}
+                              className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+                              aria-label="Play video"
+                            >
+                              <div className="relative">
+                                <div className="absolute -inset-2 bg-white/20 rounded-full blur-lg group-hover:blur-xl transition-all" />
+                                <div className="relative w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
+                                  <Play className="w-10 h-10 text-white ml-1 drop-shadow-lg" />
+                                </div>
+                              </div>
+                            </motion.button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Tags Section */}
@@ -299,7 +346,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
-                    
+
                     {/* Post Titles */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
                       <GetPostTitles postTitles={video.titles as any} />
@@ -450,7 +497,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
                   {/* Info Cards */}
                   <div className="space-y-4">
-
                     {/* Category Info */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
                       <div className="flex items-center gap-2 mb-3">
@@ -1012,7 +1058,7 @@ function EditVideo({
               </div>
             </div>
           </div>
-          
+
           {/* Right Column - Titles Form */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
