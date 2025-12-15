@@ -52,13 +52,14 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
+import SexyShortLoader from "../components/SexyShortLoader";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
-  const { data: video, reFetch } = UseVideo(videoId);
+  const { data: video, reFetch, loading } = UseVideo(videoId);
   const [videoPlayed, setVideoPlayed] = useState(false);
 
   const [modifying, setModifying] = useState(false);
@@ -84,19 +85,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     );
   }, [video]);
 
-  if (!video)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-red-500 text-xl font-medium"
-        >
-          Video not found
-        </motion.div>
-      </div>
-    );
-
+  
   const send = async (videoId: number) => {
     try {
       await sendProcessing(videoId);
@@ -114,6 +103,25 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
         toast.error(err?.response?.data?.message);
       });
   };
+
+  if (!video)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-red-500 text-xl font-medium"
+        >
+          Video not found
+        </motion.div>
+      </div>
+  );
+
+  if (loading) {
+    return <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-20 rounded-xl">
+      <SexyShortLoader />
+    </div>
+  }
 
   return (
     <>
