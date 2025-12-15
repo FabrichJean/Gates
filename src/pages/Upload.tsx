@@ -181,11 +181,10 @@ export function TitlesForm({
         whileTap={{ scale: 0.98 }}
         onClick={handleSubmit}
         disabled={uploading}
-        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-          uploading
-            ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-            : "rounded-lg border shadow-lg hover:shadow-xl"
-        }`}
+        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${uploading
+          ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+          : "rounded-lg border shadow-lg hover:shadow-xl"
+          }`}
       >
         {uploading ? (
           <>
@@ -235,6 +234,9 @@ const Upload = () => {
 
   const [state, dispatch] = useReducer(uploadReducer, initialUploadState);
   const { videoFile, coverFile, videoPreview, coverPreview } = state;
+
+  const [needVip, setNeedVip] = useState<boolean>(false);
+
 
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -391,6 +393,8 @@ const Upload = () => {
     fd.append("ref", String(ref));
     fd.append("titles", JSON.stringify(coupleTitles));
     fd.append("isShort", String(videoType === "short"));
+    fd.append("need_vip", String(needVip));
+
 
     if (selectedTagCategories.length > 0) {
       const ids: number[] = [];
@@ -456,9 +460,6 @@ const Upload = () => {
     reFetch,
   ]);
 
-  console.log('sss', suggestions);
-  
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
       <motion.div
@@ -466,20 +467,45 @@ const Upload = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Upload Video
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Upload and configure your video content
-          </p>
-        </motion.div>
+        <div className="flex items-center justify-between">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Upload Video
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Upload and configure your video content
+            </p>
+          </motion.div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              VIP
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setNeedVip((v) => !v)}
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+                }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
+                  }`}
+              />
+            </button>
+
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {needVip ? 'true' : 'false'}
+            </span>
+          </div>
+
+        </div>
+
         {/* Reference */}
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
@@ -666,7 +692,7 @@ const Upload = () => {
                   <Plus className="w-4 h-4" />
                 </motion.button>
               </div>
-                  
+
               <AnimatePresence>
                 {showTagDropdown && suggestions && suggestions.length > 0 && (
                   <motion.div
