@@ -99,11 +99,17 @@ export function TitlesForm({
   const [autoDesc, setAutoDesc] = useState("");
   const [server, setServer] = useState(translateServer);
 
+  const [selectedLanguages, setSelectedLanguages] = useState<
+    Array<{ code: string; name: string }>
+  >([]);
+
+
   const applyAuto = async () => {
     setLoading(true);
     const i18ns = await axios.post<Couple[]>(server, {
       title: autoTitle,
       description: autoDesc,
+      i18n: selectedLanguages.length === 0 ? null : selectedLanguages.map((l) => l.code),
     });
 
     setCoupleTitles(i18ns.data);
@@ -112,6 +118,7 @@ export function TitlesForm({
     setAutoOpen(false);
     setAutoTitle("");
     setAutoDesc("");
+    setSelectedLanguages([]);
   };
 
   return (
@@ -182,7 +189,7 @@ export function TitlesForm({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Language
+                    {/* Language { JSON.stringify(c.language) } */}
                   </label>
                   <LanguageAutoComplete
                     defaultValue={{
@@ -266,6 +273,58 @@ export function TitlesForm({
           <h3 className="font-bold text-lg mb-4">
             Auto-fill titles & descriptions
           </h3>
+
+          {/* champ select multiple language */}
+
+          <div className="form-control w-full mb-4">
+            <div className="flex space-x-1.5 items-center">
+              <label className="label">
+                <span className="label-text">
+                  {selectedLanguages.length === 0 ? 'All' : `(${selectedLanguages.length}) lang selected`}
+                </span>
+              </label>
+            </div>
+
+            <LanguageAutoComplete
+              onSelect={(lang) => {
+                if (!lang) return;
+
+                const exists = selectedLanguages.find(
+                  (l) => l.code === lang.code
+                );
+                if (exists) return;
+
+                setSelectedLanguages((prev) => [
+                  ...prev,
+                  { code: lang.code, name: lang.name },
+                ]);
+              }}
+            />
+
+            {/* Selected languages */}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedLanguages.map((lang, index) => (
+                <span
+                  key={lang.code}
+                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm"
+                >
+                  {lang.name}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedLanguages((prev) =>
+                        prev.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="hover:text-red-500"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
 
           <div className="form-control w-full mb-4">
             <label className="label">
