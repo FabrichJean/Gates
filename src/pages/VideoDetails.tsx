@@ -60,6 +60,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
+  const isPortrait = React.useMemo(() => {
+    return video?.type === "1";
+  }, [video]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
@@ -228,18 +231,36 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   className="lg:col-span-2"
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
-                    <div className="relative aspect-video bg-black group">
-                      {videoPlayed ? (
-                        <video
-                          src={
-                            video.s3_urls.hlsUrl || video.public_urls.temp_url
-                          }
-                          className="w-full h-full object-cover"
-                          controls
-                          autoPlay
-                        />
-                      ) : (
-                        <>
+                    <div
+                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${
+                        isPortrait
+                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                      }`}
+                    >
+                      <AnimatePresence mode="wait">
+                        {videoPlayed ? (
+                          <motion.video
+                            key="video"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            src={
+                              video.s3_urls.hlsUrl || video.public_urls.temp_url
+                            }
+                            className="w-full h-full object-cover"
+                            controls
+                            autoPlay
+                            playsInline
+                            // onLoadedMetadata permet de forcer la bonne orientation
+                            onLoadedMetadata={(e) => {
+                              const el = e.currentTarget;
+                              el.style.objectFit = "cover"; // remplit tout
+                              el.style.objectPosition = "center";
+                            }}
+                          />
+                        ) : (
                           <motion.div
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
@@ -308,6 +329,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
+
 
                     {/* Post Titles */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
@@ -456,7 +478,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
                   {/* Info Cards */}
                   <div className="space-y-4">
-
                     {/* Category Info */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
                       <div className="flex items-center gap-2 mb-3">
@@ -772,10 +793,6 @@ function EditVideo({
                   }`}
               />
             </button>
-
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              { needVip ? 'true' : 'false'}
-            </span>
           </div>
         </div>
 
