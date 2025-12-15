@@ -140,7 +140,7 @@ export default function PostFilter({
             transfer_status: mapStatus(filters.transfer_status || "all"),
             isDeleted: mapStatus(filters.isDeleted || "all"),
             page: "1",
-            limit: filters.limit || "20",
+            limit: filters.limit || "10",
             sort: filters.sort || "createdAt",
             order: filters.order || "DESC",
         };
