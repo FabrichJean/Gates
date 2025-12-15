@@ -232,11 +232,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
                     <div
-                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${
-                        isPortrait
-                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
-                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
-                      }`}
+                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${isPortrait
+                        ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                        : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                        }`}
                     >
                       <AnimatePresence mode="wait">
                         {videoPlayed ? (
@@ -253,49 +252,53 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             controls
                             autoPlay
                             playsInline
-                            // onLoadedMetadata permet de forcer la bonne orientation
                             onLoadedMetadata={(e) => {
                               const el = e.currentTarget;
-                              el.style.objectFit = "cover"; // remplit tout
+                              el.style.objectFit = "cover";
                               el.style.objectPosition = "center";
                             }}
                           />
                         ) : (
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setVideoPlayed(true)}
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
-                          >
-                            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
-                              <Play className="w-10 h-10 text-white ml-1" />
-                            </div>
-                          </motion.div>
+                          <>
+                            {/* Play Button */}
+                            <motion.div
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setVideoPlayed(true)}
+                              className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+                            >
+                              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                                <Play className="w-10 h-10 text-white ml-1" />
+                              </div>
+                            </motion.div>
 
-                          {
-                            video?.need_vip && (
+                            {/* VIP Badge */}
+                            {video?.need_vip && (
                               <motion.div
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                className="absolute right-0 top-0 flex items-center justify-center cursor-pointer z-10"
+                                className="absolute right-2 top-2 z-20"
                               >
-                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-all duration-200">
-                                  <RiVipCrown2Fill className="w-5 h-5 text-orange-400 ml-1" />
+                                <div className="w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                  <RiVipCrown2Fill className="w-5 h-5 text-orange-400" />
                                 </div>
                               </motion.div>
-                            )
-                          }
-                          <img
-                            src={
-                              currentCoverUrl ||
-                              video.s3_urls.coverUrl ||
-                              video.public_urls.cover_url
-                            }
-                            alt="cover"
-                            className="w-full h-full object-cover"
-                          />
-                        </>
-                      )}
+                            )}
+
+                            {/* Cover Image */}
+                            <img
+                              src={
+                                currentCoverUrl ||
+                                video.s3_urls.coverUrl ||
+                                video.public_urls.cover_url
+                              }
+                              alt="cover"
+                              className="w-full h-full object-cover"
+                            />
+                          </>
+                        )}
+                      </AnimatePresence>
+
                     </div>
 
                     {/* Tags Section */}
