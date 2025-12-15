@@ -772,10 +772,6 @@ function EditVideo({
                   }`}
               />
             </button>
-
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              { needVip ? 'true' : 'false'}
-            </span>
           </div>
         </div>
 
