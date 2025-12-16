@@ -3,7 +3,7 @@ import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "./useSubCategory";
-import type { Creator } from "./useCreators";
+import type { Creator } from "../components/creators/CreatorList";
 
 export type Checking = "null" | "waiting for checking" | "refused" | "checked";
 
@@ -23,6 +23,7 @@ export type TVideo = {
   user_id: number;
   checking: Checking;
   type: "1" | "2";
+  need_vip: boolean;
   comment: string;
   category: Category;
   subCategory: SubCategory;

@@ -37,8 +37,8 @@ function TouchVideo() {
   useEffect(() => {
     setVideoPreview(
       video?.s3_urls?.hlsUrl ||
-        video?.public_urls.temp_url ||
-        video?.local_mp4_path
+      video?.public_urls.temp_url ||
+      video?.local_mp4_path
     );
     setCoverPreview(
       video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover
@@ -54,16 +54,16 @@ function TouchVideo() {
       // creator fields
       setCreator(
         (video as any)?.creatorObj?.name ??
-          (typeof (video as any)?.creator === "string"
-            ? (video as any).creator
-            : (video as any)?.creator?.name) ??
-          null
+        (typeof (video as any)?.creator === "string"
+          ? (video as any).creator
+          : (video as any)?.creator?.name) ??
+        null
       );
       setCreatorId(
         (video as any)?.creatorObj?.id ??
-          (video as any)?.creator?.id ??
-          (video as any)?.creator_id ??
-          null
+        (video as any)?.creator?.id ??
+        (video as any)?.creator_id ??
+        null
       );
     }
   }, [video]);
@@ -96,6 +96,7 @@ function TouchVideo() {
   const [creator, setCreator] = useState<string | null>(initialCreatorName);
   const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
   const [videoType, setVideoType] = useState<string>("long");
+  const [needVip, setNeedVip] = useState<boolean>(!!video?.need_vip);
 
   // TagCategory state (mirror EditVideo/Upload): available suggestions + selected chips
   const [availableTags, setAvailableTags] = useState<Array<{ id?: number; name: string; meta?: any }>>([]);
@@ -179,10 +180,7 @@ function TouchVideo() {
       }
       fd.append("category_id", String(category.id));
       if (subcategory) fd.append("sub_category_id", String(subcategory.id));
-      // backend expects 'plateform_id' (single id)
       // if (platform?.id) fd.append("plateform_id", String(platform.id));
-      // prefer sending creator_id when an existing creator is selected,
-      // otherwise fall back to free-text creator name for backward compatibility
       if (creatorId) fd.append("creator_id", String(creatorId));
       else if (creator) fd.append("creator", String(creator));
       // fd.append("ref", String(ref));
@@ -191,6 +189,8 @@ function TouchVideo() {
       if (videoType) fd.append("type", videoType === "short" ? "1" : "2");
       fd.append("isShort", String(videoType === "short"));
       fd.append("titles", JSON.stringify(coupleTitles));
+      fd.append("need_vip", String(needVip));
+
 
       // Build mixed tagCategory array as expected by backend
       if (selectedTagCategories && selectedTagCategories.length > 0) {
@@ -390,6 +390,24 @@ function TouchVideo() {
                   <span className="font-semibold">{videoType}</span>
                 </span>
               </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                VIP
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setNeedVip((v) => !v)}
+                className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
+                    }`}
+                />
+              </button>
             </div>
 
             <div>
