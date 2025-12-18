@@ -42,6 +42,7 @@ import PostBotManagement from "../pages/PostBotManagement";
 import PostBotDetails from "../pages/PostBotDetails";
 import PostBotEdit from "../pages/PostBotEdit";
 import Creatorr from "../pages/Creator";
+import MediaPostManager from "../pages/MediaPostManager";
 
 
 
@@ -201,6 +202,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <PostEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/edit-media/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MediaPostManager />
                 </InsideSidebar>
               </ProtectedRoute>
             }
