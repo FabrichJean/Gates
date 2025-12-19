@@ -45,6 +45,7 @@ import Creatorr from "../pages/Creator";
 import MediaPostManager from "../pages/MediaPostManager";
 
 import Mangas from "../pages/Mangas";
+import UploadMangas from "../pages/UploadMangas";
 
 
 
@@ -64,6 +65,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <Mangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangas />
                 </InsideSidebar>
               </ProtectedRoute>
             }
