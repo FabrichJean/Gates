@@ -2,6 +2,8 @@ import { apiURL, token } from "../constant";
 import axios from "axios";
 
 export const createManga = async (data: FormData) => {
+    console.log(data);
+    
   const response = await axios.post(`${apiURL}/mangas/`, data, {
     headers: {
       Authorization: `Bearer ${token()}`,

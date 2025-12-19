@@ -4,6 +4,8 @@ import { createManga } from "../api/mangas";
 import { getCreators } from "../api/creators";
 import { getAllPlateformsApi } from "../api/plateforms";
 import { getTagCategoriesApi } from "../api/tagCategory";
+import { getMangasCategoriesApi } from "../api/mangasCategory";
+import { getMangasSubCategoriesApi } from "../api/mangasSubCategory";
 import toast from "react-hot-toast";
 
 const UploadMangas: React.FC = () => {
@@ -24,6 +26,8 @@ const UploadMangas: React.FC = () => {
   const [creators, setCreators] = useState<any[]>([]);
   const [plateforms, setPlateforms] = useState<any[]>([]);
   const [tagCategories, setTagCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
 
   useEffect(() => {
     getCreators().then((res) => setCreators(res.data || res)).catch(() => {});
@@ -35,6 +39,20 @@ const UploadMangas: React.FC = () => {
         setTagCategories(tags);
       })
       .catch(() => setTagCategories([]));
+    getMangasCategoriesApi()
+      .then((res) => {
+        let cats = res.data?.data || res.data || res;
+        if (!Array.isArray(cats)) cats = [];
+        setCategories(cats);
+      })
+      .catch(() => setCategories([]));
+    getMangasSubCategoriesApi()
+      .then((res) => {
+        let subs = res.data?.data || res.data || res;
+        if (!Array.isArray(subs)) subs = [];
+        setSubCategories(subs);
+      })
+      .catch(() => setSubCategories([]));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -71,7 +89,7 @@ const UploadMangas: React.FC = () => {
         } else if (key === "cover" && value) {
           formData.append("cover", value as File);
         } else {
-          formData.append(key, value as string);
+          formData.append(key, String(value));
         }
       });
       await createManga(formData);
@@ -108,7 +126,18 @@ const UploadMangas: React.FC = () => {
           <label className="block font-medium mb-1">Catégorie</label>
           <select name="mangas_category_id" value={form.mangas_category_id} onChange={handleChange} className="input input-bordered w-full" required>
             <option value="">Sélectionner</option>
-            {/* TODO: Charger les catégories mangas si API disponible */}
+            {Array.isArray(categories) && categories.map((cat: any) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Sous-catégorie</label>
+          <select name="mangas_sub_category_id" value={form.mangas_sub_category_id} onChange={handleChange} className="input input-bordered w-full">
+            <option value="">Sélectionner</option>
+            {Array.isArray(subCategories) && subCategories.map((sub: any) => (
+              <option key={sub.id} value={sub.id}>{sub.name}</option>
+            ))}
           </select>
         </div>
         <div>
