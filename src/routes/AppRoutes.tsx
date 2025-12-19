@@ -44,6 +44,8 @@ import PostBotEdit from "../pages/PostBotEdit";
 import Creatorr from "../pages/Creator";
 import MediaPostManager from "../pages/MediaPostManager";
 
+import Mangas from "../pages/Mangas";
+
 
 
 const AppRoutes = () => {
@@ -56,6 +58,16 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route
+            path="/mangas"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <Mangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/users"
             element={
