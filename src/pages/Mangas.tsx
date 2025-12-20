@@ -96,6 +96,12 @@ const Mangas: React.FC = () => {
                       <td className="px-4 py-2 border-b text-center">
                         <div className="flex gap-2 justify-center">
                           <Link
+                            to={`/mangas/${manga.id}`}
+                            className="btn btn-xs btn-outline btn-info"
+                          >
+                            Détails
+                          </Link>
+                          <Link
                             to={`/mangas/${manga.id}/edit`}
                             className="btn btn-xs btn-outline btn-primary"
                           >

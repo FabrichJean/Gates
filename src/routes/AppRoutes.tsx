@@ -59,6 +59,7 @@ import MediaPostManager from "../pages/MediaPostManager";
 import Mangas from "../pages/Mangas";
 import UploadMangas from "../pages/UploadMangas";
 import EditMangasPage from "../pages/EditMangasPage";
+import MangasDetailsPage from "../pages/MangasDetailsPage";
 import UploadMangasEpisodePage from "../pages/UploadMangasEpisodePage";
 import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
@@ -91,6 +92,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <UploadMangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasDetailsPage />
                 </InsideSidebar>
               </ProtectedRoute>
             }
