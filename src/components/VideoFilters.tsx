@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
-import { mapStatus, reverseStatus } from "../utils/filter";
+import { mapStatus, mapStatusProcessing, reverseStatus } from "../utils/filter";
 import UseCreators from "../hooks/useCreators";
 
 export type TFilter = {
@@ -13,9 +13,7 @@ export type TFilter = {
     creator_id: string;
     creatorSearch?: string;
     isDeleted: string;
-    upload_status: string;
-    cover_upload_status: string;
-    transfer_status: string;
+    processing: string;
     startedAt: string;
     endAt: string;
 };
@@ -52,9 +50,7 @@ export default function VideoFilters({
             const _ = {
                 ...savedFilter,
                 isDeleted: reverseStatus(savedFilter.isDeleted),
-                cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-                transfer_status: reverseStatus(savedFilter.transfer_status),
-                upload_status: reverseStatus(savedFilter.upload_status),
+                processing: mapStatusProcessing(savedFilter.processing),
                 startedAt: savedFilter.startedAt || "",
                 endAt: savedFilter.endAt || "",
                 // restore creatorSearch if present
@@ -89,9 +85,7 @@ export default function VideoFilters({
         const data = {
             ...filters,
             isDeleted: mapStatus(filters.isDeleted),
-            cover_upload_status: mapStatus(filters.cover_upload_status),
-            transfer_status: mapStatus(filters.transfer_status),
-            upload_status: mapStatus(filters.upload_status),
+            processing: mapStatusProcessing(filters.processing),
         };
 
         localStorage.setItem("videos_filtered", JSON.stringify(data));
@@ -104,19 +98,30 @@ export default function VideoFilters({
             if (scope === "bot") {
                 // lazy import the bot api to avoid cycles
                 const { getFilteredBotVideos } = await import("../api/videoBot");
+                
                 fetched = await getFilteredBotVideos(finalQuery);
+
+                console.log(fetched.data);
+                
             } else {
                 const { getFilteredVideos } = await import("../api/videos");
+                
                 fetched = await getFilteredVideos(finalQuery);
+                console.log(fetched.data);
             }
 
             onSubmit(fetched.data);
-
-            // debug
-            // console.log("✅ Filtres appliqués :", finalQuery);
         } catch (error) {
             console.error(" Erreur lors du filtrage :", error);
         }
+    };
+
+    const closeModal = () => {
+        const modal = document.getElementById(
+            "search_modal_52"
+        ) as HTMLDialogElement | null;
+
+        modal?.close();
     };
 
     return (
@@ -254,9 +259,7 @@ export default function VideoFilters({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                         { key: "isDeleted", label: "Deleted" },
-                        { key: "upload_status", label: "Video Uploaded" },
-                        { key: "cover_upload_status", label: "Cover Uploaded" },
-                        { key: "transfer_status", label: "Transferred" },
+                        { key: "processing", label: "Video Uploaded" },
                     ].map(({ key, label }) => (
                         <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
                             <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
@@ -294,9 +297,7 @@ export default function VideoFilters({
                                 creator_id: "",
                                 creatorSearch: "",
                                 isDeleted: "all",
-                                upload_status: "all",
-                                cover_upload_status: "all",
-                                transfer_status: "all",
+                                processing: "",
                                 sub_category_id: "",
                                 startedAt: "",
                                 endAt: "",
@@ -313,6 +314,7 @@ export default function VideoFilters({
                         onClick={(e) => {
                             e.preventDefault();
                             submit();
+                            closeModal();
                         }}
                     >
                         Apply
