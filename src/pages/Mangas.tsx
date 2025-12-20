@@ -58,10 +58,9 @@ const Mangas: React.FC = () => {
               <thead>
                 <tr>
                   <th className="px-4 py-2 border-b">#</th>
-                  <th className="px-4 py-2 border-b">Titre</th>
-                  <th className="px-4 py-2 border-b">Catégorie</th>
-                  <th className="px-4 py-2 border-b">Sous-catégorie</th>
                   <th className="px-4 py-2 border-b">Créateur</th>
+                  <th className="px-4 py-2 border-b">ref</th>
+                  <th className="px-4 py-2 border-b">Catégorie</th>
                   <th className="px-4 py-2 border-b">Chapitres</th>
                   <th className="px-4 py-2 border-b">VIP</th>
                   <th className="px-4 py-2 border-b">Cover</th>
@@ -77,15 +76,14 @@ const Mangas: React.FC = () => {
                   mangas.map((manga, idx) => (
                     <tr key={manga.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                       <td className="px-4 py-2 border-b">{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                      <td className="px-4 py-2 border-b font-semibold">{manga.ref}</td>
-                      <td className="px-4 py-2 border-b">{manga.mangasCategory?.name || '-'}</td>
-                      <td className="px-4 py-2 border-b">{manga.mangasSubCategory?.name || '-'}</td>
                       <td className="px-4 py-2 border-b flex items-center gap-2">
                         {manga.creatorObj?.avatar && (
                           <img src={manga.creatorObj.avatar.startsWith('http') ? manga.creatorObj.avatar : `/${manga.creatorObj.avatar}`} alt="avatar" className="w-6 h-6 rounded-full object-cover" />
                         )}
                         {manga.creatorObj?.name || manga.creator || '-'}
                       </td>
+                      <td className="px-4 py-2 border-b font-semibold">{manga.ref}</td>
+                      <td className="px-4 py-2 border-b">{manga.mangasCategory?.name || '-'} / {manga.mangasSubCategory?.name || '-'}</td>
                       <td className="px-4 py-2 border-b text-center">{manga.total_chapters ?? '-'}</td>
                       <td className="px-4 py-2 border-b text-center">{manga.need_vip ? <span className="text-pink-600 font-bold">VIP</span> : '-'}</td>
                       <td className="px-4 py-2 border-b">
