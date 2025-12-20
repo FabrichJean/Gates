@@ -102,12 +102,26 @@ const MangasChaptersPage: React.FC<Props> = ({ mangaId }) => {
                   <td className="px-4 py-2 border-b">{ch.description || '-'}</td>
                   <td className="px-4 py-2 border-b text-center">{ch.chapter_number}</td>
                   <td className="px-4 py-2 border-b text-center">
-                    <Link
-                      to={`/mangas/${mangaId}/chapters/${ch.id}/edit`}
-                      className="btn btn-xs btn-outline"
-                    >
-                      Éditer
-                    </Link>
+                    <div className="flex gap-2 justify-center">
+                      <Link
+                        to={`/mangas/${mangaId}/chapters/${ch.id}/episodes`}
+                        className="btn btn-xs btn-outline"
+                      >
+                        Épisodes
+                      </Link>
+                      <Link
+                        to={`/mangas/${mangaId}/chapters/${ch.id}/edit`}
+                        className="btn btn-xs btn-outline btn-primary"
+                      >
+                        Éditer
+                      </Link>
+                      <Link
+                        to={`/mangas/${mangaId}/chapters/${ch.id}/episodes/upload`}
+                        className="btn btn-xs btn-outline btn-success"
+                      >
+                        + Épisode
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))
