@@ -15,3 +15,9 @@ export async function createMangasEpisodeApi(chapterId: number, formData: FormDa
     },
   });
 }
+
+export async function deleteMangasEpisodeApi(episodeId: number) {
+  return await axios.delete(`${apiURL}/mangas/episodes/${episodeId}`, {
+    headers: { Authorization: `Bearer ${token()}` },
+  });
+}

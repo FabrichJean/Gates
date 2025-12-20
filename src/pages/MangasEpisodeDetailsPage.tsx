@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL, token } from "../constant";
+import { deleteMangasEpisodeApi } from "../api/mangasEpisode";
 import toast from "react-hot-toast";
 
 interface Episode {
@@ -21,6 +22,7 @@ interface Episode {
 
 const MangasEpisodeDetailsPage: React.FC = () => {
   const { mangaId, chapterId, episodeId } = useParams();
+  const navigate = useNavigate();
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -192,10 +194,15 @@ const MangasEpisodeDetailsPage: React.FC = () => {
           Éditer
         </Link>
         <button
-          onClick={() => {
+          onClick={async () => {
             if (confirm("Voulez-vous vraiment supprimer cet épisode ?")) {
-              // TODO: Implement delete
-              toast.success("Fonctionnalité de suppression à implémenter");
+              try {
+                await deleteMangasEpisodeApi(Number(episodeId));
+                toast.success("Épisode supprimé avec succès");
+                navigate(`/mangas/${mangaId}/chapters/${chapterId}/episodes`);
+              } catch (error) {
+                toast.error("Erreur lors de la suppression de l'épisode");
+              }
             }
           }}
           className="btn btn-error"

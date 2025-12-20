@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMangasChaptersApi } from "../api/mangasChapter";
 import axios from "axios";
 import { apiURL, token } from "../constant";
 import toast from "react-hot-toast";
