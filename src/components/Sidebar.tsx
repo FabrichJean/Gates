@@ -117,18 +117,19 @@ function Sidebar({
   };
 
   const isActive = (name: string) =>
-    location.pathname.startsWith(`/${name}`) && !location.pathname.startsWith(`/${name}-`);
+    location.pathname.startsWith(`/${name}`) &&
+    !location.pathname.startsWith(`/${name}-`);
 
-  const NavLink = ({ 
-    to, 
-    icon: Icon, 
-    label, 
+  const NavLink = ({
+    to,
+    icon: Icon,
+    label,
     name,
-    iconComponent 
-  }: { 
-    to: string; 
-    icon?: any; 
-    label: string; 
+    iconComponent,
+  }: {
+    to: string;
+    icon?: any;
+    label: string;
     name: string;
     iconComponent?: React.ReactNode;
   }) => (
@@ -138,9 +139,10 @@ function Sidebar({
       className={`
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-300 overflow-hidden
-        ${isActive(name)
-          ? 'bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20'
-          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50'
+        ${
+          isActive(name)
+            ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
+            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
         }
       `}
     >
@@ -150,30 +152,44 @@ function Sidebar({
       )}
 
       {/* Icon */}
-      <div className={`
+      <div
+        className={`
         relative z-10 transition-transform duration-300
-        ${isActive(name) ? 'scale-110' : 'group-hover:scale-110 group-hover:rotate-3'}
-      `}>
+        ${
+          isActive(name)
+            ? "scale-110"
+            : "group-hover:scale-110 group-hover:rotate-3"
+        }
+      `}
+      >
         {iconComponent || (Icon && <Icon className="w-5 h-5" />)}
       </div>
 
       {/* Label */}
       {!isCollapsed && (
-        <span className={`
+        <span
+          className={`
           relative z-10 font-medium text-sm
-          ${isActive(name) ? '' : 'group-hover:text-gray-900 dark:group-hover:text-gray-100'}
-        `}>
+          ${
+            isActive(name)
+              ? ""
+              : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
+          }
+        `}
+        >
           {label}
         </span>
       )}
 
       {/* Hover arrow */}
       {!isCollapsed && !isActive(name) && (
-        <ChevronRight className="
+        <ChevronRight
+          className="
           w-4 h-4 ml-auto opacity-0 -translate-x-2
           group-hover:opacity-100 group-hover:translate-x-0
           transition-all duration-300
-        " />
+        "
+        />
       )}
     </Link>
   );
@@ -209,17 +225,19 @@ function Sidebar({
       {/* Header */}
       <div className="flex-shrink-0">
         {/* Logo */}
-        <div className={`
+        <div
+          className={`
           flex items-center gap-3 px-4 py-6 border-b border-gray-200 dark:border-gray-800
-          ${isCollapsed ? 'justify-center' : ''}
-        `}>
+          ${isCollapsed ? "justify-center" : ""}
+        `}
+        >
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-50" />
             <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl">
               <SiGoogledisplayandvideo360 className="w-6 h-6 text-white" />
             </div>
           </div>
-          
+
           {!isCollapsed && (
             <div>
               <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
@@ -244,7 +262,7 @@ function Sidebar({
               dark:hover:from-purple-900/30 dark:hover:to-pink-900/30
               border border-purple-200/50 dark:border-purple-800/50
               transition-all duration-300 hover:shadow-lg hover:scale-[1.02]
-              ${isCollapsed ? 'justify-center' : ''}
+              ${isCollapsed ? "justify-center" : ""}
             `}
           >
             <div className="relative flex-shrink-0">
@@ -257,7 +275,7 @@ function Sidebar({
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" />
             </div>
-            
+
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1 truncate">
@@ -276,14 +294,22 @@ function Sidebar({
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-2 space-y-1 no-scrollbar">
-        <NavLink 
-          to="/videos" 
-          name="videos" 
+        <NavLink
+          to="/videos"
+          name="videos"
           label="Videos"
           iconComponent={
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" 
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"
               />
             </svg>
           }
@@ -302,8 +328,18 @@ function Sidebar({
               </div>
             )}
 
-            <NavLink to="/bot-videos" name="bot-videos" label="Video Bot" icon={RiRobot2Line} />
-            <NavLink to="/bot-posts" name="bot-posts" label="Post Bot" icon={RiRobot2Line} />
+            <NavLink
+              to="/bot-videos"
+              name="bot-videos"
+              label="Video Bot"
+              icon={RiRobot2Line}
+            />
+            <NavLink
+              to="/bot-posts"
+              name="bot-posts"
+              label="Post Bot"
+              icon={RiRobot2Line}
+            />
 
             {/* Separator */}
             {!isCollapsed && (
@@ -314,9 +350,95 @@ function Sidebar({
               </div>
             )}
 
-            <NavLink to="/category-manager" name="category-manager" label="Video Category" icon={MdOutlineCategory} />
-            <NavLink to="/post-categories" name="post-categories" label="Post Category" icon={MdOutlineCategory} />
-            <NavLink to="/tag-category" name="tag-category" label="Tag Category" icon={MdOutlineCategory} />
+            <NavLink
+              to="/category-manager"
+              name="category-manager"
+              label="Video Category"
+              icon={MdOutlineCategory}
+            />
+            <NavLink
+              to="/post-categories"
+              name="post-categories"
+              label="Post Category"
+              icon={MdOutlineCategory}
+            />
+            <NavLink
+              to="/tag-category"
+              name="tag-category"
+              label="Tag Category"
+              icon={MdOutlineCategory}
+            />
+
+            {/* Separator */}
+            {!isCollapsed && (
+              <div className="pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
+                  Booking
+                </p>
+              </div>
+            )}
+
+            <Link
+              to="/mangas"
+              onClick={() => handleNav('mangas')}
+              className={`
+        group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
+        transition-all duration-300 overflow-hidden
+        ${
+          isActive("mangas")
+            ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
+            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+        }
+      `}
+            >
+              {/* Active indicator */}
+              {isActive("mangas") && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+              )}
+
+              {/* Icon */}
+              <div
+                className={`
+        relative z-10 transition-transform duration-300
+        ${
+          isActive("mangas")
+            ? "scale-110"
+            : "group-hover:scale-110 group-hover:rotate-3"
+        }
+      `}
+              >
+                <img src="/mangas.png" alt="" className="w-7 h-7"/>
+              </div>
+
+              {/* Label */}
+              {!isCollapsed && (
+                <span
+                  className={`
+          relative z-10 font-medium text-sm
+          ${
+            isActive("mangas")
+              ? ""
+              : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
+          }
+        `}
+                >
+                  Mangas
+                </span>
+              )}
+
+              {/* Hover arrow */}
+              {!isCollapsed && !isActive("mangas") && (
+                <ChevronRight
+                  className="
+          w-4 h-4 ml-auto opacity-0 -translate-x-2
+          group-hover:opacity-100 group-hover:translate-x-0
+          transition-all duration-300
+        "
+                />
+              )}
+            </Link>
+
+
 
             {/* Separator */}
             {!isCollapsed && (
@@ -327,47 +449,71 @@ function Sidebar({
               </div>
             )}
 
-            <NavLink 
-              to="/plateform-relations" 
-              name="plateform-relations" 
-              label="WebApps" 
-              icon={BiLogoInternetExplorer} 
+            <NavLink
+              to="/plateform-relations"
+              name="plateform-relations"
+              label="WebApps"
+              icon={BiLogoInternetExplorer}
             />
 
-            <NavLink 
-              to="/users" 
-              name="users" 
+            <NavLink
+              to="/users"
+              name="users"
               label="Users"
               iconComponent={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
               }
             />
 
-            <NavLink 
-              to="/archive" 
-              name="archive" 
+            <NavLink
+              to="/archive"
+              name="archive"
               label="Blocked Users"
               iconComponent={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
                   />
                 </svg>
               }
             />
 
-            <NavLink 
-              to="/creators" 
-              name="creators" 
+            <NavLink
+              to="/creators"
+              name="creators"
               label="Creators"
               iconComponent={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.5 19.5a6.75 6.75 0 0 1 13.5 0" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.5 19.5a6.75 6.75 0 0 1 13.5 0"
                   />
                 </svg>
               }
@@ -382,30 +528,49 @@ function Sidebar({
               </div>
             )}
 
-            <NavLink 
-              to="/settings" 
-              name="settings" 
+            <NavLink
+              to="/settings"
+              name="settings"
               label="Settings"
               iconComponent={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                   />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
               }
             />
 
-            <NavLink 
-              to="/conversion" 
-              name="conversion" 
+            <NavLink
+              to="/conversion"
+              name="conversion"
               label="Excel Conversion"
               iconComponent={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" 
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
                   />
                 </svg>
               }
@@ -426,7 +591,7 @@ function Sidebar({
               text-red-600 dark:text-red-400
               hover:bg-red-50 dark:hover:bg-red-900/20
               transition-all duration-300
-              ${isCollapsed ? 'justify-center' : ''}
+              ${isCollapsed ? "justify-center" : ""}
             `}
           >
             <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />

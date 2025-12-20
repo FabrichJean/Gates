@@ -1,3 +1,15 @@
+import EditMangasChapterPage from "../pages/EditMangasChapterPage";
+import MangasChaptersPage from "../pages/MangasChaptersPage";
+import { useParams } from "react-router-dom";
+
+// Wrapper to extract mangaId from params and pass as prop
+function MangaChaptersRouteWrapper() {
+  const { mangaId } = useParams();
+  const id = mangaId ? parseInt(mangaId, 10) : undefined;
+  if (!id || isNaN(id)) return <div className="p-8 text-red-500">Manga ID invalide</div>;
+  return <MangasChaptersPage mangaId={id} />;
+}
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
@@ -42,6 +54,11 @@ import PostBotManagement from "../pages/PostBotManagement";
 import PostBotDetails from "../pages/PostBotDetails";
 import PostBotEdit from "../pages/PostBotEdit";
 import Creatorr from "../pages/Creator";
+import MediaPostManager from "../pages/MediaPostManager";
+
+import Mangas from "../pages/Mangas";
+import UploadMangas from "../pages/UploadMangas";
+import EditMangasPage from "../pages/EditMangasPage";
 
 
 
@@ -55,6 +72,56 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route
+            path="/mangas"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <Mangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangaChaptersRouteWrapper />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasChapterPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/users"
             element={
@@ -201,6 +268,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <PostEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/edit-media/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MediaPostManager />
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -375,11 +452,11 @@ const AppRoutes = () => {
             path="/settings"
             element={
               <ProtectedRoute>
-                {/* <SuperProtected> */}
+                <SuperProtected>
                 <InsideSidebar>
                   <Settings />
                 </InsideSidebar>
-                {/* </SuperProtected> */}
+                </SuperProtected>
               </ProtectedRoute>
             }
           />

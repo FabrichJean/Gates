@@ -100,9 +100,7 @@ export async function deleteManyVideos(ids: number[] ) {
   });
 }
 
-export async function deleteManyImages(ids: number[] ) {
-    console.log(ids);
-    
+export async function deleteManyImages(ids: number[] ) { 
   return await axios.post(`${apiURL}/post-images/removeMany`, { ids }, {
     headers: {
       Authorization: `Bearer ${getToken()}`,

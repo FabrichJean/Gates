@@ -1,7 +1,5 @@
+
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
-import { getToken } from "../utils/storage";
-import ConfirmCoverUploadModal from "./PostEdit/components/ConfirmCoverUploadModal";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -13,9 +11,7 @@ import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
 import MediaUploader from "./PostEdit/components/MediaUploader";
-import { deleteManyImages, deleteManyVideos } from "../api/posts";
-import { apiURL } from "../constant";
-import { getTagCategoriesPostApi } from "../api/tagCategoryPost";
+import { deleteManyImages } from "../api/posts";
 
 type Language = {
   code: string;
@@ -38,27 +34,6 @@ const PostEdit = () => {
 
   // store ids of media to delete on next update (deferred deletion)
   const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
-  const [deletedVideoIds, setDeletedVideoIds] = useState<number[]>([]);
-
-  const handleRemoveLanguage = (languageId: number) => {
-    // 1. Supprimer la langue de la liste
-    setLanguages((prev) => prev.filter((l) => l.id !== languageId));
-
-    // 2. Supprimer le titre associé
-    setTitles((prev) => {
-      const { [languageId]: _deleted, ...rest } = prev;
-      return rest;
-    });
-
-    // 3. Supprimer la description associée
-    setDescriptions((prev) => {
-      const { [languageId]: _deleted, ...rest } = prev;
-      return rest;
-    });
-
-    // 4. Si la langue supprimée était sélectionnée → reset
-    setSelectedLanguage((prev) => (prev?.id === languageId ? null : prev));
-  };
 
   useEffect(() => {
     if (post) {
@@ -98,55 +73,16 @@ const PostEdit = () => {
   const [imageFields, setImageFields] = useState<
     { id: number; file: File | null; url?: string }[]
   >([]);
-  const [videoFields, setVideoFields] = useState<
-    {
-      id: number;
-      file: File | null;
-      url?: string;
-      cover?: File | null;
-      coverUrl?: string;
-      type?: string;
-    }[]
+  const [videoFields] = useState<
+    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
   >([]);
-
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
-  const [existingVideoCovers, setExistingVideoCovers] = useState<
-    Record<number, File | null>
-  >({});
-
-  const [coverPost, setCoverPost] = useState<
-    { cover_id: number | null; video_id: number }[]
-  >([]);
-
-  // mapping of existing video id -> uploaded cover image id returned by API
-  const [existingCoverIds, setExistingCoverIds] = useState<
-    Record<number, number | null>
-  >({});
-  const [pendingCover, setPendingCover] = useState<{
-    videoId: number;
-    file: File;
-  } | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
+  const [existingVideoCovers] = useState<Record<number, File | null>>({});
   const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
   const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] =
     useState<Language | null>(null);
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
-
-  // TagCategory for Post (edit): suggestions + add-by-name + chips
-  const [availablePostTags, setAvailablePostTags] = useState<
-    Array<{ id?: number; name: string; meta?: any }>
-  >([]);
-  const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
-    Array<{ id?: number; name: string; meta?: any }>
-  >([]);
-  const [postTagQuery, setPostTagQuery] = useState("");
-  const [postTagSuggestions, setPostTagSuggestions] = useState<
-    Array<{ id?: number; name: string; meta?: any }>
-  >([]);
-  const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
-  const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const { data: categoriesResponse } = useCategoryPost();
   const { data: subCategoriesResponse } = useSubCategoryPost(
@@ -164,7 +100,7 @@ const PostEdit = () => {
       const matchingCategory = categoriesResponse?.categories.find(
         (cat) => cat.id === post.postCategory.id
       );
-
+      // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
       if (matchingCategory) {
         setSelectedCategory(matchingCategory);
         // setSelectedSubCategory(matchingSubCategory);
@@ -178,6 +114,8 @@ const PostEdit = () => {
 
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
+          // Créer l'objet langue basé sur les données du post
+          // prefer explicit i18_language, otherwise fallback to language.code if available
           const code = item.i18_language || item.language?.code || "";
           const postLanguage = {
             id: languageId,
@@ -198,21 +136,10 @@ const PostEdit = () => {
           setSelectedLanguage(postLanguages[0]);
         }
       }
-
+      // Prefill creator fields if available on post
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
         setCreatorObj((post as any).creatorObj || null);
-      }
-
-      // initialize selected tags from post.tagCategory
-      if (Array.isArray((post as any).tagCategory)) {
-        setSelectedPostTagCategories(
-          ((post as any).tagCategory as any[]).map((t) => ({
-            id: t?.id,
-            name: t?.name,
-            meta: t?.meta ?? null,
-          }))
-        );
       }
     }
   }, [post, categoriesResponse]);
@@ -242,81 +169,11 @@ const PostEdit = () => {
       ) {
         setSubOpen(false);
       }
-
-      if (
-        postTagWrapperRef.current &&
-        !postTagWrapperRef.current.contains(event.target as Node)
-      ) {
-        setShowPostTagDropdown(false);
-      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Load post tag categories
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getTagCategoriesPostApi();
-        const items = res?.data?.items ?? res?.data ?? [];
-        const normalized = (Array.isArray(items) ? items : []).map(
-          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
-        );
-        setAvailablePostTags(normalized);
-        setPostTagSuggestions(normalized);
-      } catch (err) {
-        console.warn("Failed to load post tag categories", err);
-      }
-    };
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (!postTagQuery) {
-      setPostTagSuggestions(availablePostTags);
-      return;
-    }
-    const q = postTagQuery.toLowerCase();
-    setPostTagSuggestions(
-      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
-    );
-  }, [postTagQuery, availablePostTags]);
-
-  const addPostTagByName = (name: string) => {
-    const n = name.trim();
-    if (!n) return;
-    const exists = selectedPostTagCategories.find(
-      (t) => t.name.toLowerCase() === n.toLowerCase()
-    );
-    if (exists) return;
-    setSelectedPostTagCategories((s) => [...s, { name: n }]);
-    setPostTagQuery("");
-  };
-
-  const addPostTagSuggestion = (tag: {
-    id?: number;
-    name: string;
-    meta?: any;
-  }) => {
-    const existsByName = selectedPostTagCategories.find(
-      (t) => t.name.toLowerCase() === tag.name.toLowerCase()
-    );
-    const existsById = tag.id
-      ? selectedPostTagCategories.find((t) => t.id === tag.id)
-      : null;
-    if (existsByName || existsById) return;
-    setSelectedPostTagCategories((s) => [
-      ...s,
-      { id: tag.id, name: tag.name, meta: tag.meta ?? null },
-    ]);
-    setPostTagQuery("");
-  };
-
-  const removeSelectedPostTag = (index: number) => {
-    setSelectedPostTagCategories((s) => s.filter((_, i) => i !== index));
-  };
 
   const handleTitleChange = (languageId: number, value: string) => {
     setTitles((prev) => ({ ...prev, [languageId]: value }));
@@ -358,10 +215,7 @@ const PostEdit = () => {
   };
 
   const addImageField = () => {
-    const newId =
-      imageFields.length > 0
-        ? Math.max(...imageFields.map((field) => field.id)) + 1
-        : 1;
+    const newId = imageFields.length > 0 ? Math.max(...imageFields.map((field) => field.id)) + 1 : 1;
     setImageFields((prev) => [...prev, { id: newId, file: null }]);
   };
 
@@ -381,195 +235,28 @@ const PostEdit = () => {
     }
   };
 
-  const addVideoField = () => {
-    const newId =
-      videoFields.length > 0
-        ? Math.max(...videoFields.map((field) => field.id)) + 1
-        : 1;
-    setVideoFields((prev) => [
-      ...prev,
-      { id: newId, file: null, cover: null, type: "long" },
-    ]);
-  };
-
-  const removeVideoField = (id: number) => {
-    if (videoFields.length > 1) {
-      setVideoFields((prev) => prev.filter((field) => field.id !== id));
-    }
-  };
-
-  const handleVideoChange = (id: number, file: File | null) => {
-    if (file) {
-      const maxSize = 2 * 1024 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert(
-          `⚠️ La vidéo est trop volumineuse !\n\nTaille: ${(
-            file.size /
-            1024 /
-            1024 /
-            1024
-          ).toFixed(2)} GB\nMax: 2 GB`
-        );
-        return;
-      }
-
-      setVideoFields((prev) =>
-        prev.map((field) =>
-          field.id === id ? { ...field, file, url: undefined } : field
-        )
-      );
-    }
-  };
-
-  // Map frontend type <-> backend representation
-  const frontToBackendType = (val: "short" | "long") =>
-    val === "long" ? "2" : "1";
-
-  // Update type for a new video field (user-added)
-  const handleVideoTypeChange = (id: number, value: "short" | "long") => {
-    setVideoFields((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, type: value } : f))
-    );
-  };
-
-  // Update type for an existing video (already stored on the post)
-  const handleExistingVideoTypeChange = (
-    id: number,
-    value: "short" | "long"
-  ) => {
-    const t = frontToBackendType(value);
-    setMedia((prev) => ({
-      ...prev,
-      videos: prev.videos.map((v) => (v.id === id ? { ...v, type: t } : v)),
-    }));
-  };
-
-  const handleCoverChange = (id: number, file: File | null) => {
-    if (file) {
-      const existingVideo = videos.find((v) => v.id === id);
-      if (existingVideo) {
-        setExistingVideoCovers((prev) => ({ ...prev, [id]: file }));
-      } else {
-        setVideoFields((prev) =>
-          prev.map((field) =>
-            field.id === id
-              ? { ...field, cover: file, coverUrl: undefined }
-              : field
-          )
-        );
-      }
-    }
-  };
-
-  const handleExistingCoverSelect = (videoId: number, file: File) => {
-    setPendingCover({ videoId, file });
-    setConfirmOpen(true);
-  };
-
-  const uploadExistingCover = async () => {
-    if (!pendingCover || !post) return;
-    const { videoId, file } = pendingCover;
-    setUploadingCover(true);
-    try {
-      const url = `${apiURL}/posts/${post.id}/images`;
-      const fd = new FormData();
-      fd.append("image", file, file.name);
-
-      const token = getToken();
-      const resp = await axios.post(url, fd, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-      });
-
-      const image = resp.data?.image;
-      const localPath =
-        image?.public_urls.local_image_url || image?.local_image_url || null;
-
-      if (localPath) {
-        setMedia((prev) => ({
-          ...prev,
-          videos: prev.videos.map((v) =>
-            v.id === videoId
-              ? {
-                  ...v,
-                  public_urls: {
-                    ...v.public_urls,
-                    local_cover_path: localPath,
-                  },
-                }
-              : v
-          ),
-        }));
-
-        setCoverPost((prev) => [
-          ...prev,
-          { cover_id: image.id, video_id: videoId },
-        ]);
-      } else {
-        toast.success("Cover uploaded (no path returned)");
-      }
-
-      if (image?.id) {
-        setExistingCoverIds((prev) => {
-          const next = { ...prev, [videoId]: image.id };
-          return next;
-        });
-      }
-
-      setExistingVideoCovers((prev) => ({ ...prev, [videoId]: null }));
-    } catch (err: any) {
-      console.error(err);
-      toast.error("Failed to upload cover");
-    } finally {
-      setUploadingCover(false);
-      setConfirmOpen(false);
-      setPendingCover(null);
-    }
-  };
-
   const { updatePost, loading: updating } = useUpdatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (uploadingCover) {
-      toast.error(
-        "A cover upload is in progress. Please wait until it finishes."
-      );
-      return;
-    }
-
+    // Build payload including existing videos followed by newly added video fields
     const videosPayload: any[] = [];
 
+    // existing videos currently in media state
     videos.forEach((v) => {
-      videosPayload.push({
-        id: v.id,
-        fileName:
-          v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url,
-        isNew: false,
-        type: (v as any).type ?? "2",
-      });
+      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false });
     });
 
+    // new video fields (user added in form)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
-        const t = field.type === "short" ? "1" : "2";
-        videosPayload.push({
-          id: field.id,
-          fileName: field.file?.name || field.url,
-          isNew: !!field.file,
-          type: t,
-        });
+        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file });
       });
 
     const imagesPayload = imageFields
       .filter((field) => field.file !== null || field.url)
-      .map((field) => ({
-        id: field.id,
-        fileName: field.file?.name || field.url,
-        isNew: !!field.file,
-      }));
+      .map((field) => ({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file }));
 
     const payload = {
       id: post?.id,
@@ -585,174 +272,67 @@ const PostEdit = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
-      // Persist tags in non-file update path as well
-      tagCategoryPost: (() => {
-        if (
-          !selectedPostTagCategories ||
-          selectedPostTagCategories.length === 0
-        )
-          return [];
-        const ids: number[] = [];
-        const named: Array<{ name: string; meta?: any }> = [];
-        selectedPostTagCategories.forEach((t) => {
-          if (typeof t.id === "number") ids.push(t.id);
-          else
-            named.push({ name: t.name, ...(t.meta ? { meta: t.meta } : {}) });
-        });
-        const uniqIds = Array.from(new Set(ids));
-        const seen = new Set<string>();
-        const uniqNamed = named.filter((n) => {
-          const key = n.name.toLowerCase();
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-        return [...uniqIds, ...uniqNamed];
-      })(),
+      // include deferred deletions so backend can remove them as part of the update
+      // deleted_image_ids: deletedImageIds,
+      // deleted_video_ids: deletedVideoIds,
     };
-
+    // include creator or creator_id in payload
     if (creatorObj) {
       (payload as any).creator_id = creatorObj.id;
     }
 
+    // If there are newly added files (file objects), send a FormData so the files are transmitted.
+    // determine if there are any new files (images, videos, covers for new/existing videos)
     const hasNewFiles =
       imageFields.some((f) => f.file) ||
       videoFields.some((f) => f.file || f.cover) ||
       Object.values(existingVideoCovers).some((f) => f);
 
-    const coversInOrder: (File | null)[] = [];
-    // existing videos
-    videos.forEach((v) => {
-      const c = existingVideoCovers?.[v.id] ?? null;
-      coversInOrder.push(c);
-    });
-    // new videoFields
-    videoFields.forEach((f) => {
-      coversInOrder.push(f.cover ?? null);
-    });
-
     try {
       if (deletedImageIds.length > 0) {
         await deleteManyImages(deletedImageIds);
       }
-      if (deletedVideoIds.length > 0) {
-        await deleteManyVideos(deletedVideoIds);
-      }
 
       if (hasNewFiles) {
-        const titlesArray = Object.entries(titles).map(([langId, title]) => {
-          const lang = languages.find((l) => l.id === parseInt(langId));
-          return {
-            title,
-            i18_language: lang?.code,
-            ...(descriptions[parseInt(langId)]
-              ? { description: descriptions[parseInt(langId)] }
-              : {}),
-          };
-        });
-
         const fd = new FormData();
-
+        // Keep the same metadata structure by sending it as JSON in a field
         fd.append("payload", JSON.stringify(payload));
 
-        if (post?.id) fd.append("id", String(post.id));
-        fd.append(
-          "category_id",
-          String(selectedCategory?.id ?? post?.postCategory?.id ?? "")
-        );
-        fd.append(
-          "sub_category_id",
-          String(selectedSubCategory?.id ?? post?.postSubCategory?.id ?? "")
-        );
-        fd.append("titles", JSON.stringify(titlesArray));
+        // Append new image files
+        imageFields.filter((f) => f.file).forEach((f) => {
+          if (f.file) fd.append("images", f.file, f.file.name);
+        });
 
-        fd.append("videos_metadata", JSON.stringify(videosPayload));
-        // Append tagCategoryPost (mixed array): ids + {name, meta}; [] clears all
-        if (selectedPostTagCategories && selectedPostTagCategories.length > 0) {
-          const ids: number[] = [];
-          const named: Array<{ name: string; meta?: any }> = [];
-          selectedPostTagCategories.forEach((t) => {
-            if (typeof t.id === "number") ids.push(t.id);
-            else
-              named.push({ name: t.name, ...(t.meta ? { meta: t.meta } : {}) });
-          });
-          const uniqIds = Array.from(new Set(ids));
-          const seen = new Set<string>();
-          const uniqNamed = named.filter((n) => {
-            const key = n.name.toLowerCase();
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          });
-          const mixed: any[] = [...uniqIds, ...uniqNamed];
-          fd.append(
-            "tagCategoryPost",
-            JSON.stringify(mixed.length > 0 ? mixed : [])
-          );
-        } else {
-          fd.append("tagCategoryPost", JSON.stringify([]));
-        }
+        // Append new video files
+        videoFields.filter((f) => f.file).forEach((f) => {
+          if (f.file) fd.append("videos", f.file, f.file.name);
+        });
 
-        const mapShorts = videosPayload.map((v) => ({
-          id: v.id,
-          isShort: String(v.type) === "1",
-        }));
-        fd.append("mapShorts", JSON.stringify(mapShorts));
-
-        imageFields
-          .filter((f) => f.file)
-          .forEach((f) => {
-            if (f.file) fd.append("images", f.file, f.file.name);
-          });
-
-        videoFields
-          .filter((f) => f.file)
-          .forEach((f) => {
-            if (f.file) fd.append("videos", f.file, f.file.name);
-          });
-
+        // Build list of covers in the same order as payload.videos (existing videos first, then new fields)
         const coversInOrder: (File | null)[] = [];
-
         // existing videos
         videos.forEach((v) => {
           const c = existingVideoCovers?.[v.id] ?? null;
           coversInOrder.push(c);
         });
-
         // new videoFields
         videoFields.forEach((f) => {
           coversInOrder.push(f.cover ?? null);
         });
 
-        fd.append("coverPost", JSON.stringify(coverPost));
+        // Append covers preserving order. For videos without a cover we append an empty blob placeholder
+        coversInOrder.forEach((c, idx) => {
+          if (c) {
+            fd.append("covers", c, c.name);
+          } else {
+            const emptyBlob = new Blob([], { type: "image/jpeg" });
+            fd.append("covers", emptyBlob, `no_cover_${idx}.jpg`);
+          }
+        });
 
         await updatePost(post?.id, fd);
       } else {
-        (payload as any).covers_meta = coversInOrder.map((c) =>
-          c ? c.name : null
-        );
-        const coverPost: { cover_id: number | null; video_id: number }[] = [];
-        videos.forEach((v) => {
-          const cover_id =
-            existingCoverIds && existingCoverIds[v.id]
-              ? existingCoverIds[v.id]
-              : null;
-          coverPost.push({ cover_id, video_id: v.id });
-        });
-        videoFields.forEach((f, i) => {
-          const c = coversInOrder[videos.length + i];
-          coverPost.push({ cover_id: c ? null : null, video_id: f.id });
-        });
-        (payload as any).coverPost = coverPost;
-        (payload as any).mapShorts = videosPayload.map((v) => ({
-          id: v.id,
-          isShort: String(v.type) === "1",
-        }));
-        // Include tagCategoryPost in JSON update path
-        (payload as any).tagCategoryPost =
-          (payload as any).tagCategoryPost ?? [];
-        // Removed JSON debug logging to keep console clean.
-
+        // No files to upload — send JSON payload as before
         await updatePost(post?.id, payload);
       }
 
@@ -812,11 +392,12 @@ const PostEdit = () => {
     );
   }
 
+  // record map for existing covers to pass down to MediaUploader (use state)
   const existingVideoCoversRecord = existingVideoCovers;
 
   return (
     <div className="min-h-screen flex items-start pb-6">
-      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-2">
+      <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6">
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
@@ -871,12 +452,12 @@ const PostEdit = () => {
               handleTitleChange={handleTitleChange}
               handleDescriptionChange={handleDescriptionChange}
               setShowAddLanguageModal={setShowAddLanguageModal}
-              handleRemoveLanguage={handleRemoveLanguage}
+              handleRemoveLanguage={() => setLanguages((prev) => prev.filter((lang) => lang.id !== selectedLanguage?.id))}
             />
 
             <div className="w-full mt-4">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator
+                Creator (optional)
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}
@@ -888,113 +469,16 @@ const PostEdit = () => {
 
             <MediaUploader
               images={images}
-              videos={videos}
               imageFields={imageFields}
-              videoFields={videoFields}
               handleImageChange={handleImageChange}
-              handleVideoChange={handleVideoChange}
-              handleCoverChange={handleCoverChange}
-              onExistingCoverSelect={handleExistingCoverSelect}
-              handleVideoTypeChange={handleVideoTypeChange}
-              handleExistingVideoTypeChange={handleExistingVideoTypeChange}
               addImageField={addImageField}
-              addVideoField={addVideoField}
               removeImageField={removeImageField}
-              removeVideoField={removeVideoField}
               setDeletedImageIds={setDeletedImageIds}
-              setDeletedVideoIds={setDeletedVideoIds}
               existingVideoCovers={existingVideoCoversRecord}
               setMedia={setMedia}
             />
 
-            <ConfirmCoverUploadModal
-              open={confirmOpen}
-              file={pendingCover?.file ?? null}
-              onCancel={() => {
-                setConfirmOpen(false);
-                setPendingCover(null);
-              }}
-              onConfirm={uploadExistingCover}
-              uploading={uploadingCover}
-            />
-
             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
-
-            {/* Tag categories for Post (edit) */}
-            <div className="relative w-full" ref={postTagWrapperRef}>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Tags:
-              </label>
-              <div className="flex gap-2 items-center">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={postTagQuery}
-                    onChange={(e) => {
-                      setPostTagQuery(e.target.value);
-                      setShowPostTagDropdown(true);
-                    }}
-                    onFocus={() => setShowPostTagDropdown(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addPostTagByName(postTagQuery);
-                        setShowPostTagDropdown(false);
-                      }
-                    }}
-                    placeholder="Type tag name or select suggestion..."
-                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
-                  />
-
-                  {showPostTagDropdown &&
-                    postTagSuggestions &&
-                    postTagSuggestions.length > 0 && (
-                      <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
-                        {postTagSuggestions.slice(0, 8).map((s) => (
-                          <li
-                            key={s.id ?? s.name}
-                            onClick={() => {
-                              addPostTagSuggestion(s);
-                              setShowPostTagDropdown(false);
-                            }}
-                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                          >
-                            {s.name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    addPostTagByName(postTagQuery);
-                    setShowPostTagDropdown(false);
-                  }}
-                  className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {selectedPostTagCategories.map((t, i) => (
-                  <span
-                    key={`${t.id ?? "new"}-${t.name}-${i}`}
-                    className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    <span>{t.name}</span>
-                    <button
-                      onClick={() => removeSelectedPostTag(i)}
-                      className="text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
 
             {/* Boutons d'action */}
             <div className="flex justify-end gap-4">
@@ -1006,13 +490,19 @@ const PostEdit = () => {
                 Cancel
               </button>
               <button
+                type="button"
+                onClick={() => navigate(`/post/edit-media/${id}`)}
+                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Manage Video/Cover {">"}
+              </button>
+              <button
                 type="submit"
-                disabled={updating || uploadingCover}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${
-                  updating || uploadingCover
+                disabled={updating}
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-blue-700"
-                }`}
+                  }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -1027,11 +517,7 @@ const PostEdit = () => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {uploadingCover
-                  ? "Uploading cover..."
-                  : updating
-                  ? "Updating..."
-                  : "Update"}
+                {updating ? "Updating..." : "Update"}
               </button>
             </div>
           </form>
