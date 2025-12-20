@@ -59,6 +59,9 @@ import MediaPostManager from "../pages/MediaPostManager";
 import Mangas from "../pages/Mangas";
 import UploadMangas from "../pages/UploadMangas";
 import EditMangasPage from "../pages/EditMangasPage";
+import RomansManagement from "../pages/romans/RomansManagement";
+import RomanDetails from "../pages/romans/romanDetails";
+import RomanEdit from "../pages/romans/romanEdit";
 
 
 
@@ -72,6 +75,33 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route path="/romans"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomansManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+           <Route path="/romans/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanDetails />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/romans/edit/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/mangas"
             element={
@@ -453,9 +483,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                <InsideSidebar>
-                  <Settings />
-                </InsideSidebar>
+                  <InsideSidebar>
+                    <Settings />
+                  </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
             }
