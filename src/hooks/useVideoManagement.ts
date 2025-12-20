@@ -14,7 +14,7 @@ export const useVideoManagement = () => {
   const savedParams = (() => {
     try {
       const s = localStorage.getItem("video_params");
-      return s && s !== "undefined" ? JSON.parse(s) : null;
+      return s && s !== "undefined" ? {...JSON.parse(s), page: undefined} : null;
     } catch {
       return null;
     }
@@ -27,9 +27,7 @@ export const useVideoManagement = () => {
     user_id: "",
     creator_id: "",
     isDeleted: "",
-    upload_status: "",
-    cover_upload_status: "",
-    transfer_status: "",
+    processing: "",
     startedAt: "",
     endAt: "",
   };
@@ -78,9 +76,7 @@ export const useVideoManagement = () => {
   const computedParams = useMemo(() => ({
     ...filters,
     isDeleted: mapStatus(filters.isDeleted),
-    upload_status: mapStatus(filters.upload_status),
-    cover_upload_status: mapStatus(filters.cover_upload_status),
-    transfer_status: mapStatus(filters.transfer_status),
+    processing: mapStatus(filters.processing),
     status: "all",
     page,
   }), [filters, page]);
