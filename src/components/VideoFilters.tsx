@@ -100,14 +100,11 @@ export default function VideoFilters({
                 const { getFilteredBotVideos } = await import("../api/videoBot");
                 
                 fetched = await getFilteredBotVideos(finalQuery);
-
-                console.log(fetched.data);
                 
             } else {
                 const { getFilteredVideos } = await import("../api/videos");
                 
                 fetched = await getFilteredVideos(finalQuery);
-                console.log(fetched.data);
             }
 
             onSubmit(fetched.data);
