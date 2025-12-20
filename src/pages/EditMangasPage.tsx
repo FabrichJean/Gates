@@ -16,7 +16,7 @@ const EditMangasPage: React.FC = () => {
     mangas_category_id: "",
     mangas_sub_category_id: "",
     mangas_plateform_id: "",
-    tagCategories: [] as string[],
+    tagCategories: [] as Array<number | { name: string }>,
     creator: "",
     creator_id: "",
     total_chapters: "",
@@ -30,6 +30,8 @@ const EditMangasPage: React.FC = () => {
   const [tagCategories, setTagCategories] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [filteredTags, setFilteredTags] = useState<any[]>([]);
 
   useEffect(() => {
     getCreators().then((res) => setCreators(res.data || res)).catch(() => {});
@@ -65,12 +67,19 @@ const EditMangasPage: React.FC = () => {
     try {
       const res = await getMangaById(Number(mangaId));
       const manga = res.data || res;
+      
+      // Convertir les tags au format attendu [number, number, ...]
+      let tagIds: number[] = [];
+      if (manga.tagCategories && Array.isArray(manga.tagCategories)) {
+        tagIds = manga.tagCategories.map((t: any) => t.id);
+      }
+      
       setForm({
         ref: manga.ref || "",
         mangas_category_id: manga.mangas_category_id ? String(manga.mangas_category_id) : "",
         mangas_sub_category_id: manga.mangas_sub_category_id ? String(manga.mangas_sub_category_id) : "",
         mangas_plateform_id: manga.mangas_plateform_id ? String(manga.mangas_plateform_id) : "",
-        tagCategories: manga.tagCategories ? manga.tagCategories.map((t: any) => String(t.id)) : [],
+        tagCategories: tagIds,
         creator: manga.creator || "",
         creator_id: manga.creator_id ? String(manga.creator_id) : "",
         total_chapters: manga.total_chapters ? String(manga.total_chapters) : "",
@@ -103,9 +112,66 @@ const EditMangasPage: React.FC = () => {
     }
   };
 
-  const handleTagCategoriesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions, (option) => option.value);
-    setForm((prev) => ({ ...prev, tagCategories: selected as string[] }));
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTagInput(value);
+    
+    if (value.trim()) {
+      const filtered = tagCategories.filter((tag: any) =>
+        tag.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredTags(filtered);
+    } else {
+      setFilteredTags([]);
+    }
+  };
+
+  const addTag = (tag: any) => {
+    // Vérifier si le tag n'est pas déjà ajouté
+    const alreadyExists = form.tagCategories.some((t) => 
+      typeof t === "number" ? t === tag.id : false
+    );
+    
+    if (!alreadyExists) {
+      setForm((prev) => ({
+        ...prev,
+        tagCategories: [...prev.tagCategories, tag.id],
+      }));
+    }
+    setTagInput("");
+    setFilteredTags([]);
+  };
+
+  const addCustomTag = () => {
+    if (tagInput.trim()) {
+      const alreadyExists = form.tagCategories.some((t) =>
+        typeof t === "object" && "name" in t ? t.name === tagInput.trim() : false
+      );
+      
+      if (!alreadyExists) {
+        setForm((prev) => ({
+          ...prev,
+          tagCategories: [...prev.tagCategories, { name: tagInput.trim() }],
+        }));
+      }
+      setTagInput("");
+      setFilteredTags([]);
+    }
+  };
+
+  const removeTag = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      tagCategories: prev.tagCategories.filter((_, i) => i !== index),
+    }));
+  };
+
+  const getTagDisplay = (tag: number | { name: string }) => {
+    if (typeof tag === "number") {
+      const foundTag = tagCategories.find((t: any) => t.id === tag);
+      return foundTag ? foundTag.name : `Tag #${tag}`;
+    }
+    return tag.name;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -182,11 +248,68 @@ const EditMangasPage: React.FC = () => {
         </div>
         <div>
           <label className="block font-medium mb-1">Tags</label>
-          <select name="tagCategories" multiple value={form.tagCategories} onChange={handleTagCategoriesChange} className="input input-bordered w-full h-32">
-            {Array.isArray(tagCategories) && tagCategories.map((tag: any) => (
-              <option key={tag.id} value={tag.id}>{tag.name}</option>
+          <div className="relative">
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={handleTagInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (filteredTags.length > 0) {
+                      addTag(filteredTags[0]);
+                    } else {
+                      addCustomTag();
+                    }
+                  }
+                }}
+                placeholder="Rechercher ou créer un tag..."
+                className="input input-bordered flex-1"
+              />
+              <button
+                type="button"
+                onClick={addCustomTag}
+                className="btn btn-secondary"
+                disabled={!tagInput.trim()}
+              >
+                Ajouter
+              </button>
+            </div>
+            
+            {filteredTags.length > 0 && (
+              <div className="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filteredTags.map((tag: any) => (
+                  <div
+                    key={tag.id}
+                    onClick={() => addTag(tag)}
+                    className="px-4 py-2 hover:bg-base-200 cursor-pointer"
+                  >
+                    {tag.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Tags sélectionnés */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {form.tagCategories.map((tag, index) => (
+              <div
+                key={index}
+                className="badge badge-primary gap-2 px-3 py-3"
+              >
+                <span>{getTagDisplay(tag)}</span>
+                <button
+                  type="button"
+                  onClick={() => removeTag(index)}
+                  className="btn btn-ghost btn-xs btn-circle"
+                >
+                  ✕
+                </button>
+              </div>
             ))}
-          </select>
+          </div>
         </div>
         <div>
           <label className="block font-medium mb-1">VIP</label>
