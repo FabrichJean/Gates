@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getMangaById, updateManga } from "../api/mangas";
 import toast from "react-hot-toast";
+import MangaChecking from "../components/MangaChecking";
 
 interface Manga {
   id: number;
@@ -27,6 +28,8 @@ interface Manga {
   total_chapters?: number;
   need_vip?: boolean;
   isDeleted?: boolean;
+  checking?: string;
+  comment?: string;
   mangas_category_id?: number;
   mangas_sub_category_id?: number;
   plateform_id?: number;
@@ -181,6 +184,13 @@ const MangasDetailsPage: React.FC = () => {
                   transition={{ delay: 0.2 }}
                   className="flex items-center gap-3 mt-2"
                 >
+                  {/* Checking Status */}
+                  <MangaChecking
+                    manga={manga}
+                    index={0}
+                    reFetch={fetchManga}
+                  />
+                  
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-600 dark:text-gray-400">
