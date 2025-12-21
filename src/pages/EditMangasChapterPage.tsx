@@ -75,7 +75,6 @@ const EditMangasChapterPage: React.FC = () => {
         <input name="title" value={form.title} onChange={handleChange} className="input input-bordered w-full" placeholder="Titre du chapitre" required />
         <textarea name="description" value={form.description} onChange={handleChange} className="input input-bordered w-full" placeholder="Description" />
         <input name="chapter_number" value={form.chapter_number} onChange={handleChange} className="input input-bordered w-full" placeholder="Numéro du chapitre" type="number" min="1" />
-        <input name="metadata" value={form.metadata} onChange={handleChange} className="input input-bordered w-full" placeholder="Metadata (JSON optionnel)" />
         <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Modification..." : "Enregistrer"}</button>
       </form>
     </div>

@@ -1,5 +1,19 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Plus, 
+  Upload, 
+  Image as ImageIcon,
+  User,
+  Globe,
+  Tag,
+  BookOpen,
+  Star,
+  X,
+  Save,
+  Loader2,
+  ChevronDown
+} from "lucide-react";
 import { createManga } from "../api/mangas";
 import { getCreators } from "../api/creators";
 import { getAllPlateformsApi } from "../api/plateforms";
@@ -13,13 +27,11 @@ const UploadMangas: React.FC = () => {
     ref: "",
     mangas_category_id: "",
     mangas_sub_category_id: "",
-    mangas_plateform_id: "",
+    plateform_id: "",
     tagCategories: [] as Array<number | { name: string }>,
-    creator: "",
     creator_id: "",
     total_chapters: "",
     need_vip: false,
-    plateform_id: "",
     cover: null as File | null,
   });
   const [loading, setLoading] = useState(false);
@@ -30,48 +42,54 @@ const UploadMangas: React.FC = () => {
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [filteredTags, setFilteredTags] = useState<any[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    getCreators().then((res) => setCreators(res.data || res)).catch(() => {});
-    getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => {});
-    getTagCategoriesApi()
-      .then((res) => {
-        let tags = res.data?.data || res.data || res;
-        if (!Array.isArray(tags)) tags = [];
-        setTagCategories(tags);
-      })
-      .catch(() => setTagCategories([]));
-    getMangasCategoriesApi()
-      .then((res) => {
-        let cats = res.data?.data || res.data || res;
-        if (!Array.isArray(cats)) cats = [];
-        setCategories(cats);
-      })
-      .catch(() => setCategories([]));
-    getMangasSubCategoriesApi()
-      .then((res) => {
-        let subs = res.data?.data || res.data || res;
-        if (!Array.isArray(subs)) subs = [];
-        setSubCategories(subs);
-      })
-      .catch(() => setSubCategories([]));
+    Promise.all([
+      getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
+      getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
+      getTagCategoriesApi().then((res) => {
+        const tags = res.data?.data || res.data || res;
+        setTagCategories(Array.isArray(tags) ? tags : []);
+      }).catch(() => setTagCategories([])),
+      getMangasCategoriesApi().then((res) => {
+        const cats = res.data?.data || res.data || res;
+        setCategories(Array.isArray(cats) ? cats : []);
+      }).catch(() => setCategories([])),
+    ]);
   }, []);
+
+  // Charger les sous-catégories quand la catégorie change
+  useEffect(() => {
+    if (form.mangas_category_id) {
+      getMangasSubCategoriesApi()
+        .then((res) => {
+          const subs = res.data?.data || res.data || res;
+          setSubCategories(Array.isArray(subs) ? subs : []);
+        })
+        .catch(() => setSubCategories([]));
+    } else {
+      setSubCategories([]);
+    }
+  }, [form.mangas_category_id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    let checked = false;
-    if (type === "checkbox" && "checked" in e.target) {
-      checked = (e.target as HTMLInputElement).checked;
-    }
+    const isCheckbox = type === "checkbox";
+    const checked = isCheckbox ? (e.target as HTMLInputElement).checked : undefined;
+    
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: isCheckbox ? checked : value,
     }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setForm((prev) => ({ ...prev, cover: e.target.files![0] }));
+      const file = e.target.files[0];
+      setForm((prev) => ({ ...prev, cover: file }));
+      setCoverPreview(URL.createObjectURL(file));
     }
   };
 
@@ -84,13 +102,14 @@ const UploadMangas: React.FC = () => {
         tag.name.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredTags(filtered);
+      setShowTagDropdown(true);
     } else {
       setFilteredTags([]);
+      setShowTagDropdown(false);
     }
   };
 
   const addTag = (tag: any) => {
-    // Vérifier si le tag n'est pas déjà ajouté
     const alreadyExists = form.tagCategories.some((t) => 
       typeof t === "number" ? t === tag.id : false
     );
@@ -103,6 +122,7 @@ const UploadMangas: React.FC = () => {
     }
     setTagInput("");
     setFilteredTags([]);
+    setShowTagDropdown(false);
   };
 
   const addCustomTag = () => {
@@ -119,6 +139,7 @@ const UploadMangas: React.FC = () => {
       }
       setTagInput("");
       setFilteredTags([]);
+      setShowTagDropdown(false);
     }
   };
 
@@ -140,6 +161,7 @@ const UploadMangas: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
@@ -151,151 +173,347 @@ const UploadMangas: React.FC = () => {
           formData.append(key, String(value));
         }
       });
+      
       await createManga(formData);
-      toast.success("Manga uploaded!");
+      toast.success("Manga créé avec succès!");
+      
+      // Reset form
       setForm({
         ref: "",
         mangas_category_id: "",
         mangas_sub_category_id: "",
-        mangas_plateform_id: "",
+        plateform_id: "",
         tagCategories: [],
-        creator: "",
         creator_id: "",
         total_chapters: "",
         need_vip: false,
-        plateform_id: "",
         cover: null,
       });
+      setCoverPreview(null);
+      
     } catch (err: any) {
-      toast.error("Erreur lors de l'upload du manga");
+      toast.error("Erreur lors de la création du manga");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Upload Mangas</h1>
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-        <div>
-          <label className="block font-medium mb-1">Titre (ref)</label>
-          <input name="ref" value={form.ref} onChange={handleChange} className="input input-bordered w-full" required />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Catégorie</label>
-          <select name="mangas_category_id" value={form.mangas_category_id} onChange={handleChange} className="input input-bordered w-full" required>
-            <option value="">Sélectionner</option>
-            {Array.isArray(categories) && categories.map((cat: any) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Sous-catégorie</label>
-          <select name="mangas_sub_category_id" value={form.mangas_sub_category_id} onChange={handleChange} className="input input-bordered w-full">
-            <option value="">Sélectionner</option>
-            {Array.isArray(subCategories) && subCategories.map((sub: any) => (
-              <option key={sub.id} value={sub.id}>{sub.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Plateforme</label>
-          <select name="plateform_id" value={form.plateform_id} onChange={handleChange} className="input input-bordered w-full" required>
-            <option value="">Sélectionner</option>
-            {plateforms.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Créateur</label>
-          <select name="creator_id" value={form.creator_id} onChange={handleChange} className="input input-bordered w-full">
-            <option value="">Sélectionner</option>
-            {creators.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Total chapitres</label>
-          <input name="total_chapters" value={form.total_chapters} onChange={handleChange} className="input input-bordered w-full" type="number" min="1" />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Tags</label>
-          <div className="relative">
-            <div className="flex gap-2 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      >
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 text-center"
+        >
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Créer un Manga
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Ajoutez un nouveau manga à votre collection
+          </p>
+        </motion.div>
+
+        {/* Form */}
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-8 space-y-6"
+          encType="multipart/form-data"
+        >
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Titre (ref)
+              </label>
               <input
-                type="text"
-                value={tagInput}
-                onChange={handleTagInputChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    if (filteredTags.length > 0) {
-                      addTag(filteredTags[0]);
-                    } else {
-                      addCustomTag();
-                    }
-                  }
-                }}
-                placeholder="Rechercher ou créer un tag..."
-                className="input input-bordered flex-1"
+                name="ref"
+                value={form.ref}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300"
+                placeholder="Entrez le titre du manga"
+                required
               />
-              <button
-                type="button"
-                onClick={addCustomTag}
-                className="btn btn-secondary"
-                disabled={!tagInput.trim()}
-              >
-                Ajouter
-              </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Total des chapitres
+              </label>
+              <input
+                name="total_chapters"
+                value={form.total_chapters}
+                onChange={handleChange}
+                type="number"
+                min="1"
+                className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300"
+                placeholder="Nombre de chapitres"
+              />
+            </div>
+          </div>
+
+          {/* Category & Platform */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Catégorie
+              </label>
+              <div className="relative">
+                <select
+                  name="mangas_category_id"
+                  value={form.mangas_category_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 appearance-none"
+                  required
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  {categories.map((cat: any) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Sous-catégorie
+              </label>
+              <div className="relative">
+                <select
+                  name="mangas_sub_category_id"
+                  value={form.mangas_sub_category_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 appearance-none"
+                >
+                  <option value="">Sélectionner une sous-catégorie</option>
+                  {subCategories.map((sub: any) => (
+                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Platform & Creator */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Plateforme
+              </label>
+              <div className="relative">
+                <select
+                  name="plateform_id"
+                  value={form.plateform_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 appearance-none"
+                  required
+                >
+                  <option value="">Sélectionner une plateforme</option>
+                  {plateforms.map((p: any) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Créateur
+              </label>
+              <div className="relative">
+                <select
+                  name="creator_id"
+                  value={form.creator_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 appearance-none"
+                >
+                  <option value="">Sélectionner un créateur</option>
+                  {creators.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              Tags
+            </label>
+            <div className="relative">
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={handleTagInputChange}
+                  onFocus={() => setShowTagDropdown(true)}
+                  placeholder="Rechercher ou créer un tag..."
+                  className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={addCustomTag}
+                  className="px-4 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                  disabled={!tagInput.trim()}
+                >
+                  <Plus className="w-4 h-4" />
+                </motion.button>
+              </div>
+              
+              <AnimatePresence>
+                {showTagDropdown && filteredTags.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                  >
+                    {filteredTags.map((tag: any, index) => (
+                      <motion.button
+                        key={tag.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        type="button"
+                        onClick={() => addTag(tag)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 text-gray-700 dark:text-gray-300"
+                      >
+                        {tag.name}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
-            {filteredTags.length > 0 && (
-              <div className="absolute z-10 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {filteredTags.map((tag: any) => (
-                  <div
-                    key={tag.id}
-                    onClick={() => addTag(tag)}
-                    className="px-4 py-2 hover:bg-base-200 cursor-pointer"
+            {/* Selected Tags */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              <AnimatePresence>
+                {form.tagCategories.map((tag, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 px-3 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
                   >
-                    {tag.name}
-                  </div>
+                    <span>{getTagDisplay(tag)}</span>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      type="button"
+                      onClick={() => removeTag(index)}
+                      className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </motion.button>
+                  </motion.div>
                 ))}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* VIP & Cover */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  name="need_vip"
+                  type="checkbox"
+                  checked={form.need_vip}
+                  onChange={handleChange}
+                  className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Marquer comme VIP
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" />
+                Image de couverture
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer">
+                  {coverPreview ? (
+                    <motion.img
+                      src={coverPreview}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Cliquez pour télécharger une image
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500">
+                        PNG, JPG, WEBP (max 10MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            disabled={loading}
+            className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300 ${
+              loading
+                ? "bg-gray-100 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
+            }`}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Création en cours...
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Créer le manga
+              </>
             )}
-          </div>
-          
-          {/* Tags sélectionnés */}
-          <div className="flex flex-wrap gap-2 mt-3">
-            {form.tagCategories.map((tag, index) => (
-              <div
-                key={index}
-                className="badge badge-primary gap-2 px-3 py-3"
-              >
-                <span>{getTagDisplay(tag)}</span>
-                <button
-                  type="button"
-                  onClick={() => removeTag(index)}
-                  className="btn btn-ghost btn-xs btn-circle"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className="block font-medium mb-1">VIP</label>
-          <input name="need_vip" type="checkbox" checked={form.need_vip} onChange={handleChange} className="checkbox" />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Image de couverture</label>
-          <input name="cover" type="file" accept="image/*" onChange={handleFileChange} className="file-input file-input-bordered w-full" />
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Envoi..." : "Uploader"}</button>
-      </form>
+          </motion.button>
+        </motion.form>
+      </motion.div>
     </div>
   );
 };
