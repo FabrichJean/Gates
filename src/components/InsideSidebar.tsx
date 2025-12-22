@@ -164,6 +164,7 @@ const Breadcrumb: React.FC = () => {
     "/users-archive": "Users Archive",
     "/videos": "Videos Management",
     "/category-manager": "Category Video",
+    "/mangas-categories": "Mangas Categories",
     "/post-categories": "Post Categories",
     "/upload": "Upload",
     "/upload-post": "Upload Post",

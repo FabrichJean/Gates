@@ -53,6 +53,7 @@ import EditMangasEpisodePage from "../pages/EditMangasEpisodePage";
 import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
 import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
+import MangasCategoriesPage from "../pages/MangasCategoriesPage";
 
 
 
@@ -163,6 +164,18 @@ const AppRoutes = () => {
                 <InsideSidebar>
                   <EditMangasEpisodePage />
                 </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <MangasCategoriesPage />
+                  </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
