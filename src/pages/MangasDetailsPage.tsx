@@ -32,6 +32,7 @@ interface Manga {
   isDeleted?: boolean;
   checking?: string;
   comment?: string;
+  processing?: string;
   mangas_category_id?: number;
   mangas_sub_category_id?: number;
   plateform_id?: number;
@@ -243,11 +244,16 @@ const MangasDetailsPage: React.FC = () => {
             >
               <button
                 onClick={handleSendManga}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                title="Envoyer le manga"
+                disabled={manga.processing === "done"}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${
+                  manga.processing === "done"
+                    ? "bg-gray-400 dark:bg-gray-700 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-60"
+                    : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                }`}
+                title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer le manga"}
               >
                 <Send className="w-4 h-4" />
-                Envoyer
+                {manga.processing === "done" ? "Uploaded" : "Envoyer"}
               </button>
               
               <button

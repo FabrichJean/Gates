@@ -123,7 +123,7 @@ const MangasEpisodeDetailsPage: React.FC = () => {
                   
                   {/* Numéro de page */}
                   <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                    {currentPage + 1} / {episode.images_url.length}
+                    {currentPage + 1} / {episode.mangasImages.length}
                   </div>
                 </div>
               </div>

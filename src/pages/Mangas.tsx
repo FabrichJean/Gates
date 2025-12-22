@@ -39,6 +39,7 @@ interface Manga {
   isDeleted?: boolean;
   checking?: string;
   comment?: string;
+  processing?: string;
   mangasCategory?: { name: string };
   mangasSubCategory?: { name: string };
 }
@@ -299,6 +300,19 @@ const Mangas: React.FC = () => {
                           )}
                         </div>
 
+                        {/* Processing Status Badge */}
+                        {manga.processing && (
+                          <div className="absolute top-2 left-2" style={{ top: manga.isDeleted !== undefined ? '32px' : '8px' }}>
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium text-nowrap ${
+                              manga.processing === "done"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                            }`}>
+                              {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
+                            </span>
+                          </div>
+                        )}
+
                         {/* Action Buttons */}
                         <div className="absolute bottom-2 left-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <Link
@@ -321,11 +335,16 @@ const Mangas: React.FC = () => {
                                 e.preventDefault();
                                 handleSendManga(manga.id);
                               }}
-                              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-500/20 backdrop-blur-md rounded-lg hover:bg-blue-500/30 transition-all duration-200 text-white text-xs font-medium"
-                              title="Envoyer"
+                              disabled={manga.processing === "done"}
+                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
+                                manga.processing === "done"
+                                  ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
+                                  : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
+                              }`}
+                              title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer"}
                             >
                               <Send className="w-3.5 h-3.5" />
-                              Send
+                              {manga.processing === "done" ? "Uploaded" : "Send"}
                             </button>
                           )}
                         </div>
@@ -423,6 +442,9 @@ const Mangas: React.FC = () => {
                           Checking
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Activate
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -494,9 +516,9 @@ const Mangas: React.FC = () => {
 
                             {/* Category */}
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex flex-nowrap items-center gap-1.5">
                                 <Tag className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                <span className="text-sm text-gray-600 dark:text-gray-400 text-nowrap">
                                   {manga.mangasCategory?.name || "-"} /{" "}
                                   {manga.mangasSubCategory?.name || "-"}
                                 </span>
@@ -521,6 +543,21 @@ const Mangas: React.FC = () => {
                             </td>
 
                             {/* Status */}
+                            <td className="px-6 py-4 text-center">
+                              {manga.processing ? (
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
+                                  manga.processing === "done"
+                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                }`}>
+                                  {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                              )}
+                            </td>
+
+                            {/* Activate */}
                             <td className="px-6 py-4 text-center">
                             <motion.input
                               whileHover={{ scale: 1.05 }}
@@ -559,8 +596,13 @@ const Mangas: React.FC = () => {
                                 {user?.role === RoleEnum.SUPERADMIN && (
                                   <button
                                     onClick={() => handleSendManga(manga.id)}
-                                    className="p-1.5 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 transition-all duration-200"
-                                    title="Envoyer"
+                                    disabled={manga.processing === "done"}
+                                    className={`p-1.5 rounded-lg transition-all duration-200 ${
+                                      manga.processing === "done"
+                                        ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
+                                        : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                                    }`}
+                                    title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer"}
                                   >
                                     <Send className="w-4 h-4" />
                                   </button>
