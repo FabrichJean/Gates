@@ -38,7 +38,7 @@ const RomansManagement = () => {
     const mapStatus = (roman: TRoman) => {
         if (roman.isDeleted) return "deleted";
         if (roman.checking === "waiting for checking") return "pending";
-        if (roman.checking === "refused") return "rejected";
+        if (roman.checking === "refused") return "refused";
         if (roman.processing === "done") return "published";
         return "draft";
     };
@@ -102,17 +102,23 @@ const RomansManagement = () => {
         deleted: romans.filter((r) => r.isDeleted).length,
     };
 
-    function handleRemeveRoman(id: number): import("react").MouseEventHandler<HTMLButtonElement> {
-        return (e) => {
-            e.preventDefault();
-            if (window.confirm("Are you sure you want to delete this novel?")) {
-                // TODO: Call API to remove roman, then refresh list or update state
-                // Example:
-                // removeRoman(id).then(() => refetchRomans());
-                alert(`Novel with ID ${id} deleted (simulation).`);
-            }
-        };
-    }
+    // function handleRoggleStateRoman(id: number): import("react").MouseEventHandler<HTMLButtonElement> {
+    //     return (e) => {
+    //         e.preventDefault();
+    //         if (window.confirm("Are you sure you want to delete this novel?")) {
+    //             // TODO: Call API to remove roman, then refresh list or update state
+    //             // Example:
+    //             // removeRoman(id).then(() => refetchRomans());
+    //             alert(`Novel with ID ${id} deleted (simulation).`);
+    //         }
+    //     };
+    // }
+
+    /* ===================== UTILS ===================== */
+    const truncateText = (text: string, maxLength: number = 10) => {
+        if (!text) return "-";
+        return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
 
     /* ===================== RENDER CARD ===================== */
     const renderCardView = () => (
@@ -122,8 +128,8 @@ const RomansManagement = () => {
                     <div className="p-6">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                                    {roman.ref}
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1" title={roman.ref}>
+                                    {truncateText(roman.ref)}
                                 </h3>
                             </div>
                             {/* {getStatusBadge(mapStatus(roman))} */}
@@ -173,11 +179,17 @@ const RomansManagement = () => {
                         </div>
 
                         <div className="flex flex-col gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <CheckingRoman
+                            <div className="flex justify-between items-center">
+                                <CheckingRoman
                                 roman={roman}
                                 user={user}
                                 index={filteredRomans.indexOf(roman)}
                             />
+                            <label className="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" defaultChecked={false} className="sr-only peer" />
+                                <div className="relative w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-200 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-gray-100 after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500" />
+                            </label>
+                            </div>
                             <div className="flex justify-between items-center">
                                 <div className="flex gap-2">
                                     <Link to={`/romans/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
@@ -186,9 +198,6 @@ const RomansManagement = () => {
                                     <Link to={`/romans/edit/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
                                         <Edit2 className="w-4 h-4" />
                                     </Link>
-                                    <button onClick={handleRemeveRoman(roman.id)} className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
                                 </div>
                                 <MoreVertical className="w-4 h-4 text-gray-400 cursor-pointer" />
                             </div>
@@ -226,7 +235,7 @@ const RomansManagement = () => {
                     {filteredRomans.map((roman) => (
                         <tr key={roman.id} className="border-t">
                             <td className="px-4 py-3">{roman.id}</td>
-                            <td className="px-4 py-3">{roman.ref}</td>
+                            <td className="px-4 py-3" title={roman.ref}>{truncateText(roman.ref)}</td>
                             <td className="px-4 py-3">
                                 <span className="flex items-center hover:text-blue-500 dark:hover:text-blue-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
@@ -262,21 +271,24 @@ const RomansManagement = () => {
                             </td>
                             <td className="px-4 py-3">
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <span className="text-sm font-medium text-nowrap text-gray-900 dark:text-gray-100">
                                         {roman.category?.name || "-"}
                                     </span>
                                     {roman.subCategory?.name && (
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        <span className="text-xs text-nowrap text-gray-500 dark:text-gray-400">
                                             {roman.subCategory.name}
                                         </span>
                                     )}
                                 </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 text-nowrap">
                                 {roman.plateform?.name || "-"}
                             </td>
                             <td className="px-4 py-3">
-                                {getStatusBadge(mapStatus(roman))}
+                                <label className="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" defaultChecked={false} className="sr-only peer" />
+                                    <div className="relative w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-200 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-gray-100 after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500" />
+                                </label>
                             </td>
                             <td className="px-4 py-3">
                                 <CheckingRoman
@@ -292,9 +304,6 @@ const RomansManagement = () => {
                                 <Link to={`/romans/edit/${roman.id}`}>
                                     <Edit2 className="w-4 h-4 cursor-pointer text-blue-500" />
                                 </Link>
-                                <button className="" onClick={handleRemeveRoman(roman.id)}>
-                                    <Trash2 className="w-4 h-4 cursor-pointer text-red-500" />
-                                </button>
                                 <MoreVertical className="w-4 h-4 cursor-pointer" />
                             </td>
                         </tr>
