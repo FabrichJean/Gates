@@ -2,6 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getMangasEpisodesApi } from "../api/mangasEpisode";
 
+export interface MangasImage {
+  id: number;
+  image_id: string;
+  episode_id: number;
+  metadata: any | null;
+  image_upload_status: boolean;
+  s3_image_path: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  image_url: string;
+  s3_image_url: string;
+}
+
 interface Episode {
   id: number;
   name: string;
@@ -10,6 +24,7 @@ interface Episode {
   images?: string[] | string;
   images_url?: string[];
   metadata?: any;
+  mangasImages: MangasImage[]
   chapter?: {
     title: string;
     chapter_number: number;

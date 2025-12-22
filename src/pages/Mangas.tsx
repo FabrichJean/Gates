@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus,
   Edit,
   Eye,
   BookOpen,
   Image as ImageIcon,
   Tag,
   Star,
-  Trash2,
   CheckCircle,
   XCircle,
   ChevronLeft,
   ChevronRight,
-  Search,
-  Filter,
   LayoutGrid,
   List,
   FilePlus,
@@ -34,6 +30,7 @@ interface Manga {
   ref: string;
   cover?: string;
   cover_url?: string;
+  s3_cover_url?: string;
   creator?: string;
   creator_id?: number;
   creatorObj?: { name: string; avatar?: string };
@@ -448,7 +445,7 @@ const Mangas: React.FC = () => {
                               <div className="w-12 h-16 rounded-md overflow-hidden shadow-sm">
                                 {manga.cover_url ? (
                                   <img
-                                    src={manga.cover_url}
+                                    src={manga.s3_cover_url || manga.cover_url}
                                     alt={manga.ref}
                                     className="w-full h-full object-cover"
                                   />
