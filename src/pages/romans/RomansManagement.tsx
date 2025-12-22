@@ -19,7 +19,7 @@ const RomansManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [page] = useState(1);
-    const [viewMode, setViewMode] = useState<"card" | "table">("card");
+    const [viewMode, setViewMode] = useState<"card" | "table">("table");
     const { user } = useAuth();
 
     /* ===================== API ===================== */

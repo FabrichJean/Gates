@@ -63,6 +63,7 @@ import RomansManagement from "../pages/romans/RomansManagement";
 import RomanDetails from "../pages/romans/romanDetails";
 import RomanEdit from "../pages/romans/romanEdit";
 import RomanCategoryPage from "../pages/romans/romanCategory";
+import RomanUpload from "../pages/romans/romanUpload";
 
 
 
@@ -76,6 +77,15 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route path="/romans/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanUpload />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/romans"
             element={
               <ProtectedRoute>
@@ -106,6 +116,7 @@ const AppRoutes = () => {
           <Route path="/romans/edit"
             element={<Navigate to="/romans" />}
           />
+          
           <Route path="/roman-category"
             element={
               <ProtectedRoute>
