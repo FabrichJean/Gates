@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 
 interface Manga {
+  s3_cover_url: string;
   id: number;
   ref: string;
   cover?: string;
@@ -293,7 +294,7 @@ const MangasDetailsPage: React.FC = () => {
               <div className="aspect-[3/4] relative group">
                 {manga.cover_url ? (
                   <motion.img
-                    src={manga.cover_url}
+                    src={manga.s3_cover_url || manga.cover_url}
                     alt={manga.ref}
                     className="w-full h-full object-cover"
                     whileHover={{ scale: 1.05 }}
