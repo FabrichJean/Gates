@@ -1,15 +1,4 @@
 import EditMangasChapterPage from "../pages/EditMangasChapterPage";
-import MangasChaptersPage from "../pages/MangasChaptersPage";
-import { useParams } from "react-router-dom";
-
-// Wrapper to extract mangaId from params and pass as prop
-function MangaChaptersRouteWrapper() {
-  const { mangaId } = useParams();
-  const id = mangaId ? parseInt(mangaId, 10) : undefined;
-  if (!id || isNaN(id)) return <div className="p-8 text-red-500">Manga ID invalide</div>;
-  return <MangasChaptersPage mangaId={id} />;
-}
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
@@ -23,7 +12,6 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import VideoBotManagement from "../pages/VideoBotManagement";
 import VideoBotDetails from "../pages/VideoBotDetails";
-// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -64,6 +52,7 @@ import UploadMangasEpisodePage from "../pages/UploadMangasEpisodePage";
 import EditMangasEpisodePage from "../pages/EditMangasEpisodePage";
 import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
+import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
 
 
 

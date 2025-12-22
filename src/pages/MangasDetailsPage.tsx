@@ -12,9 +12,10 @@ import {
   Image as ImageIcon,
   Info,
   ChevronRight,
-  Star
+  Star,
+  Send
 } from "lucide-react";
-import { getMangaById, updateManga } from "../api/mangas";
+import { getMangaById, updateManga, uploadMangaToS3 } from "../api/mangas";
 import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 
@@ -105,6 +106,21 @@ const MangasDetailsPage: React.FC = () => {
       fetchManga();
     } catch (error) {
       toast.error("Erreur lors de la mise à jour du statut");
+    }
+  };
+
+  const handleSendManga = async () => {
+    if (!manga) return;
+    try {
+      toast.loading("Envoi du manga vers S3/R2...", { id: "send-manga" });
+      
+      await uploadMangaToS3(manga.id);
+      
+      toast.success("Manga envoyé avec succès!", { id: "send-manga" });
+      fetchManga();
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Erreur lors de l'envoi du manga";
+      toast.error(errorMessage, { id: "send-manga" });
     }
   };
 
@@ -224,6 +240,15 @@ const MangasDetailsPage: React.FC = () => {
               transition={{ delay: 0.3 }}
               className="flex items-center gap-3"
             >
+              <button
+                onClick={handleSendManga}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                title="Envoyer le manga"
+              >
+                <Send className="w-4 h-4" />
+                Envoyer
+              </button>
+              
               <button
                 onClick={handleToggleDeleted}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${

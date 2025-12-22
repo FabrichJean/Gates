@@ -38,3 +38,12 @@ export const toggleMangaDeleted = async (id: number) => {
   });
   return response.data;
 };
+
+export const uploadMangaToS3 = async (id: number) => {
+  const response = await axios.post(`${apiURL}/mangas/${id}/upload`, {}, {
+    headers: {
+      Authorization: `Bearer ${token()}`,
+    },
+  });
+  return response.data;
+};
