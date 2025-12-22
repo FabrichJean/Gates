@@ -11,16 +11,28 @@ import {
 } from "lucide-react";
 import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
 import { Link } from "react-router-dom";
+import CheckingRoman from "../../components/CheckingRoman";
+import { useAuth } from "../../hooks/useAuth";
+import useSocketCheckRomans from "../../hooks/romans/useSocketCheckRomans";
 
 const RomansManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [page] = useState(1);
     const [viewMode, setViewMode] = useState<"card" | "table">("card");
+    const { user } = useAuth();
 
     /* ===================== API ===================== */
-    const { data, loading } = UseRomans("all", page, searchTerm);
+    const { data, loading, reFetch } = UseRomans("all", page, searchTerm);
     const romans = data?.romans || [];
+
+    /* ===================== SOCKET CHECKING ===================== */
+    useSocketCheckRomans((data) => {
+        // Refetch uniquement si c'est une mise à jour d'un autre utilisateur
+        if (data.user_id !== user?.id) {
+            setTimeout(() => reFetch(), 500);
+        }
+    });
 
     /* ===================== STATUS ===================== */
     const mapStatus = (roman: TRoman) => {
@@ -160,19 +172,26 @@ const RomansManagement = () => {
                             )}
                         </div>
 
-                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex gap-2">
-                                <Link to={`/romans/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
-                                    <Eye className="w-4 h-4" />
-                                </Link>
-                                <Link to={`/romans/edit/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
-                                    <Edit2 className="w-4 h-4" />
-                                </Link>
-                                <button onClick={handleRemeveRoman(roman.id)} className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500">
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                        <div className="flex flex-col gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <CheckingRoman
+                                roman={roman}
+                                user={user}
+                                index={filteredRomans.indexOf(roman)}
+                            />
+                            <div className="flex justify-between items-center">
+                                <div className="flex gap-2">
+                                    <Link to={`/romans/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
+                                        <Eye className="w-4 h-4" />
+                                    </Link>
+                                    <Link to={`/romans/edit/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
+                                        <Edit2 className="w-4 h-4" />
+                                    </Link>
+                                    <button onClick={handleRemeveRoman(roman.id)} className="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <MoreVertical className="w-4 h-4 text-gray-400 cursor-pointer" />
                             </div>
-                            <MoreVertical className="w-4 h-4 text-gray-400 cursor-pointer" />
                         </div>
                     </div>
                 </div>
@@ -194,6 +213,7 @@ const RomansManagement = () => {
                             "Category",
                             "Platform",
                             "Status",
+                            "Checking",
                             "Actions",
                         ].map((h) => (
                             <th key={h} className="px-4 py-3 text-left">
@@ -257,6 +277,13 @@ const RomansManagement = () => {
                             </td>
                             <td className="px-4 py-3">
                                 {getStatusBadge(mapStatus(roman))}
+                            </td>
+                            <td className="px-4 py-3">
+                                <CheckingRoman
+                                    roman={roman}
+                                    user={user}
+                                    index={romans.indexOf(roman)}
+                                />
                             </td>
                             <td className="px-4 py-3 flex gap-2">
                                 <Link to={`/romans/${roman.id}`}>
