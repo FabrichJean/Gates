@@ -479,7 +479,7 @@ const Mangas: React.FC = () => {
                           Cover
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Titre
+                          Ref
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Créateur
@@ -531,41 +531,22 @@ const Mangas: React.FC = () => {
                               </div>
                             </td>
 
-                            {/* Title */}
+                            {/* ref */}
                             <td className="px-6 py-4">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <Link
-                                    to={`/mangas/${manga.id}`}
-                                    className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                  >
-                                    {manga.titles ? (
-                                      <MangaTitle
-                                        titles={parseTitlesFromAPI(manga.titles)}
-                                        fallbackText={manga.title || manga.ref}
-                                      />
-                                    ) : (
-                                      manga.title || manga.ref
-                                    )}
-                                  </Link>
-                                  {manga.need_vip && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-orange-600 text-[10px] font-medium">
-                                      <RiStarFill className="w-2 h-2" />
-                                    </span>
-                                  )}
+                              {manga.title ? (
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {manga.title}
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {manga.ref}
+                                  </span>
                                 </div>
-                                {manga.titles ? (
-                                  <MangaDescription
-                                    titles={parseTitlesFromAPI(manga.titles)}
-                                    fallbackText={manga.description}
-                                    className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs"
-                                  />
-                                ) : manga.description ? (
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs">
-                                    {manga.description}
-                                  </p>
-                                ) : null}
-                              </div>
+                              ) : (
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {manga.ref}
+                                </span>
+                              )}
                             </td>
 
                             {/* Creator */}

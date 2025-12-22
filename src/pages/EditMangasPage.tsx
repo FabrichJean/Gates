@@ -230,21 +230,6 @@ const EditMangasPage: React.FC = () => {
           <label className="block font-medium mb-1">Référence (ref)</label>
           <input name="ref" value={form.ref} onChange={handleChange} className="input input-bordered w-full" required />
         </div>
-        <div>
-          <label className="block font-medium mb-1">Titre (ancien format)</label>
-          <input name="title" value={form.title} onChange={handleChange} className="input input-bordered w-full" />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Description (ancien format)</label>
-          <textarea 
-            name="description" 
-            value={form.description} 
-            onChange={(e) => setForm({ ...form, description: e.target.value })} 
-            className="textarea textarea-bordered w-full" 
-            rows={4}
-            placeholder="Entrez une description du manga..."
-          />
-        </div>
         
         {/* Nouveau champ Titres multilingues */}
         <MangaTitlesField
