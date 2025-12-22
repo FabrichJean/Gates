@@ -62,6 +62,7 @@ import EditMangasPage from "../pages/EditMangasPage";
 import RomansManagement from "../pages/romans/RomansManagement";
 import RomanDetails from "../pages/romans/romanDetails";
 import RomanEdit from "../pages/romans/romanEdit";
+import RomanCategoryPage from "../pages/romans/romanCategory";
 
 
 
@@ -84,7 +85,7 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-           <Route path="/romans/:id"
+          <Route path="/romans/:id"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
@@ -98,6 +99,18 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <RomanEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/romans/edit"
+            element={<Navigate to="/romans" />}
+          />
+          <Route path="/roman-category"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanCategoryPage />
                 </InsideSidebar>
               </ProtectedRoute>
             }

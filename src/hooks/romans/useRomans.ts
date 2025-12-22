@@ -77,9 +77,6 @@ export default function UseRomans(
   search?: string
 ) {
   return useFetch<{
-    total: number;
-    totalSent: number;
-    page: number | null;
     limit: number | null;
     search: string | null;
     romans: TRoman[];
@@ -92,9 +89,6 @@ export default function UseRomans(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function UseRomansWithParams(query: any) {
   return useFetch<{
-    total: number;
-    totalSent: number;
-    page: number | null;
     limit: number | null;
     search: string | null;
     romans: TRoman[];

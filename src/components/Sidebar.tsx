@@ -366,6 +366,13 @@ function Sidebar({
               icon={MdOutlineCategory}
             />
 
+            <NavLink
+              to="/roman-category"
+              name="roman-category"
+              label="Roman Category"
+              icon={MdOutlineCategory}
+            />
+
             {/* Separator */}
             {!isCollapsed && (
               <div className="pt-4 pb-2">
