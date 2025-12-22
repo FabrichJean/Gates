@@ -4,6 +4,7 @@ import axios from "axios";
 import { apiURL, token } from "../constant";
 import { deleteMangasEpisodeApi } from "../api/mangasEpisode";
 import toast from "react-hot-toast";
+import type { MangasImage } from "./MangasEpisodesPage";
 
 interface Episode {
   id: number;
@@ -13,6 +14,7 @@ interface Episode {
   images?: string[] | string;
   images_url?: string[];
   metadata?: any;
+  mangasImages: MangasImage[]
   chapter?: {
     title: string;
     chapter_number: number;
@@ -113,7 +115,7 @@ const MangasEpisodeDetailsPage: React.FC = () => {
                   }}
                 >
                   <img
-                    src={episode.images_url[currentPage]}
+                    src={episode.mangasImages[currentPage].s3_image_url || episode.mangasImages[currentPage].image_url}
                     alt={`${episode.name} - Page ${currentPage + 1}`}
                     className="w-full h-auto object-contain"
                     style={{ maxHeight: '70vh' }}
