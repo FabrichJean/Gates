@@ -43,27 +43,6 @@ const RomansManagement = () => {
         return "draft";
     };
 
-    const getStatusBadge = (status: string) => {
-        const styles: Record<string, string> = {
-            published:
-                "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
-            draft:
-                "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
-            pending:
-                "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200",
-            rejected:
-                "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
-            deleted:
-                "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300",
-        };
-
-        return (
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status]}`}>
-                {status}
-            </span>
-        );
-    };
-
     /* ===================== FILTER ===================== */
     const filteredRomans = useMemo(() => {
         return romans.filter((roman) => {

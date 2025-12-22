@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { apiURL } from "../../constant";
@@ -113,6 +113,7 @@ const RomanDetails = () => {
     const navigate = useNavigate();
     const [roman, setRoman] = useState<Roman | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedTitleIndex, setSelectedTitleIndex] = useState(0);
 
     useEffect(() => {
         const fetchRomanDetails = async () => {
@@ -202,9 +203,28 @@ const RomanDetails = () => {
                         <ArrowLeft className="w-5 h-5" />
                         Back to Romans
                     </button>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Roman Details
-                    </h1>
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            Roman Details
+                        </h1>
+                        {/* btn switch edit */}
+                        <Link to={`/romans/edit/${roman.id}`} className="inline-block mt-2 p-2 animate-pulse transition-all">
+                            {/* icon svg edit */}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-5 h-5 inline-block mr-2"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -286,26 +306,52 @@ const RomanDetails = () => {
                             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                                 Titles & Descriptions
                             </h2>
-                            <div className="space-y-4">
+
+                            {/* Onglets de langues */}
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
                                 {roman.titles.map((title, index) => (
-                                    <div
+                                    <button
                                         key={index}
-                                        className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
+                                        type="button"
+                                        onClick={() => setSelectedTitleIndex(index)}
+                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedTitleIndex === index
+                                                ? "bg-blue-600 text-white shadow-md"
+                                                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                            }`}
                                     >
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded">
-                                                {title.language.name}
-                                            </span>
-                                        </div>
-                                        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-2">
-                                            {title.title}
-                                        </h3>
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                            {title.description}
-                                        </p>
-                                    </div>
+                                        {title.language.name}
+                                    </button>
                                 ))}
                             </div>
+
+                            {/* Contenu de la langue sélectionnée */}
+                            {roman.titles[selectedTitleIndex] && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                            Title ({roman.titles[selectedTitleIndex].language.name})
+                                        </label>
+                                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                            <p className="font-semibold text-gray-800 dark:text-gray-200">
+                                                {roman.titles[selectedTitleIndex].title}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {roman.titles[selectedTitleIndex].description && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                                Description ({roman.titles[selectedTitleIndex].language.name})
+                                            </label>
+                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                    {roman.titles[selectedTitleIndex].description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Category & Platform */}
