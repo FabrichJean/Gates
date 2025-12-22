@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -12,7 +12,8 @@ import {
   X,
   Save,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Check
 } from "lucide-react";
 import { createManga } from "../api/mangas";
 import { getCreators } from "../api/creators";
@@ -49,7 +50,9 @@ const UploadMangas: React.FC = () => {
   const [tagInput, setTagInput] = useState("");
   const [filteredTags, setFilteredTags] = useState<any[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [showCreatorDropdown, setShowCreatorDropdown] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Promise.all([
@@ -79,6 +82,18 @@ const UploadMangas: React.FC = () => {
       setSubCategories([]);
     }
   }, [form.mangas_category_id]);
+
+  // Close creator dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
+        setShowCreatorDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -355,19 +370,96 @@ const UploadMangas: React.FC = () => {
                 <User className="w-4 h-4" />
                 Créateur
               </label>
-              <div className="relative">
-                <select
-                  name="creator_id"
-                  value={form.creator_id}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 appearance-none"
+              <div className="relative" ref={creatorDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
+                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 text-left flex items-center gap-3"
                 >
-                  <option value="">Sélectionner un créateur</option>
-                  {creators.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  {form.creator_id ? (
+                    <>
+                      {creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
+                        <img
+                          src={creators.find((c) => c.id === Number(form.creator_id))?.avatar}
+                          alt="Creator"
+                          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                        />
+                      )}
+                      {!creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                          <User className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                      <span className="flex-1">
+                        {creators.find((c) => c.id === Number(form.creator_id))?.name || "Créateur sélectionné"}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400">Sélectionner un créateur</span>
+                  )}
+                  <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 transition-transform duration-200 ${showCreatorDropdown ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {showCreatorDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto"
+                    >
+                      {/* Option vide */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, creator_id: "" });
+                          setShowCreatorDropdown(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <X className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">Aucun créateur</span>
+                      </button>
+
+                      {creators.map((creator: any, index) => (
+                        <motion.button
+                          key={creator.id}
+                          type="button"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          onClick={() => {
+                            setForm({ ...form, creator_id: String(creator.id) });
+                            setShowCreatorDropdown(false);
+                          }}
+                          className={`w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200 flex items-center gap-3 group ${
+                            form.creator_id === String(creator.id) ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                          }`}
+                        >
+                          {creator.avatar ? (
+                            <img
+                              src={creator.avatar}
+                              alt={creator.name}
+                              className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-transparent group-hover:ring-blue-500 transition-all duration-200"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 ring-2 ring-transparent group-hover:ring-blue-500 transition-all duration-200">
+                              <User className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                          <span className="flex-1 text-gray-700 dark:text-gray-300 text-sm font-medium">
+                            {creator.name}
+                          </span>
+                          {form.creator_id === String(creator.id) && (
+                            <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          )}
+                        </motion.button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>

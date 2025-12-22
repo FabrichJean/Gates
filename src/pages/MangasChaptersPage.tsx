@@ -17,6 +17,9 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getMangasChaptersApi, createMangasChapterApi } from "../api/mangasChapter";
 import toast from "react-hot-toast";
+import type { MangaTitles } from "../types/mangaTitles";
+import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 interface Chapter {
   id: number;
@@ -38,6 +41,7 @@ const MangasChaptersPage: React.FC = () => {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    titles: [] as MangaTitles, // Titres multilingues
     chapter_number: "",
     metadata: "",
   });
@@ -73,17 +77,28 @@ const MangasChaptersPage: React.FC = () => {
 
     setCreating(true);
     try {
-      const chapterData = {
+      const chapterData: any = {
         title: form.title,
         description: form.description,
         chapter_number: form.chapter_number ? Number(form.chapter_number) : undefined,
         metadata: form.metadata ? JSON.parse(form.metadata) : undefined,
       };
 
+      // Ajouter les titres multilingues s'ils existent
+      if (form.titles.length > 0) {
+        chapterData.titles = prepareTitlesForAPI(form.titles);
+      }
+
       await createMangasChapterApi(Number(mangaId), chapterData);
       
       toast.success("Chapitre créé avec succès!");
-      setForm({ title: "", description: "", chapter_number: "", metadata: "" });
+      setForm({ 
+        title: "", 
+        description: "", 
+        titles: [], 
+        chapter_number: "", 
+        metadata: "" 
+      });
       setShowForm(false);
       fetchChapters();
       
@@ -177,19 +192,6 @@ const MangasChaptersPage: React.FC = () => {
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Titre du chapitre
-                      </label>
-                      <input
-                        name="title"
-                        value={form.title}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300"
-                        placeholder="Entrez le titre du chapitre"
-                        required
-                      />
-                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -207,17 +209,13 @@ const MangasChaptersPage: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Titres multilingues */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      value={form.description}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 resize-none"
-                      placeholder="Décrivez le chapitre"
-                      rows={3}
+                    <MangaTitlesField
+                      value={form.titles}
+                      onChange={(titles) => setForm({ ...form, titles })}
+                      label="Titres multilingues (optionnel)"
+                      required={false}
                     />
                   </div>
 

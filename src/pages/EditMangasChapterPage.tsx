@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL, token } from "../constant";
 import toast from "react-hot-toast";
+import type { MangaTitles } from "../types/mangaTitles";
+import { parseTitlesFromAPI, prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 const EditMangasChapterPage: React.FC = () => {
   const { mangaId, chapterId } = useParams();
@@ -11,6 +14,7 @@ const EditMangasChapterPage: React.FC = () => {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    titles: [] as MangaTitles, // Titres multilingues
     chapter_number: "",
     metadata: "",
   });
@@ -30,6 +34,7 @@ const EditMangasChapterPage: React.FC = () => {
       setForm({
         title: ch.title || "",
         description: ch.description || "",
+        titles: ch.titles ? parseTitlesFromAPI(ch.titles) : [],
         chapter_number: ch.chapter_number ? String(ch.chapter_number) : "",
         metadata: ch.metadata ? JSON.stringify(ch.metadata) : "",
       });
@@ -49,14 +54,21 @@ const EditMangasChapterPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const updateData: any = {
+        title: form.title,
+        description: form.description,
+        chapter_number: form.chapter_number ? Number(form.chapter_number) : undefined,
+        metadata: form.metadata ? JSON.parse(form.metadata) : undefined,
+      };
+
+      // Ajouter les titres multilingues s'ils existent
+      if (form.titles.length > 0) {
+        updateData.titles = prepareTitlesForAPI(form.titles);
+      }
+
       await axios.put(
         `${apiURL}/mangas-chapters/mangas/chapters/${chapterId}`,
-        {
-          title: form.title,
-          description: form.description,
-          chapter_number: form.chapter_number ? Number(form.chapter_number) : undefined,
-          metadata: form.metadata ? JSON.parse(form.metadata) : undefined,
-        },
+        updateData,
         { headers: { Authorization: `Bearer ${token()}` } }
       );
       toast.success("Chapitre modifié !");
@@ -72,9 +84,30 @@ const EditMangasChapterPage: React.FC = () => {
     <div className="p-6 max-w-xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Modifier le chapitre</h2>
       <form onSubmit={handleSubmit} className="space-y-3">
-        <input name="title" value={form.title} onChange={handleChange} className="input input-bordered w-full" placeholder="Titre du chapitre" required />
-        <textarea name="description" value={form.description} onChange={handleChange} className="input input-bordered w-full" placeholder="Description" />
-        <input name="chapter_number" value={form.chapter_number} onChange={handleChange} className="input input-bordered w-full" placeholder="Numéro du chapitre" type="number" min="1" />
+        
+        {/* Titres multilingues */}
+        <div className="my-4">
+          <MangaTitlesField
+            value={form.titles}
+            onChange={(titles) => setForm({ ...form, titles })}
+            label="Titres multilingues (optionnel)"
+            required={false}
+          />
+        </div>
+        
+        <label className="block mb-1 font-medium" htmlFor="chapter_number">
+          Numéro du chapitre
+        </label>
+        <input
+          id="chapter_number"
+          name="chapter_number"
+          value={form.chapter_number}
+          onChange={handleChange}
+          className="input input-bordered w-full"
+          placeholder="Numéro du chapitre"
+          type="number"
+          min="1"
+        />
         <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Modification..." : "Enregistrer"}</button>
       </form>
     </div>

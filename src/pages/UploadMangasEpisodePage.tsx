@@ -14,6 +14,9 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { createMangasEpisodeApi } from "../api/mangasEpisode";
 import toast from "react-hot-toast";
+import type { MangaTitles } from "../types/mangaTitles";
+import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 const UploadMangasEpisodePage: React.FC = () => {
   const { mangaId, chapterId } = useParams();
@@ -22,6 +25,7 @@ const UploadMangasEpisodePage: React.FC = () => {
     name: "",
     number: "",
     description: "",
+    titles: [] as MangaTitles, // Titres multilingues
     metadata: "",
     images: [] as File[],
   });
@@ -83,6 +87,11 @@ const UploadMangasEpisodePage: React.FC = () => {
       formData.append("description", form.description);
       if (form.metadata) formData.append("metadata", form.metadata);
       
+      // Ajouter les titres multilingues s'ils existent
+      if (form.titles.length > 0) {
+        formData.append("titles", prepareTitlesForAPI(form.titles));
+      }
+      
       form.images.forEach((file) => {
         formData.append("images", file);
       });
@@ -92,6 +101,16 @@ const UploadMangasEpisodePage: React.FC = () => {
       
       // Nettoyer avant de naviguer
       imagePreviews.forEach(url => URL.revokeObjectURL(url));
+      
+      // Reset form
+      setForm({
+        name: "",
+        number: "",
+        description: "",
+        titles: [],
+        metadata: "",
+        images: [],
+      });
       
       navigate(`/mangas/${mangaId}/chapters`);
     } catch (err: any) {
@@ -200,6 +219,16 @@ const UploadMangasEpisodePage: React.FC = () => {
               className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 resize-none"
               placeholder="Décrivez l'épisode"
               rows={4}
+            />
+          </div>
+
+          {/* Titres multilingues */}
+          <div>
+            <MangaTitlesField
+              value={form.titles}
+              onChange={(titles) => setForm({ ...form, titles })}
+              label="Titres multilingues (optionnel)"
+              required={false}
             />
           </div>
 
