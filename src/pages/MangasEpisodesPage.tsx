@@ -93,7 +93,7 @@ const MangasEpisodesPage: React.FC = () => {
                 {ep.images_url && ep.images_url.length > 0 && (
                   <div className="mt-2">
                     <img
-                      src={ep.images_url[0]}
+                      src={ep.mangasImages[0].s3_image_url || ep.mangasImages[0].image_url}
                       alt={ep.name}
                       className="w-full h-40 object-cover rounded"
                     />
