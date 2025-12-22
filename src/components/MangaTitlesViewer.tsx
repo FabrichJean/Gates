@@ -77,15 +77,15 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
   const DescriptionTag = descriptionAs;
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-3 w-full">
       {/* En-tête avec sélecteur de langues et bouton Vue */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap flex-1">
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Languages className="w-4 h-4" />
-            <span className="font-medium">Langues:</span>
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <Languages className="w-3.5 h-3.5" />
+            <span className="font-medium">Langues</span>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {titles.map((entry) => {
               const meta = languageMetadata[entry.i18_language] || {
                 name: entry.i18_language.toUpperCase(),
@@ -104,26 +104,19 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
                     setViewMode('single');
                   }}
                   className={`
-                    relative px-3 py-1.5 rounded-lg font-medium text-sm
-                    transition-all duration-200 border-2
+                    relative px-2 py-1 rounded-md font-medium text-xs
+                    transition-all duration-200
                     ${isSelected && viewMode === 'single'
-                      ? 'bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700'
                     }
                   `}
                   title={`${meta.name} (${meta.nativeName})`}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-base">{meta.flag}</span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-sm">{meta.flag}</span>
                     <span>{entry.i18_language.toUpperCase()}</span>
                   </span>
-                  {isSelected && viewMode === 'single' && (
-                    <motion.div
-                      layoutId="selectedLang"
-                      className="absolute inset-0 bg-blue-500 rounded-lg -z-10"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
                 </motion.button>
               );
             })}
@@ -137,17 +130,17 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
             whileTap={{ scale: 0.95 }}
             onClick={() => setViewMode(viewMode === 'all' ? 'single' : 'all')}
             className={`
-              flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
-              transition-all duration-200 border-2
+              flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium text-xs
+              transition-all duration-200
               ${viewMode === 'all'
-                ? 'bg-purple-500 text-white border-purple-500 shadow-md shadow-purple-500/20'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'
+                ? 'bg-purple-500 text-white shadow-sm'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
               }
             `}
             title={viewMode === 'all' ? 'Vue unique' : 'Voir toutes les langues'}
           >
-            <Grid3x3 className="w-4 h-4" />
-            <span>{viewMode === 'all' ? 'Une langue' : 'Toutes'}</span>
+            <Grid3x3 className="w-3.5 h-3.5" />
+            <span>{viewMode === 'all' ? 'Une' : 'Toutes'}</span>
           </motion.button>
         )}
       </div>
@@ -158,11 +151,11 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
           // Vue unique : une langue à la fois
           <motion.div
             key={`single-${selectedLang}`}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-2"
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-1.5"
           >
             {currentContent && (
               <>
@@ -182,11 +175,11 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
           // Vue toutes : grille avec toutes les langues
           <motion.div
             key="all-languages"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
           >
             {titles.map((entry, index) => {
               const meta = languageMetadata[entry.i18_language] || {
@@ -198,16 +191,16 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
               return (
                 <motion.div
                   key={entry.i18_language}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                  transition={{ delay: index * 0.03 }}
+                  className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all"
                 >
                   {/* En-tête de langue */}
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-2xl">{meta.flag}</span>
-                    <div>
-                      <div className="font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-lg">{meta.flag}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
                         {meta.nativeName}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -217,13 +210,13 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
                   </div>
 
                   {/* Titre */}
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-2">
                     {entry.title || fallbackText}
                   </h3>
 
                   {/* Description */}
                   {showDescription && entry.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
                       {entry.description}
                     </p>
                   )}
@@ -237,13 +230,13 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
       {/* Indicateur de langue active (uniquement en mode single) */}
       {viewMode === 'single' && currentContent && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900"
         >
-          <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <Globe className="w-3 h-3 text-blue-600 dark:text-blue-400" />
           <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-            Affiché en {languageMetadata[selectedLang]?.nativeName || selectedLang.toUpperCase()}
+            {languageMetadata[selectedLang]?.nativeName || selectedLang.toUpperCase()}
           </span>
         </motion.div>
       )}

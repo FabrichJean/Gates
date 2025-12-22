@@ -183,15 +183,15 @@ const MangasDetailsPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
       >
         {/* Header avec boutons uniquement */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4"
         >
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             {/* Bouton retour */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -199,7 +199,7 @@ const MangasDetailsPage: React.FC = () => {
               onClick={() => window.history.back()}
               className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </motion.button>
 
             {/* Boutons d'action */}
@@ -213,7 +213,7 @@ const MangasDetailsPage: React.FC = () => {
               <button
                 onClick={handleSendManga}
                 disabled={manga.processing === "done" || manga.checking !== "checked"}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${
                   manga.processing === "done" || manga.checking !== "checked"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-700"
                     : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow border border-emerald-600"
@@ -226,14 +226,14 @@ const MangasDetailsPage: React.FC = () => {
                     : "Upload to S3"
                 }
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-3.5 h-3.5" />
                 {manga.processing === "done" ? "Uploaded" : "Upload"}
               </button>
               
               {/* Toggle Active/Inactive */}
               <button
                 onClick={handleToggleDeleted}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 border ${
                   manga.isDeleted
                     ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 border-emerald-600 dark:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
                     : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -242,12 +242,18 @@ const MangasDetailsPage: React.FC = () => {
               >
                 {manga.isDeleted ? 'Activate' : 'Deactivate'}
               </button>
-
+              <Link
+                to={`/mangas/${manga.id}/chapters`}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Chapters
+              </Link>
               <Link
                 to={`/mangas/${manga.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="w-3.5 h-3.5" />
                 Modifier
               </Link>
             </motion.div>
@@ -259,15 +265,15 @@ const MangasDetailsPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+          className="mb-6 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700"
         >
           <MangaTitlesViewer
             titles={parseTitlesFromAPI(manga?.titles)}
             showDescription={true}
             titleAs="h1"
-            titleClassName="text-4xl font-bold text-gray-900 dark:text-gray-100"
+            titleClassName="text-3xl font-bold text-gray-900 dark:text-gray-100"
             descriptionAs="p"
-            descriptionClassName="text-gray-600 dark:text-gray-400 mt-2 max-w-full"
+            descriptionClassName="text-sm text-gray-600 dark:text-gray-400 mt-1.5 max-w-full"
           />
         </motion.div>
 
@@ -276,7 +282,7 @@ const MangasDetailsPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="flex items-center gap-3 mb-8 flex-wrap"
+          className="flex items-center gap-2 mb-6 flex-wrap"
         >
           {/* Checking Status */}
           <MangaChecking
@@ -286,14 +292,14 @@ const MangasDetailsPage: React.FC = () => {
           />
           
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-gray-500" />
-            <span className="text-gray-600 dark:text-gray-400">
+            <BookOpen className="w-3.5 h-3.5 text-gray-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               {manga.total_chapters || 0} chapitres
             </span>
           </div>
           
           {manga.isDeleted !== undefined && (
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${
               manga.isDeleted 
                 ? 'bg-gray-50 text-gray-600 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700' 
                 : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800'
@@ -304,7 +310,7 @@ const MangasDetailsPage: React.FC = () => {
           )}
           
           {manga.need_vip && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800 text-xs font-medium">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800 text-xs font-medium">
               <Star className="w-3 h-3 fill-current" />
               VIP
             </span>
@@ -312,7 +318,7 @@ const MangasDetailsPage: React.FC = () => {
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Cover Image */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -356,34 +362,34 @@ const MangasDetailsPage: React.FC = () => {
             className="lg:col-span-2 space-y-6"
           >
             {/* General Information */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <Info className="w-5 h-5" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Info className="w-4 h-4" />
                   Informations générales
                 </h2>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">ID</p>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 font-mono text-lg">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">ID</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 font-mono text-base">
                       #{manga.id}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Référence</p>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Référence</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">
                       {manga.ref}
                     </p>
                   </div>
 
                   {manga.title && (
                     <div className="space-y-2 md:col-span-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Titre</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Titre</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">
                         {manga.title}
                       </p>
                     </div>
@@ -391,24 +397,24 @@ const MangasDetailsPage: React.FC = () => {
 
                   {manga.description && (
                     <div className="space-y-2 md:col-span-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Description</p>
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Description</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {manga.description}
                       </p>
                     </div>
                   )}
 
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Total des chapitres</p>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Total des chapitres</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">
                       {manga.total_chapters || 0}
                     </p>
                   </div>
 
                   {manga.mangasCategory && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Catégorie</p>
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-sm font-medium">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Catégorie</p>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-medium">
                         {manga.mangasCategory.name}
                       </span>
                     </div>
@@ -416,8 +422,8 @@ const MangasDetailsPage: React.FC = () => {
 
                   {manga.mangasSubCategory && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Sous-catégorie</p>
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-sm font-medium">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Sous-catégorie</p>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs font-medium">
                         {manga.mangasSubCategory.name}
                       </span>
                     </div>
@@ -425,8 +431,8 @@ const MangasDetailsPage: React.FC = () => {
 
                   {manga.plateform && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Plateforme</p>
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-sm font-medium">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Plateforme</p>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium">
                         {manga.plateform.name}
                       </span>
                     </div>
@@ -435,22 +441,22 @@ const MangasDetailsPage: React.FC = () => {
 
                 {/* Creator */}
                 {manga.creatorObj && (
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                      <User className="w-4 h-4" />
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" />
                       Créateur
                     </p>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {manga.creatorObj.avatar && (
                         <motion.img
                           src={manga.creatorObj.avatar}
                           alt={manga.creatorObj.name}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                           whileHover={{ scale: 1.05 }}
                         />
                       )}
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-base">
                           {manga.creatorObj.name}
                         </p>
                       </div>
@@ -462,24 +468,24 @@ const MangasDetailsPage: React.FC = () => {
 
             {/* Tags */}
             {manga.tagCategories && manga.tagCategories.length > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Tag className="w-5 h-5" />
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
                     Tags
                   </h2>
                 </div>
                 
-                <div className="p-6">
-                  <div className="flex flex-wrap gap-2">
+                <div className="p-4">
+                  <div className="flex flex-wrap gap-1.5">
                     <AnimatePresence>
                       {manga.tagCategories.map((tag, index) => (
                         <motion.span
                           key={tag.id}
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-700"
+                          transition={{ delay: index * 0.03 }}
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-700"
                           title={tag?.meta ? JSON.stringify(tag.meta) : undefined}
                         >
                           #{tag.name}
@@ -493,44 +499,44 @@ const MangasDetailsPage: React.FC = () => {
 
             {/* Recent Chapters */}
             {manga.chapters && manga.chapters.length > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
                     Chapitres récents
                   </h2>
                   
                   <Link
                     to={`/mangas/${manga.id}/chapters`}
-                    className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                    className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                   >
                     Voir tout
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
                 
-                <div className="p-6">
-                  <div className="space-y-3">
+                <div className="p-4">
+                  <div className="space-y-2">
                     <AnimatePresence>
                       {manga.chapters.slice(0, 5).map((chapter, index) => (
                         <motion.div
                           key={chapter.id}
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer group"
+                          transition={{ delay: index * 0.05 }}
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer group"
                         >
                           <div className="flex-1">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
                                 {chapter.chapter_number}
                               </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              <div className="min-w-0">
+                                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                                   {chapter.title}
                                 </h3>
                                 {chapter.description && (
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                                     {chapter.description}
                                   </p>
                                 )}
@@ -540,10 +546,10 @@ const MangasDetailsPage: React.FC = () => {
                           
                           <Link
                             to={`/mangas/${manga.id}/chapters/${chapter.id}/edit`}
-                            className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-3.5 h-3.5" />
                           </Link>
                         </motion.div>
                       ))}
@@ -554,23 +560,23 @@ const MangasDetailsPage: React.FC = () => {
             )}
 
             {/* Metadata */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
                   Métadonnées
                 </h2>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {manga.createdAt && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
                         Créé le
                       </p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                         {new Date(manga.createdAt).toLocaleDateString('fr-FR', {
                           year: 'numeric',
                           month: 'long',
@@ -583,12 +589,12 @@ const MangasDetailsPage: React.FC = () => {
                   )}
                   
                   {manga.updatedAt && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
                         Modifié le
                       </p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                         {new Date(manga.updatedAt).toLocaleDateString('fr-FR', {
                           year: 'numeric',
                           month: 'long',
