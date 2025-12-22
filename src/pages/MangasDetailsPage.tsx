@@ -18,6 +18,9 @@ import {
 import { getMangaById, updateManga, uploadMangaToS3 } from "../api/mangas";
 import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
+import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
+import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
+import type { MangaTitles } from "../types/mangaTitles";
 
 interface Manga {
   s3_cover_url: string;
@@ -25,6 +28,7 @@ interface Manga {
   ref: string;
   title?: string;
   description?: string;
+  titles?: string; // JSON string of multilingual titles
   cover?: string;
   cover_url?: string;
   creator?: string;
@@ -181,89 +185,28 @@ const MangasDetailsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
-        {/* Header */}
+        {/* Header avec boutons uniquement */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => window.history.back()}
-                className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </motion.button>
-              
-              <div>
-                <motion.h1
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-4xl font-bold text-gray-900 dark:text-gray-100"
-                >
-                  {manga.title || manga.ref}
-                </motion.h1>
-                
-                {manga.description && (
-                  <motion.p
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.15 }}
-                    className="text-gray-600 dark:text-gray-400 mt-1 max-w-2xl"
-                  >
-                    {manga.description}
-                  </motion.p>
-                )}
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex items-center gap-3 mt-2"
-                >
-                  {/* Checking Status */}
-                  <MangaChecking
-                    manga={manga}
-                    index={0}
-                    reFetch={fetchManga}
-                  />
-                  
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {manga.total_chapters || 0} chapitres
-                    </span>
-                  </div>
-                  
-                  {manga.isDeleted !== undefined && (
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
-                      manga.isDeleted 
-                        ? 'bg-gray-50 text-gray-600 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700' 
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${manga.isDeleted ? 'bg-gray-400' : 'bg-emerald-500'}`} />
-                      {manga.isDeleted ? 'Inactive' : 'Active'}
-                    </span>
-                  )}
-                  
-                  {manga.need_vip && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800 text-xs font-medium">
-                      <Star className="w-3 h-3 fill-current" />
-                      VIP
-                    </span>
-                  )}
-                </motion.div>
-              </div>
-            </div>
+          <div className="flex items-center justify-between gap-4">
+            {/* Bouton retour */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.history.back()}
+              className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </motion.button>
 
+            {/* Boutons d'action */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.1 }}
               className="flex items-center gap-2"
             >
               {/* Send Button */}
@@ -299,26 +242,73 @@ const MangasDetailsPage: React.FC = () => {
               >
                 {manga.isDeleted ? 'Activate' : 'Deactivate'}
               </button>
-              
-              {/* Edit Button */}
+
               <Link
                 to={`/mangas/${manga.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium text-sm transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
               >
                 <Edit className="w-4 h-4" />
-                Edit
-              </Link>
-
-              {/* Chapters Button */}
-              <Link
-                to={`/mangas/${manga.id}/chapters`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
-              >
-                <BookOpen className="w-4 h-4" />
-                Chapters
+                Modifier
               </Link>
             </motion.div>
           </div>
+        </motion.div>
+
+        {/* Section Titres Multilingues - Espace dédié */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+        >
+          <MangaTitlesViewer
+            titles={parseTitlesFromAPI(manga?.titles)}
+            showDescription={true}
+            titleAs="h1"
+            titleClassName="text-4xl font-bold text-gray-900 dark:text-gray-100"
+            descriptionAs="p"
+            descriptionClassName="text-gray-600 dark:text-gray-400 mt-2 max-w-full"
+          />
+        </motion.div>
+
+        {/* Informations et statuts */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex items-center gap-3 mb-8 flex-wrap"
+        >
+          {/* Checking Status */}
+          <MangaChecking
+            manga={manga}
+            index={0}
+            reFetch={fetchManga}
+          />
+          
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-gray-500" />
+            <span className="text-gray-600 dark:text-gray-400">
+              {manga.total_chapters || 0} chapitres
+            </span>
+          </div>
+          
+          {manga.isDeleted !== undefined && (
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
+              manga.isDeleted 
+                ? 'bg-gray-50 text-gray-600 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700' 
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${manga.isDeleted ? 'bg-gray-400' : 'bg-emerald-500'}`} />
+              {manga.isDeleted ? 'Inactive' : 'Active'}
+            </span>
+          )}
+          
+          {manga.need_vip && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800 text-xs font-medium">
+              <Star className="w-3 h-3 fill-current" />
+              VIP
+            </span>
+          )}
         </motion.div>
 
         {/* Main Content Grid */}

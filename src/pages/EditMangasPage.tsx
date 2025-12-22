@@ -7,6 +7,9 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import { getMangasCategoriesApi } from "../api/mangasCategory";
 import { getMangasSubCategoriesApi } from "../api/mangasSubCategory";
 import toast from "react-hot-toast";
+import type { MangaTitles } from "../types/mangaTitles";
+import { parseTitlesFromAPI, prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 const EditMangasPage: React.FC = () => {
   const { mangaId } = useParams();
@@ -15,6 +18,7 @@ const EditMangasPage: React.FC = () => {
     ref: "",
     title: "",
     description: "",
+    titles: [] as MangaTitles, // Nouveau champ multilingue
     mangas_category_id: "",
     mangas_sub_category_id: "",
     mangas_plateform_id: "",
@@ -76,10 +80,23 @@ const EditMangasPage: React.FC = () => {
         tagIds = manga.tagCategories.map((t: any) => t.id);
       }
       
+      // Parser les titres multilingues
+      let parsedTitles = parseTitlesFromAPI(manga.titles);
+      
+      // Si pas de titres multilingues mais qu'il y a title/description, les utiliser comme fallback en anglais
+      if (parsedTitles.length === 0 && (manga.title || manga.description)) {
+        parsedTitles = [{
+          i18_language: 'en',
+          title: manga.title || '',
+          description: manga.description || ''
+        }];
+      }
+      
       setForm({
         ref: manga.ref || "",
         title: manga.title || "",
         description: manga.description || "",
+        titles: parsedTitles, // Titres multilingues avec fallback
         mangas_category_id: manga.mangas_category_id ? String(manga.mangas_category_id) : "",
         mangas_sub_category_id: manga.mangas_sub_category_id ? String(manga.mangas_sub_category_id) : "",
         mangas_plateform_id: manga.mangas_plateform_id ? String(manga.mangas_plateform_id) : "",
@@ -186,6 +203,9 @@ const EditMangasPage: React.FC = () => {
       Object.entries(form).forEach(([key, value]) => {
         if (key === "tagCategories") {
           formData.append("tagCategories", JSON.stringify(value));
+        } else if (key === "titles") {
+          // Convertir les titres multilingues en JSON string
+          formData.append("titles", prepareTitlesForAPI(value as MangaTitles));
         } else if (key === "cover" && value) {
           formData.append("cover", value as File);
         } else if (key !== "cover") {
@@ -211,11 +231,11 @@ const EditMangasPage: React.FC = () => {
           <input name="ref" value={form.ref} onChange={handleChange} className="input input-bordered w-full" required />
         </div>
         <div>
-          <label className="block font-medium mb-1">Titre</label>
+          <label className="block font-medium mb-1">Titre (ancien format)</label>
           <input name="title" value={form.title} onChange={handleChange} className="input input-bordered w-full" />
         </div>
         <div>
-          <label className="block font-medium mb-1">Description</label>
+          <label className="block font-medium mb-1">Description (ancien format)</label>
           <textarea 
             name="description" 
             value={form.description} 
@@ -225,6 +245,15 @@ const EditMangasPage: React.FC = () => {
             placeholder="Entrez une description du manga..."
           />
         </div>
+        
+        {/* Nouveau champ Titres multilingues */}
+        <MangaTitlesField
+          value={form.titles}
+          onChange={(titles) => setForm({ ...form, titles })}
+          label="Titres multilingues"
+          required={false}
+        />
+        
         <div>
           <label className="block font-medium mb-1">Catégorie</label>
           <select name="mangas_category_id" value={form.mangas_category_id} onChange={handleChange} className="input input-bordered w-full" required>

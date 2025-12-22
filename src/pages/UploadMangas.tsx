@@ -21,12 +21,16 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import { getMangasCategoriesApi } from "../api/mangasCategory";
 import { getMangasSubCategoriesApi } from "../api/mangasSubCategory";
 import toast from "react-hot-toast";
+import type { MangaTitles } from "../types/mangaTitles";
+import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 const UploadMangas: React.FC = () => {
   const [form, setForm] = useState({
     ref: "",
     title: "",
     description: "",
+    titles: [] as MangaTitles, // Nouveau champ multilingue
     mangas_category_id: "",
     mangas_sub_category_id: "",
     plateform_id: "",
@@ -169,9 +173,12 @@ const UploadMangas: React.FC = () => {
       Object.entries(form).forEach(([key, value]) => {
         if (key === "tagCategories") {
           formData.append("tagCategories", JSON.stringify(value));
+        } else if (key === "titles") {
+          // Convertir les titres multilingues en JSON string
+          formData.append("titles", prepareTitlesForAPI(value as MangaTitles));
         } else if (key === "cover" && value) {
           formData.append("cover", value as File);
-        } else {
+        } else if (key !== "cover" && key !== "titles") {
           formData.append(key, String(value));
         }
       });
@@ -184,6 +191,7 @@ const UploadMangas: React.FC = () => {
         ref: "",
         title: "",
         description: "",
+        titles: [], // Reset titres multilingues
         mangas_category_id: "",
         mangas_sub_category_id: "",
         plateform_id: "",
@@ -250,7 +258,7 @@ const UploadMangas: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Titre
+                Titre (ancien format)
               </label>
               <input
                 name="title"
@@ -265,7 +273,7 @@ const UploadMangas: React.FC = () => {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
+              Description (ancien format)
             </label>
             <textarea
               name="description"
@@ -276,6 +284,14 @@ const UploadMangas: React.FC = () => {
               placeholder="Entrez une description du manga..."
             />
           </div>
+
+          {/* Nouveau champ Titres multilingues */}
+          <MangaTitlesField
+            value={form.titles}
+            onChange={(titles) => setForm({ ...form, titles })}
+            label="Titres multilingues"
+            required={false}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

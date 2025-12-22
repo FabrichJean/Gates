@@ -24,12 +24,16 @@ import MangaChecking from "../components/MangaChecking";
 import RoleEnum from "../utils/roleEnum";
 import { useAuth } from "../hooks/useAuth";
 import { RiStarFill } from "react-icons/ri";
+import type { MangaTitles } from "../types/mangaTitles";
+import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitle, MangaDescription } from "../components/MangaTitlesDisplay";
 
 interface Manga {
   id: number;
   ref: string;
   title?: string;
   description?: string;
+  titles?: string | MangaTitles; // Nouveau champ multilingue
   cover?: string;
   cover_url?: string;
   s3_cover_url?: string;
@@ -377,13 +381,32 @@ const Mangas: React.FC = () => {
                         {/* Title & Checking */}
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
-                              {manga.title || manga.ref}
-                            </h3>
-                            {manga.description && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
-                                {manga.description}
-                              </p>
+                            {manga.titles ? (
+                              <>
+                                <MangaTitle
+                                  titles={parseTitlesFromAPI(manga.titles)}
+                                  fallbackText={manga.title || manga.ref}
+                                  as="h3"
+                                  className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                                />
+                                <MangaDescription
+                                  titles={parseTitlesFromAPI(manga.titles)}
+                                  fallbackText={manga.description}
+                                  as="p"
+                                  className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1"
+                                />
+                              </>
+                            ) : (
+                              <>
+                                <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                                  {manga.title || manga.ref}
+                                </h3>
+                                {manga.description && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                                    {manga.description}
+                                  </p>
+                                )}
+                              </>
                             )}
                           </div>
                           <MangaChecking
@@ -516,7 +539,14 @@ const Mangas: React.FC = () => {
                                     to={`/mangas/${manga.id}`}
                                     className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                   >
-                                    {manga.title || manga.ref}
+                                    {manga.titles ? (
+                                      <MangaTitle
+                                        titles={parseTitlesFromAPI(manga.titles)}
+                                        fallbackText={manga.title || manga.ref}
+                                      />
+                                    ) : (
+                                      manga.title || manga.ref
+                                    )}
                                   </Link>
                                   {manga.need_vip && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-orange-600 text-[10px] font-medium">
@@ -524,11 +554,17 @@ const Mangas: React.FC = () => {
                                     </span>
                                   )}
                                 </div>
-                                {manga.description && (
+                                {manga.titles ? (
+                                  <MangaDescription
+                                    titles={parseTitlesFromAPI(manga.titles)}
+                                    fallbackText={manga.description}
+                                    className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs"
+                                  />
+                                ) : manga.description ? (
                                   <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs">
                                     {manga.description}
                                   </p>
-                                )}
+                                ) : null}
                               </div>
                             </td>
 
