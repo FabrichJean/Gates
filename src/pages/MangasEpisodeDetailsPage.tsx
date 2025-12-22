@@ -5,12 +5,15 @@ import { apiURL, token } from "../constant";
 import { deleteMangasEpisodeApi } from "../api/mangasEpisode";
 import toast from "react-hot-toast";
 import type { MangasImage } from "./MangasEpisodesPage";
+import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
+import MangaTitlesViewer from "../components/MangaTitlesViewer";
 
 interface Episode {
   id: number;
   name: string;
   number: number;
   description?: string;
+  titles?: string;
   images?: string[] | string;
   images_url?: string[];
   metadata?: any;
@@ -75,9 +78,30 @@ const MangasEpisodeDetailsPage: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">
-          Épisode {episode.number}: {episode.name}
-        </h1>
+        {episode.titles ? (
+          <div className="flex-1">
+            <MangaTitlesViewer 
+              titles={parseTitlesFromAPI(episode.titles)} 
+              fallbackText={`Épisode ${episode.number}: ${episode.name}${episode.description ? ` - ${episode.description}` : ''}`}
+              titleClassName="text-3xl font-bold"
+              descriptionClassName="text-gray-700 dark:text-gray-300 mt-2"
+              showDescription={true}
+              titleAs="h1"
+              descriptionAs="p"
+            />
+          </div>
+        ) : (
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold">
+              Épisode {episode.number}: {episode.name}
+            </h1>
+            {episode.description && (
+              <p className="text-gray-700 dark:text-gray-300 mt-2">
+                {episode.description}
+              </p>
+            )}
+          </div>
+        )}
         <Link
           to={`/mangas/${mangaId}/chapters/${chapterId}/episodes`}
           className="btn btn-sm btn-outline"
@@ -91,13 +115,6 @@ const MangasEpisodeDetailsPage: React.FC = () => {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Chapitre {episode.chapter.chapter_number}: {episode.chapter.title}
           </p>
-        </div>
-      )}
-
-      {episode.description && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Description</h2>
-          <p className="text-gray-700 dark:text-gray-300">{episode.description}</p>
         </div>
       )}
 

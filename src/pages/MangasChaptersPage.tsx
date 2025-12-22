@@ -18,13 +18,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getMangasChaptersApi, createMangasChapterApi } from "../api/mangasChapter";
 import toast from "react-hot-toast";
 import type { MangaTitles } from "../types/mangaTitles";
-import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import { prepareTitlesForAPI, parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitlesField } from "../components/MangaTitlesField";
+import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 
 interface Chapter {
   id: number;
   title: string;
   description?: string;
+  titles?: string; // JSON string des titres multilingues
   chapter_number: number;
   metadata?: any;
   createdAt?: string;
@@ -317,16 +319,32 @@ const MangasChaptersPage: React.FC = () => {
                             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
                               {chapter.chapter_number || index + 1}
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                              {chapter.title}
-                            </h3>
+                            <div className="flex-1">
+                              {chapter.titles ? (
+                                <MangaTitlesViewer
+                                  titles={parseTitlesFromAPI(chapter.titles)}
+                                  fallbackText={`${chapter.title}${chapter.description ? ` - ${chapter.description}` : ''}`}
+                                  showDescription={true}
+                                  titleClassName="text-lg font-semibold text-gray-900 dark:text-gray-100"
+                                  descriptionClassName="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1"
+                                  titleAs="h3"
+                                  descriptionAs="p"
+                                  allowViewAll={false}
+                                />
+                              ) : (
+                                <>
+                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    {chapter.title}
+                                  </h3>
+                                  {chapter.description && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                                      {chapter.description}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           </div>
-                          
-                          {chapter.description && (
-                            <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                              {chapter.description}
-                            </p>
-                          )}
                           
                           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                             {chapter.createdAt && (

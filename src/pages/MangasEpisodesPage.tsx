@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getMangasEpisodesApi } from "../api/mangasEpisode";
+import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
+import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
+import type { MangaTitles } from "../types/mangaTitles";
 
 export interface MangasImage {
   id: number;
@@ -21,6 +24,7 @@ interface Episode {
   name: string;
   number: number;
   description?: string;
+  titles?: string; // JSON string des titres multilingues
   images?: string[] | string;
   images_url?: string[];
   metadata?: any;
@@ -82,13 +86,28 @@ const MangasEpisodesPage: React.FC = () => {
                 <h3 className="card-title text-lg font-bold">
                   Épisode {ep.number}
                 </h3>
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {ep.name}
-                </p>
-                {ep.description && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {ep.description}
-                  </p>
+                {ep.titles ? (
+                  <MangaTitlesViewer
+                    titles={parseTitlesFromAPI(ep.titles)}
+                    fallbackText={`${ep.name}${ep.description ? ` - ${ep.description}` : ''}`}
+                    showDescription={true}
+                    titleClassName="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                    descriptionClassName="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1"
+                    titleAs="p"
+                    descriptionAs="p"
+                    allowViewAll={false}
+                  />
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {ep.name}
+                    </p>
+                    {ep.description && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        {ep.description}
+                      </p>
+                    )}
+                  </>
                 )}
                 {ep.images_url && ep.images_url.length > 0 && (
                   <div className="mt-2">

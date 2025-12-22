@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getMangasEpisodeByIdApi, updateMangasEpisodeApi, deleteEpisodeImagesApi, addEpisodeImagesApi } from "../api/mangasEpisode";
 import toast from "react-hot-toast";
+import { parseTitlesFromAPI, prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
+import type { MangaTitles } from "../types/mangaTitles";
+import { MangaTitlesField } from "../components/MangaTitlesField";
 
 interface EpisodeImage {
   id: number;
@@ -13,6 +16,7 @@ interface Episode {
   name: string;
   number: number;
   description?: string;
+  titles?: string;
   images?: EpisodeImage[];
   images_url?: string[];
   metadata?: any;
@@ -28,6 +32,7 @@ const EditMangasEpisodePage: React.FC = () => {
     number: "",
     description: "",
     metadata: "",
+    titles: [] as MangaTitles,
   });
   const [existingImages, setExistingImages] = useState<EpisodeImage[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
@@ -49,6 +54,7 @@ const EditMangasEpisodePage: React.FC = () => {
         number: String(data.number || ""),
         description: data.description || "",
         metadata: data.metadata ? JSON.stringify(data.metadata, null, 2) : "",
+        titles: data.titles ? parseTitlesFromAPI(data.titles) : [],
       });
       // Si l'API retourne un tableau d'objets avec id et image_url
       if (data.mangasImages && Array.isArray(data.mangasImages)) {
@@ -125,6 +131,11 @@ const EditMangasEpisodePage: React.FC = () => {
       formData.append("number", form.number);
       formData.append("description", form.description);
       
+      // Ajouter les titres multilingues
+      if (form.titles.length > 0) {
+        formData.append("titles", prepareTitlesForAPI(form.titles));
+      }
+      
       if (form.metadata.trim()) {
         try {
           const metadataObj = JSON.parse(form.metadata);
@@ -198,6 +209,15 @@ const EditMangasEpisodePage: React.FC = () => {
             onChange={handleChange}
             className="textarea textarea-bordered w-full"
             rows={4}
+          />
+        </div>
+
+        {/* Titres multilingues */}
+        <div>
+          <MangaTitlesField
+            value={form.titles}
+            onChange={(titles) => setForm((prev) => ({ ...prev, titles }))}
+            label="Titres et descriptions multilingues (optionnel)"
           />
         </div>
 
