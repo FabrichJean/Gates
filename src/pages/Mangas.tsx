@@ -28,6 +28,8 @@ import { RiStarFill } from "react-icons/ri";
 interface Manga {
   id: number;
   ref: string;
+  title?: string;
+  description?: string;
   cover?: string;
   cover_url?: string;
   s3_cover_url?: string;
@@ -118,6 +120,18 @@ const Mangas: React.FC = () => {
   };
 
   const handleSendManga = async (mangaId: number) => {
+    // Find the manga to check its status
+    const manga = mangas.find(m => m.id === mangaId);
+    
+    // Block upload if manga is not checked
+    if (!manga || manga.checking !== "checked") {
+      toast.error("Cannot upload: Manga must be checked and approved first", {
+        duration: 4000,
+        icon: "🚫",
+      });
+      return;
+    }
+
     try {
       toast.loading("Envoi du manga vers S3/R2...", { id: "send-manga" });
       
@@ -135,6 +149,8 @@ const Mangas: React.FC = () => {
   const filteredMangas = mangas.filter((manga) => {
     const matchesSearch =
       manga.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manga.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manga.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       manga.creatorObj?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       manga.mangasCategory?.name
         .toLowerCase()
@@ -341,7 +357,13 @@ const Mangas: React.FC = () => {
                                   ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
                                   : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
                               }`}
-                              title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer"}
+                              title={
+                                manga.processing === "done" 
+                                  ? "Déjà envoyé" 
+                                  : manga.checking !== "checked"
+                                  ? "Manga must be checked first"
+                                  : "Envoyer"
+                              }
                             >
                               <Send className="w-3.5 h-3.5" />
                               {manga.processing === "done" ? "Uploaded" : "Send"}
@@ -354,9 +376,16 @@ const Mangas: React.FC = () => {
                       <div className="p-3">
                         {/* Title & Checking */}
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-1 line-clamp-2">
-                            {manga.ref}
-                          </h3>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                              {manga.title || manga.ref}
+                            </h3>
+                            {manga.description && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                                {manga.description}
+                              </p>
+                            )}
+                          </div>
                           <MangaChecking
                             manga={manga}
                             index={index}
@@ -481,17 +510,24 @@ const Mangas: React.FC = () => {
 
                             {/* Title */}
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-2">
-                                <Link
-                                  to={`/mangas/${manga.id}`}
-                                  className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                >
-                                  {manga.ref}
-                                </Link>
-                                {manga.need_vip && (
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-orange-600 text-[10px] font-medium">
-                                    <RiStarFill className="w-2 h-2" />
-                                  </span>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <Link
+                                    to={`/mangas/${manga.id}`}
+                                    className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                  >
+                                    {manga.title || manga.ref}
+                                  </Link>
+                                  {manga.need_vip && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-orange-600 text-[10px] font-medium">
+                                      <RiStarFill className="w-2 h-2" />
+                                    </span>
+                                  )}
+                                </div>
+                                {manga.description && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs">
+                                    {manga.description}
+                                  </p>
                                 )}
                               </div>
                             </td>
@@ -602,7 +638,13 @@ const Mangas: React.FC = () => {
                                         ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
                                         : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
                                     }`}
-                                    title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer"}
+                                    title={
+                                      manga.processing === "done" 
+                                        ? "Déjà envoyé" 
+                                        : manga.checking !== "checked"
+                                        ? "Manga must be checked first"
+                                        : "Envoyer"
+                                    }
                                   >
                                     <Send className="w-4 h-4" />
                                   </button>

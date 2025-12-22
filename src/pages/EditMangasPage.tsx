@@ -13,6 +13,8 @@ const EditMangasPage: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     ref: "",
+    title: "",
+    description: "",
     mangas_category_id: "",
     mangas_sub_category_id: "",
     mangas_plateform_id: "",
@@ -76,6 +78,8 @@ const EditMangasPage: React.FC = () => {
       
       setForm({
         ref: manga.ref || "",
+        title: manga.title || "",
+        description: manga.description || "",
         mangas_category_id: manga.mangas_category_id ? String(manga.mangas_category_id) : "",
         mangas_sub_category_id: manga.mangas_sub_category_id ? String(manga.mangas_sub_category_id) : "",
         mangas_plateform_id: manga.mangas_plateform_id ? String(manga.mangas_plateform_id) : "",
@@ -203,8 +207,23 @@ const EditMangasPage: React.FC = () => {
       <h1 className="text-3xl font-bold mb-4">Modifier le Manga</h1>
       <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
         <div>
-          <label className="block font-medium mb-1">Titre (ref)</label>
+          <label className="block font-medium mb-1">Référence (ref)</label>
           <input name="ref" value={form.ref} onChange={handleChange} className="input input-bordered w-full" required />
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Titre</label>
+          <input name="title" value={form.title} onChange={handleChange} className="input input-bordered w-full" />
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Description</label>
+          <textarea 
+            name="description" 
+            value={form.description} 
+            onChange={(e) => setForm({ ...form, description: e.target.value })} 
+            className="textarea textarea-bordered w-full" 
+            rows={4}
+            placeholder="Entrez une description du manga..."
+          />
         </div>
         <div>
           <label className="block font-medium mb-1">Catégorie</label>

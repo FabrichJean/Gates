@@ -23,6 +23,8 @@ interface Manga {
   s3_cover_url: string;
   id: number;
   ref: string;
+  title?: string;
+  description?: string;
   cover?: string;
   cover_url?: string;
   creator?: string;
@@ -113,6 +115,16 @@ const MangasDetailsPage: React.FC = () => {
 
   const handleSendManga = async () => {
     if (!manga) return;
+    
+    // Block upload if manga is not checked
+    if (manga.checking !== "checked") {
+      toast.error("Cannot upload: Manga must be checked and approved first", {
+        duration: 4000,
+        icon: "🚫",
+      });
+      return;
+    }
+
     try {
       toast.loading("Envoi du manga vers S3/R2...", { id: "send-manga" });
       
@@ -193,8 +205,19 @@ const MangasDetailsPage: React.FC = () => {
                   transition={{ delay: 0.1 }}
                   className="text-4xl font-bold text-gray-900 dark:text-gray-100"
                 >
-                  {manga.ref}
+                  {manga.title || manga.ref}
                 </motion.h1>
+                
+                {manga.description && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="text-gray-600 dark:text-gray-400 mt-1 max-w-2xl"
+                  >
+                    {manga.description}
+                  </motion.p>
+                )}
                 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -217,18 +240,19 @@ const MangasDetailsPage: React.FC = () => {
                   </div>
                   
                   {manga.isDeleted !== undefined && (
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
                       manga.isDeleted 
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' 
-                        : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        ? 'bg-gray-50 text-gray-600 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700' 
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800'
                     }`}>
-                      {manga.isDeleted ? '🗑️ Désactivé' : '✓ Actif'}
+                      <span className={`w-1.5 h-1.5 rounded-full ${manga.isDeleted ? 'bg-gray-400' : 'bg-emerald-500'}`} />
+                      {manga.isDeleted ? 'Inactive' : 'Active'}
                     </span>
                   )}
                   
                   {manga.need_vip && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-medium">
-                      <Star className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-800 text-xs font-medium">
+                      <Star className="w-3 h-3 fill-current" />
                       VIP
                     </span>
                   )}
@@ -240,48 +264,58 @@ const MangasDetailsPage: React.FC = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-2"
             >
+              {/* Send Button */}
               <button
                 onClick={handleSendManga}
-                disabled={manga.processing === "done"}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${
-                  manga.processing === "done"
-                    ? "bg-gray-400 dark:bg-gray-700 text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-60"
-                    : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                disabled={manga.processing === "done" || manga.checking !== "checked"}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  manga.processing === "done" || manga.checking !== "checked"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-700"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow border border-emerald-600"
                 }`}
-                title={manga.processing === "done" ? "Déjà envoyé" : "Envoyer le manga"}
+                title={
+                  manga.processing === "done" 
+                    ? "Already uploaded" 
+                    : manga.checking !== "checked"
+                    ? "Manga must be checked first"
+                    : "Upload to S3"
+                }
               >
                 <Send className="w-4 h-4" />
-                {manga.processing === "done" ? "Uploaded" : "Envoyer"}
+                {manga.processing === "done" ? "Uploaded" : "Upload"}
               </button>
               
+              {/* Toggle Active/Inactive */}
               <button
                 onClick={handleToggleDeleted}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 border ${
                   manga.isDeleted
-                    ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
-                    : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white'
+                    ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 border-emerald-600 dark:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
+                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 }`}
-                title={manga.isDeleted ? 'Activer le manga' : 'Désactiver le manga'}
+                title={manga.isDeleted ? 'Activate manga' : 'Deactivate manga'}
               >
-                {manga.isDeleted ? '✓ Activer' : '🗑️ Désactiver'}
+                {manga.isDeleted ? 'Activate' : 'Deactivate'}
               </button>
               
+              {/* Edit Button */}
               <Link
                 to={`/mangas/${manga.id}/edit`}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium text-sm transition-all duration-200"
               >
                 <Edit className="w-4 h-4" />
-                Éditer
+                Edit
               </Link>
 
+              {/* Chapters Button */}
               <Link
                 to={`/mangas/${manga.id}/chapters`}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
               >
                 <BookOpen className="w-4 h-4" />
-                Chapitres
+                Chapters
               </Link>
             </motion.div>
           </div>
@@ -348,6 +382,31 @@ const MangasDetailsPage: React.FC = () => {
                       #{manga.id}
                     </p>
                   </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Référence</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                      {manga.ref}
+                    </p>
+                  </div>
+
+                  {manga.title && (
+                    <div className="space-y-2 md:col-span-2">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Titre</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                        {manga.title}
+                      </p>
+                    </div>
+                  )}
+
+                  {manga.description && (
+                    <div className="space-y-2 md:col-span-2">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Description</p>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {manga.description}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <p className="text-sm text-gray-500 dark:text-gray-400">Total des chapitres</p>
