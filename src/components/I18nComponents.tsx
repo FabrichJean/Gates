@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Languages, Check } from 'lucide-react';
+import { Languages, Check, Sparkles, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import I18nField from './I18nField';
 import I18nText from './I18nText';
 import type { TranslatedText } from '../types/i18n';
 import { LANGUAGE_NAMES, LANGUAGE_FLAGS } from '../types/i18n';
+import { translateServer } from '../constant';
 
 /**
  * Composant wrapper qui combine titre et description i18n dans des onglets unifiés
@@ -15,9 +18,11 @@ interface I18nContentFieldsProps {
   description: TranslatedText;
   onTitleChange: (value: TranslatedText) => void;
   onDescriptionChange: (value: TranslatedText) => void;
+  onBothChange?: (titles: TranslatedText, descriptions: TranslatedText) => void; // Callback combiné
   titleRequired?: boolean;
   descriptionRequired?: boolean;
   supportedLanguages?: string[];
+  showAutoFill?: boolean; // Nouvelle prop pour activer/désactiver Auto-fill
 }
 
 export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
@@ -25,11 +30,18 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
   description,
   onTitleChange,
   onDescriptionChange,
+  onBothChange,
   titleRequired = true,
   descriptionRequired = false,
   supportedLanguages = ['en', 'fr'],
+  showAutoFill = false,
 }) => {
   const [selectedLang, setSelectedLang] = useState<string>(supportedLanguages[0]);
+  const [isLoading, setLoading] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoTitle, setAutoTitle] = useState("");
+  const [autoDesc, setAutoDesc] = useState("");
+  const [server, setServer] = useState(translateServer);
 
   const handleTitleChange = (lang: string, text: string) => {
     const newValue = { ...title, [lang]: text };
@@ -52,9 +64,75 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
     return Math.round((filledLangs / supportedLanguages.length) * 100);
   };
 
+  const applyAuto = async () => {
+    if (!autoTitle.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(server, {
+        title: autoTitle,
+        description: autoDesc,
+        i18n: supportedLanguages,
+      });
+
+      const translations = response.data;
+      
+      console.log('API Response:', translations);
+      console.log('Supported languages:', supportedLanguages);
+      
+      // Parser les résultats et appliquer (conserver les valeurs existantes)
+      const newTitles: TranslatedText = { ...title };
+      const newDescriptions: TranslatedText = { ...description };
+
+      translations.forEach((t: any) => {
+        console.log('Processing translation:', t);
+        if (t.i18_language && supportedLanguages.includes(t.i18_language)) {
+          if (t.title) {
+            console.log(`Setting title for ${t.i18_language}:`, t.title);
+            newTitles[t.i18_language] = t.title;
+          }
+          if (t.description) {
+            console.log(`Setting description for ${t.i18_language}:`, t.description);
+            newDescriptions[t.i18_language] = t.description;
+          }
+        }
+      });
+
+      console.log('Final titles:', newTitles);
+      console.log('Final descriptions:', newDescriptions);
+
+      // Utiliser le callback combiné si disponible, sinon les callbacks séparés
+      if (onBothChange) {
+        onBothChange(newTitles, newDescriptions);
+      } else {
+        onTitleChange(newTitles);
+        onDescriptionChange(newDescriptions);
+      }
+      
+      toast.success("✨ Auto-fill successful!");
+      setAutoOpen(false);
+      setAutoTitle("");
+      setAutoDesc("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Auto-fill failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
-      {/* Label with completion indicator */}
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {/* Label with completion indicator and Auto button */}
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <Languages className="w-4 h-4" />
@@ -62,15 +140,31 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
           {titleRequired && <span className="text-red-500">*</span>}
         </label>
         
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-          getCompletionPercentage() === 100
-            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-            : getCompletionPercentage() > 0
-            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-        }`}>
-          {getCompletionPercentage()}% traduit
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+            getCompletionPercentage() === 100
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+              : getCompletionPercentage() > 0
+              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+          }`}>
+            {getCompletionPercentage()}% traduit
+          </span>
+
+          {/* Bouton Auto-fill */}
+          {showAutoFill && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={() => setAutoOpen(true)}
+              className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-xs font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Auto
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* Unified tabs for all languages */}
@@ -157,6 +251,100 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Modal Auto-fill */}
+      {showAutoFill && (
+        <>
+          <input
+            type="checkbox"
+            checked={autoOpen}
+            onChange={() => setAutoOpen((o) => !o)}
+            className="modal-toggle"
+          />
+          <div className="modal modal-bottom sm:modal-middle">
+            <div className="modal-box bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-500" />
+                Auto-fill titles & descriptions
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Titre source
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Entrez le titre à traduire"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    value={autoTitle}
+                    onChange={(e) => setAutoTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Description source
+                  </label>
+                  <textarea
+                    placeholder="Entrez la description à traduire"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                    rows={4}
+                    value={autoDesc}
+                    onChange={(e) => setAutoDesc(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Serveur de traduction
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="URL du serveur"
+                    className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    value={server}
+                    onChange={(e) => setServer(e.target.value)}
+                  />
+                </div>
+
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>Langues cibles:</strong> {supportedLanguages.map(lang => LANGUAGE_FLAGS[lang] || '🌐').join(' ')} ({supportedLanguages.length} langues)
+                  </p>
+                </div>
+              </div>
+
+              <div className="modal-action">
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setAutoOpen(false)}
+                  disabled={isLoading}
+                >
+                  Annuler
+                </button>
+                <button 
+                  className="btn btn-primary gap-2" 
+                  onClick={applyAuto}
+                  disabled={isLoading || !autoTitle.trim()}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Traduction...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Appliquer
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

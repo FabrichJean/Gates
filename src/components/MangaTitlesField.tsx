@@ -45,13 +45,29 @@ export const MangaTitlesField: React.FC<MangaTitlesFieldProps> = ({
 
   // Gérer les changements de titre
   const handleTitleChange = (titleTranslations: TranslatedText) => {
-    const updated = i18nToMangaTitles(titleTranslations, i18nContent.description || {});
+    console.log('handleTitleChange called with:', titleTranslations);
+    // Utiliser les descriptions actuelles depuis value, pas depuis i18nContent
+    const currentDescriptions = mangaTitlesToI18n(value).description || {};
+    const updated = i18nToMangaTitles(titleTranslations, currentDescriptions);
+    console.log('Updated titles:', updated);
     onChange(updated);
   };
 
   // Gérer les changements de description
   const handleDescriptionChange = (descriptionTranslations: TranslatedText) => {
-    const updated = i18nToMangaTitles(i18nContent.title || {}, descriptionTranslations);
+    console.log('handleDescriptionChange called with:', descriptionTranslations);
+    // Utiliser les titres actuels depuis value, pas depuis i18nContent
+    const currentTitles = mangaTitlesToI18n(value).title || {};
+    const updated = i18nToMangaTitles(currentTitles, descriptionTranslations);
+    console.log('Updated descriptions:', updated);
+    onChange(updated);
+  };
+
+  // Gérer les changements combinés (titre + description en même temps)
+  const handleBothChange = (titleTranslations: TranslatedText, descriptionTranslations: TranslatedText) => {
+    console.log('handleBothChange called with:', { titleTranslations, descriptionTranslations });
+    const updated = i18nToMangaTitles(titleTranslations, descriptionTranslations);
+    console.log('Updated both:', updated);
     onChange(updated);
   };
 
@@ -95,9 +111,11 @@ export const MangaTitlesField: React.FC<MangaTitlesFieldProps> = ({
           description={i18nContent.description || {}}
           onTitleChange={handleTitleChange}
           onDescriptionChange={handleDescriptionChange}
+          onBothChange={handleBothChange}
           titleRequired={required}
           descriptionRequired={false}
           supportedLanguages={selectedLanguages}
+          showAutoFill={true}
         />
       )}
     </div>
