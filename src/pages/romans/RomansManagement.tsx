@@ -276,14 +276,16 @@ const RomansManagement = () => {
                                     index={romans.indexOf(roman)}
                                 />
                             </td>
-                            <td className="px-4 py-3 flex gap-2">
-                                <Link to={`/romans/${roman.id}`}>
-                                    <Eye className="w-4 h-4 cursor-pointer" />
-                                </Link>
-                                <Link to={`/romans/edit/${roman.id}`}>
-                                    <Edit2 className="w-4 h-4 cursor-pointer text-blue-500" />
-                                </Link>
-                                <MoreVertical className="w-4 h-4 cursor-pointer" />
+                            <td className="px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                    <Link to={`/romans/${roman.id}`}>
+                                        <Eye className="w-4 h-4 cursor-pointer" />
+                                    </Link>
+                                    <Link to={`/romans/edit/${roman.id}`}>
+                                        <Edit2 className="w-4 h-4 cursor-pointer text-blue-500" />
+                                    </Link>
+                                    <MoreVertical className="w-4 h-4 cursor-pointer" />
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -300,8 +302,8 @@ const RomansManagement = () => {
 
     /* ===================== RENDER ===================== */
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-gray-900 p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-slate-50 dark:bg-gray-900 px-2 py-6">
+            <div className="max-w-8xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         Romans management
