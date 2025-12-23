@@ -6,18 +6,14 @@ import FileUploadZone from "../../components/FileUploadZone";
 import PlatformSelectComponent from "../../components/PlatformSelectComponent";
 import CreatorAutoComplete from "../../components/CreatorAutoComplete";
 import type { Platform } from "../../hooks/usePlatform";
-import LanguageAutoComplete from "../../components/LanguageAutoComplete";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../../constant";
 import { getToken } from "../../utils/storage";
 import { motion } from "framer-motion";
-
-type Language = {
-    code: string;
-    name: string;
-};
+import { MangaTitlesField } from "../../components/MangaTitlesField";
+import type { MangaTitles } from "../../types/mangaTitles";
 
 const RomanEdit = () => {
     const { id } = useParams<{ id: string }>();
@@ -35,13 +31,8 @@ const RomanEdit = () => {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    // Système de langues avec onglets
-    const [languages, setLanguages] = useState<{ id: number, name: string, code: string }[]>([]);
-    const [selectedLanguage, setSelectedLanguage] = useState<{ id: number, name: string, code: string } | null>(null);
-    const [titles, setTitles] = useState<{ [key: number]: string }>({});
-    const [descriptions, setDescriptions] = useState<{ [key: number]: string }>({});
-    const [showAddLanguageModal, setShowAddLanguageModal] = useState(false);
-    const [selectedLanguageFromBackend, setSelectedLanguageFromBackend] = useState<Language | null>(null);
+    // Titres multilingues
+    const [titles, setTitles] = useState<MangaTitles>([]);
 
     // Charger les données du roman
     useEffect(() => {
@@ -63,26 +54,14 @@ const RomanEdit = () => {
                 setCreator(roman.creator || roman.creatorObj?.name || null);
                 setCreatorId(roman.creator_id);
 
-                // Pré-remplir les titres avec le nouveau système
+                // Pré-remplir les titres avec le format MangaTitles
                 if (roman.titles && roman.titles.length > 0) {
-                    const loadedLanguages = roman.titles.map((t: any, index: number) => ({
-                        id: index + 1,
-                        name: t.language?.name || t.i18_language.toUpperCase(),
-                        code: t.i18_language
+                    const loadedTitles: MangaTitles = roman.titles.map((t: any) => ({
+                        i18_language: t.i18_language,
+                        title: t.title || "",
+                        description: t.description || ""
                     }));
-                    setLanguages(loadedLanguages);
-
-                    const loadedTitles: { [key: number]: string } = {};
-                    const loadedDescriptions: { [key: number]: string } = {};
-
-                    roman.titles.forEach((t: any, index: number) => {
-                        loadedTitles[index + 1] = t.title;
-                        loadedDescriptions[index + 1] = t.description || "";
-                    });
-
                     setTitles(loadedTitles);
-                    setDescriptions(loadedDescriptions);
-                    setSelectedLanguage(loadedLanguages[0]);
                 }
 
                 // Pré-remplir la cover preview
@@ -107,51 +86,6 @@ const RomanEdit = () => {
         setCoverPreview(preview);
     };
 
-    // Fonctions pour gérer les titres et descriptions par langue
-    const handleTitleChange = (languageId: number, value: string) => {
-        setTitles(prev => ({ ...prev, [languageId]: value }));
-    };
-
-    const handleDescriptionChange = (languageId: number, value: string) => {
-        setDescriptions(prev => ({ ...prev, [languageId]: value }));
-    };
-
-    // Fonction pour ajouter une nouvelle langue
-    const handleAddLanguage = () => {
-        if (selectedLanguageFromBackend) {
-            const existingLanguage = languages.find(lang => lang.code === selectedLanguageFromBackend.code);
-            if (existingLanguage) {
-                toast.error("This language is already added!");
-                return;
-            }
-
-            const newId = Math.max(0, ...languages.map(lang => lang.id)) + 1;
-            const newLanguage = {
-                id: newId,
-                name: selectedLanguageFromBackend.name,
-                code: selectedLanguageFromBackend.code
-            };
-            setLanguages(prev => [...prev, newLanguage]);
-            setSelectedLanguageFromBackend(null);
-            setShowAddLanguageModal(false);
-            setSelectedLanguage(newLanguage);
-        }
-    };
-
-    const handleCancelAddLanguage = () => {
-        setSelectedLanguageFromBackend(null);
-        setShowAddLanguageModal(false);
-    };
-
-    const removeLanguage = (languageId: number) => {
-        setLanguages(prev => prev.filter(lang => lang.id !== languageId));
-        delete titles[languageId];
-        delete descriptions[languageId];
-        if (selectedLanguage?.id === languageId) {
-            setSelectedLanguage(languages.find(lang => lang.id !== languageId) || null);
-        }
-    };
-
     const handleSubmitRoman = useCallback(async () => {
         if (!selectedCategory || !ref) {
             toast.error("Please fill in all required fields!");
@@ -159,23 +93,20 @@ const RomanEdit = () => {
         }
 
         // Vérifier qu'au moins un titre est renseigné
-        const hasTitle = Object.values(titles).some(title => title.trim() !== "");
+        const hasTitle = titles.some(entry => entry.title.trim() !== "");
         if (!hasTitle) {
             toast.error("Please add at least one title");
             return;
         }
 
-        // Préparer les titres multilingues
-        const titlesArray: { title: string, i18_language: string, description?: string }[] = [];
-        languages.forEach(lang => {
-            if (titles[lang.id]?.trim()) {
-                titlesArray.push({
-                    title: titles[lang.id].trim(),
-                    i18_language: lang.code,
-                    ...(descriptions[lang.id]?.trim() && { description: descriptions[lang.id].trim() })
-                });
-            }
-        });
+        // Préparer les titres multilingues (filtrer les entrées vides)
+        const titlesArray = titles
+            .filter(entry => entry.title.trim() !== "")
+            .map(entry => ({
+                title: entry.title.trim(),
+                i18_language: entry.i18_language,
+                ...(entry.description.trim() && { description: entry.description.trim() })
+            }));
 
         const fd = new FormData();
         if (coverFile) {
@@ -223,8 +154,6 @@ const RomanEdit = () => {
         selectedCategory,
         selectedSubCategory,
         titles,
-        descriptions,
-        languages,
         ref,
         navigate,
         creator,
@@ -352,77 +281,12 @@ const RomanEdit = () => {
                 </div>
 
                 {/* Titles & Descriptions */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 mb-4">
-                    <label className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">Title:</label>
-
-                    {/* Onglets de langues */}
-                    <div className="flex flex-wrap items-center gap-2 mb-4">
-                        {languages.map((lang) => (
-                            <div key={lang.id} className="relative">
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedLanguage(lang)}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedLanguage?.id === lang.id
-                                            ? "bg-blue-600 text-white shadow-md"
-                                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                                        }`}
-                                >
-                                    {lang.name}
-                                </button>
-                                {languages.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeLanguage(lang.id)}
-                                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs"
-                                    >
-                                        ×
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-
-                        {/* Bouton Add Language */}
-                        <button
-                            type="button"
-                            onClick={() => setShowAddLanguageModal(true)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-all duration-200 flex items-center gap-2"
-                        >
-                            <Tag className="w-4 h-4" />
-                            Add Language
-                        </button>
-                    </div>
-
-                    {/* Champs pour la langue sélectionnée */}
-                    {selectedLanguage && (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Title ({selectedLanguage.name})
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder={`Enter title in ${selectedLanguage.name}`}
-                                    value={titles[selectedLanguage.id] || ""}
-                                    onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
-                                    className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Description ({selectedLanguage.name})
-                                </label>
-                                <textarea
-                                    placeholder={`Enter description in ${selectedLanguage.name}`}
-                                    value={descriptions[selectedLanguage.id] || ""}
-                                    onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
-                                    className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300 resize-none"
-                                    rows={3}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <MangaTitlesField
+                    value={titles}
+                    onChange={setTitles}
+                    label="Titres multilingues"
+                    required={false}
+                />
 
                 {/* Submit Button */}
                 <motion.button
@@ -471,47 +335,6 @@ const RomanEdit = () => {
                 )}
 
             </div>
-
-            {/* Modal Add Language */}
-            {showAddLanguageModal && (
-                <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                            New Title
-                        </h3>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Select Language
-                            </label>
-                            <div>
-                                <LanguageAutoComplete
-                                    onSelect={(lang) => setSelectedLanguageFromBackend(lang)}
-                                    defaultValue={selectedLanguageFromBackend || undefined}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                type="button"
-                                onClick={handleCancelAddLanguage}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleAddLanguage}
-                                disabled={!selectedLanguageFromBackend}
-                                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
-                            >
-                                Add Title
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     );
 };

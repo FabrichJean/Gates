@@ -21,6 +21,7 @@ import {
     ImageOff,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import AddChapterModal from "../../components/AddChapterModal";
 
 type RomanTitle = {
     id: number;
@@ -114,29 +115,34 @@ const RomanDetails = () => {
     const [roman, setRoman] = useState<Roman | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedTitleIndex, setSelectedTitleIndex] = useState(0);
+    const [showAddChapterModal, setShowAddChapterModal] = useState(false);
+
+    const fetchRomanDetails = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`${apiURL}/romans/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${getToken()}`,
+                },
+            });
+            setRoman(response.data);
+        } catch (error: any) {
+            console.error("Error fetching roman details:", error);
+            toast.error("Failed to load roman details");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchRomanDetails = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${apiURL}/romans/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${getToken()}`,
-                    },
-                });
-                setRoman(response.data);
-            } catch (error: any) {
-                console.error("Error fetching roman details:", error);
-                toast.error("Failed to load roman details");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (id) {
             fetchRomanDetails();
         }
     }, [id]);
+
+    const handleChapterAdded = () => {
+        fetchRomanDetails();
+    };
 
     const getCheckingStatusColor = (status: string) => {
         switch (status) {
@@ -208,9 +214,8 @@ const RomanDetails = () => {
                             Roman Details
                         </h1>
                         <div className="flex items-center gap-4">
-
                             {/* btn switch edit */}
-                            <Link to={`/romans/edit/${roman.id}`} className="inline-block mt-2 p-2 animate-pulse transition-all">
+                            <Link to={`/romans/edit/${roman.id}`} className="inline-block p-2 animate-pulse transition-all">
                                 {/* icon svg edit */}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -285,13 +290,22 @@ const RomanDetails = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">Chapters</p>
-                                    <p className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
+                                    <div className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
                                         <BookOpen className="w-4 h-4" />
-                                        <Link to={`/romans/${roman.id}/chapters`} >
+                                        <Link to={`/romans/${roman.id}/chapters`} className="flex items-center gap-1">
                                             {roman.chapters_count} <span className="underline hover:text-blue-600 dark:hover:text-blue-400" title="">chapters</span>
                                         </Link>
-                                        
-                                    </p>
+                                        <button
+                                            onClick={() => setShowAddChapterModal(true)}
+                                            className="p-1 cursor-pointer rounded-md bg-blue-100 dark:bg-blue-600/30 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                                            title="New chapter for this roman"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">Total Words</p>
@@ -439,6 +453,16 @@ const RomanDetails = () => {
                     </motion.div>
                 </div>
             </div>
+
+            {/* Add Chapter Modal */}
+            {roman && (
+                <AddChapterModal
+                    isOpen={showAddChapterModal}
+                    onClose={() => setShowAddChapterModal(false)}
+                    romanId={roman.id}
+                    onSuccess={handleChapterAdded}
+                />
+            )}
         </div>
     );
 };

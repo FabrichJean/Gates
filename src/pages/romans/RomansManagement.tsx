@@ -357,7 +357,7 @@ const RomansManagement = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                         Romans Management
                     </h1>
                     {/* bouton bascule vers `romans/upload` */}
