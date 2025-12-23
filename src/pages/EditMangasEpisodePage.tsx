@@ -175,41 +175,30 @@ const EditMangasEpisodePage: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-medium mb-1">Nom de l'épisode</label>
+            <div>
+            <label className="block font-medium mb-1 text-gray-900 dark:text-gray-100">Nom de l'épisode</label>
             <input
               type="text"
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
               required
             />
-          </div>
+            </div>
 
           <div>
-            <label className="block font-medium mb-1">Numéro</label>
+            <label className="block font-medium mb-1 text-gray-900 dark:text-gray-100">Numéro</label>
             <input
               type="number"
               name="number"
               value={form.number}
               onChange={handleChange}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700"
               min="1"
               required
             />
           </div>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1">Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="textarea textarea-bordered w-full"
-            rows={4}
-          />
         </div>
 
         {/* Titres multilingues */}

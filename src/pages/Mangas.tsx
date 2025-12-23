@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Edit,
@@ -9,49 +9,23 @@ import {
   Star,
   CheckCircle,
   XCircle,
-  ChevronLeft,
-  ChevronRight,
   LayoutGrid,
   List,
   FilePlus,
   Send,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getMangasListApi } from "../api/mangasList";
-import { updateManga, uploadMangaToS3 } from "../api/mangas";
-import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 import RoleEnum from "../utils/roleEnum";
 import { useAuth } from "../hooks/useAuth";
-import { RiStarFill } from "react-icons/ri";
 import type { MangaTitles } from "../types/mangaTitles";
 import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitle, MangaDescription } from "../components/MangaTitlesDisplay";
 import { MangaUploadProgress } from "../components/MangaUploadProgress";
-
-interface Manga {
-  id: number;
-  ref: string;
-  title?: string;
-  description?: string;
-  titles?: string | MangaTitles; // Nouveau champ multilingue
-  cover?: string;
-  cover_url?: string;
-  s3_cover_url?: string;
-  creator?: string;
-  creator_id?: number;
-  creatorObj?: { name: string; avatar?: string };
-  total_chapters?: number;
-  need_vip?: boolean;
-  isDeleted?: boolean;
-  checking?: string;
-  comment?: string;
-  processing?: string;
-  mangasCategory?: { name: string };
-  mangasSubCategory?: { name: string };
-}
-
-const PAGE_SIZE = 12;
+import Pagination from "../components/Pagination";
+import { PAGE_SIZE } from "../constant";
+import { useMangasContext } from "../context/MangasContext";
+import { useState } from "react";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -75,91 +49,25 @@ const SexyLoader = () => (
 
 const Mangas: React.FC = () => {
   const { user } = useAuth();
-  const [mangas, setMangas] = useState<Manga[]>([]);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterVIP, setFilterVIP] = useState<boolean | null>(null);
-  const [filterStatus, setFilterStatus] = useState<boolean | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  
+  // Use context for manga management
+  const ctx = useMangasContext();
+  if (!ctx) return null;
 
-  useEffect(() => {
-    fetchMangas(page);
-  }, [page]);
+  const {
+    page,
+    setPage,
+    mangas,
+    total,
+    loading,
+    reFetch,
+    toggleDeleted,
+    sendManga,
+  } = ctx;
 
-  const fetchMangas = async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const res = await getMangasListApi({ page: pageNum, limit: PAGE_SIZE });
-      const data = res.data?.data || res.data || res;
-      setMangas(data || []);
-      setTotal(data.count || data.total || 0);
-    } catch (err) {
-      setMangas([]);
-      setTotal(0);
-      toast.error("Erreur lors du chargement des mangas");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleDeleted = async (
-    mangaId: number,
-    currentStatus: boolean
-  ) => {
-    try {
-      const formData = new FormData();
-      formData.append("isDeleted", String(!currentStatus));
-
-      await updateManga(mangaId, formData);
-      toast.success(
-        currentStatus
-          ? "Manga activé avec succès"
-          : "Manga désactivé avec succès"
-      );
-      fetchMangas(page);
-    } catch (error) {
-      toast.error("Erreur lors de la mise à jour du statut");
-    }
-  };
-
-  const handleSendManga = async (mangaId: number) => {
-    // Find the manga to check its status
-    const manga = mangas.find(m => m.id === mangaId);
-
-    try {
-      toast.loading("Envoi du manga vers S3/R2...", { id: "send-manga" });
-      
-      await uploadMangaToS3(mangaId);
-      
-      toast.success("Manga envoyé avec succès!", { id: "send-manga" });
-      fetchMangas(page);
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Erreur lors de l'envoi du manga";
-      toast.error(errorMessage, { id: "send-manga" });
-    }
-  };
-
-  // Filtrage côté client
-  const filteredMangas = mangas.filter((manga) => {
-    const matchesSearch =
-      manga.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      manga.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      manga.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      manga.creatorObj?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      manga.mangasCategory?.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-    const matchesVIP = filterVIP === null || manga.need_vip === filterVIP;
-    const matchesStatus =
-      filterStatus === null || manga.isDeleted === !filterStatus;
-
-    return matchesSearch && matchesVIP && matchesStatus;
-  });
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const filteredMangas = mangas;
+  const isLoading = loading?.type === "fetch";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
@@ -203,7 +111,7 @@ const Mangas: React.FC = () => {
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded-md transition-all duration-200 ${
                     viewMode === "grid"
-                      ? "bg-white text-black shadow-md"
+                      ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                   title="Vue Grille"
@@ -216,7 +124,7 @@ const Mangas: React.FC = () => {
                   onClick={() => setViewMode("table")}
                   className={`p-2 rounded-md transition-all duration-200 ${
                     viewMode === "table"
-                      ? "bg-white text-black shadow-md"
+                      ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                   title="Vue Tableau"
@@ -345,7 +253,7 @@ const Mangas: React.FC = () => {
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
-                                handleSendManga(manga.id);
+                                sendManga(manga.id);
                               }}
                               disabled={manga.processing === "done" || manga.processing === "working"}
                               className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
@@ -404,7 +312,7 @@ const Mangas: React.FC = () => {
                           <MangaChecking
                             manga={manga}
                             index={index}
-                            reFetch={() => fetchMangas(page)}
+                            reFetch={() => reFetch(400)}
                           />
                         </div>
 
@@ -450,7 +358,7 @@ const Mangas: React.FC = () => {
                             className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
-                                ? () => handleToggleDeleted(
+                                ? () => toggleDeleted(
                                 manga.id,
                                 manga.isDeleted || false
                               )
@@ -586,7 +494,7 @@ const Mangas: React.FC = () => {
                               <MangaChecking
                                 manga={manga}
                                 index={index}
-                                reFetch={() => fetchMangas(page)}
+                                reFetch={() => reFetch(400)}
                               />
                             </td>
 
@@ -621,7 +529,7 @@ const Mangas: React.FC = () => {
                               className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                               onChange={
                                 user?.role === RoleEnum.SUPERADMIN
-                                  ? () => handleToggleDeleted(
+                                  ? () => toggleDeleted(
                                   manga.id,
                                   manga.isDeleted || false
                                 )
@@ -649,7 +557,7 @@ const Mangas: React.FC = () => {
                                 </Link>
                                 {user?.role === RoleEnum.SUPERADMIN && (
                                   <button
-                                    onClick={() => handleSendManga(manga.id)}
+                                    onClick={() => sendManga(manga.id)}
                                     disabled={manga.processing === "done" || manga.processing === "working"}
                                     className={`p-1.5 rounded-lg transition-all duration-200 ${
                                      ( manga.processing === "done" || manga.processing === "working")
@@ -677,62 +585,21 @@ const Mangas: React.FC = () => {
                 </div>
               </div>
             )}
-
+{total} {PAGE_SIZE}
             {/* Pagination */}
-            {totalPages > 1 && (
+            {total > PAGE_SIZE && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex justify-center items-center gap-4 mt-8"
+                className="mt-8"
               >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Précédent
-                </motion.button>
-
-                <div className="flex items-center gap-2">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <motion.button
-                        key={pageNum}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`w-10 h-10 rounded-lg transition-all duration-200 ${
-                          page === pageNum
-                            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
-                            : "bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
-                        }`}
-                        onClick={() => setPage(pageNum)}
-                      >
-                        {pageNum}
-                      </motion.button>
-                    );
-                  })}
-                  {totalPages > 5 && (
-                    <span className="px-2 text-gray-500 dark:text-gray-400">
-                      ...
-                    </span>
-                  )}
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  Suivant
-                  <ChevronRight className="w-4 h-4" />
-                </motion.button>
+                <Pagination
+                  totalItems={total}
+                  pageSize={PAGE_SIZE}
+                  currentPage={page}
+                  onPageChange={setPage}
+                />
               </motion.div>
             )}
           </>

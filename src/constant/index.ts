@@ -8,3 +8,5 @@ export const SENDING_STORAGE_KEY = "vms:sending_videos";
 export const PROCESSED_STORAGE_KEY = "vms:processed_videos";
 
 export const translateServer = `${server}/translate-titles`
+
+export const PAGE_SIZE = 5;
