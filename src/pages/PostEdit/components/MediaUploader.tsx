@@ -9,6 +9,16 @@ export default function MediaUploader(props: {
   removeImageField: (id: number) => void;
   setDeletedImageIds: React.Dispatch<React.SetStateAction<number[]>>;
   setMedia: React.Dispatch<React.SetStateAction<{ images: any[]; videos: any[] }>>;
+  // Optional props for compatibility with TouchPost and PostBotEdit
+  videos?: any[];
+  videoFields?: any[];
+  handleVideoChange?: (id: number, file: File | null) => void;
+  handleCoverChange?: (id: number, file: File | null) => void;
+  handleVideoTypeChange?: (id: number, type: string) => void;
+  handleExistingVideoTypeChange?: (videoId: number, type: string) => void;
+  addVideoField?: () => void;
+  removeVideoField?: (id: number) => void;
+  setDeletedVideoIds?: React.Dispatch<React.SetStateAction<number[]>>;
 }) {
   const { images, imageFields, handleImageChange, addImageField, removeImageField, setDeletedImageIds, setMedia } = props;
 
