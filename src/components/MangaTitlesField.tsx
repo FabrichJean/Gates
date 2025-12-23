@@ -24,21 +24,25 @@ export const MangaTitlesField: React.FC<MangaTitlesFieldProps> = ({
       .filter(entry => entry.title.trim() !== '' || entry.description.trim() !== '')
       .map(entry => entry.i18_language);
     
-    // Si aucune langue, retourner anglais par défaut
+    // Si aucune langue existante, sélectionner l'anglais par défaut
     return languages.length > 0 ? languages : ['en'];
   });
   
-  // Mettre à jour les langues sélectionnées quand les titres changent
+  // Mettre à jour les langues sélectionnées quand les titres initiaux sont chargés
   useEffect(() => {
+    // Extraire les langues des titres existants
     const languages = value
       .filter(entry => entry.title.trim() !== '' || entry.description.trim() !== '')
       .map(entry => entry.i18_language);
     
-    // Mettre à jour seulement si différent
-    if (languages.length > 0 && JSON.stringify(languages.sort()) !== JSON.stringify(selectedLanguages.sort())) {
+    // Si on a des titres ET que les langues sélectionnées sont différentes, mettre à jour
+    if (languages.length > 0 && selectedLanguages.length === 1 && selectedLanguages[0] === 'en') {
       setSelectedLanguages(languages);
     }
   }, [value]);
+  
+  // Ne PAS mettre à jour automatiquement les langues sélectionnées pendant la saisie
+  // L'utilisateur contrôle explicitement les langues via le LanguageSelector
 
   // Convertir MangaTitles vers I18nContent
   const i18nContent = mangaTitlesToI18n(value);
