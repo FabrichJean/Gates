@@ -1,15 +1,4 @@
 import EditMangasChapterPage from "../pages/EditMangasChapterPage";
-import MangasChaptersPage from "../pages/MangasChaptersPage";
-import { useParams } from "react-router-dom";
-
-// Wrapper to extract mangaId from params and pass as prop
-function MangaChaptersRouteWrapper() {
-  const { mangaId } = useParams();
-  const id = mangaId ? parseInt(mangaId, 10) : undefined;
-  if (!id || isNaN(id)) return <div className="p-8 text-red-500">Manga ID invalide</div>;
-  return <MangasChaptersPage mangaId={id} />;
-}
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
@@ -23,7 +12,6 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import VideoBotManagement from "../pages/VideoBotManagement";
 import VideoBotDetails from "../pages/VideoBotDetails";
-// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -59,11 +47,18 @@ import MediaPostManager from "../pages/MediaPostManager";
 import Mangas from "../pages/Mangas";
 import UploadMangas from "../pages/UploadMangas";
 import EditMangasPage from "../pages/EditMangasPage";
+import MangasDetailsPage from "../pages/MangasDetailsPage";
+import UploadMangasEpisodePage from "../pages/UploadMangasEpisodePage";
+import EditMangasEpisodePage from "../pages/EditMangasEpisodePage";
+import MangasEpisodesPage from "../pages/MangasEpisodesPage";
+import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
+import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
+import MangasCategoriesPage from "../pages/MangasCategoriesPage";
+import RomanUpload from "../pages/romans/romanUpload";
 import RomansManagement from "../pages/romans/RomansManagement";
 import RomanDetails from "../pages/romans/romanDetails";
 import RomanEdit from "../pages/romans/romanEdit";
 import RomanCategoryPage from "../pages/romans/romanCategory";
-import RomanUpload from "../pages/romans/romanUpload";
 
 
 
@@ -147,6 +142,16 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/mangas/:mangaId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/mangas/:mangaId/edit"
             element={
               <ProtectedRoute>
@@ -173,6 +178,58 @@ const AppRoutes = () => {
                 <InsideSidebar>
                   <EditMangasChapterPage />
                 </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangasEpisodePage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodesPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodeDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasEpisodePage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <MangasCategoriesPage />
+                  </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />

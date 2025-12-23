@@ -29,3 +29,21 @@ export const updateManga = async (id: number, data: FormData) => {
   });
   return response.data;
 };
+
+export const toggleMangaDeleted = async (id: number) => {
+  const response = await axios.put(`${apiURL}/mangas/${id}/toggle-deleted`, {}, {
+    headers: {
+      Authorization: `Bearer ${token()}`,
+    },
+  });
+  return response.data;
+};
+
+export const uploadMangaToS3 = async (id: number) => {
+  const response = await axios.post(`${apiURL}/mangas/${id}/upload`, {}, {
+    headers: {
+      Authorization: `Bearer ${token()}`,
+    },
+  });
+  return response.data;
+};

@@ -360,6 +360,12 @@ function Sidebar({
               icon={MdOutlineCategory}
             />
             <NavLink
+              to="/mangas-categories"
+              name="mangas-categories"
+              label="Manga Category"
+              icon={MdOutlineCategory}
+            />
+            <NavLink
               to="/tag-category"
               name="tag-category"
               label="Tag Category"
