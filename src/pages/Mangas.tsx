@@ -126,15 +126,6 @@ const Mangas: React.FC = () => {
   const handleSendManga = async (mangaId: number) => {
     // Find the manga to check its status
     const manga = mangas.find(m => m.id === mangaId);
-    
-    // Block upload if manga is not checked
-    if (!manga || manga.checking !== "checked") {
-      toast.error("Cannot upload: Manga must be checked and approved first", {
-        duration: 4000,
-        icon: "🚫",
-      });
-      return;
-    }
 
     try {
       toast.loading("Envoi du manga vers S3/R2...", { id: "send-manga" });

@@ -25,8 +25,11 @@ import toast from "react-hot-toast";
 import type { MangaTitles } from "../types/mangaTitles";
 import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitlesField } from "../components/MangaTitlesField";
+import { useNavigate } from "react-router-dom";
 
 const UploadMangas: React.FC = () => {
+
+  const nav = useNavigate();
   const [form, setForm] = useState({
     ref: "",
     title: "",
@@ -200,6 +203,7 @@ const UploadMangas: React.FC = () => {
       
       await createManga(formData);
       toast.success("Manga créé avec succès!");
+      nav("/mangas");
       
       // Reset form
       setForm({
