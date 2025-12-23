@@ -172,16 +172,6 @@ const UploadAudio: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!form.title.trim()) {
-      toast.error("Le titre est requis");
-      return;
-    }
-
-    if (!form.audio) {
-      toast.error("Le fichier audio est requis");
-      return;
-    }
 
     setLoading(true);
 

@@ -31,6 +31,8 @@ import PostCategoryManager from "../pages/PostCategoryManager";
 import CreatorManager from "../pages/CreatorsManager";
 import Audios from "../pages/Audios";
 import UploadAudio from "../pages/UploadAudio";
+import AudioDetails from "../pages/AudioDetails";
+import AudioEdit from "../pages/AudioEdit";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
@@ -190,6 +192,30 @@ const AppRoutes = () => {
                 <SuperProtected>
                   <InsideSidebar>
                     <UploadAudio />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audios/:id"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioDetails />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audios/:id/edit"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioEdit />
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
