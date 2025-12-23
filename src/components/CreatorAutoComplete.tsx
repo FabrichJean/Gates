@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import UseCreators, { type Creator } from '../hooks/useCreators';
+import UseCreators from '../hooks/useCreators';
+import type { Creator } from './creators/CreatorList';
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
