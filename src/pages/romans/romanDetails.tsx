@@ -192,7 +192,7 @@ const RomanDetails = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 rounded-lg transition-all duration-300 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-6">
@@ -207,23 +207,26 @@ const RomanDetails = () => {
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             Roman Details
                         </h1>
-                        {/* btn switch edit */}
-                        <Link to={`/romans/edit/${roman.id}`} className="inline-block mt-2 p-2 animate-pulse transition-all">
-                            {/* icon svg edit */}
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-5 h-5 inline-block mr-2"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                        </Link>
+                        <div className="flex items-center gap-4">
+
+                            {/* btn switch edit */}
+                            <Link to={`/romans/edit/${roman.id}`} className="inline-block mt-2 p-2 animate-pulse transition-all">
+                                {/* icon svg edit */}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-5 h-5 inline-block mr-2"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
@@ -284,7 +287,10 @@ const RomanDetails = () => {
                                     <p className="text-sm text-gray-500 dark:text-gray-400">Chapters</p>
                                     <p className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-1">
                                         <BookOpen className="w-4 h-4" />
-                                        {roman.chapters_count} chapters
+                                        <Link to={`/romans/${roman.id}/chapters`} >
+                                            {roman.chapters_count} <span className="underline hover:text-blue-600 dark:hover:text-blue-400" title="">chapters</span>
+                                        </Link>
+                                        
                                     </p>
                                 </div>
                                 <div>
@@ -315,8 +321,8 @@ const RomanDetails = () => {
                                         type="button"
                                         onClick={() => setSelectedTitleIndex(index)}
                                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${selectedTitleIndex === index
-                                                ? "bg-blue-600 text-white shadow-md"
-                                                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                            ? "bg-blue-600 text-white shadow-md"
+                                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                                             }`}
                                     >
                                         {title.language.name}

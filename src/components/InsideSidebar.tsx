@@ -82,6 +82,32 @@ const CreateNewDropdown: React.FC = () => {
               New Manga
             </span>
           </button>
+
+          {/* New Roman */}
+          <button
+            onClick={() => navigate("/romans/upload")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left
+              hover:bg-yellow-50 dark:hover:bg-yellow-900/20
+              transition-all duration-200 ease-out group/item
+              border-t border-gray-100 dark:border-gray-700"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+              />
+            </svg>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              New Roman
+            </span>
+          </button>
         </div>
       </div>
     </div>
