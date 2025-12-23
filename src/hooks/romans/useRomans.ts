@@ -51,6 +51,10 @@ export type TRoman = {
     processing: "null" | "working" | "done";
     createdAt: string; // ISO date string
     updatedAt: string; // ISO date string
+    public_urls?: {
+        cover_url?: string;
+        local_cover_url?: string;
+    };
     titles: {
         id: any;
         title: string;

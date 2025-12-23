@@ -8,6 +8,13 @@ import {
     Trash2,
     Grid,
     List,
+    Send,
+    BookOpen,
+    User,
+    Calendar,
+    Tag,
+    Globe,
+    ChevronDown
 } from "lucide-react";
 import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
 import { Link } from "react-router-dom";
@@ -19,7 +26,7 @@ const RomansManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [page] = useState(1);
-    const [viewMode, setViewMode] = useState<"card" | "table">("table");
+    const [viewMode, setViewMode] = useState<"card" | "table">("card");
     const { user } = useAuth();
 
     /* ===================== API ===================== */
@@ -28,7 +35,6 @@ const RomansManagement = () => {
 
     /* ===================== SOCKET CHECKING ===================== */
     useSocketCheckRomans((data) => {
-        // Refetch uniquement si c'est une mise à jour d'un autre utilisateur
         if (data.user_id !== user?.id) {
             setTimeout(() => reFetch(), 500);
         }
@@ -47,7 +53,6 @@ const RomansManagement = () => {
     const filteredRomans = useMemo(() => {
         return romans.filter((roman) => {
             const status = mapStatus(roman);
-
             const matchesSearch =
                 roman.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (roman.creator || "")
@@ -67,8 +72,8 @@ const RomansManagement = () => {
     /* ===================== LOADING ===================== */
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-                Loading novels...
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
         );
     }
@@ -81,104 +86,116 @@ const RomansManagement = () => {
         deleted: romans.filter((r) => r.isDeleted).length,
     };
 
-    // function handleRoggleStateRoman(id: number): import("react").MouseEventHandler<HTMLButtonElement> {
-    //     return (e) => {
-    //         e.preventDefault();
-    //         if (window.confirm("Are you sure you want to delete this novel?")) {
-    //             // TODO: Call API to remove roman, then refresh list or update state
-    //             // Example:
-    //             // removeRoman(id).then(() => refetchRomans());
-    //             alert(`Novel with ID ${id} deleted (simulation).`);
-    //         }
-    //     };
-    // }
-
     /* ===================== UTILS ===================== */
-    const truncateText = (text: string, maxLength: number = 10) => {
+    const truncateText = (text: string, maxLength: number = 25) => {
         if (!text) return "-";
         return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "published": return "bg-green-100 text-green-800";
+            case "pending": return "bg-yellow-100 text-yellow-800";
+            case "refused": return "bg-red-100 text-red-800";
+            case "deleted": return "bg-gray-100 text-gray-800";
+            default: return "bg-blue-100 text-blue-800";
+        }
     };
 
     /* ===================== RENDER CARD ===================== */
     const renderCardView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredRomans.map((roman) => (
-                <div key={roman.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1" title={roman.ref}>
-                                    {truncateText(roman.ref)}
-                                </h3>
+                <div key={roman.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    {/* Cover Image */}
+                    <div className="relative h-48 bg-gradient-to-br from-purple-400 to-pink-400">
+                        {roman.public_urls?.cover_url ? (
+                            <img 
+                                src={roman.public_urls.cover_url} 
+                                alt={roman.ref}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <BookOpen className="w-16 h-16 text-white/50" />
                             </div>
-                            {/* {getStatusBadge(mapStatus(roman))} */}
+                        )}
+                        <div className="absolute top-3 right-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mapStatus(roman))}`}>
+                                {mapStatus(roman)}
+                            </span>
                         </div>
+                    </div>
 
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3">
-                                {roman.creatorObj?.avatar ? (
-                                    <img
-                                        src={roman.creatorObj.avatar.startsWith('http') ? roman.creatorObj.avatar : `/${roman.creatorObj.avatar}`}
-                                        alt={roman.creatorObj.name}
-                                        className="w-10 h-10 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">
-                                            {roman.creatorObj?.name?.charAt(0) || roman.creator?.charAt(0) || 'U'}
-                                        </span>
-                                    </div>
-                                )}
-                                <div>
-                                    <Link to={`/creators/${roman.creatorObj?.id}`} className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-500">
-                                        {roman.creatorObj?.name || roman.creator || "-"}
-                                    </Link>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {roman.creatorObj.gender || "Unknown gender"}
-                                    </p>
+                    <div className="p-5">
+                        {/* Title */}
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2" title={roman.ref}>
+                            {truncateText(roman.ref)}
+                        </h3>
+
+                        {/* Creator Info */}
+                        <div className="flex items-center gap-3 mb-4">
+                            {roman.creatorObj?.avatar ? (
+                                <img
+                                    src={roman.creatorObj.avatar}
+                                    alt={roman.creatorObj.name}
+                                    className="w-10 h-10 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold">
+                                        {roman.creatorObj?.name?.charAt(0) || 'U'}
+                                    </span>
                                 </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <p className="text-sm text-gray-900 dark:text-white">
-                                    {roman.category?.name || "-"}
-                                </p>
-                                {roman.subCategory?.name && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {roman.subCategory.name}
-                                    </p>
-                                )}
-                            </div>
-
-                            {roman.plateform?.name && (
-                                <p className="text-sm text-gray-600 dark:text-gray-300">
-                                    {roman.plateform.name}
-                                </p>
                             )}
+                            <div>
+                                <Link to={`/creators/${roman.creatorObj?.id}`} className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-500">
+                                    {roman.creatorObj?.name || "-"}
+                                </Link>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {roman.creatorObj?.gender || "Unknown"}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-between items-center">
-                                <CheckingRoman
+                        {/* Category & Platform */}
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                <Tag className="w-4 h-4" />
+                                <span>{roman.category?.name || "-"}</span>
+                                {roman.subCategory?.name && (
+                                    <span className="text-xs text-gray-500">• {roman.subCategory.name}</span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                <Globe className="w-4 h-4" />
+                                <span>{roman.plateform?.name || "-"}</span>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <CheckingRoman
                                 roman={roman}
                                 user={user}
                                 index={filteredRomans.indexOf(roman)}
                             />
-                            <label className="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" defaultChecked={false} className="sr-only peer" />
-                                <div className="relative w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-200 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-gray-100 after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500" />
-                            </label>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <div className="flex gap-2">
-                                    <Link to={`/romans/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
-                                        <Eye className="w-4 h-4" />
-                                    </Link>
-                                    <Link to={`/romans/edit/${roman.id}`} className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500">
-                                        <Edit2 className="w-4 h-4" />
-                                    </Link>
-                                </div>
-                                <MoreVertical className="w-4 h-4 text-gray-400 cursor-pointer" />
+                            <div className="flex items-center gap-2">
+                                <Link 
+                                    to={`/romans/${roman.id}`} 
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                </Link>
+                                <Link 
+                                    to={`/romans/edit/${roman.id}`} 
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </Link>
+                                <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <Send className="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -189,112 +206,142 @@ const RomansManagement = () => {
 
     /* ===================== RENDER TABLE ===================== */
     const renderTableView = () => (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead className="bg-gray-100 dark:bg-gray-700">
-                    <tr>
-                        {[
-                            "ID",
-                            "Reference",
-                            "User",
-                            "Creator",
-                            "Category",
-                            "Platform",
-                            "Status",
-                            "Checking",
-                            "Actions",
-                        ].map((h) => (
-                            <th key={h} className="px-4 py-3 text-left">
-                                {h}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Cover
                             </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredRomans.map((roman) => (
-                        <tr key={roman.id} className="border-t">
-                            <td className="px-4 py-3">{roman.id}</td>
-                            <td className="px-4 py-3" title={roman.ref}>{truncateText(roman.ref)}</td>
-                            <td className="px-4 py-3">
-                                <span className="flex items-center hover:text-blue-500 dark:hover:text-blue-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
-                                        <path fillRule="evenodd" d="M11.89 4.111a5.5 5.5 0 1 0 0 7.778.75.75 0 1 1 1.06 1.061A7 7 0 1 1 15 8a2.5 2.5 0 0 1-4.083 1.935A3.5 3.5 0 1 1 11.5 8a1 1 0 0 0 2 0 5.48 5.48 0 0 0-1.61-3.889ZM10 8a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z" clipRule="evenodd" />
-                                    </svg>
-
-                                    <Link to={`/users/${roman.user_id}`}>
-                                        {roman.user?.username || roman.user_id}
-                                    </Link>
-                                </span>
-                            </td>
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-3">
-                                    {roman.creatorObj?.avatar ? (
-                                        <img
-                                            src={roman.creatorObj.avatar.startsWith('http') ? roman.creatorObj.avatar : `/${roman.creatorObj.avatar}`}
-                                            alt={roman.creatorObj.name}
-                                            className="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Title
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Creator
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Category
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Platform
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Checking
+                            </th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {filteredRomans.map((roman) => (
+                            <tr key={roman.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <td className="px-6 py-4">
+                                    {roman.public_urls?.cover_url ? (
+                                        <img 
+                                            src={roman.public_urls?.cover_url} 
+                                            alt={roman.ref}
+                                            className="w-12 h-16 object-cover rounded"
                                         />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
-                                            <span className="text-white text-xs font-bold">
-                                                {roman.creatorObj?.name?.charAt(0) || roman.creator?.charAt(0) || 'U'}
-                                            </span>
+                                        <div className="w-12 h-16 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                            <BookOpen className="w-6 h-6 text-gray-400" />
                                         </div>
                                     )}
-                                    <span className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-500 dark:hover:text-blue-400">
-                                        <Link to={`/creators/${roman.creatorObj?.id}`}>
-                                            {roman.creatorObj?.name || roman.creator || "-"}
-                                        </Link>
-                                    </span>
-                                </div>
-                            </td>
-                            <td className="px-4 py-3">
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-sm font-medium text-nowrap text-gray-900 dark:text-gray-100">
-                                        {roman.category?.name || "-"}
-                                    </span>
-                                    {roman.subCategory?.name && (
-                                        <span className="text-xs text-nowrap text-gray-500 dark:text-gray-400">
-                                            {roman.subCategory.name}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div>
+                                        <p className="font-medium text-gray-900 dark:text-white" title={roman.ref}>
+                                            {truncateText(roman.ref, 20)}
+                                        </p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                            ID: {roman.id}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        {roman.creatorObj?.avatar ? (
+                                            <img
+                                                src={roman.creatorObj.avatar}
+                                                alt={roman.creatorObj.name}
+                                                className="w-8 h-8 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
+                                                <span className="text-white text-xs font-bold">
+                                                    {roman.creatorObj?.name?.charAt(0) || 'U'}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <span className="text-gray-900 dark:text-gray-100 font-medium">
+                                            <Link to={`/creators/${roman.creatorObj?.id}`} className="hover:text-blue-500">
+                                                {roman.creatorObj?.name || "-"}
+                                            </Link>
                                         </span>
-                                    )}
-                                </div>
-                            </td>
-                            <td className="px-4 py-3 text-nowrap">
-                                {roman.plateform?.name || "-"}
-                            </td>
-                            <td className="px-4 py-3">
-                                <label className="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" defaultChecked={false} className="sr-only peer" />
-                                    <div className="relative w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-200 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-gray-100 after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500" />
-                                </label>
-                            </td>
-                            <td className="px-4 py-3">
-                                <CheckingRoman
-                                    roman={roman}
-                                    user={user}
-                                    index={romans.indexOf(roman)}
-                                />
-                            </td>
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                    <Link to={`/romans/${roman.id}`}>
-                                        <Eye className="w-4 h-4 cursor-pointer" />
-                                    </Link>
-                                    <Link to={`/romans/edit/${roman.id}`}>
-                                        <Edit2 className="w-4 h-4 cursor-pointer text-blue-500" />
-                                    </Link>
-                                    <MoreVertical className="w-4 h-4 cursor-pointer" />
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            {roman.category?.name || "-"}
+                                        </span>
+                                        {roman.subCategory?.name && (
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                {roman.subCategory.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-gray-900 dark:text-gray-100">
+                                    {roman.plateform?.name || "-"}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(mapStatus(roman))}`}>
+                                        {mapStatus(roman)}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <CheckingRoman
+                                        roman={roman}
+                                        user={user}
+                                        index={romans.indexOf(roman)}
+                                    />
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Link 
+                                            to={`/romans/${roman.id}`} 
+                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </Link>
+                                        <Link 
+                                            to={`/romans/edit/${roman.id}`} 
+                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </Link>
+                                        <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                            <Send className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
             {filteredRomans.length === 0 && (
-                <div className="p-8 text-center text-gray-500">
-                    No novels found
+                <div className="p-12 text-center text-gray-500 dark:text-gray-400">
+                    <BookOpen className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <p className="text-lg font-medium mb-2">No novels found</p>
+                    <p className="text-sm">Try adjusting your search or filter criteria</p>
                 </div>
             )}
         </div>
@@ -302,62 +349,90 @@ const RomansManagement = () => {
 
     /* ===================== RENDER ===================== */
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-gray-900 px-2 py-6">
-            <div className="max-w-8xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Romans management
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        Romans Management
                     </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        Manage and organize your novel collection
+                    </p>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    {[
-                        ["Total", stats.total],
-                        ["Published", stats.published],
-                        ["Pending", stats.pending],
-                        ["Deleted", stats.deleted],
-                    ].map(([label, value]) => (
-                        <div
-                            key={label}
-                            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
-                        >
-                            <div className="text-2xl font-bold">{value}</div>
-                            <div className="text-sm text-gray-500">{label}</div>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                            </div>
+                            <BookOpen className="w-8 h-8 text-blue-500" />
                         </div>
-                    ))}
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Published</p>
+                                <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+                            </div>
+                            <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+                                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                            </div>
+                            <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Deleted</p>
+                                <p className="text-2xl font-bold text-gray-600">{stats.deleted}</p>
+                            </div>
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Filters */}
-                <div className="p-4 rounded-lg mb-6 flex justify-between items-center">
-                    <div className="flex gap-4 items-center justify-between w-full">
-                        <button className="relative flex items-center cursor-pointer outline-none">
-                            <Filter className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                            <span className="pl-9 pr-3 py-2 border rounded-lg bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                Filters
-                            </span>
-                        </button>
-
-                        <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-1">
+                <div className="mb-6">
+                    <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                        {/*  */}
+                        <div className="flex items-center gap-4 w-full lg:w-auto"> </div>
+                        {/* View Toggle */}
+                        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                             <button
                                 onClick={() => setViewMode("card")}
-                                className={`p-2 rounded outline-none ${viewMode === "card"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    }`}
-                                title="Card View"
+                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                                    viewMode === "card"
+                                        ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
+                                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                }`}
                             >
-                                <Grid className="w-5 h-5" />
+                                <Grid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => setViewMode("table")}
-                                className={`p-2 rounded outline-none ${viewMode === "table"
-                                    ? "bg-blue-500 text-white"
-                                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    }`}
-                                title="Table View"
+                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                                    viewMode === "table"
+                                        ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
+                                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                }`}
                             >
-                                <List className="w-5 h-5" />
+                                <List className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
@@ -367,8 +442,10 @@ const RomansManagement = () => {
                 {viewMode === "card" ? renderCardView() : renderTableView()}
 
                 {filteredRomans.length === 0 && (
-                    <div className="p-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-lg">
-                        No novels found
+                    <div className="p-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                        <p className="text-xl font-medium mb-2">No novels found</p>
+                        <p className="text-sm">Try adjusting your search or filter criteria</p>
                     </div>
                 )}
             </div>
