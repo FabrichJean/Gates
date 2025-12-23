@@ -2,6 +2,7 @@ import EditMangasChapterPage from "../pages/EditMangasChapterPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
+import { AudiosProvider } from "../context/AudiosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
@@ -28,6 +29,8 @@ import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
 import PostCategoryManager from "../pages/PostCategoryManager";
 import CreatorManager from "../pages/CreatorsManager";
+import Audios from "../pages/Audios";
+import UploadAudio from "../pages/UploadAudio";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
@@ -63,9 +66,10 @@ const AppRoutes = () => {
   return (
     <BrowserRouter>
       <VideosProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <AudiosProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
           <Route
             path="/mangas"
@@ -164,6 +168,30 @@ const AppRoutes = () => {
                 <InsideSidebar>
                   <EditMangasEpisodePage />
                 </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audios"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <Audios />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audios/upload"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <UploadAudio />
+                  </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
@@ -562,6 +590,7 @@ const AppRoutes = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         {modalFloat && <CardFlottant />}
+        </AudiosProvider>
       </VideosProvider>
     </BrowserRouter>
   );

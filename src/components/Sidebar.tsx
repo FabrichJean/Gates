@@ -316,14 +316,6 @@ function Sidebar({
         />
 
         <NavLink to="/post" name="post" label="Posts" icon={MdDynamicFeed} />
-        <NavLink
-          to="/mangas"
-          name="mangas"
-          label="Mangas"
-          iconComponent={
-            <img src="/mangas.png" alt="" className="w-5 h-5"/>
-          }
-        />
 
         {user?.role === RoleEnum.SUPERADMIN && (
           <>
@@ -391,6 +383,36 @@ function Sidebar({
                 </p>
               </div>
             )}
+
+            <NavLink
+              to="/mangas"
+              name="mangas"
+              label="Mangas"
+              iconComponent={
+                <img src="/mangas.png" alt="" className="w-5 h-5"/>
+              }
+            />
+
+            <NavLink
+              to="/audios"
+              name="audios"
+              label="Audios"
+              iconComponent={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
+              }
+            />
 
             {/* Separator */}
             {!isCollapsed && (
