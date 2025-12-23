@@ -897,7 +897,6 @@ const PostBotEdit = () => {
                             handleImageChange={handleImageChange}
                             handleVideoChange={handleVideoChange}
                             handleCoverChange={handleCoverChange}
-                            onExistingCoverSelect={handleExistingCoverSelect}
                             handleVideoTypeChange={handleVideoTypeChange}
                             handleExistingVideoTypeChange={handleExistingVideoTypeChange}
                             addImageField={addImageField}
