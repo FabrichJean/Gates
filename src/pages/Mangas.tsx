@@ -27,6 +27,7 @@ import { RiStarFill } from "react-icons/ri";
 import type { MangaTitles } from "../types/mangaTitles";
 import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitle, MangaDescription } from "../components/MangaTitlesDisplay";
+import { MangaUploadProgress } from "../components/MangaUploadProgress";
 
 interface Manga {
   id: number;
@@ -346,14 +347,14 @@ const Mangas: React.FC = () => {
                                 e.preventDefault();
                                 handleSendManga(manga.id);
                               }}
-                              disabled={manga.processing === "done"}
+                              disabled={manga.processing === "done" || manga.processing === "working"}
                               className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
-                                manga.processing === "done"
+                                (manga.processing === "done" || manga.processing === "working")
                                   ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
                                   : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
                               }`}
                               title={
-                                manga.processing === "done" 
+                                (manga.processing === "done" || manga.processing === "working")
                                   ? "Déjà envoyé" 
                                   : manga.checking !== "checked"
                                   ? "Manga must be checked first"
@@ -429,6 +430,9 @@ const Mangas: React.FC = () => {
                             {manga.mangasSubCategory?.name || "-"}
                           </span>
                         </div>
+
+                        {/* Upload Progress */}
+                        <MangaUploadProgress mangaId={manga.id} variant="inline" className="mb-2" />
 
                         {/* Stats & Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -588,17 +592,23 @@ const Mangas: React.FC = () => {
 
                             {/* Status */}
                             <td className="px-6 py-4 text-center">
-                              {manga.processing ? (
-                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
-                                  manga.processing === "done"
-                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                                }`}>
-                                  {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
-                              )}
+                              <div className="flex flex-col items-center gap-2">
+                                {/* Upload Progress Badge */}
+                                <MangaUploadProgress mangaId={manga.id} variant="badge" />
+                                
+                                {/* Processing Status */}
+                                {manga.processing !== "working" ? (
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
+                                    manga.processing === "done"
+                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                  }`}>
+                                    {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                                )}
+                              </div>
                             </td>
 
                             {/* Activate */}
@@ -640,15 +650,15 @@ const Mangas: React.FC = () => {
                                 {user?.role === RoleEnum.SUPERADMIN && (
                                   <button
                                     onClick={() => handleSendManga(manga.id)}
-                                    disabled={manga.processing === "done"}
+                                    disabled={manga.processing === "done" || manga.processing === "working"}
                                     className={`p-1.5 rounded-lg transition-all duration-200 ${
-                                      manga.processing === "done"
+                                     ( manga.processing === "done" || manga.processing === "working")
                                         ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
                                         : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
                                     }`}
                                     title={
-                                      manga.processing === "done" 
-                                        ? "Déjà envoyé" 
+                                      (manga.processing === "done" || manga.processing === "working")
+                                        ? "Not to send" 
                                         : manga.checking !== "checked"
                                         ? "Manga must be checked first"
                                         : "Envoyer"
