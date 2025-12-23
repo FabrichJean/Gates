@@ -585,7 +585,7 @@ const Mangas: React.FC = () => {
                 </div>
               </div>
             )}
-{total} {PAGE_SIZE}
+
             {/* Pagination */}
             {total > PAGE_SIZE && (
               <motion.div
