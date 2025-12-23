@@ -59,6 +59,7 @@ import RomansManagement from "../pages/romans/RomansManagement";
 import RomanDetails from "../pages/romans/romanDetails";
 import RomanEdit from "../pages/romans/romanEdit";
 import RomanCategoryPage from "../pages/romans/romanCategory";
+import RomanChapterManagement from "../pages/romans/romanChapterManagement";
 
 
 
@@ -121,6 +122,17 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/romans/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanChapterManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/mangas"
             element={
