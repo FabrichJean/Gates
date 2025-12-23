@@ -174,7 +174,7 @@ const RomanUpload = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
+            <div className="min-h-screen  transition-all duration-300 max-w-6xl mx-auto pb-10 px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between pb-5">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

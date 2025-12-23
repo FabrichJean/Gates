@@ -14,13 +14,17 @@ import {
     Calendar,
     Tag,
     Globe,
-    ChevronDown
+    ChevronDown,
+    FilePlus,
 } from "lucide-react";
+import { GrChapterAdd } from "react-icons/gr";
+import { MdAssignmentAdd } from "react-icons/md";
 import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
 import { Link } from "react-router-dom";
 import CheckingRoman from "../../components/CheckingRoman";
 import { useAuth } from "../../hooks/useAuth";
 import useSocketCheckRomans from "../../hooks/romans/useSocketCheckRomans";
+import { FaBookOpen } from "react-icons/fa";
 
 const RomansManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -106,12 +110,12 @@ const RomansManagement = () => {
     const renderCardView = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredRomans.map((roman) => (
-                <div key={roman.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <div key={roman.id} className="bg-white dark:bg-gray-800 rounded-sm shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     {/* Cover Image */}
                     <div className="relative h-48 bg-gradient-to-br from-purple-400 to-pink-400">
                         {roman.public_urls?.cover_url ? (
-                            <img 
-                                src={roman.public_urls.cover_url} 
+                            <img
+                                src={roman.public_urls.cover_url}
                                 alt={roman.ref}
                                 className="w-full h-full object-cover"
                             />
@@ -181,14 +185,14 @@ const RomansManagement = () => {
                                 index={filteredRomans.indexOf(roman)}
                             />
                             <div className="flex items-center gap-2">
-                                <Link 
-                                    to={`/romans/${roman.id}`} 
+                                <Link
+                                    to={`/romans/${roman.id}`}
                                     className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <Eye className="w-4 h-4" />
                                 </Link>
-                                <Link 
-                                    to={`/romans/edit/${roman.id}`} 
+                                <Link
+                                    to={`/romans/edit/${roman.id}`}
                                     className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <Edit2 className="w-4 h-4" />
@@ -242,8 +246,8 @@ const RomansManagement = () => {
                             <tr key={roman.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <td className="px-6 py-4">
                                     {roman.public_urls?.cover_url ? (
-                                        <img 
-                                            src={roman.public_urls?.cover_url} 
+                                        <img
+                                            src={roman.public_urls?.cover_url}
                                             alt={roman.ref}
                                             className="w-12 h-16 object-cover rounded"
                                         />
@@ -314,14 +318,14 @@ const RomansManagement = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center justify-end gap-2">
-                                        <Link 
-                                            to={`/romans/${roman.id}`} 
+                                        <Link
+                                            to={`/romans/${roman.id}`}
                                             className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         >
                                             <Eye className="w-4 h-4" />
                                         </Link>
-                                        <Link 
-                                            to={`/romans/edit/${roman.id}`} 
+                                        <Link
+                                            to={`/romans/edit/${roman.id}`}
                                             className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         >
                                             <Edit2 className="w-4 h-4" />
@@ -349,21 +353,34 @@ const RomansManagement = () => {
 
     /* ===================== RENDER ===================== */
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 rounded-sm">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
                         Romans Management
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Manage and organize your novel collection
-                    </p>
+                    {/* bouton bascule vers `romans/upload` */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                        <Link
+                            to="/romans/upload"
+                            className="px-2 py-2 border border-blue-400 text-gray-700 rounded-md hover:border-blue-700 transition-colors text-center whitespace-nowrap text-sm sm:text-base"
+                        >
+                            <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
+                        </Link>
+                        <Link
+                            to="/romans/chapters"
+                            className="px-4 py-2 border border-teal-600 text-teal-600 dark:text-teal-700 rounded-sm shadow-sm hover:border-teal-700 transition-colors text-center whitespace-nowrap text-sm sm:text-base"
+                        >
+                            <GrChapterAdd className="w-4 h-4 inline-block mr-2" />
+                            Manage Chapters
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
@@ -372,7 +389,7 @@ const RomansManagement = () => {
                             <BookOpen className="w-8 h-8 text-blue-500" />
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Published</p>
@@ -383,7 +400,7 @@ const RomansManagement = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
@@ -394,7 +411,7 @@ const RomansManagement = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Deleted</p>
@@ -413,24 +430,22 @@ const RomansManagement = () => {
                         {/*  */}
                         <div className="flex items-center gap-4 w-full lg:w-auto"> </div>
                         {/* View Toggle */}
-                        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 ml-auto">
                             <button
                                 onClick={() => setViewMode("card")}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                                    viewMode === "card"
-                                        ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
-                                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                }`}
+                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === "card"
+                                    ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
+                                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                    }`}
                             >
                                 <Grid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => setViewMode("table")}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                                    viewMode === "table"
-                                        ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
-                                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                }`}
+                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === "table"
+                                    ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
+                                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                                    }`}
                             >
                                 <List className="w-4 h-4" />
                             </button>
