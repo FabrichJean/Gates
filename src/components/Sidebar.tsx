@@ -316,6 +316,14 @@ function Sidebar({
         />
 
         <NavLink to="/post" name="post" label="Posts" icon={MdDynamicFeed} />
+        <NavLink
+          to="/mangas"
+          name="mangas"
+          label="Mangas"
+          iconComponent={
+            <img src="/mangas.png" alt="" className="w-5 h-5"/>
+          }
+        />
 
         {user?.role === RoleEnum.SUPERADMIN && (
           <>
@@ -383,68 +391,6 @@ function Sidebar({
                 </p>
               </div>
             )}
-
-            <Link
-              to="/mangas"
-              onClick={() => handleNav('mangas')}
-              className={`
-        group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
-        transition-all duration-300 overflow-hidden
-        ${
-          isActive("mangas")
-            ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
-            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
-        }
-      `}
-            >
-              {/* Active indicator */}
-              {isActive("mangas") && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
-              )}
-
-              {/* Icon */}
-              <div
-                className={`
-        relative z-10 transition-transform duration-300
-        ${
-          isActive("mangas")
-            ? "scale-110"
-            : "group-hover:scale-110 group-hover:rotate-3"
-        }
-      `}
-              >
-                <img src="/mangas.png" alt="" className="w-7 h-7"/>
-              </div>
-
-              {/* Label */}
-              {!isCollapsed && (
-                <span
-                  className={`
-          relative z-10 font-medium text-sm
-          ${
-            isActive("mangas")
-              ? ""
-              : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
-          }
-        `}
-                >
-                  Mangas
-                </span>
-              )}
-
-              {/* Hover arrow */}
-              {!isCollapsed && !isActive("mangas") && (
-                <ChevronRight
-                  className="
-          w-4 h-4 ml-auto opacity-0 -translate-x-2
-          group-hover:opacity-100 group-hover:translate-x-0
-          transition-all duration-300
-        "
-                />
-              )}
-            </Link>
-
-
 
             {/* Separator */}
             {!isCollapsed && (

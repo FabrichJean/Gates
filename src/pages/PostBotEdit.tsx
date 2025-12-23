@@ -891,7 +891,6 @@ const PostBotEdit = () => {
 
                         <MediaUploader
                             images={images}
-                            videos={videos}
                             imageFields={imageFields}
                             videoFields={videoFields}
                             handleImageChange={handleImageChange}

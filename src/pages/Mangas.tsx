@@ -587,7 +587,7 @@ const Mangas: React.FC = () => {
             )}
 
             {/* Pagination */}
-            {total > PAGE_SIZE && (
+            {/* {total > PAGE_SIZE && ( */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -601,7 +601,7 @@ const Mangas: React.FC = () => {
                   onPageChange={setPage}
                 />
               </motion.div>
-            )}
+            {/* )} */}
           </>
         )}
       </motion.div>

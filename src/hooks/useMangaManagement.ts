@@ -128,10 +128,10 @@ export const useMangaManagement = () => {
       setLoading({ type: "fetch" });
       
       const res = await getMangasListApi(computedParams);
-      const data = res.data?.data || res.data || res;
+      const data = res.data?.data;
       
       setMangas(data || []);
-      setTotal(data.count || data.total || 0);
+      setTotal(res.data.total || 0);
     } catch (err) {
       console.error("Error fetching mangas:", err);
       setMangas([]);
