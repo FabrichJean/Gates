@@ -112,10 +112,12 @@ export const AudioTitlesField: React.FC<AudioTitlesFieldProps> = ({
       }
     });
     
-    // Filtrer pour ne garder que les langues sélectionnées
-    const filteredTitles = updatedTitles.filter(t => languages.includes(t.i18_language));
+    // Filtrer les langues non sélectionnées (optionnel - garder les données même si désélectionnées)
+    // Pour garder les données: ne pas filtrer
+    // Pour supprimer: décommenter la ligne suivante
+    // const filteredTitles = updatedTitles.filter(t => languages.includes(t.i18_language));
     
-    onChange(filteredTitles);
+    onChange(updatedTitles);
   };
 
   return (

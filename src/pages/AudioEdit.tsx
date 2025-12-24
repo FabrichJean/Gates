@@ -453,7 +453,7 @@ const AudioEdit: React.FC = () => {
                 {/* Sub-Category */}
                 {form.audio_category_id && audioSubCategories.length > 0 && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                       <Tag className="w-4 h-4" />
                       Sous-catégorie
                     </label>

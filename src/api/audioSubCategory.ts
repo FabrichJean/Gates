@@ -22,7 +22,7 @@ export const getAudioSubCategoriesApi = async (
   categoryId?: number
 ): Promise<AudioSubCategoriesResponse> => {
   const params = categoryId ? `?audio_category_id=${categoryId}` : "";
-  const response = await fetch(`${apiURL}/audio-sub-categories${params}`, {
+  const response = await fetch(`${apiURL}/audio-subcategories${params}`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
     },
