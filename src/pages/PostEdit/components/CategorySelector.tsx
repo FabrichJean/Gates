@@ -44,9 +44,6 @@ export default function CategorySelector(props: {
     ? availableSubCategories.filter((sc) => sc && sc.category && selectedCategory && sc.category.id === selectedCategory.id)
     : [];
 
-    console.log(selectedSubCategory);
-    
-
   return (
     <>
       <div className="relative w-full" ref={categoryDropdownRef}>

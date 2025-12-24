@@ -1,3 +1,4 @@
+import EditMangasChapterPage from "../pages/EditMangasChapterPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
@@ -11,7 +12,6 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import VideoBotManagement from "../pages/VideoBotManagement";
 import VideoBotDetails from "../pages/VideoBotDetails";
-// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -42,6 +42,18 @@ import PostBotManagement from "../pages/PostBotManagement";
 import PostBotDetails from "../pages/PostBotDetails";
 import PostBotEdit from "../pages/PostBotEdit";
 import Creatorr from "../pages/Creator";
+import MediaPostManager from "../pages/MediaPostManager";
+
+import Mangas from "../pages/Mangas";
+import UploadMangas from "../pages/UploadMangas";
+import EditMangasPage from "../pages/EditMangasPage";
+import MangasDetailsPage from "../pages/MangasDetailsPage";
+import UploadMangasEpisodePage from "../pages/UploadMangasEpisodePage";
+import EditMangasEpisodePage from "../pages/EditMangasEpisodePage";
+import MangasEpisodesPage from "../pages/MangasEpisodesPage";
+import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
+import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
+import MangasCategoriesPage from "../pages/MangasCategoriesPage";
 
 
 
@@ -55,6 +67,118 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route
+            path="/mangas"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <Mangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangaChaptersRouteWrapper />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasChapterPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangasEpisodePage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodesPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodeDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasEpisodePage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <MangasCategoriesPage />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/users"
             element={
@@ -201,6 +325,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <PostEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post/edit-media/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MediaPostManager />
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -375,11 +509,11 @@ const AppRoutes = () => {
             path="/settings"
             element={
               <ProtectedRoute>
-                {/* <SuperProtected> */}
+                <SuperProtected>
                 <InsideSidebar>
                   <Settings />
                 </InsideSidebar>
-                {/* </SuperProtected> */}
+                </SuperProtected>
               </ProtectedRoute>
             }
           />

@@ -91,7 +91,7 @@ export default function VideoFilters({
         localStorage.setItem("videos_filtered", JSON.stringify(data));
 
         const safeParams = params || {};
-        const finalQuery = { ...safeParams, ...data, page: 1, };
+        const finalQuery = { ...safeParams, ...data, page: '1' };
 
         try {
             let fetched;

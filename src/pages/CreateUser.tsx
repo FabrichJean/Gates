@@ -17,8 +17,6 @@ function CreateUser() {
             password: String(form.get('password'))
         }
 
-        console.log(data);
-
         await createUser(data)
             .then(() => {
                 toast.success('Register successfull !');

@@ -17,7 +17,6 @@ export function useSocketProgress() {
             })
                 .then((res) => {
                     setId(String(res.data.id))
-                    console.log(res.data);
                 })
         })()
     }, [])
@@ -39,8 +38,6 @@ export function useSocketProgress() {
         socket.on("upload-progress", (data) => {
             if (String(id) !== String(data.userId))
                 return;
-
-            console.log("📡 Progress event reçu :", data);
             setProgress(data);
         });
 

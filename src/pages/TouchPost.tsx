@@ -176,6 +176,23 @@ const TouchPost = () => {
     setDescriptions((prev) => ({ ...prev, [languageId]: value }));
   };
 
+  const handleRemoveLanguage = (languageId: number) => {
+    setLanguages((prev) => prev.filter((lang) => lang.id !== languageId));
+    setTitles((prev) => {
+      const updated = { ...prev };
+      delete updated[languageId];
+      return updated;
+    });
+    setDescriptions((prev) => {
+      const updated = { ...prev };
+      delete updated[languageId];
+      return updated;
+    });
+    if (selectedLanguage?.id === languageId) {
+      setSelectedLanguage(languages[0] || null);
+    }
+  };
+
   // Fonction pour ajouter une nouvelle langue
   const handleAddLanguage = () => {
     if (selectedLanguageFromBackend) {
@@ -511,6 +528,7 @@ const TouchPost = () => {
               handleTitleChange={handleTitleChange}
               handleDescriptionChange={handleDescriptionChange}
               setShowAddLanguageModal={setShowAddLanguageModal}
+              handleRemoveLanguage={handleRemoveLanguage}
             />
 
             <div className="w-full mt-4">
