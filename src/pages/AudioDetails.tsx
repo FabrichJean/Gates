@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getAudioByIdApi, uploadAudioToS3, updateAudio } from "../api/audios";
+import { getAudioAlbumsByAudioIdApi } from "../api/audioAlbum";
 import type { Audio } from "../types/audio";
 import { AudioTitlesViewer } from "../components/AudioTitlesViewer";
 import toast from "react-hot-toast";
@@ -38,6 +39,7 @@ const AudioDetails: React.FC = () => {
   const [audio, setAudio] = useState<Audio | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [audioAlbums, setAudioAlbums] = useState<any[]>([]);
 
   const fetchAudio = async () => {
     if (!id) return;
@@ -54,8 +56,18 @@ const AudioDetails: React.FC = () => {
     }
   };
 
+  const fetchAudioAlbums = async (audioId: string|number) => {
+    try {
+      const res = await getAudioAlbumsByAudioIdApi(audioId);
+      setAudioAlbums(res.data?.items || res.data || []);
+    } catch (e) {
+      setAudioAlbums([]);
+    }
+  };
+
   useEffect(() => {
     fetchAudio();
+    if (id) fetchAudioAlbums(id);
   }, [id]);
 
   const handleSendToS3 = async () => {
@@ -297,6 +309,52 @@ const AudioDetails: React.FC = () => {
               <div className="bg-red-50 dark:bg-red-900/20 rounded-md p-3">
                 <div className="text-sm font-semibold text-red-800 dark:text-red-300 mb-1">Commentaire de rejet</div>
                 <div className="text-sm text-red-700 dark:text-red-400">{audio.comment}</div>
+              </div>
+            )}
+
+            {/* Audio Albums liés */}
+            {audioAlbums.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-md p-3 shadow">
+                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-2">
+                  <Music className="w-4 h-4" />
+                  <span className="font-medium">Albums de cet audio</span>
+                  <a
+                    href={`/audio-albums/upload?audio_id=${audio?.id}`}
+                    className="ml-auto px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs font-semibold"
+                  >
+                    + Ajouter un album
+                  </a>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {audioAlbums.map(album => (
+                    <a
+                      key={album.id}
+                      href={`/audio-albums/${album.id}`}
+                      className="block px-3 py-2 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                    >
+                      <span className="font-semibold">{album.ref || `Album #${album.id}`}</span>
+                      {album.album_number && (
+                        <span className="ml-2 text-xs text-gray-500">(N° {album.album_number})</span>
+                      )}
+                      {album.total_tracks && (
+                        <span className="ml-2 text-xs text-gray-500">{album.total_tracks} tracks</span>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Si aucun album, proposer aussi le bouton */}
+            {audioAlbums.length === 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-md p-3 shadow flex items-center gap-2">
+                <Music className="w-4 h-4" />
+                <span className="font-medium">Aucun album pour cet audio</span>
+                <a
+                  href={`/audio-albums/upload?audio_id=${audio?.id}`}
+                  className="ml-auto px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs font-semibold"
+                >
+                  + Ajouter un album
+                </a>
               </div>
             )}
           </motion.div>

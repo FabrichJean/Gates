@@ -59,8 +59,10 @@ import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
 import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
 import MangasCategoriesPage from "../pages/MangasCategoriesPage";
-
-
+import AudioAlbums from "../pages/AudioAlbums";
+import UploadAudioAlbum from "../pages/UploadAudioAlbum";
+import AudioAlbumDetails from "../pages/AudioAlbumDetails";
+import AudioAlbumEdit from "../pages/AudioAlbumEdit";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -608,6 +610,54 @@ const AppRoutes = () => {
                 <SuperProtected>
                   <InsideSidebar>
                     <Synchronisation />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audio-albums"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioAlbums />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audio-albums/upload"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <UploadAudioAlbum />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audio-albums/:id"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioAlbumDetails />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audio-albums/:id/edit"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioAlbumEdit />
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
