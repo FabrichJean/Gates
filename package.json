@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "build:check": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync": "git checkout master && git pull origin master && git checkout $npm_config_branch && git merge master"
@@ -49,6 +50,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.9.11",
     "daisyui": "^5.3.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",

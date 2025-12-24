@@ -68,6 +68,20 @@ const CreateNewDropdown: React.FC = () => {
               New Post
             </span>
           </button>
+
+          {/* New Manga */}
+          <button
+            onClick={() => navigate("/mangas/upload")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left
+              hover:bg-pink-50 dark:hover:bg-pink-900/20
+              transition-all duration-200 ease-out group/item
+              border-t border-gray-100 dark:border-gray-700"
+          >
+            <img src="/mangas.png" alt="Manga" className="w-5 h-5" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              New Manga
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -150,6 +164,7 @@ const Breadcrumb: React.FC = () => {
     "/users-archive": "Users Archive",
     "/videos": "Videos Management",
     "/category-manager": "Category Video",
+    "/mangas-categories": "Mangas Categories",
     "/post-categories": "Post Categories",
     "/upload": "Upload",
     "/upload-post": "Upload Post",

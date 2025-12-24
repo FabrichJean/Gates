@@ -149,7 +149,6 @@ function VideoBotEdit() {
       );
 
       toast.success("✅ successfull !");
-      console.log("Video updated:", res.data);
       navigate("/bot-videos/" + video.id);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

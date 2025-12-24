@@ -3,7 +3,6 @@ import { activateVideoBot, sendVideoBotToServer, sendMultipleBotVideosToWebapp }
 import toast from "react-hot-toast";
 import { UseBotVideosWithParams } from "./useBotVideos";
 import useSocketSend from "../useSocketSend";
-import useSocketCheckVideos from "../useSocketCheckVideos";
 import { mapStatus } from "../../utils/filter";
 import { PROCESSED_STORAGE_KEY, SENDING_STORAGE_KEY } from "../../constant";
 import type { TFilter } from "../../components/VideoFilters";
@@ -26,9 +25,7 @@ export const useBotVideoManagement = () => {
     user_id: "",
     creator_id: "",
     isDeleted: "",
-    upload_status: "",
-    cover_upload_status: "",
-    transfer_status: "",
+    processing: "",
     startedAt: "",
     endAt: "",
   };
@@ -75,9 +72,7 @@ export const useBotVideoManagement = () => {
   const computedParams = useMemo(() => ({
     ...filters,
     isDeleted: mapStatus(filters.isDeleted),
-    upload_status: mapStatus(filters.upload_status),
-    cover_upload_status: mapStatus(filters.cover_upload_status),
-    transfer_status: mapStatus(filters.transfer_status),
+    processing: mapStatus(filters.processing),
     status: "all",
     page,
   }), [filters, page]);

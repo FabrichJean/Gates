@@ -6,10 +6,7 @@ import { useProgress } from "../hooks/useProgress";
 const TransferNotification = () => {
   const [isOpen, setIsOpen] = useState(true);
   const { progressList, clearAll } = useProgress();
-
-  console.log(progressList);
   
-
   return (
     <>
       {/* Bouton flottant pour ouvrir/fermer */}

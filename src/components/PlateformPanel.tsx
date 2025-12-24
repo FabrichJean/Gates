@@ -20,8 +20,6 @@ export default function PlateformPanel({ categoryId }: Props) {
   const { data: allPlateforms } = UsePlateform();
 
   const add = async () => {
-    console.log({ new_, categoryId });
-
     if (!new_ || !categoryId) return;
 
     await addCategoryToPlateformApi(new_, categoryId)

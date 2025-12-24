@@ -34,9 +34,6 @@ export async function getPosts(params?: any) {
     },
     params,
   });
-
-  console.log(res.data);
-
   return res;
 }
 
@@ -48,9 +45,6 @@ export async function getPostsBot(params?: any) {
     },
     params,
   });
-
-  console.log(res.data);
-
   return res;
 }
 

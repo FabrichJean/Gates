@@ -5,7 +5,7 @@ import useCategoryPost from "../../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../../hooks/posts/useSubCategoryPost";
 import { useUsers } from "../../hooks/useAuth";
 import UseCreators from "../../hooks/useCreators";
-import { mapStatus, reverseStatus } from "../../utils/filter";
+import { mapStatus, mapStatusProcessing, reverseStatus } from "../../utils/filter";
 
 export type TPostFilter = {
     category_id: string;
@@ -16,9 +16,7 @@ export type TPostFilter = {
     // video-like statuses to mirror VideoFilters
     user_id?: string;
     isDeleted?: string;
-    upload_status?: string;
-    cover_upload_status?: string;
-    transfer_status?: string;
+    processing?: string;
     uploaded?: string; // legacy: 'all' | '1' | '0'
     page: string;
     limit: string;
@@ -30,7 +28,6 @@ export type TPostFilter = {
 
 export default function PostFilter({
     onSubmit,
-    params,
     filters,
     setFilters,
 }: {
@@ -91,9 +88,7 @@ export default function PostFilter({
             const restored = {
                 ...savedFilter,
                 isDeleted: reverseStatus(savedFilter.isDeleted),
-                cover_upload_status: reverseStatus(savedFilter.cover_upload_status),
-                transfer_status: reverseStatus(savedFilter.transfer_status),
-                upload_status: reverseStatus(savedFilter.upload_status || savedFilter.uploaded),
+                processing: reverseStatus(savedFilter.processing || savedFilter.uploaded),
                 startDate: savedFilter.startDate || "",
                 endDate: savedFilter.endDate || "",
             };
@@ -122,8 +117,6 @@ export default function PostFilter({
     };
 
     const submit = async () => {
-        const safeParams = params || {};
-
         // map boolean-like filters to API expected values (1/0)
         const data: any = {
             category_id: filters.category_id || "",
@@ -135,9 +128,7 @@ export default function PostFilter({
             endDate: filters.endDate || "",
             startedAt: filters.startDate || "",
             endAt: filters.endDate || "",
-            upload_status: mapStatus(filters.upload_status || filters.uploaded || "all"),
-            cover_upload_status: mapStatus(filters.cover_upload_status || "all"),
-            transfer_status: mapStatus(filters.transfer_status || "all"),
+            processing: mapStatusProcessing(filters.processing || filters.uploaded || "all"),
             isDeleted: mapStatus(filters.isDeleted || "all"),
             page: "1",
             limit: filters.limit || "10",
@@ -155,6 +146,15 @@ export default function PostFilter({
             console.error("Erreur lors du filtrage posts:", error);
         }
     };
+
+    const closeModal = () => {
+        const modal = document.getElementById(
+            "search_modal_52"
+        ) as HTMLDialogElement | null;
+
+        modal?.close();
+    };
+
 
     return (
         <dialog id="search_modal_52" className="modal modal-bottom sm:modal-middle">
@@ -403,9 +403,7 @@ export default function PostFilter({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                         { key: "isDeleted", label: "Deleted" },
-                        { key: "upload_status", label: "Video Uploaded" },
-                        { key: "cover_upload_status", label: "Cover Uploaded" },
-                        { key: "transfer_status", label: "Transferred" },
+                        { key: "processing", label: "Video Uploaded" },
                     ].map(({ key, label }) => (
                         <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
                             <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
@@ -453,7 +451,8 @@ export default function PostFilter({
                         Reset
                     </div>
 
-                    <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300" onClick={(e) => { e.preventDefault(); submit(); }}>
+                    <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300"
+                        onClick={(e) => { e.preventDefault(); submit(); closeModal(); }}>
                         Apply
                     </button>
                 </form>

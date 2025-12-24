@@ -1,3 +1,4 @@
+import EditMangasChapterPage from "../pages/EditMangasChapterPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
@@ -11,7 +12,6 @@ import InsideSidebar from "../components/InsideSidebar";
 import VideosManagment from "../pages/VideosManagment";
 import VideoBotManagement from "../pages/VideoBotManagement";
 import VideoBotDetails from "../pages/VideoBotDetails";
-// import VideoBotEdit from "../pages/VideoBotEdit";
 import Users from "../pages/Users";
 import NotFound from "../pages/NotFound";
 import Settings from "../pages/Settings";
@@ -44,7 +44,17 @@ import PostBotEdit from "../pages/PostBotEdit";
 import Creatorr from "../pages/Creator";
 import MediaPostManager from "../pages/MediaPostManager";
 
-
+import Mangas from "../pages/Mangas";
+import UploadMangas from "../pages/UploadMangas";
+import EditMangasPage from "../pages/EditMangasPage";
+import MangasDetailsPage from "../pages/MangasDetailsPage";
+import UploadMangasEpisodePage from "../pages/UploadMangasEpisodePage";
+import EditMangasEpisodePage from "../pages/EditMangasEpisodePage";
+import MangasEpisodesPage from "../pages/MangasEpisodesPage";
+import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
+import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
+import MangasCategoriesPage from "../pages/MangasCategoriesPage";
+import { MangasProvider } from "../context/MangasContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -56,6 +66,41 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
+          <Route
+            path="/mangas/*"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasProvider>
+                    <Routes>
+                      <Route path="" element={<Mangas />} />
+                      <Route path="upload" element={<UploadMangas />} />
+                      <Route path=":mangaId" element={<MangasDetailsPage />} />
+                      <Route path=":mangaId/edit" element={<EditMangasPage />} />
+                      <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
+                      <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
+                      <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
+                      <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
+                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
+                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
+                    </Routes>
+                  </MangasProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <MangasCategoriesPage />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/users"
             element={
@@ -386,11 +431,11 @@ const AppRoutes = () => {
             path="/settings"
             element={
               <ProtectedRoute>
-                {/* <SuperProtected> */}
+                <SuperProtected>
                 <InsideSidebar>
                   <Settings />
                 </InsideSidebar>
-                {/* </SuperProtected> */}
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
