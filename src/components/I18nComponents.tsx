@@ -317,13 +317,15 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
 
               <div className="modal-action">
                 <button
+                  type='button'
                   className="btn btn-ghost"
                   onClick={() => setAutoOpen(false)}
                   disabled={isLoading}
                 >
                   Annuler
                 </button>
-                <button 
+                <button
+                  type='button'
                   className="btn btn-primary gap-2" 
                   onClick={applyAuto}
                   disabled={isLoading || !autoTitle.trim()}
