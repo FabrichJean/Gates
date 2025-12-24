@@ -189,16 +189,16 @@ const AudioEdit: React.FC = () => {
 
   const handleTagInput = (value: string) => {
     setTagInput(value);
+    let filtered;
     if (value.trim()) {
-      const filtered = tagCategories.filter((tag) =>
+      filtered = tagCategories.filter((tag) =>
         tag.name.toLowerCase().includes(value.toLowerCase())
       );
-      setFilteredTags(filtered);
-      setShowTagDropdown(true);
     } else {
-      setFilteredTags([]);
-      setShowTagDropdown(false);
+      filtered = tagCategories;
     }
+    setFilteredTags(filtered);
+    setShowTagDropdown(true);
   };
 
   const addTag = (tag: any) => {
@@ -562,6 +562,7 @@ const AudioEdit: React.FC = () => {
                       type="text"
                       value={tagInput}
                       onChange={(e) => handleTagInput(e.target.value)}
+                      onFocus={() => handleTagInput(tagInput)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
