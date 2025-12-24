@@ -27,8 +27,6 @@ export const MangaUploadSocketProvider: React.FC<{ children: React.ReactNode }> 
 
   // Initialize socket once
   useEffect(() => {
-    console.log("🔌 Initializing global manga upload socket...");
-    
     const newSocket = io(server, {
       reconnection: true,
       reconnectionDelay: 1000,
@@ -50,7 +48,6 @@ export const MangaUploadSocketProvider: React.FC<{ children: React.ReactNode }> 
     });
 
     newSocket.on("reconnect", (attemptNumber) => {
-      console.log("🔄 Global manga upload socket reconnected after", attemptNumber, "attempts");
       // Reload all states from localStorage after reconnection
       loadAllStates();
     });
@@ -95,7 +92,6 @@ export const MangaUploadSocketProvider: React.FC<{ children: React.ReactNode }> 
 
   // Handle upload start event
   const handleUploadStart = useCallback((data: MangaUploadProgress) => {
-    console.log("📤 Context received upload:start event:", data);
     const mangaId = data.mangaId;
     if (mangaId) {
       // Update localStorage
@@ -107,11 +103,9 @@ export const MangaUploadSocketProvider: React.FC<{ children: React.ReactNode }> 
       });
       
       const state = getMangaUploadState(mangaId);
-      console.log("📤 Upload start state from localStorage:", state);
       if (state) {
         setStates(prev => {
           const newStates = { ...prev, [mangaId]: state };
-          console.log("📤 Updated states:", newStates);
           return newStates;
         });
       }

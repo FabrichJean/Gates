@@ -21,7 +21,6 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
       headers: { Authorization: `Bearer ${getToken()}` },
     }).then(res => {
       const allLanguages = res.data;
-      console.log(allLanguages);
 
       allLanguages.sort((a, b) => a.name.localeCompare(b.name));
       setLanguages(allLanguages);
@@ -57,8 +56,6 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
   }, [languages]);
 
   const handleSelect = (lang: Language) => {
-    console.log(lang);
-
     setQuery(lang.name);
     setShowDropdown(false);
     if (onSelect) {

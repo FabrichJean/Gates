@@ -98,9 +98,6 @@ export function PostCard({ post }: PostCardProps) {
 
 export default function CreatorPost({ id }: { id: any }) {
   const { data } = usePostCreators(id);
-
-  console.log(data);
-
   return (
     <div>
       {/* {data && <StatsPosts data={data.posts} />} */}

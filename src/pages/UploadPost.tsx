@@ -414,7 +414,6 @@ const UploadPost = () => {
 
             toast.success("✅ Post uploadé avec succès !");
             navigate("/post");
-            console.log("Post uploaded:", response.data);
 
             // Réinitialiser le formulaire
             setSelectedCategory(null);

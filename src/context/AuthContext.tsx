@@ -153,7 +153,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const res = await validateUserApi(userId); // 🔥 appel API backend
-      console.log("✅ Validation réussie:", res.message);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Erreur lors de la validation de l'utilisateur");

@@ -17,26 +17,17 @@ export const MangaUploadProgress: React.FC<MangaUploadProgressProps> = ({
 
   // Subscribe to this manga's updates
   React.useEffect(() => {
-    console.log("🔔 MangaUploadProgress subscribing to manga:", mangaId);
     subscribe(mangaId);
     return () => {
-      console.log("🔕 MangaUploadProgress unsubscribing from manga:", mangaId);
       unsubscribe(mangaId);
     };
   }, [mangaId, subscribe, unsubscribe]);
 
   const state = states[mangaId];
-  
-  React.useEffect(() => {
-    console.log(`📊 MangaUploadProgress [${mangaId}] state:`, state);
-  }, [state, mangaId]);
 
   if (!state || !state.isUploading) {
-    console.log(`⏸️ MangaUploadProgress [${mangaId}] - Not showing (state: ${JSON.stringify(state)})`);
     return null;
   }
-
-  console.log(`✅ MangaUploadProgress [${mangaId}] - Showing progress:`, state.progress);
 
   // Badge variant - compact for table rows
   if (variant === "badge") {

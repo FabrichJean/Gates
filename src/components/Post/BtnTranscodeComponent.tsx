@@ -16,8 +16,6 @@ const BtnTranscodeComponent = ({
   const handleTranscode = async () => {
     try {
       const processing = await usePostProcessing({ id: post.id });
-      console.log("processing :", processing);
-
       reFetch();
     } catch (error) {
       console.error("Error transcoding post:", error);

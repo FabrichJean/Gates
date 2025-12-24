@@ -80,29 +80,20 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
 
       const translations = response.data;
       
-      console.log('API Response:', translations);
-      console.log('Supported languages:', supportedLanguages);
-      
       // Parser les résultats et appliquer (conserver les valeurs existantes)
       const newTitles: TranslatedText = { ...title };
       const newDescriptions: TranslatedText = { ...description };
 
       translations.forEach((t: any) => {
-        console.log('Processing translation:', t);
         if (t.i18_language && supportedLanguages.includes(t.i18_language)) {
           if (t.title) {
-            console.log(`Setting title for ${t.i18_language}:`, t.title);
             newTitles[t.i18_language] = t.title;
           }
           if (t.description) {
-            console.log(`Setting description for ${t.i18_language}:`, t.description);
             newDescriptions[t.i18_language] = t.description;
           }
         }
       });
-
-      console.log('Final titles:', newTitles);
-      console.log('Final descriptions:', newDescriptions);
 
       // Utiliser le callback combiné si disponible, sinon les callbacks séparés
       if (onBothChange) {
