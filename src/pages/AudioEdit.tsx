@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 import { useNavigate, useParams, Link } from "react-router-dom";
 
 import type { AudioTitle } from "../components/AudioTitlesField";
+import { getAudioTagCategoriesApi } from "../api/audioTagCategory";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -120,8 +121,8 @@ const AudioEdit: React.FC = () => {
     Promise.all([
       getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
       getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
-      getTagCategoriesApi().then((res) => {
-        const tags = res.data?.data || res.data || res;
+      getAudioTagCategoriesApi().then((res) => {
+        const tags = res.data?.items || res.data || res;
         setTagCategories(Array.isArray(tags) ? tags : []);
       }).catch(() => setTagCategories([])),
       getAudioCategoriesApi().then((res) => {
@@ -251,7 +252,7 @@ const AudioEdit: React.FC = () => {
       }
 
       const processedTags = form.tagCategories.map((tag) =>
-        typeof tag === "object" ? tag.name : tag
+        typeof tag === "object" ? { name: tag.name } : tag
       );
       formData.append("tagCategories", JSON.stringify(processedTags));
 

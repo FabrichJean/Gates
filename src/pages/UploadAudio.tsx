@@ -200,8 +200,11 @@ const UploadAudio: React.FC = () => {
       
       formData.append("need_vip", form.need_vip.toString());
       
-      // Tags
-      formData.append("tagCategories", JSON.stringify(form.tagCategories));
+      // Tags - ensure new tags have {name: "tagname"} structure
+      const processedTags = form.tagCategories.map((tag) =>
+        typeof tag === "object" && tag.name ? { name: tag.name } : tag
+      );
+      formData.append("tagCategories", JSON.stringify(processedTags));
       
       // Titles (i18n)
       if (form.titles.length > 0) {
