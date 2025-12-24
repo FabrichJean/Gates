@@ -23,6 +23,8 @@ import {
     Table,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import I18nField from "../../components/I18nField";
+import type { TranslatedText } from "../../types/i18n";
 import {
     getAllRomanChaptersApi,
     getRomanChapterByIdApi,
@@ -82,8 +84,8 @@ interface RomanChapter {
 
 interface ChapterFormData {
     roman_id: number;
-    title: string;
-    content: string;
+    titles: TranslatedText; // mapping lang->title
+    contents: TranslatedText; // mapping lang->content
     chapter_number: number;
     isPublished: boolean;
 }
@@ -113,8 +115,8 @@ const RomanChapterManagement: React.FC = () => {
     // Form state for create
     const [createFormData, setCreateFormData] = useState<ChapterFormData>({
         roman_id: 0,
-        title: "",
-        content: "",
+        titles: {},
+        contents: {},
         chapter_number: 1,
         isPublished: false,
     });
@@ -122,8 +124,8 @@ const RomanChapterManagement: React.FC = () => {
     // Form state for edit
     const [editFormData, setEditFormData] = useState<ChapterFormData>({
         roman_id: 0,
-        title: "",
-        content: "",
+        titles: {},
+        contents: {},
         chapter_number: 1,
         isPublished: false,
     });
@@ -216,8 +218,8 @@ const RomanChapterManagement: React.FC = () => {
     const openCreateModal = () => {
         setCreateFormData({
             roman_id: 0,
-            title: "",
-            content: "",
+            titles: {},
+            contents: {},
             chapter_number: 1,
             isPublished: false,
         });
@@ -226,10 +228,15 @@ const RomanChapterManagement: React.FC = () => {
 
     const openEditModal = (chapter: RomanChapter) => {
         setEditingChapter(chapter);
+        const titlesMap: { [k: string]: string } = {};
+        const contentsMap: { [k: string]: string } = {};
+        (chapter.titles || []).forEach((t) => (titlesMap[t.i18_language] = t.title || ""));
+        (chapter.contents || []).forEach((c) => (contentsMap[c.i18_language] = c.content || ""));
+
         setEditFormData({
             roman_id: chapter.roman_id,
-            title: getChapterTitle(chapter),
-            content: getChapterContent(chapter),
+            titles: titlesMap,
+            contents: contentsMap,
             chapter_number: chapter.chapter_number,
             isPublished: chapter.isPublished,
         });
@@ -249,14 +256,34 @@ const RomanChapterManagement: React.FC = () => {
     };
 
     const handleCreate = async () => {
-        if (!createFormData.title.trim() || !createFormData.content.trim() || !createFormData.roman_id || !createFormData.chapter_number) {
-            toast.error("Tous les champs sont requis");
+        if (!createFormData.roman_id || !createFormData.chapter_number) {
+            toast.error("Roman et numéro du chapitre requis");
+            return;
+        }
+
+        // convert translations objects to arrays
+        const titlesArray = Object.entries(createFormData.titles || {})
+            .map(([i18_language, title]) => ({ i18_language, title }))
+            .filter((t) => t.title && t.title.trim().length > 0);
+
+        const contentsArray = Object.entries(createFormData.contents || {})
+            .map(([i18_language, content]) => ({ i18_language, content }))
+            .filter((c) => c.content && c.content.trim().length > 0);
+
+        if (titlesArray.length === 0 || contentsArray.length === 0) {
+            toast.error("Au moins un titre et un contenu doivent être fournis");
             return;
         }
 
         setSubmitting(true);
         try {
-            await createRomanChapterApi(createFormData);
+            await createRomanChapterApi({
+                roman_id: createFormData.roman_id,
+                chapter_number: createFormData.chapter_number,
+                isPublished: createFormData.isPublished,
+                titles: titlesArray,
+                contents: contentsArray,
+            });
             toast.success("Chapitre créé avec succès");
             setShowCreateModal(false);
             fetchChapters();
@@ -270,20 +297,28 @@ const RomanChapterManagement: React.FC = () => {
     };
 
     const handleUpdate = async () => {
-        if (!editFormData.title.trim() || !editFormData.content.trim() || !editFormData.chapter_number) {
-            toast.error("Tous les champs sont requis");
+        if (!editingChapter) return;
+        if (!editFormData.chapter_number) {
+            toast.error("Numéro du chapitre requis");
             return;
         }
 
-        if (!editingChapter) return;
+        // convert translations to arrays
+        const titlesArray = Object.entries(editFormData.titles || {})
+            .map(([i18_language, title]) => ({ i18_language, title }))
+            .filter((t) => t.title && t.title.trim().length > 0);
+
+        const contentsArray = Object.entries(editFormData.contents || {})
+            .map(([i18_language, content]) => ({ i18_language, content }))
+            .filter((c) => c.content && c.content.trim().length > 0);
 
         setSubmitting(true);
         try {
             await updateRomanChapterApi(editingChapter.id, {
-                title: editFormData.title,
-                content: editFormData.content,
                 chapter_number: editFormData.chapter_number,
                 isPublished: editFormData.isPublished,
+                titles: titlesArray.length ? titlesArray : undefined,
+                contents: contentsArray.length ? contentsArray : undefined,
             });
             toast.success("Chapitre mis à jour avec succès");
             setShowEditModal(false);
@@ -801,15 +836,12 @@ const RomanChapterManagement: React.FC = () => {
 
                                     {/* Title */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Titre du Chapitre <span className="text-red-500 dark:text-red-400">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={createFormData.title}
-                                            onChange={(e) => setCreateFormData({ ...createFormData, title: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Ex: Chapitre 1 : Le Début"
+                                        <I18nField
+                                            value={createFormData.titles}
+                                            onChange={(titles) => setCreateFormData({ ...createFormData, titles })}
+                                            label="Titre du Chapitre"
+                                            fieldType="input"
+                                            required={true}
                                         />
                                     </div>
 
@@ -818,15 +850,16 @@ const RomanChapterManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Contenu <span className="text-red-500 dark:text-red-400">*</span>
                                         </label>
-                                        <textarea
-                                            value={createFormData.content}
-                                            onChange={(e) => setCreateFormData({ ...createFormData, content: e.target.value })}
+                                        <I18nField
+                                            value={createFormData.contents}
+                                            onChange={(contents) => setCreateFormData({ ...createFormData, contents })}
+                                            label="Contenu"
+                                            fieldType="textarea"
+                                            required={true}
                                             rows={12}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                            placeholder="Écrivez le contenu du chapitre ici..."
                                         />
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {createFormData.content.trim().split(/\s+/).filter(w => w).length}
+                                            Nombre de mots: {Object.values(createFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
                                         </p>
                                     </div>
 
@@ -941,12 +974,12 @@ const RomanChapterManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Titre du Chapitre <span className="text-red-500 dark:text-red-400">*</span>
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={editFormData.title}
-                                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Ex: Chapitre 1 : Le Début"
+                                        <I18nField
+                                            value={editFormData.titles}
+                                            onChange={(titles) => setEditFormData({ ...editFormData, titles })}
+                                            label="Titre du Chapitre"
+                                            fieldType="input"
+                                            required={true}
                                         />
                                     </div>
 
@@ -955,15 +988,16 @@ const RomanChapterManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Contenu <span className="text-red-500 dark:text-red-400">*</span>
                                         </label>
-                                        <textarea
-                                            value={editFormData.content}
-                                            onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                                        <I18nField
+                                            value={editFormData.contents}
+                                            onChange={(contents) => setEditFormData({ ...editFormData, contents })}
+                                            label="Contenu"
+                                            fieldType="textarea"
+                                            required={true}
                                             rows={12}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                            placeholder="Écrivez le contenu du chapitre ici..."
                                         />
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {editFormData.content.trim().split(/\s+/).filter(w => w).length}
+                                            Nombre de mots: {Object.values(editFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
                                         </p>
                                     </div>
 

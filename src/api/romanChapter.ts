@@ -40,10 +40,10 @@ export async function getChaptersByRomanIdApi(romanId: number | string) {
  */
 export async function createRomanChapterApi(payload: {
   roman_id: number;
-  title: string;
-  content: string;
   chapter_number: number;
   isPublished?: boolean;
+  titles?: Array<{ i18_language: string; title: string }>;
+  contents?: Array<{ i18_language: string; content: string }>;
 }) {
   return await axios.post(`${apiURL}/roman/chapters/add`, payload, {
     headers: {
@@ -58,10 +58,10 @@ export async function createRomanChapterApi(payload: {
 export async function updateRomanChapterApi(
   id: number | string,
   payload: {
-    title?: string;
-    content?: string;
     chapter_number?: number;
     isPublished?: boolean;
+    titles?: Array<{ i18_language: string; title: string }>;
+    contents?: Array<{ i18_language: string; content: string }>;
   }
 ) {
   return await axios.put(`${apiURL}/roman/chapters/${id}`, payload, {
