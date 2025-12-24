@@ -464,7 +464,7 @@ function Sidebar({
               }
             />
 
-            <NavLink
+            {/* <NavLink
               to="/romans/chapters"
               name="romans-chapters"
               label="Roman Chapters"
@@ -483,7 +483,7 @@ function Sidebar({
                   />
                 </svg>
               }
-            />
+            /> */}
           
 
             {/* Separator */}

@@ -25,6 +25,12 @@ import CheckingRoman from "../../components/CheckingRoman";
 import { useAuth } from "../../hooks/useAuth";
 import useSocketCheckRomans from "../../hooks/romans/useSocketCheckRomans";
 import { FaBookOpen } from "react-icons/fa";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { apiURL } from "../../constant";
+import RoleEnum from "../../utils/roleEnum";
+
+import { motion } from "framer-motion";
 
 const RomansManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -103,6 +109,32 @@ const RomansManagement = () => {
             case "refused": return "bg-red-100 text-red-800";
             case "deleted": return "bg-gray-100 text-gray-800";
             default: return "bg-blue-100 text-blue-800";
+        }
+    };
+
+    // Fonction pour mettre à jour le statut isDeleted
+    const handleToggleDeleted = async (romanId: number, currentStatus: boolean) => {
+        try {
+            // Envoi en JSON pour que le backend puisse parser facilement
+            await axios.put(`${apiURL}/roman/${romanId}/is-deleted`, { isDeleted: !currentStatus });
+            toast.success(
+                currentStatus
+                    ? "Roman activé avec succès"
+                    : "Roman désactivé avec succès"
+            );
+            reFetch();
+        } catch (error: any) {
+            toast.error("Erreur lors de la mise à jour du statut");
+        }
+    };
+
+    const sendRomanCoverToS3 = async (romanId: number) => {
+        try {
+            await axios.put(`${apiURL}/roman/${romanId}/deep-upload`);
+            toast.success("Upload de la couverture programmé !");
+            reFetch();
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Erreur lors de l'envoi S3");
         }
     };
 
@@ -197,7 +229,11 @@ const RomansManagement = () => {
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </Link>
-                                <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                <button
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    onClick={() => sendRomanCoverToS3(roman.id)}
+                                    title="Envoyer la couverture sur S3"
+                                >
                                     <Send className="w-4 h-4" />
                                 </button>
                             </div>
@@ -232,6 +268,9 @@ const RomansManagement = () => {
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Status
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Activate
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Checking
@@ -309,6 +348,29 @@ const RomansManagement = () => {
                                         {mapStatus(roman)}
                                     </span>
                                 </td>
+                                <td className="px-6 py-4 text-center">
+                                    <motion.input
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        type="checkbox"
+                                        checked={roman.isDeleted}
+                                        disabled={user?.role !== RoleEnum.SUPERADMIN}
+                                        className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
+                                        onChange={
+                                            user?.role === RoleEnum.SUPERADMIN
+                                                ? () => handleToggleDeleted(
+                                                    roman.id,
+                                                    roman.isDeleted || false
+                                                )
+                                                : undefined
+                                        }
+                                        title={
+                                            user?.role === RoleEnum.SUPERADMIN
+                                                ? (roman.isDeleted ? "Activer" : "Désactiver")
+                                                : "Requiert rôle SUPERADMIN"
+                                        }
+                                    />
+                                </td>
                                 <td className="px-6 py-4">
                                     <CheckingRoman
                                         roman={roman}
@@ -330,7 +392,11 @@ const RomansManagement = () => {
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Link>
-                                        <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                        <button
+                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                            onClick={() => sendRomanCoverToS3(roman.id)}
+                                            title="Envoyer la couverture sur S3"
+                                        >
                                             <Send className="w-4 h-4" />
                                         </button>
                                     </div>

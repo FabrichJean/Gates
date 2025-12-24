@@ -70,8 +70,9 @@ interface RomanChapter {
     id: number;
     roman_id: number;
     chapter_number: number;
-    title: string;
-    content: string;
+    // multilingual fields coming from the API
+    titles?: Array<{ i18_language: string; title: string }>;
+    contents?: Array<{ i18_language: string; content: string }>;
     word_count: number;
     isPublished: boolean;
     createdAt: string;
@@ -94,6 +95,8 @@ const RomanChapterManagement: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedRomanId, setSelectedRomanId] = useState<number | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<"all" | "published" | "draft">("all");
+    // language to display localized title/content
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("fr");
 
     // view mode state
     const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -162,13 +165,42 @@ const RomanChapterManagement: React.FC = () => {
     // Use all romans for the dropdown
     const availableRomans = allRomans;
 
+    // helpers to get localized title/content with fallbacks
+    const getChapterTitle = (chapter: RomanChapter, lang: string = selectedLanguage) => {
+        const titles = (chapter as any).titles as Array<{ i18_language: string; title: string }> | undefined;
+        if (titles && titles.length) {
+            const t = titles.find((x) => x.i18_language === lang);
+            if (t && t.title) return t.title;
+            return titles[0].title;
+        }
+        // fallback to roman titles
+        const rTitles = chapter.roman?.titles;
+        if (rTitles && rTitles.length) {
+            const rt = rTitles.find((x) => x.i18_language === lang);
+            return rt?.title || rTitles[0].title || chapter.roman?.ref || `Chap ${chapter.chapter_number}`;
+        }
+        return (chapter as any).title || `Chap ${chapter.chapter_number}`;
+    };
+
+    const getChapterContent = (chapter: RomanChapter, lang: string = selectedLanguage) => {
+        const contents = (chapter as any).contents as Array<{ i18_language: string; content: string }> | undefined;
+        if (contents && contents.length) {
+            const c = contents.find((x) => x.i18_language === lang);
+            if (c && c.content) return c.content;
+            return contents[0].content;
+        }
+        return (chapter as any).content || "";
+    };
+
     // Filter chapters
     const filteredChapters = useMemo(() => {
         return chapters.filter((chapter) => {
+            const title = getChapterTitle(chapter).toLowerCase();
             const matchesSearch =
-                chapter.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                title.includes(searchTerm.toLowerCase()) ||
                 chapter.roman?.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                chapter.chapter_number.toString().includes(searchTerm);
+                chapter.chapter_number.toString().includes(searchTerm) ||
+                getChapterContent(chapter).toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesRoman = selectedRomanId === null || chapter.roman_id === selectedRomanId;
 
@@ -179,7 +211,7 @@ const RomanChapterManagement: React.FC = () => {
 
             return matchesSearch && matchesRoman && matchesStatus;
         });
-    }, [chapters, searchTerm, selectedRomanId, selectedStatus]);
+    }, [chapters, searchTerm, selectedRomanId, selectedStatus, selectedLanguage]);
 
     const openCreateModal = () => {
         setCreateFormData({
@@ -196,8 +228,8 @@ const RomanChapterManagement: React.FC = () => {
         setEditingChapter(chapter);
         setEditFormData({
             roman_id: chapter.roman_id,
-            title: chapter.title,
-            content: chapter.content,
+            title: getChapterTitle(chapter),
+            content: getChapterContent(chapter),
             chapter_number: chapter.chapter_number,
             isPublished: chapter.isPublished,
         });
@@ -478,7 +510,7 @@ const RomanChapterManagement: React.FC = () => {
                                                         {chapter.chapter_number}
                                                     </span>
                                                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs truncate">
-                                                        {chapter.title}
+                                                        {getChapterTitle(chapter)}
                                                     </div>
                                                 </div>
                                             </td>
@@ -615,7 +647,7 @@ const RomanChapterManagement: React.FC = () => {
                                         </span>
                                     </div>
                                     <h3 className="text-gray-700 dark:text-white font-bold text-lg line-clamp-2">
-                                        {chapter.title}
+                                        {getChapterTitle(chapter)}
                                     </h3>
                                 </div>
 
@@ -882,7 +914,7 @@ const RomanChapterManagement: React.FC = () => {
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Roman
                                         </label>
-                                        <div className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg bg-gray-50 dark:bg-gray-800">
+                                        <div className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:text-gray-100 rounded-lg bg-gray-50 dark:bg-gray-800">
                                             {getRomanTitle(editingChapter.roman)} ({editingChapter.roman?.ref})
                                         </div>
                                     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -34,8 +34,8 @@ interface RomanChapter {
     id: number;
     roman_id: number;
     chapter_number: number;
-    title: string;
-    content: string;
+    titles?: Array<{ i18_language: string; title: string }>;
+    contents?: Array<{ i18_language: string; content: string }>;
     word_count: number;
     isPublished: boolean;
     createdAt: string;
@@ -49,11 +49,72 @@ interface RomanChapterDetailsProps {
 }
 
 const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onClose }) => {
-    const getRomanTitle = (roman: Roman | undefined, lang: string = "fr") => {
+    const [selectedLang, setSelectedLang] = useState<string>("fr");
+
+    const getRomanTitle = (roman: Roman | undefined, lang: string = selectedLang) => {
         if (!roman?.titles) return roman?.ref || "N/A";
         const title = roman.titles.find((t) => t.i18_language === lang);
         return title?.title || roman.titles[0]?.title || roman.ref;
     };
+
+    const getChapterTitle = (chapter: RomanChapter, lang: string = selectedLang) => {
+        const titles = (chapter as any).titles as Array<{ i18_language: string; title: string }> | undefined;
+        if (titles && titles.length) {
+            const t = titles.find((x) => x.i18_language === lang);
+            return t?.title || titles[0].title;
+        }
+        const rTitles = chapter.roman?.titles;
+        if (rTitles && rTitles.length) {
+            const rt = rTitles.find((x) => x.i18_language === lang);
+            return rt?.title || rTitles[0].title;
+        }
+        return `Chap ${chapter.chapter_number}`;
+    };
+
+    const getChapterContent = (chapter: RomanChapter, lang: string = selectedLang) => {
+        const contents = (chapter as any).contents as Array<{ i18_language: string; content: string }> | undefined;
+        if (contents && contents.length) {
+            const c = contents.find((x) => x.i18_language === lang);
+            return c?.content || contents[0].content;
+        }
+        return "";
+    };
+
+    const availableLangs = useMemo(() => {
+        const codes = new Set<string>();
+        const list: Array<{ code: string; label?: string }> = [];
+
+        // from chapter titles
+        const ct = (chapter as any).titles as Array<{ i18_language: string; title: string }> | undefined;
+        if (ct) ct.forEach((t) => codes.add(t.i18_language));
+
+        // from chapter contents
+        const cc = (chapter as any).contents as Array<{ i18_language: string; content: string }> | undefined;
+        if (cc) cc.forEach((c) => codes.add(c.i18_language));
+
+        // from roman titles (to get labels)
+        const rt = chapter.roman?.titles;
+        if (rt) rt.forEach((t) => codes.add(t.i18_language));
+
+        codes.forEach((code) => {
+            const label = chapter.roman?.titles?.find((t) => t.i18_language === code)?.language?.name;
+            list.push({ code, label });
+        });
+
+        // ensure default 'fr' present at top if available
+        list.sort((a, b) => (a.code === "fr" ? -1 : b.code === "fr" ? 1 : 0));
+        return list;
+    }, [chapter]);
+
+    // set sensible default if fr not available
+    React.useEffect(() => {
+        if (availableLangs.length === 0) return;
+        if (availableLangs.some((l) => l.code === "fr")) {
+            setSelectedLang("fr");
+        } else if (!availableLangs.some((l) => l.code === selectedLang)) {
+            setSelectedLang(availableLangs[0].code);
+        }
+    }, [availableLangs]);
 
     return (
         <motion.div
@@ -74,11 +135,26 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                 <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between z-10">
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                            Chapitre {chapter.chapter_number}: {chapter.title}
+                            Chapitre {chapter.chapter_number}: {getChapterTitle(chapter)}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             {getRomanTitle(chapter.roman)} ({chapter.roman?.ref})
                         </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {availableLangs.length > 0 && (
+                            <select
+                                value={selectedLang}
+                                onChange={(e) => setSelectedLang(e.target.value)}
+                                className="ml-4 px-2 py-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm rounded"
+                            >
+                                {availableLangs.map((l) => (
+                                    <option key={l.code} value={l.code}>
+                                        {l.label ? `${l.label} (${l.code})` : l.code}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <button
                         onClick={onClose}
@@ -120,7 +196,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contenu</h4>
                         <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
                             <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {chapter.content}
+                                {getChapterContent(chapter)}
                             </p>
                         </div>
                     </div>
