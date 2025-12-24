@@ -18,6 +18,7 @@ import {
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getAudioByIdApi, uploadAudioToS3, updateAudio } from "../api/audios";
 import type { Audio } from "../types/audio";
+import { AudioTitlesViewer } from "../components/AudioTitlesViewer";
 import toast from "react-hot-toast";
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
@@ -277,19 +278,17 @@ const AudioDetails: React.FC = () => {
             {/* Multilingual Titles */}
             {audio.titles && audio.titles.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-md p-3 shadow">
-                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-3">
                   <Globe className="w-4 h-4" />
-                  <span className="font-medium">Titres</span>
+                  <span className="font-medium">Titres multilingues</span>
                 </div>
-                <div className="grid grid-cols-1 gap-2">
-                  {audio.titles.map((title) => (
-                    <div key={title.id} className="p-2 bg-gray-50 dark:bg-gray-900/40 rounded text-sm">
-                      <div className="text-xs text-gray-500 uppercase mb-1">{title.i18_language}</div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">{title.title}</div>
-                      {title.description && <div className="text-xs text-gray-600 dark:text-gray-400">{title.description}</div>}
-                    </div>
-                  ))}
-                </div>
+                <AudioTitlesViewer
+                  titles={audio.titles}
+                  showDescription={true}
+                  titleClassName="font-medium text-gray-900 dark:text-gray-100 text-sm"
+                  descriptionClassName="text-xs text-gray-600 dark:text-gray-400 mt-1"
+                  compact={true}
+                />
               </div>
             )}
 

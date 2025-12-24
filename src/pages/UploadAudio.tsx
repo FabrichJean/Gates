@@ -22,6 +22,7 @@ import { getAllPlateformsApi } from "../api/plateforms";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import { getAudioCategoriesApi } from "../api/audioCategory";
 import { getAudioSubCategoriesApi } from "../api/audioSubCategory";
+import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -370,35 +371,6 @@ const UploadAudio: React.FC = () => {
                   />
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Titre <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    placeholder="Nom de l'audio"
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                    rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-                    placeholder="Description de l'audio..."
-                  />
-                </div>
-
                 {/* Category */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -596,6 +568,14 @@ const UploadAudio: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Multilingual Titles */}
+                <AudioTitlesField
+                  value={form.titles}
+                  onChange={(titles) => setForm((prev) => ({ ...prev, titles }))}
+                  label="Titres multilingues (optionnel)"
+                  required={false}
+                />
 
                 {/* Need VIP */}
                 <div className="flex items-center gap-3">

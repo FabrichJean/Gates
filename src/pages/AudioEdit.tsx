@@ -22,15 +22,11 @@ import { getAllPlateformsApi } from "../api/plateforms";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import { getAudioCategoriesApi } from "../api/audioCategory";
 import { getAudioSubCategoriesApi } from "../api/audioSubCategory";
+import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate, useParams, Link } from "react-router-dom";
 
-interface AudioTitle {
-  i18_language: string;
-  language_code: string;
-  title: string;
-  description: string;
-}
+import type { AudioTitle } from "../components/AudioTitlesField";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -88,7 +84,12 @@ const AudioEdit: React.FC = () => {
           ref: audio.ref || "",
           title: audio.title || "",
           description: audio.description || "",
-          titles: audio.titles || [],
+          titles: (audio.titles || []).map((t: any) => ({
+            i18_language: t.i18_language,
+            language_code: t.language_code ?? t.i18_language ?? "",
+            title: t.title,
+            description: t.description,
+          })),
           audio_category_id: audio.audio_category_id?.toString() || "",
           audio_sub_category_id: audio.audio_sub_category_id?.toString() || "",
           plateform_id: audio.plateform_id?.toString() || "",
@@ -654,6 +655,14 @@ const AudioEdit: React.FC = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Multilingual Titles */}
+                <AudioTitlesField
+                  value={form.titles}
+                  onChange={(titles) => setForm({ ...form, titles })}
+                  label="Titres multilingues (optionnel)"
+                  required={false}
+                />
 
                 {/* VIP Checkbox */}
                 <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-2 border-yellow-200 dark:border-yellow-800">
