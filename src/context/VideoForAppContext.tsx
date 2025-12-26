@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import type { VideoForApp } from "../api/videoForApp";
-import { fetchVideoForAppList } from "../api/videoForApp";
+import { fetchVideoForAppList, activateVideoForApp } from "../api/videoForApp";
+import toast from "react-hot-toast";
 
 interface VideoForAppContextType {
   page: number;
@@ -12,7 +13,7 @@ interface VideoForAppContextType {
   loading: boolean;
   mutate: () => void;
   toWebapp: () => void;
-  activate: () => void;
+  activate: (videoId: number) => Promise<void>;
   send: () => void;
   reFetch: () => void;
 }
@@ -42,7 +43,16 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Dummy implementations for now
   const mutate = () => fetchData();
   const toWebapp = () => {};
-  const activate = () => {};
+  const activate = async (videoId: number) => {
+    try {
+      await activateVideoForApp(videoId);
+      toast.success("Statut mis à jour !");
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour du statut");
+      console.error("Error activating video for app:", error);
+    }
+  };
   const send = () => {};
   const reFetch = () => fetchData();
 

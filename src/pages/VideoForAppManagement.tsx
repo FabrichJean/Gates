@@ -72,7 +72,7 @@ const VideoForAppManagement = () => {
                   onActivate={activate}
                   onSend={send}
                   updateFn={updateVideoForApp}
-                  hideTouchLink={true}
+                  hideTouchLink={false}
                   cancelFn={undefined}
                   reFetchFn={reFetch}
                   detailsPath="/app-videos"

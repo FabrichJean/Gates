@@ -101,3 +101,16 @@ export async function updateVideoForApp(
     }
   );
 }
+
+export async function activateVideoForApp(videoId: number) {
+  const response = await axios.put(
+    `${apiURL}/videos-for-app/${videoId}/toggleStatus`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
+  return response.data;
+}
