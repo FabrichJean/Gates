@@ -30,8 +30,18 @@ const SubCategoryAutoComplete = ({
   defaultValue,
   onSelect,
 }: Props) => {
+  console.log(defaultValue);
+  
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [selected, setSelected] = useState<number | "">(defaultValue?.id || "");
+
+  useEffect(() => {
+    if (defaultValue?.id) {
+      setSelected(defaultValue.id);
+    } else {
+      setSelected("");
+    }
+  }, [defaultValue]);
 
   useEffect(() => {
     if (!categoryId) {

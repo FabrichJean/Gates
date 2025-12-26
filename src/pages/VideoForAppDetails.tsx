@@ -38,6 +38,30 @@ import { Link, useParams } from 'react-router-dom';
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
 
+// Helper function to get category display name
+const getCategoryDisplayName = (categories?: Array<{code: string, name: string}>): string => {
+  if (!categories || categories.length === 0) return 'No category';
+
+  // Try to find English name first, then fallback to any available
+  const englishName = categories.find(cat => cat.code === 'en')?.name;
+  if (englishName) return englishName;
+
+  // Fallback to first available name
+  return categories[0].name;
+};
+
+// Helper function to get subcategory display name
+const getSubCategoryDisplayName = (subCategories?: Array<{code: string, name: string}>): string => {
+  if (!subCategories || subCategories.length === 0) return 'No subcategory';
+
+  // Try to find English name first, then fallback to any available
+  const englishName = subCategories.find(sub => sub.code === 'en')?.name;
+  if (englishName) return englishName;
+
+  // Fallback to first available name
+  return subCategories[0].name;
+};
+
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
@@ -287,6 +311,12 @@ const VideoForAppDetails: React.FC = () => {
                       </div>
                       <div>
                         <span className="font-medium">Duration:</span> {video.seconds}s
+                      </div>
+                      <div>
+                        <span className="font-medium">Category:</span> {getCategoryDisplayName(video.categories)}
+                      </div>
+                      <div>
+                        <span className="font-medium">Sub Category:</span> {getSubCategoryDisplayName(video.sub_categories)}
                       </div>
                     </div>
                   </div>
