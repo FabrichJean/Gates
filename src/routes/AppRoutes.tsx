@@ -515,9 +515,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <AppVideosProvider>
+                  <VideoForAppProvider>
                     <VideoForAppEdit />
-                  </AppVideosProvider>
+                  </VideoForAppProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }

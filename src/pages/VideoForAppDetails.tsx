@@ -13,6 +13,7 @@ import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
+import { usePlatformReactive } from "../hooks/usePlatform";
 import {
   Play,
   Edit3,
@@ -62,6 +63,12 @@ const getSubCategoryDisplayName = (subCategories?: Array<{code: string, name: st
   return subCategories[0].name;
 };
 
+// Helper function to get platform display name
+const getPlatformDisplayName = (platform?: {id: number, name: string}): string => {
+  if (!platform) return 'No platform';
+  return platform.name;
+};
+
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
@@ -72,6 +79,10 @@ const VideoForAppDetails: React.FC = () => {
 
   const [modifying, setModifying] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  // Platform data
+  const { data: platforms } = usePlatformReactive();
+  const [platform, setPlatform] = useState<{ id: number; name: string } | null>(null);
 
   // Convert VideoForApp titles to MangaTitles format for i18n display
   const videoTitles: MangaTitles = video ? [
@@ -92,6 +103,14 @@ const VideoForAppDetails: React.FC = () => {
         .catch(err => console.error('Failed to load M3U8', err));
     }
   }, [video?.m3u8_path]);
+
+  // Fetch platform data when video loads
+  useEffect(() => {
+    if (video?.plateform_id && platforms) {
+      const videoPlatform = platforms.find(p => p.id === video.plateform_id);
+      setPlatform(videoPlatform || null);
+    }
+  }, [video?.plateform_id, platforms]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
@@ -317,6 +336,26 @@ const VideoForAppDetails: React.FC = () => {
                       </div>
                       <div>
                         <span className="font-medium">Sub Category:</span> {getSubCategoryDisplayName(video.sub_categories)}
+                      </div>
+                      <div>
+                        <span className="font-medium">Platform:</span> {getPlatformDisplayName(video.plateform)}
+                      </div>
+                      <div>
+                        <span className="font-medium">Tags:</span>
+                        {video.tagCategoryVideos && video.tagCategoryVideos.length > 0 ? (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {video.tagCategoryVideos.map((tag) => (
+                              <span
+                                key={tag.id}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                              >
+                                {tag.name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 dark:text-gray-400 ml-1">No tags</span>
+                        )}
                       </div>
                     </div>
                   </div>

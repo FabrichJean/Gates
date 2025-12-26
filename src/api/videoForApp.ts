@@ -22,8 +22,12 @@ export interface VideoForApp {
     creator_id?: number;
     category_id?: number;
     sub_category_id?: number;
+    plateform_id?: number;
+    plateform?: { id: number; name: string };
+    tag_category_ids?: (number | { name: string })[];
     categories?: (Category & {code : string})[];
     sub_categories?: (SubCategory & {code : string})[];
+    tagCategoryVideos?: { id: number; name: string }[];
     cover?: string;
     m3u8_path?: string;
     creatorObj?: {
@@ -113,4 +117,32 @@ export async function activateVideoForApp(videoId: number) {
     }
   );
   return response.data;
+}
+
+// Tag Category Videos API functions
+export async function getTagCategoriesVideoForAppApi() {
+  return await axios.get(`${apiURL}/tag-category/`, {
+		headers: { Authorization: `Bearer ${token()}` },
+	});
+  
+}
+
+export async function createTagCategoryVideoForAppApi(data: { name: string; meta?: string | object }) {
+  return await axios.post(
+    `${apiURL}/video-for-app-tag-category`,
+    { name: data.name, meta: data.meta ?? null },
+    { headers: { Authorization: `Bearer ${token()}` } }
+  );
+}
+
+export async function updateTagCategoryVideoForAppApi(id: number, data: { name?: string; meta?: string | object | null }) {
+  return await axios.put(`${apiURL}/video-for-app-tag-category/${id}`, data, {
+    headers: { Authorization: `Bearer ${token()}` },
+  });
+}
+
+export async function deleteTagCategoryVideoForAppApi(id: number) {
+  return await axios.delete(`${apiURL}/video-for-app-tag-category/${id}`, {
+    headers: { Authorization: `Bearer ${token()}` },
+  });
 }

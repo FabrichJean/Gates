@@ -1,20 +1,24 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
+import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import { I18nField } from "../components/I18nComponents";
+import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
 import type { TranslatedText } from "../types/i18n";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
+import type { Platform } from "../hooks/usePlatform";
 import { UseAppVideo } from "../hooks/app/useAppVideos";
 import { updateVideoForApp } from "../api/videoForApp";
-import { getTagCategoriesApi } from "../api/tagCategory";
+import { usePlatformReactive } from "../hooks/usePlatform";
 
 function VideoForAppEdit() {
   const { id: videoId } = useParams<{ id: string }>();
   const { data: video } = UseAppVideo(videoId);
+  const { data: platforms } = usePlatformReactive();
 
   const navigate = useNavigate();
 
@@ -88,8 +92,12 @@ function VideoForAppEdit() {
   // Category and SubCategory states
   const [category, setCategory] = useState<Category | null>(null);
   const [subcategory, setSubCategory] = useState<SubCategory | null>(null);
+  const [platform, setPlatform] = useState<Platform | null>(null);
 
-  // Update category and subcategory when video data loads
+  // Tag Category Videos states
+  const [selectedTags, setSelectedTags] = useState<(number | { name: string })[]>([]);
+
+  // Update category, subcategory, platform and tags when video data loads
   useEffect(() => {
     if (video?.categories) {
       setCategory(video.categories.find(cat => cat.code === "en"));
@@ -97,7 +105,21 @@ function VideoForAppEdit() {
     if (video?.sub_categories) {
       setSubCategory(video.sub_categories.find(sub => sub.code === "en"));
     }
+    if (video?.tagCategoryVideos) {
+      setSelectedTags(video.tagCategoryVideos.map(tag => tag.id));
+    }
   }, [video]);
+
+  // Update platform when video or platforms data changes
+  useEffect(() => {
+    if (video?.plateform_id && platforms.length > 0) {
+      // Find the platform object that matches the video's platform ID
+      const videoPlatform = platforms.find(p => p.id === video.plateform_id);
+      if (videoPlatform) {
+        setPlatform(videoPlatform);
+      }
+    }
+  }, [video?.plateform_id, platforms]);
 
   const handleSubmit = async () => {
     try {
@@ -123,95 +145,22 @@ function VideoForAppEdit() {
         creator_id: creatorId,
         category_id: category?.id,
         sub_category_id: subcategory?.id,
+        plateform_id: platform?.id,
         cn_title: titlesData.cn_title,
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
+        tag_category_ids: selectedTags,
       });
 
       toast.success("✅ Updated successfully!");
       navigate(`/app-videos/${video.id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error("Error: " + (err.response?.data?.message || err.message));
+      toast.error("Error: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setUploading(false);
       setProgress(0);
     }
-  };
-
-  const postTagWrapperRef = useRef<HTMLDivElement | null>(null);
-  // TAGS
-  const [postTagQuery, setPostTagQuery] = useState("");
-  const [showPostTagDropdown, setShowPostTagDropdown] = useState(false);
-
-  // suggestions récupérées depuis API (à adapter)
-  const [postTagSuggestions, setPostTagSuggestions] = useState<any[]>([]);
-  const [availablePostTags, setAvailablePostTags] = useState<
-    Array<{ id?: number; name: string; meta?: any }>
-  >([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getTagCategoriesApi();
-        const items = res?.data?.items ?? res?.data ?? [];
-        const normalized = (Array.isArray(items) ? items : []).map(
-          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
-        );
-
-        setAvailablePostTags(normalized);
-        setPostTagSuggestions(normalized);
-      } catch (err) {
-        console.warn("Failed to load post tag categories", err);
-      }
-    };
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (!postTagQuery) {
-      setPostTagSuggestions(availablePostTags);
-      return;
-    }
-    const q = postTagQuery.toLowerCase();
-    setPostTagSuggestions(
-      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
-    );
-  }, [postTagQuery, availablePostTags]);
-
-  // tags sélectionnés
-  const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
-    { id?: number; name: string }[]
-  >([]);
-
-  const addPostTagSuggestion = (tag: any) => {
-    // éviter les doublons
-    if (
-      selectedPostTagCategories.some(
-        (existing) => existing.name.toLowerCase() === tag.name.toLowerCase()
-      )
-    ) {
-      return;
-    }
-
-    setSelectedPostTagCategories((prev) => [...prev, tag]);
-    setPostTagQuery("");
-  };
-
-  const addPostTagByName = (name: string) => {
-    if (!name.trim()) return;
-
-    const existed = selectedPostTagCategories.some(
-      (t) => t.name.toLowerCase() === name.toLowerCase()
-    );
-    if (existed) return;
-
-    setSelectedPostTagCategories((prev) => [...prev, { name }]);
-    setPostTagQuery("");
-  };
-
-  const removeSelectedPostTag = (index: number) => {
-    setSelectedPostTagCategories((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -220,7 +169,7 @@ function VideoForAppEdit() {
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
           Edit App Video {video?.id}
         </h1>
-        <div className="flex md:flex-row flex-col gap-7 w-max bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
+        <div className="flex flex-col gap-7 w-full bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
           <div className="space-y-6">
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
@@ -256,6 +205,16 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Platform
+              </label>
+              <PlatformSelectComponent
+                defaultValue={platform}
+                onSelect={setPlatform}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
                 Duration (seconds)
               </label>
               <input
@@ -266,80 +225,18 @@ function VideoForAppEdit() {
               />
             </div>
 
-            <div className="relative w-full" ref={postTagWrapperRef}>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Tags:
-              </label>
-              <div className="flex gap-2 items-center">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={postTagQuery}
-                    onChange={(e) => {
-                      setPostTagQuery(e.target.value);
-                      setShowPostTagDropdown(true);
-                    }}
-                    onFocus={() => setShowPostTagDropdown(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addPostTagByName(postTagQuery);
-                        setShowPostTagDropdown(false);
-                      }
-                    }}
-                    placeholder="Type tag name or select suggestion..."
-                    className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
-                  />
-
-                  {showPostTagDropdown &&
-                    postTagSuggestions &&
-                    postTagSuggestions.length > 0 && (
-                      <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
-                        {postTagSuggestions.slice(0, 8).map((s) => (
-                          <li
-                            key={s.id ?? s.name}
-                            onClick={() => {
-                              addPostTagSuggestion(s);
-                              setShowPostTagDropdown(false);
-                            }}
-                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                          >
-                            {s.name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    addPostTagByName(postTagQuery);
-                    setShowPostTagDropdown(false);
-                  }}
-                  className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {selectedPostTagCategories.map((t, i) => (
-                  <span
-                    key={`${t.id ?? "new"}-${t.name}-${i}`}
-                    className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    <span>{t.name}</span>
-                    <button
-                      onClick={() => removeSelectedPostTag(i)}
-                      className="text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+              <TagCategoryVideoForApp
+                selectedTags={selectedTags}
+                onTagSelect={(tag) => setSelectedTags(prev => [...prev, tag])}
+                onTagDeselect={(tag) => setSelectedTags(prev => prev.filter(t => {
+                  if (typeof tag === 'number' && typeof t === 'number') {
+                    return t !== tag;
+                  } else if (typeof tag === 'object' && typeof t === 'object') {
+                    return t.name !== tag.name;
+                  }
+                  return true;
+                }))}
+              />
 
             {/* Barre de progression */}
             {uploading && (
