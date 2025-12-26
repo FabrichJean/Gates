@@ -55,6 +55,9 @@ export type TRoman = {
         cover_url?: string;
         local_cover_url?: string;
     };
+    s3_urls: {
+      coverUrl: string | null;
+    }
     titles: {
         id: any;
         title: string;

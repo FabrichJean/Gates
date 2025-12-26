@@ -14,6 +14,7 @@ import {
     Calendar,
     Tag,
     Globe,
+    Loader2,
     ChevronDown,
     FilePlus,
 } from "lucide-react";
@@ -23,11 +24,10 @@ import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
 import { Link } from "react-router-dom";
 import CheckingRoman from "../../components/CheckingRoman";
 import { useAuth } from "../../hooks/useAuth";
-import useSocketCheckRomans from "../../hooks/romans/useSocketCheckRomans";
+import useSocketCheckRomans from "../../hooks/romans/useSocketRomans";
 import { FaBookOpen } from "react-icons/fa";
-import axios from "axios";
 import toast from "react-hot-toast";
-import { apiURL } from "../../constant";
+import { toggleIsDeleted, deepUploadRoman } from "../../api/romans";
 import RoleEnum from "../../utils/roleEnum";
 
 import { motion } from "framer-motion";
@@ -115,8 +115,7 @@ const RomansManagement = () => {
     // Fonction pour mettre à jour le statut isDeleted
     const handleToggleDeleted = async (romanId: number, currentStatus: boolean) => {
         try {
-            // Envoi en JSON pour que le backend puisse parser facilement
-            await axios.put(`${apiURL}/roman/${romanId}/is-deleted`, { isDeleted: !currentStatus });
+            await toggleIsDeleted(romanId, !currentStatus);
             toast.success(
                 currentStatus
                     ? "Roman activé avec succès"
@@ -128,13 +127,15 @@ const RomansManagement = () => {
         }
     };
 
-    const sendRomanCoverToS3 = async (romanId: number) => {
+    // Gestion processing et bouton Send
+    const handleSendRoman = async (romanId: number) => {
         try {
-            await axios.put(`${apiURL}/roman/${romanId}/deep-upload`);
-            toast.success("Upload de la couverture programmé !");
+            toast.loading("Envoi du roman vers S3...", { id: "send-roman" });
+            await deepUploadRoman(romanId);
+            toast.success("Roman envoyé avec succès!", { id: "send-roman" });
             reFetch();
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Erreur lors de l'envoi S3");
+            toast.error(err?.response?.data?.message || "Erreur lors de l'envoi S3", { id: "send-roman" });
         }
     };
 
@@ -147,7 +148,7 @@ const RomansManagement = () => {
                     <div className="relative h-48 bg-gradient-to-br from-purple-400 to-pink-400">
                         {roman.public_urls?.cover_url ? (
                             <img
-                                src={roman.public_urls.cover_url}
+                                src={roman.s3_urls.coverUrl || roman.public_urls.cover_url}
                                 alt={roman.ref}
                                 className="w-full h-full object-cover"
                             />
@@ -156,10 +157,25 @@ const RomansManagement = () => {
                                 <BookOpen className="w-16 h-16 text-white/50" />
                             </div>
                         )}
-                        <div className="absolute top-3 right-3">
+                        <div className="absolute top-3 right-3 flex flex-col gap-1 items-end">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mapStatus(roman))}`}>
                                 {mapStatus(roman)}
                             </span>
+                            {/* Processing Status Badge */}
+                            {roman.processing && (
+                                <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                                    {roman.processing === "done" ? (
+                                        "✓ Uploaded"
+                                    ) : roman.processing === "working" ? (
+                                        <span className="inline-flex items-center gap-2">
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                            <span>Uploading</span>
+                                        </span>
+                                    ) : (
+                                        "Pending"
+                                    )}
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -230,9 +246,10 @@ const RomansManagement = () => {
                                     <Edit2 className="w-4 h-4" />
                                 </Link>
                                 <button
-                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                    onClick={() => sendRomanCoverToS3(roman.id)}
-                                    title="Envoyer la couverture sur S3"
+                                    className={`p-2 rounded-lg transition-colors ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+                                    onClick={() => handleSendRoman(roman.id)}
+                                    disabled={roman.processing === "done" || roman.processing === "working"}
+                                    title={roman.processing === "done" ? "Déjà envoyé" : "Envoyer la couverture sur S3"}
                                 >
                                     <Send className="w-4 h-4" />
                                 </button>
@@ -286,7 +303,7 @@ const RomansManagement = () => {
                                 <td className="px-6 py-4">
                                     {roman.public_urls?.cover_url ? (
                                         <img
-                                            src={roman.public_urls?.cover_url}
+                                            src={ roman.s3_urls.coverUrl || roman.public_urls?.cover_url}
                                             alt={roman.ref}
                                             className="w-12 h-16 object-cover rounded"
                                         />
@@ -344,16 +361,30 @@ const RomansManagement = () => {
                                     {roman.plateform?.name || "-"}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(mapStatus(roman))}`}>
-                                        {mapStatus(roman)}
-                                    </span>
+                                    <div className="flex flex-col gap-1"> 
+                                        {/* Processing Status Badge */}
+                                        {roman.processing && (
+                                            <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                                                {roman.processing === "done" ? (
+                                                    "✓ Uploaded"
+                                                ) : roman.processing === "working" ? (
+                                                    <span className="inline-flex items-center gap-2">
+                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                        <span>Uploading</span>
+                                                    </span>
+                                                ) : (
+                                                    "Pending"
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 text-center">
                                     <motion.input
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         type="checkbox"
-                                        checked={roman.isDeleted}
+                                        checked={!roman.isDeleted}
                                         disabled={user?.role !== RoleEnum.SUPERADMIN}
                                         className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                                         onChange={
@@ -392,13 +423,21 @@ const RomansManagement = () => {
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Link>
-                                        <button
-                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                            onClick={() => sendRomanCoverToS3(roman.id)}
-                                            title="Envoyer la couverture sur S3"
-                                        >
-                                            <Send className="w-4 h-4" />
-                                        </button>
+                                        {user.role === RoleEnum.SUPERADMIN && (
+                                            <button
+                                                className={`p-2 rounded-lg transition-colors ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+                                                onClick={() => handleSendRoman(roman.id)}
+                                                disabled={roman.processing === "done"}
+                                                title={roman.processing === "done"
+                                                    ? "Déjà envoyé"
+                                                    : roman.checking !== "checked"
+                                                    ? "Roman must be checked first"
+                                                    : "Envoyer"
+                                                }
+                                            >
+                                                <Send className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

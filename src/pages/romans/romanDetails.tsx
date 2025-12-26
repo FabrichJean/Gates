@@ -1,8 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { apiURL } from "../../constant";
-import { getToken } from "../../utils/storage";
+import { getRomanById } from "../../api/romans";
 import { motion } from "framer-motion";
 import {
     ArrowLeft,
@@ -120,11 +118,7 @@ const RomanDetails = () => {
     const fetchRomanDetails = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${apiURL}/romans/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                },
-            });
+            const response = await getRomanById(id);
             setRoman(response.data);
         } catch (error: any) {
             console.error("Error fetching roman details:", error);
@@ -215,7 +209,7 @@ const RomanDetails = () => {
                         </h1>
                         <div className="flex items-center gap-4">
                             {/* btn switch edit */}
-                            <Link to={`/romans/edit/${roman.id}`} className="inline-block p-2 animate-pulse transition-all">
+                            <Link to={`/romans/${roman.id}/edit`} className="inline-block p-2 animate-pulse transition-all">
                                 {/* icon svg edit */}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -245,7 +239,7 @@ const RomanDetails = () => {
                         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                             {roman.public_urls.cover_url || roman.public_urls.local_cover_url ? (
                                 <img
-                                    src={roman.public_urls.cover_url || roman.public_urls.local_cover_url}
+                                    src={roman.s3_urls.coverUrl || roman.public_urls.cover_url || roman.public_urls.local_cover_url}
                                     alt="Roman Cover"
                                     className="w-full rounded-lg shadow-md object-cover"
                                 />

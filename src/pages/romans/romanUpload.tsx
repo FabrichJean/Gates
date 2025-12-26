@@ -8,9 +8,7 @@ import CreatorAutoComplete from "../../components/CreatorAutoComplete";
 import type { Platform } from "../../hooks/usePlatform";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { apiURL } from "../../constant";
-import { getToken } from "../../utils/storage";
+import { addRoman } from "../../api/romans";
 import { motion } from "framer-motion";
 import { MangaTitlesField } from "../../components/MangaTitlesField";
 import type { MangaTitles } from "../../types/mangaTitles";
@@ -75,18 +73,12 @@ const RomanUpload = () => {
             setUploading(true);
             setProgress(0);
 
-            await axios.post(`${apiURL}/romans/add`, fd, {
-                headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                    if (progressEvent.total) {
-                        setProgress(
-                            Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                        );
-                    }
-                },
+            await addRoman(fd, (progressEvent) => {
+                if (progressEvent.total) {
+                    setProgress(
+                        Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    );
+                }
             });
 
             toast.success("✅ Roman uploaded successfully!");

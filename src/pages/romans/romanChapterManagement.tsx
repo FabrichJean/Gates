@@ -23,7 +23,8 @@ import {
     Table,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import I18nField from "../../components/I18nField";
+import { I18nContentFields } from "../../components/I18nComponents";
+import { LanguageSelector } from "../../components/LanguageSelector";
 import type { TranslatedText } from "../../types/i18n";
 import {
     getAllRomanChaptersApi,
@@ -120,6 +121,10 @@ const RomanChapterManagement: React.FC = () => {
         chapter_number: 1,
         isPublished: false,
     });
+
+    // languages selected for create/edit i18n fields
+    const [createSelectedLanguages, setCreateSelectedLanguages] = useState<string[]>(["en"]);
+    const [editSelectedLanguages, setEditSelectedLanguages] = useState<string[]>(["en"]);
 
     // Form state for edit
     const [editFormData, setEditFormData] = useState<ChapterFormData>({
@@ -223,6 +228,7 @@ const RomanChapterManagement: React.FC = () => {
             chapter_number: 1,
             isPublished: false,
         });
+        setCreateSelectedLanguages(["en"]);
         setShowCreateModal(true);
     };
 
@@ -240,6 +246,11 @@ const RomanChapterManagement: React.FC = () => {
             chapter_number: chapter.chapter_number,
             isPublished: chapter.isPublished,
         });
+        // derive selected languages from existing titles/contents
+        const langs = new Set<string>();
+        (chapter.titles || []).forEach((t) => t.i18_language && langs.add(t.i18_language));
+        (chapter.contents || []).forEach((c) => c.i18_language && langs.add(c.i18_language));
+        setEditSelectedLanguages(langs.size ? Array.from(langs) : ["en"]);
         setShowEditModal(true);
     };
 
@@ -721,7 +732,7 @@ const RomanChapterManagement: React.FC = () => {
                                             <BookOpen className="w-4 h-4" />
                                             Roman
                                         </div>
-                                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
+                                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm underline truncate cursor-pointer">
                                             {getRomanTitle(chapter.roman)}
                                         </div>
                                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -834,30 +845,30 @@ const RomanChapterManagement: React.FC = () => {
                                         />
                                     </div>
 
-                                    {/* Title */}
+                                    {/* Titles & Content with language selector */}
                                     <div>
-                                        <I18nField
-                                            value={createFormData.titles}
-                                            onChange={(titles) => setCreateFormData({ ...createFormData, titles })}
-                                            label="Titre du Chapitre"
-                                            fieldType="input"
-                                            required={true}
+                                        <LanguageSelector
+                                            selectedLanguages={createSelectedLanguages}
+                                            onChange={setCreateSelectedLanguages}
+                                            maxLanguages={9}
+                                            className="mb-3"
                                         />
-                                    </div>
 
-                                    {/* Content */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Contenu <span className="text-red-500 dark:text-red-400">*</span>
-                                        </label>
-                                        <I18nField
-                                            value={createFormData.contents}
-                                            onChange={(contents) => setCreateFormData({ ...createFormData, contents })}
-                                            label="Contenu"
-                                            fieldType="textarea"
-                                            required={true}
-                                            rows={12}
-                                        />
+                                        {createSelectedLanguages.length > 0 && (
+                                            <I18nContentFields
+                                                title={createFormData.titles}
+                                                description={createFormData.contents}
+                                                onTitleChange={(titles) => setCreateFormData({ ...createFormData, titles })}
+                                                onDescriptionChange={(contents) => setCreateFormData({ ...createFormData, contents })}
+                                                onBothChange={(titles, contents) => setCreateFormData({ ...createFormData, titles, contents })}
+                                                titleRequired={true}
+                                                descriptionRequired={true}
+                                                supportedLanguages={createSelectedLanguages}
+                                                showAutoFill={true}
+                                                page="roman"
+                                            />
+                                        )}
+
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                             Nombre de mots: {Object.values(createFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
                                         </p>
@@ -969,33 +980,30 @@ const RomanChapterManagement: React.FC = () => {
                                         />
                                     </div>
 
-                                    {/* Title */}
+                                    {/* Titles & Content with language selector (edit) */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Titre du Chapitre <span className="text-red-500 dark:text-red-400">*</span>
-                                        </label>
-                                        <I18nField
-                                            value={editFormData.titles}
-                                            onChange={(titles) => setEditFormData({ ...editFormData, titles })}
-                                            label="Titre du Chapitre"
-                                            fieldType="input"
-                                            required={true}
+                                        <LanguageSelector
+                                            selectedLanguages={editSelectedLanguages}
+                                            onChange={setEditSelectedLanguages}
+                                            maxLanguages={9}
+                                            className="mb-3"
                                         />
-                                    </div>
 
-                                    {/* Content */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                            Contenu <span className="text-red-500 dark:text-red-400">*</span>
-                                        </label>
-                                        <I18nField
-                                            value={editFormData.contents}
-                                            onChange={(contents) => setEditFormData({ ...editFormData, contents })}
-                                            label="Contenu"
-                                            fieldType="textarea"
-                                            required={true}
-                                            rows={12}
-                                        />
+                                        {editSelectedLanguages.length > 0 && (
+                                            <I18nContentFields
+                                                title={editFormData.titles}
+                                                description={editFormData.contents}
+                                                onTitleChange={(titles) => setEditFormData({ ...editFormData, titles })}
+                                                onDescriptionChange={(contents) => setEditFormData({ ...editFormData, contents })}
+                                                onBothChange={(titles, contents) => setEditFormData({ ...editFormData, titles, contents })}
+                                                titleRequired={true}
+                                                descriptionRequired={true}
+                                                supportedLanguages={editSelectedLanguages}
+                                                showAutoFill={true}
+                                                page="roman"
+                                            />
+                                        )}
+
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                             Nombre de mots: {Object.values(editFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
                                         </p>
@@ -1013,7 +1021,7 @@ const RomanChapterManagement: React.FC = () => {
                                             className="w-5 h-5 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded focus:ring-2 focus:ring-blue-500"
                                         />
                                         <label htmlFor="isPublishedEdit" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Publier ce chapitre
+                                            Publish this chapter
                                         </label>
                                     </div>
                                 </div>
@@ -1024,7 +1032,7 @@ const RomanChapterManagement: React.FC = () => {
                                         className="px-6 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                         disabled={submitting}
                                     >
-                                        Annuler
+                                        Cancel
                                     </button>
                                     <button
                                         onClick={handleUpdate}
@@ -1034,12 +1042,12 @@ const RomanChapterManagement: React.FC = () => {
                                         {submitting ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                Mise à jour...
+                                                Updating...
                                             </>
                                         ) : (
                                             <>
                                                 <Save className="w-5 h-5" />
-                                                Mettre à jour
+                                                Update
                                             </>
                                         )}
                                     </button>

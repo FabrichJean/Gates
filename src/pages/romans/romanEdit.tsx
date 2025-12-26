@@ -8,9 +8,7 @@ import CreatorAutoComplete from "../../components/CreatorAutoComplete";
 import type { Platform } from "../../hooks/usePlatform";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { apiURL } from "../../constant";
-import { getToken } from "../../utils/storage";
+import { getRomanById, editRoman } from "../../api/romans";
 import { motion } from "framer-motion";
 import { MangaTitlesField } from "../../components/MangaTitlesField";
 import type { MangaTitles } from "../../types/mangaTitles";
@@ -39,11 +37,7 @@ const RomanEdit = () => {
         const fetchRomanData = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${apiURL}/romans/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${getToken()}`,
-                    },
-                });
+                const response = await getRomanById(id);
                 const roman = response.data;
 
                 // Pré-remplir les champs
@@ -124,18 +118,12 @@ const RomanEdit = () => {
             setUploading(true);
             setProgress(0);
 
-            await axios.put(`${apiURL}/romans/${id}`, fd, {
-                headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                    if (progressEvent.total) {
-                        setProgress(
-                            Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                        );
-                    }
-                },
+            await editRoman(id, fd, (progressEvent) => {
+                if (progressEvent.total) {
+                    setProgress(
+                        Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    );
+                }
             });
 
             toast.success("✅ Roman updated successfully!");

@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "../useAuth";
 
 
-const useSocketCheckRomans = (
+const useSocketRomans = (
   onCheckingUpdated?: (data: {
     user_id: number;
     roman_id: number;
@@ -82,6 +82,28 @@ const useSocketCheckRomans = (
       }
     );
 
+    // écoute des statuts asynchrones (upload cover, etc.) émis par les workers
+    socket.on("async-status", (payload: any) => {
+      try {
+        const { videoId, romanId, status, type, message, userId, entityType } = payload || {};
+
+        const id = entityType === "roman" || payload.isRoman ? romanId : videoId;
+        const label = entityType === "roman" || payload.isRoman ? "roman" : "vidéo";
+
+        if (status === "finished") {
+          toast.success(`✅ ${type} terminé pour ${label} ${id}`);
+        } else if (status === "error") {
+          toast.error(`❌ Erreur (${type}) pour ${label} ${id}: ${message || "unknown"}`);
+        } else {
+          // autres statuses possibles
+          toast(`ℹ️ ${type} pour ${label} ${id}: ${status}`);
+        }
+        if (onCheckingUpdated) onCheckingUpdated(payload);
+      } catch (err) {
+        console.error("Error handling async-status socket event:", err);
+      }
+    });
+
     return () => {
       console.log("🔌 Disconnecting from Socket.IO roman checking server");
       socket.disconnect();
@@ -91,4 +113,4 @@ const useSocketCheckRomans = (
   return socketRef.current;
 };
 
-export default useSocketCheckRomans;
+export default useSocketRomans;

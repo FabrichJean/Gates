@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Loader2, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 import { createRomanChapterApi } from "../api/romanChapter";
+import I18nField from "./I18nField";
 
 interface AddChapterModalProps {
     isOpen: boolean;
@@ -13,8 +14,8 @@ interface AddChapterModalProps {
 
 interface ChapterFormData {
     roman_id: number;
-    title: string;
-    content: string;
+    titles: { [lang: string]: string };
+    contents: { [lang: string]: string };
     chapter_number: number;
     isPublished: boolean;
 }
@@ -27,35 +28,42 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
 }) => {
     const [formData, setFormData] = useState<ChapterFormData>({
         roman_id: romanId,
-        title: "",
-        content: "",
+        titles: {},
+        contents: {},
         chapter_number: 1,
         isPublished: false,
     });
     const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async () => {
-        if (!formData.title.trim() || !formData.content.trim() || !formData.chapter_number) {
-            toast.error("Tous les champs sont requis");
+        // prepare arrays like in romanChapterManagement
+        const titlesArray = Object.entries(formData.titles || {})
+            .map(([i18_language, title]) => ({ i18_language, title }))
+            .filter((t) => t.title && t.title.trim().length > 0);
+
+        const contentsArray = Object.entries(formData.contents || {})
+            .map(([i18_language, content]) => ({ i18_language, content }))
+            .filter((c) => c.content && c.content.trim().length > 0);
+
+        if (titlesArray.length === 0 || contentsArray.length === 0 || !formData.chapter_number) {
+            toast.error("Au moins un titre et un contenu doivent être fournis");
             return;
         }
 
         setSubmitting(true);
         try {
-            await createRomanChapterApi(formData);
+            await createRomanChapterApi({
+                roman_id: formData.roman_id,
+                chapter_number: formData.chapter_number,
+                isPublished: formData.isPublished,
+                titles: titlesArray,
+                contents: contentsArray,
+            });
             toast.success("Chapitre créé avec succès");
             onClose();
-            if (onSuccess) {
-                onSuccess();
-            }
+            if (onSuccess) onSuccess();
             // Reset form
-            setFormData({
-                roman_id: romanId,
-                title: "",
-                content: "",
-                chapter_number: 1,
-                isPublished: false,
-            });
+            setFormData({ roman_id: romanId, titles: {}, contents: {}, chapter_number: 1, isPublished: false });
         } catch (error: any) {
             const errorMsg = error.response?.data?.message || "Erreur lors de la création";
             toast.error(errorMsg);
@@ -65,7 +73,7 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
         }
     };
 
-    const wordCount = formData.content.trim().split(/\s+/).filter((w) => w).length;
+    const wordCount = Object.values(formData.contents || {}).join(' ').trim().split(/\s+/).filter((w) => w).length;
 
     return (
         <AnimatePresence>
@@ -115,31 +123,29 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
                                 />
                             </div>
 
-                            {/* Title */}
+                            {/* Title (i18n) */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Titre du Chapitre <span className="text-red-500 dark:text-red-400">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Ex: Chapitre 1 : Le Début"
+                                <I18nField
+                                    value={formData.titles}
+                                    onChange={(titles) => setFormData({ ...formData, titles })}
+                                    label="Titre du Chapitre"
+                                    fieldType="input"
+                                    required={true}
                                 />
                             </div>
 
-                            {/* Content */}
+                            {/* Content (i18n) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Contenu <span className="text-red-500 dark:text-red-400">*</span>
                                 </label>
-                                <textarea
-                                    value={formData.content}
-                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                <I18nField
+                                    value={formData.contents}
+                                    onChange={(contents) => setFormData({ ...formData, contents })}
+                                    label="Contenu"
+                                    fieldType="textarea"
+                                    required={true}
                                     rows={12}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                    placeholder="Écrivez le contenu du chapitre ici..."
                                 />
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                     Nombre de mots: {wordCount}

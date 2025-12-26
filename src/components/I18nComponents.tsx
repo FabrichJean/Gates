@@ -23,6 +23,7 @@ interface I18nContentFieldsProps {
   descriptionRequired?: boolean;
   supportedLanguages?: string[];
   showAutoFill?: boolean; // Nouvelle prop pour activer/désactiver Auto-fill
+  page?: string; // Optionnel, pour contexte additionnel
 }
 
 export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
@@ -35,6 +36,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
   descriptionRequired = false,
   supportedLanguages = ['en', 'fr'],
   showAutoFill = false,
+  page,
 }) => {
   const [selectedLang, setSelectedLang] = useState<string>(supportedLanguages[0]);
   const [isLoading, setLoading] = useState(false);
@@ -136,7 +138,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <Languages className="w-4 h-4" />
-          Titres et Descriptions
+          { page === "roman" ? "Titles and Contents" : "Titre et Description" }
           {titleRequired && <span className="text-red-500">*</span>}
         </label>
 
@@ -202,14 +204,14 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
             {/* Title input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Titre {titleRequired && <span className="text-red-500">*</span>}
+                Title {titleRequired && <span className="text-red-500">*</span>}
               </label>
               <input
                 type="text"
                 value={title[selectedLang] || ''}
                 onChange={(e) => handleTitleChange(selectedLang, e.target.value)}
                 placeholder={`Entrez le titre en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required={titleRequired && selectedLang === supportedLanguages[0]}
               />
             </div>
@@ -217,13 +219,13 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
             {/* Description textarea */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description {descriptionRequired && <span className="text-red-500">*</span>}
+                { page === "roman" ? "Contents" : "Description"} {descriptionRequired && <span className="text-red-500">*</span>}
               </label>
               <textarea
                 value={description[selectedLang] || ''}
                 onChange={(e) => handleDescriptionChange(selectedLang, e.target.value)}
                 rows={6}
-                placeholder={`Entrez la description en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+                placeholder={`Entrez la ${page === "roman" ? "contenu" : "description"} en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 required={descriptionRequired && selectedLang === supportedLanguages[0]}
               />

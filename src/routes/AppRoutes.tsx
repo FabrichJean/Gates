@@ -60,6 +60,7 @@ import RomanDetails from "../pages/romans/romanDetails";
 import RomanEdit from "../pages/romans/romanEdit";
 import RomanCategoryPage from "../pages/romans/romanCategory";
 import RomanChapterManagement from "../pages/romans/romanChapterManagement";
+import RomanChaptersPage from "../pages/romans/romanChapters";
 
 
 
@@ -100,7 +101,7 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/romans/edit/:id"
+          <Route path="/romans/:id/edit"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
@@ -108,9 +109,6 @@ const AppRoutes = () => {
                 </InsideSidebar>
               </ProtectedRoute>
             }
-          />
-          <Route path="/romans/edit"
-            element={<Navigate to="/romans" />}
           />
           
           <Route path="/roman-category"
@@ -128,6 +126,16 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <RomanChapterManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/romans/:id/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanChaptersPage />
                 </InsideSidebar>
               </ProtectedRoute>
             }
