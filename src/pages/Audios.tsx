@@ -221,11 +221,7 @@ const Audios: React.FC = () => {
         </motion.div>
 
         {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <SexyLoader />
-          </div>
-        ) : audios.length === 0 ? (
+        {audios.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -271,6 +267,9 @@ const Audios: React.FC = () => {
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Statut
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Active
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
@@ -341,6 +340,24 @@ const Audios: React.FC = () => {
                           </React.Suspense>
                         </td>
                         <td className="px-6 py-4">
+                          {/* Active toggle switch */}
+                          <motion.input
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="checkbox"
+                            checked={!audio.isDeleted}
+                            className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
+                            onChange={
+                              user?.role === RoleEnum.SUPERADMIN
+                                ? () => toggleDeleted(
+                                audio.id,
+                                audio.isDeleted || false
+                              )
+                                : undefined
+                            }
+                          />
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Link
                               to={`/audios/${audio.id}`}
@@ -364,25 +381,6 @@ const Audios: React.FC = () => {
                                   title="Envoyer vers S3"
                                 >
                                   <Send className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    toggleDeleted(audio.id, audio.isDeleted)
-                                  }
-                                  className={`p-2 rounded-lg transition-colors ${
-                                    audio.isDeleted
-                                      ? "text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30"
-                                      : "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
-                                  }`}
-                                  title={
-                                    audio.isDeleted ? "Restaurer" : "Supprimer"
-                                  }
-                                >
-                                  {audio.isDeleted ? (
-                                    <CheckCircle className="w-4 h-4" />
-                                  ) : (
-                                    <XCircle className="w-4 h-4" />
-                                  )}
                                 </button>
                               </>
                             )}
