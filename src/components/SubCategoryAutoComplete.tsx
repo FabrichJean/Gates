@@ -10,6 +10,21 @@ interface Props {
   onSelect?: (sub: SubCategory) => void;
 }
 
+// Helper function to get subcategory name in current language
+const getSubCategoryDisplayName = (subCategory: SubCategory): string => {
+  // If sub_categories array exists, try to find English name first, then fallback to any available
+  if (subCategory.sub_categories && subCategory.sub_categories.length > 0) {
+    const englishName = subCategory.sub_categories.find(sub => sub.code === 'en')?.name;
+    if (englishName) return englishName;
+
+    // Fallback to first available name
+    return subCategory.sub_categories[0].name;
+  }
+
+  // Fallback to the simple name field
+  return subCategory.name;
+};
+
 const SubCategoryAutoComplete = ({
   categoryId,
   defaultValue,
@@ -66,7 +81,7 @@ const SubCategoryAutoComplete = ({
           value={sub.id}
           className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
         >
-          {sub.name}
+          {getSubCategoryDisplayName(sub)}
         </option>
       ))}
     </select>

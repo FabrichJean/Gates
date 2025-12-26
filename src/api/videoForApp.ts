@@ -1,5 +1,7 @@
 import axios from "axios";
 import { apiURL, token } from "../constant";
+import type { Category } from "../components/CategoryAutoComplete";
+import type { SubCategory } from "../hooks/useSubCategory";
 
 export interface Title {
     title: string;
@@ -18,6 +20,10 @@ export interface VideoForApp {
     hi_title?: string;
     seconds: number;
     creator_id?: number;
+    category_id?: number;
+    sub_category_id?: number;
+    categories?: (Category & {code : string})[];
+    sub_categories?: (SubCategory & {code : string})[];
     cover?: string;
     m3u8_path?: string;
     creatorObj?: {

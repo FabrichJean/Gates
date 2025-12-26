@@ -1,9 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import CategoryAutoComplete from "../components/CategoryAutoComplete";
+import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { I18nField } from "../components/I18nComponents";
 import type { TranslatedText } from "../types/i18n";
+import type { Category } from "../components/CategoryAutoComplete";
+import type { SubCategory } from "../hooks/useSubCategory";
 import { UseAppVideo } from "../hooks/app/useAppVideos";
 import { updateVideoForApp } from "../api/videoForApp";
 import { getTagCategoriesApi } from "../api/tagCategory";
@@ -81,6 +85,20 @@ function VideoForAppEdit() {
     }
   }, [video?.creatorObj]);
 
+  // Category and SubCategory states
+  const [category, setCategory] = useState<Category | null>(null);
+  const [subcategory, setSubCategory] = useState<SubCategory | null>(null);
+
+  // Update category and subcategory when video data loads
+  useEffect(() => {
+    if (video?.categories) {
+      setCategory(video.categories.find(cat => cat.code === "en"));
+    }
+    if (video?.sub_categories) {
+      setSubCategory(video.sub_categories.find(sub => sub.code === "en"));
+    }
+  }, [video]);
+
   const handleSubmit = async () => {
     try {
       setUploading(true);
@@ -103,6 +121,8 @@ function VideoForAppEdit() {
       await updateVideoForApp(targetId, {
         seconds: duration,
         creator_id: creatorId,
+        category_id: category?.id,
+        sub_category_id: subcategory?.id,
         cn_title: titlesData.cn_title,
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
@@ -215,6 +235,27 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Category
+              </label>
+              <CategoryAutoComplete
+                defaultValue={category}
+                onSelect={setCategory}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Sub Category
+              </label>
+              <SubCategoryAutoComplete
+                categoryId={category?.id}
+                defaultValue={subcategory}
+                onSelect={setSubCategory}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
                 Duration (seconds)
               </label>
               <input
@@ -313,9 +354,6 @@ function VideoForAppEdit() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Titles
-              </label>
               <I18nField
                 value={titles}
                 onChange={setTitles}
