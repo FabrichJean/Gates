@@ -92,9 +92,6 @@ const Mangas: React.FC = () => {
               >
                 Bibliothèque de Mangas
               </motion.h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Gérez votre collection de mangas
-              </p>
             </div>
 
             <motion.div

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { apiURL, token } from "../constant";
 
-export async function createAudioAlbumApi(formData: FormData) {
+export async function createAudioAlbumApi(formData: any) {
   return await axios.post(`${apiURL}/audio-albums`, formData, {
     headers: { Authorization: `Bearer ${token()}` },
   });

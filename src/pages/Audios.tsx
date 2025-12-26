@@ -23,26 +23,6 @@ import { PAGE_SIZE } from "../constant";
 import { useAudiosContext } from "../context/AudiosContext";
 import AudioChecking from "../components/AudioChecking";
 
-const SexyLoader = () => (
-  <div className="relative w-16 h-16 mx-auto">
-    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 animate-pulse" />
-    <div className="absolute inset-1 rounded-full border-2 border-transparent border-t-white/80 animate-spin" />
-    {[...Array(3)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute w-2 h-2 bg-white rounded-full shadow-lg"
-        style={{
-          top: "50%",
-          left: "50%",
-          transform: `rotate(${i * 120}deg) translateX(120%)`,
-          animation: `orbit 1.5s linear infinite`,
-          animationDelay: `${i * 0.2}s`,
-        }}
-      />
-    ))}
-  </div>
-);
-
 const Audios: React.FC = () => {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
@@ -102,123 +82,53 @@ const Audios: React.FC = () => {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
       >
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="grid gap-6 md:gap-8 mb-4">
+          {/* Top line */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <motion.h1
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-4xl font-bold text-gray-900 dark:text-gray-100"
-              >
+              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white md:text-4xl">
                 Bibliothèque Audio
-              </motion.h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Gérez votre collection de fichiers audio
-              </p>
+              </h1>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-3"
-            >
-              {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl p-1 shadow-sm">
+            <div className="flex items-center gap-3">
+              {/* View toggle */}
+              <div className="flex rounded-full bg-gray-100 dark:bg-gray-800 p-1">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-lg transition-all ${
-                    viewMode === "grid"
-                      ? "bg-indigo-500 text-white"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                  className={`rounded-full p-1.5 transition
+                    ${
+                      viewMode === "grid"
+                        ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
+                        : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    }`}
+                  title="Vue grille"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`p-2 rounded-lg transition-all ${
-                    viewMode === "table"
-                      ? "bg-indigo-500 text-white"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                  className={`rounded-full p-1.5 transition
+                    ${
+                      viewMode === "table"
+                        ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
+                        : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    }`}
+                  title="Vue liste"
                 >
                   <List className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Add Audio Button */}
               <Link
                 to="/audios/upload"
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
-                <FilePlus className="w-5 h-5" />
-                <span className="font-medium">Nouveau Audio</span>
+                <FilePlus className="h-4 w-4" />
               </Link>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  Total Audios
-                </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                  {total}
-                </p>
-              </div>
-              <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
-                <Volume2 className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-              </div>
             </div>
           </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  Approuvés
-                </p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">
-                  {audios.filter((a) => a.checking === "approved").length}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-                  En attente
-                </p>
-                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
-                  {audios.filter((a) => a.checking === "pending").length}
-                </p>
-              </div>
-              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl">
-                <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        </div>
 
         {/* Content */}
         {audios.length === 0 ? (
@@ -334,9 +244,15 @@ const Audios: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           {/* Moderation dropdown for audio checking */}
-                          <React.Suspense fallback={getCheckingBadge(audio.checking)}>
+                          <React.Suspense
+                            fallback={getCheckingBadge(audio.checking)}
+                          >
                             {/** @ts-ignore-next-line */}
-                            <AudioChecking audio={audio} index={index} reFetch={reFetch} />
+                            <AudioChecking
+                              audio={audio}
+                              index={index}
+                              reFetch={reFetch}
+                            />
                           </React.Suspense>
                         </td>
                         <td className="px-6 py-4">
@@ -349,10 +265,11 @@ const Audios: React.FC = () => {
                             className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
-                                ? () => toggleDeleted(
-                                audio.id,
-                                audio.isDeleted || false
-                              )
+                                ? () =>
+                                    toggleDeleted(
+                                      audio.id,
+                                      audio.isDeleted || false
+                                    )
                                 : undefined
                             }
                           />
@@ -423,9 +340,15 @@ const Audios: React.FC = () => {
                     )}
                     <div className="absolute top-3 right-3">
                       {/* Moderation dropdown for audio checking */}
-                      <React.Suspense fallback={getCheckingBadge(audio.checking)}>
+                      <React.Suspense
+                        fallback={getCheckingBadge(audio.checking)}
+                      >
                         {/** @ts-ignore-next-line */}
-                        <AudioChecking audio={audio} index={index} reFetch={reFetch} />
+                        <AudioChecking
+                          audio={audio}
+                          index={index}
+                          reFetch={reFetch}
+                        />
                       </React.Suspense>
                     </div>
                   </div>
