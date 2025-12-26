@@ -343,6 +343,12 @@ function Sidebar({
               icon={RiRobot2Line}
             />
             <NavLink
+              to="/app-videos"
+              name="app-videos"
+              label="Video For App"
+              icon={BiLogoInternetExplorer}
+            />
+            <NavLink
               to="/bot-posts"
               name="bot-posts"
               label="Post Bot"

@@ -55,6 +55,10 @@ import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
 import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
 import MangasCategoriesPage from "../pages/MangasCategoriesPage";
 import { MangasProvider } from "../context/MangasContext";
+import { AppVideosProvider } from "../context/AppVideosContext";
+import VideoForAppManagement from "../pages/VideoForAppManagement";
+import VideoForAppDetails from "../pages/VideoForAppDetails";
+import VideoForAppEdit from "../pages/VideoForAppEdit";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -478,6 +482,42 @@ const AppRoutes = () => {
                     <Synchronisation />
                   </InsideSidebar>
                 </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <AppVideosProvider>
+                    <VideoForAppManagement />
+                  </AppVideosProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <AppVideosProvider>
+                    <VideoForAppDetails />
+                  </AppVideosProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <AppVideosProvider>
+                    <VideoForAppEdit />
+                  </AppVideosProvider>
+                </InsideSidebar>
               </ProtectedRoute>
             }
           />
