@@ -50,7 +50,11 @@ const VideoForAppDetails: React.FC = () => {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   // Convert VideoForApp titles to MangaTitles format for i18n display
-  const videoTitles: MangaTitles = video ? video.titles : [];
+  const videoTitles: MangaTitles = video ? [
+    ...(video.cn_title ? [{ i18_language: 'zh' as any, title: video.cn_title, description: '' }] : []),
+    ...(video.en_title ? [{ i18_language: 'en' as any, title: video.en_title, description: '' }] : []),
+    ...(video.hi_title ? [{ i18_language: 'hi' as any, title: video.hi_title, description: '' }] : []),
+  ] : [];
 
   useEffect(() => {
     if (video?.m3u8_path) {
@@ -194,12 +198,12 @@ const VideoForAppDetails: React.FC = () => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setModifying(true)}
-                        className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                      <Link
+                        to={`/app-videos/${video.id}/edit`}
+                        className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center"
                       >
                         <Edit3 className="w-5 h-5" />
-                      </button>
+                      </Link>
                       <button
                         onClick={() => send(video.id)}
                         className="p-2 rounded-lg bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
@@ -248,34 +252,6 @@ const VideoForAppDetails: React.FC = () => {
                   transition={{ delay: 0.4 }}
                   className="space-y-6"
                 >
-                  {/* Cover */}
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
-                    <h3 className="text-lg font-semibold mb-4">Cover</h3>
-                    <img
-                      src={video?.public_urls.coverUrl || video?.s3_urls.coverUrl || 'https://placehold.co/300x200'}
-                      alt="Cover"
-                      className="w-full rounded-lg"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
-                    <h3 className="text-lg font-semibold mb-4">Info</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <span className="font-medium">Titles:</span>
-                        <MangaTitlesViewer
-                          titles={videoTitles}
-                          titleClassName="text-base font-normal text-gray-800 dark:text-gray-200 mt-1"
-                          allowViewAll={true}
-                        />
-                      </div>
-                      <div>
-                        <span className="font-medium">Duration:</span> {video.seconds}s
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Checking */}
                   {user?.role === RoleEnum.SUPERADMIN && (
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
@@ -288,6 +264,32 @@ const VideoForAppDetails: React.FC = () => {
                       />
                     </div>
                   )}
+
+                  {/* Cover */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+                    <h3 className="text-lg font-semibold mb-4">Cover</h3>
+                    <img
+                      src={video?.public_urls.coverUrl || video?.s3_urls.coverUrl || 'https://placehold.co/300x200'}
+                      alt="Cover"
+                      className="w-full rounded-lg"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+                    <div className="space-y-4">
+                      <div>
+                        <MangaTitlesViewer
+                          titles={videoTitles}
+                          titleClassName="text-base font-normal text-gray-800 dark:text-gray-200 mt-1"
+                          allowViewAll={true}
+                        />
+                      </div>
+                      <div>
+                        <span className="font-medium">Duration:</span> {video.seconds}s
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </div>

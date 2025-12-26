@@ -1,34 +1,46 @@
 import axios from "axios";
 import { apiURL, token } from "../constant";
 
-export interface VideoForApp {
-  id: number;
-  cn_title: string;
-  en_title?: string;
-  hi_title?: string;
-  seconds: number;
-  cover?: string;
-  m3u8_path?: string;
-  creatorObj?: {
-    id: number;
-    name: string;
-    avatar?: string;
-  };
-  createdAt?: string;
-  checking?: string;
-  public_urls: {
-    temp_url: string;
-    coverUrl: string;
-    hls_url: string;
-    local_mp4_url: string;
-    local_cover_url: string;
-    local_hls_url: string;
-  };
+export interface Title {
+    title: string;
+    description?: string;
+    i18_language: string;
+    language: {
+        code: string;
+        name: string;
+    };
+}
 
-  s3_urls: {
+export interface VideoForApp {
+    id: number;
+    cn_title: string;
+    en_title?: string;
+    hi_title?: string;
+    seconds: number;
+    creator_id?: number;
+    cover?: string;
+    m3u8_path?: string;
+    creatorObj?: {
+        id: number;
+        name: string;
+        avatar?: string;
+    };
+    createdAt?: string;
+    checking?: string;
+    public_urls: {
+        temp_url: string;
+        coverUrl: string;
+        hls_url: string;
+        local_mp4_url: string;
+        local_cover_url: string;
+        local_hls_url: string;
+    };
+
+    s3_urls: {
     coverUrl: string;
     hlsUrl: string;
-  };
+    };
+    titles: Title[];
   // ...other fields as needed
 }
 
