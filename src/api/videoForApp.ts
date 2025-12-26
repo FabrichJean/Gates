@@ -91,7 +91,7 @@ export async function updateVideoForApp(
   id: number,
   payload: Partial<VideoForApp>
 ) {
-  const { data } = await axios.put<VideoForApp>(
+  return await axios.put<VideoForApp>(
     apiURL + `/videos-for-app/${id}`,
     payload,
     {
@@ -100,5 +100,4 @@ export async function updateVideoForApp(
       },
     }
   );
-  return data;
 }
