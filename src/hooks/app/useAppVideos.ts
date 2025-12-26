@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchVideoForApp } from "../../api/videoForApp";
 import type { VideoForApp } from "../../api/videoForApp";
+import { useVideoForAppContext } from "../../context/VideoForAppContext";
 
 export function UseAppVideo(id?: string) {
   const [data, setData] = useState<VideoForApp | null>(null);
@@ -18,6 +19,28 @@ export function UseAppVideo(id?: string) {
 }
 
 export function useNextAppVideo(currentId?: string) {
-  // Dummy implementation for navigation, adapt as needed
-  return { nextVideo: null, prevVideo: null, hasNext: false, hasPrev: false };
+  const ctx = useVideoForAppContext();
+  const data = ctx?.data;
+
+  console.log(data);
+  
+
+  const currentVideoIndex = data?.videos?.findIndex(
+    (vd) => vd.id === Number(currentId)
+  );
+  const hasNext =
+    currentVideoIndex !== undefined &&
+    currentVideoIndex < (data?.videos?.length || 0) - 1;
+  const hasPrev = currentVideoIndex !== undefined && currentVideoIndex > 0;
+
+  return {
+    loading: ctx?.loading,
+    nextVideo: data?.videos?.at(currentVideoIndex + 1) || null,
+    prevVideo:
+      currentVideoIndex > 0
+        ? data?.videos?.at(currentVideoIndex - 1)
+        : null,
+    hasNext,
+    hasPrev,
+  };
 }

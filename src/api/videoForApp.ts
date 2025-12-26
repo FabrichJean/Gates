@@ -9,6 +9,26 @@ export interface VideoForApp {
   seconds: number;
   cover?: string;
   m3u8_path?: string;
+  creatorObj?: {
+    id: number;
+    name: string;
+    avatar?: string;
+  };
+  createdAt?: string;
+  checking?: string;
+  public_urls: {
+    temp_url: string;
+    coverUrl: string;
+    hls_url: string;
+    local_mp4_url: string;
+    local_cover_url: string;
+    local_hls_url: string;
+  };
+
+  s3_urls: {
+    coverUrl: string;
+    hlsUrl: string;
+  };
   // ...other fields as needed
 }
 
