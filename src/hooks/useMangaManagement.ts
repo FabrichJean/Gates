@@ -4,6 +4,7 @@ import { updateManga, uploadMangaToS3 } from "../api/mangas";
 import toast from "react-hot-toast";
 import { PAGE_SIZE } from "../constant";
 import isEqual from "lodash.isequal";
+import type { Creator } from "../components/creators/CreatorList";
 
 export interface MangaFilter {
   search?: string;
@@ -27,7 +28,7 @@ export interface Manga {
   s3_cover_url?: string;
   creator?: string;
   creator_id?: number;
-  creatorObj?: { name: string; avatar?: string };
+  creatorObj?: Creator;
   total_chapters?: number;
   need_vip?: boolean;
   isDeleted?: boolean;
