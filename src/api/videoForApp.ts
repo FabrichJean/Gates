@@ -30,6 +30,7 @@ export interface VideoForApp {
     tagCategoryVideos?: { id: number; name: string }[];
     cover?: string;
     m3u8_path?: string;
+    type?: "1" | `2`;
     creatorObj?: {
         id: number;
         name: string;

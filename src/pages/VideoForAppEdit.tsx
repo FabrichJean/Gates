@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { ChevronDown, Film } from "lucide-react";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
@@ -93,6 +94,7 @@ function VideoForAppEdit() {
   const [category, setCategory] = useState<Category | null>(null);
   const [subcategory, setSubCategory] = useState<SubCategory | null>(null);
   const [platform, setPlatform] = useState<Platform | null>(null);
+  const [videoType, setVideoType] = useState<string>("long");
 
   // Tag Category Videos states
   const [selectedTags, setSelectedTags] = useState<(number | { name: string })[]>([]);
@@ -104,6 +106,9 @@ function VideoForAppEdit() {
     }
     if (video?.sub_categories) {
       setSubCategory(video.sub_categories.find(sub => sub.code === "en"));
+    }
+    if (video?.type !== undefined) {
+      setVideoType(video.type === 1 ? "short" : "long");
     }
     if (video?.tagCategoryVideos) {
       setSelectedTags(video.tagCategoryVideos.map(tag => tag.id));
@@ -149,6 +154,7 @@ function VideoForAppEdit() {
         cn_title: titlesData.cn_title,
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
+        type: videoType === "short" ? 1 : 2,
         tag_category_ids: selectedTags,
       });
 
@@ -211,6 +217,24 @@ function VideoForAppEdit() {
                 defaultValue={platform}
                 onSelect={setPlatform}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Video Type
+              </label>
+              <div className="relative">
+                <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <select
+                  className="w-full appearance-none pl-10 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
+                  value={videoType}
+                  onChange={(e) => setVideoType(e.target.value)}
+                >
+                  <option value="short">Short Video</option>
+                  <option value="long">Long Video</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
 
             <div>

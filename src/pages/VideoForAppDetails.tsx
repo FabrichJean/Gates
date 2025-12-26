@@ -341,6 +341,14 @@ const VideoForAppDetails: React.FC = () => {
                         <span className="font-medium">Platform:</span> {getPlatformDisplayName(video.plateform)}
                       </div>
                       <div>
+                        <span className="font-medium">Video Type:</span>{' '}
+                        {video.type === "1" ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 ml-1">Short</span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ml-1">Long</span>
+                        )}
+                      </div>
+                      <div>
                         <span className="font-medium">Tags:</span>
                         {video.tagCategoryVideos && video.tagCategoryVideos.length > 0 ? (
                           <div className="flex flex-wrap gap-1 mt-1">
