@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { apiURL } from '../constant';
+import axios from "axios";
+import { apiURL, token } from "../constant";
 
 export interface VideoForApp {
   id: number;
@@ -20,17 +20,47 @@ export interface VideoForAppListResponse {
   videos: VideoForApp[];
 }
 
-export async function fetchVideoForAppList(params: { page?: number; limit?: number; search?: string }) {
-  const { data } = await axios.get<VideoForAppListResponse>(apiURL+'/videos-for-app', { params });
+export async function fetchVideoForAppList(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
+  const { data } = await axios.get<VideoForAppListResponse>(
+    apiURL + "/videos-for-app",
+    {
+      params,
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
   return data;
 }
 
 export async function fetchVideoForApp(id: number) {
-  const { data } = await axios.get<VideoForApp>(apiURL+`/videos-for-app/${id}`);
+  const { data } = await axios.get<VideoForApp>(
+    apiURL + `/videos-for-app/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
   return data;
 }
 
-export async function updateVideoForApp(id: number, payload: Partial<VideoForApp>) {
-  const { data } = await axios.put<VideoForApp>(apiURL+`/videos-for-app/${id}`, payload);
+export async function updateVideoForApp(
+  id: number,
+  payload: Partial<VideoForApp>
+) {
+  const { data } = await axios.put<VideoForApp>(
+    apiURL + `/videos-for-app/${id}`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
   return data;
 }

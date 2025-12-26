@@ -59,6 +59,7 @@ import { AppVideosProvider } from "../context/AppVideosContext";
 import VideoForAppManagement from "../pages/VideoForAppManagement";
 import VideoForAppDetails from "../pages/VideoForAppDetails";
 import VideoForAppEdit from "../pages/VideoForAppEdit";
+import { VideoForAppProvider } from "../context/VideoForAppContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -490,9 +491,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <AppVideosProvider>
+                  <VideoForAppProvider>
                     <VideoForAppManagement />
-                  </AppVideosProvider>
+                  </VideoForAppProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }

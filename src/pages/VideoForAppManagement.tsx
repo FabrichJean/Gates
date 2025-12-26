@@ -1,3 +1,4 @@
+import React from "react";
 import type { VideoForApp } from "../api/videoForApp";
 import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
@@ -8,6 +9,9 @@ import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 import { updateVideoForApp } from "../api/videoForApp";
+
+
+
 
 const VideoForAppManagement = () => {
   const { user } = useAuth();
@@ -29,20 +33,24 @@ const VideoForAppManagement = () => {
     reFetch,
   } = ctx;
 
-  // For VideoForApp, loading is boolean, so headerLoading is just loading
-  const headerLoading = loading;
+  // Listen for custom event to trigger reFetch
+  React.useEffect(() => {
+    const handler = () => reFetch();
+    window.addEventListener('request-videos-refetch', handler);
+    return () => window.removeEventListener('request-videos-refetch', handler);
+  }, [reFetch]);
 
   return (
     <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-2 pb-0">
       <VideoHeader
         user={user}
-  filters={filters as any}
+        filters={filters as any}
         setFilters={setFilters}
         params={{ status: "all", page, ...params }}
-  loading={undefined}
+        loading={undefined}
         onMutate={mutate}
         onWebApp={toWebapp}
-  scope="videos"
+        scope="videos"
       />
 
       {checkObjectContent(filters).hasContent ? (

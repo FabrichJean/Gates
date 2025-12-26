@@ -32,7 +32,7 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setLoading(true);
     fetchVideoForAppList({ page, ...filters })
       .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit }))
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false));    
   }, [page, filters]);
 
   React.useEffect(() => {
