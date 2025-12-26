@@ -21,6 +21,7 @@ import { useAuth } from "../hooks/useAuth";
 import Pagination from "../components/Pagination";
 import { PAGE_SIZE } from "../constant";
 import { useAudiosContext } from "../context/AudiosContext";
+import AudioChecking from "../components/AudioChecking";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -332,7 +333,13 @@ const Audios: React.FC = () => {
                             {audio.creator || audio.creatorObj?.name || "N/A"}
                           </span>
                         </td>
-                        <td className="px-6 py-4">{getCheckingBadge(audio.checking)}</td>
+                        <td className="px-6 py-4">
+                          {/* Moderation dropdown for audio checking */}
+                          <React.Suspense fallback={getCheckingBadge(audio.checking)}>
+                            {/** @ts-ignore-next-line */}
+                            <AudioChecking audio={audio} index={index} reFetch={reFetch} />
+                          </React.Suspense>
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Link
@@ -417,7 +424,11 @@ const Audios: React.FC = () => {
                       <Music className="w-20 h-20 text-white/30" />
                     )}
                     <div className="absolute top-3 right-3">
-                      {getCheckingBadge(audio.checking)}
+                      {/* Moderation dropdown for audio checking */}
+                      <React.Suspense fallback={getCheckingBadge(audio.checking)}>
+                        {/** @ts-ignore-next-line */}
+                        <AudioChecking audio={audio} index={index} reFetch={reFetch} />
+                      </React.Suspense>
                     </div>
                   </div>
 
