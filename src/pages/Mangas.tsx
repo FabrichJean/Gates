@@ -454,19 +454,26 @@ const Mangas: React.FC = () => {
 
                             {/* Creator */}
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-2">
-                                {manga.creatorObj?.avatar && (
+                              <div className="flex items-center gap-3">
+                                {manga?.creatorObj?.avatar ? (
                                   <img
                                     src={manga.creatorObj.avatar}
                                     alt={manga.creatorObj.name}
-                                    className="w-6 h-6 rounded-full object-cover"
+                                    className="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                                   />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">
+                                      {manga.creatorObj?.name?.charAt(0) || 'U'}
+                                    </span>
+                                  </div>
                                 )}
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  {manga.creatorObj?.name ||
-                                    manga.creator ||
-                                    "-"}
-                                </span>
+                                <Link
+                                  to={`/creators/${manga?.creatorObj?.id}`}
+                                  className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                                >
+                                  {manga?.creatorObj?.name ?? manga.creator ?? 'Unknown'}
+                                </Link>
                               </div>
                             </td>
 
