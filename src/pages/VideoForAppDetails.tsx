@@ -35,6 +35,8 @@ import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
 import { apiURL } from '../constant';
 import { Link, useParams } from 'react-router-dom';
+import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
+import type { MangaTitles } from "../types/mangaTitles";
 
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -46,6 +48,9 @@ const VideoForAppDetails: React.FC = () => {
 
   const [modifying, setModifying] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  // Convert VideoForApp titles to MangaTitles format for i18n display
+  const videoTitles: MangaTitles = video ? video.titles : [];
 
   useEffect(() => {
     if (video?.m3u8_path) {
@@ -256,15 +261,14 @@ const VideoForAppDetails: React.FC = () => {
                   {/* Info */}
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
                     <h3 className="text-lg font-semibold mb-4">Info</h3>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <div>
-                        <span className="font-medium">CN Title:</span> {video.cn_title}
-                      </div>
-                      <div>
-                        <span className="font-medium">EN Title:</span> {video.en_title}
-                      </div>
-                      <div>
-                        <span className="font-medium">HI Title:</span> {video.hi_title}
+                        <span className="font-medium">Titles:</span>
+                        <MangaTitlesViewer
+                          titles={videoTitles}
+                          titleClassName="text-base font-normal text-gray-800 dark:text-gray-200 mt-1"
+                          allowViewAll={true}
+                        />
                       </div>
                       <div>
                         <span className="font-medium">Duration:</span> {video.seconds}s
