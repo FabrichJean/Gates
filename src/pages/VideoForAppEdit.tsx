@@ -15,11 +15,17 @@ import type { Platform } from "../hooks/usePlatform";
 import { UseAppVideo } from "../hooks/app/useAppVideos";
 import { updateVideoForApp } from "../api/videoForApp";
 import { usePlatformReactive } from "../hooks/usePlatform";
+import { useVideoForAppContext } from "../context/VideoForAppContext";
 
 function VideoForAppEdit() {
   const { id: videoId } = useParams<{ id: string }>();
   const { data: video } = UseAppVideo(videoId);
   const { data: platforms } = usePlatformReactive();
+
+  const ctx = useVideoForAppContext();
+    if (!ctx) return null;
+  
+    const {reFetch} = ctx;
 
   const navigate = useNavigate();
 
@@ -175,6 +181,8 @@ function VideoForAppEdit() {
       await updateVideoForApp(targetId, payload);
 
       toast.success("✅ Updated successfully!");
+      // Trigger re-fetch of video list
+      reFetch();
       navigate(`/app-videos/${video.id}`);
     } catch (err: unknown) {
       console.error(err);
