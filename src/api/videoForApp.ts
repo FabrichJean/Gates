@@ -29,6 +29,7 @@ export interface VideoForApp {
     sub_categories?: (SubCategory & {code : string})[];
     tagCategoryVideos?: { id: number; name: string }[];
     cover?: string;
+    need_vip?: boolean;
     m3u8_path?: string;
     type?: "1" | `2`;
     creatorObj?: {

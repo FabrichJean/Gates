@@ -99,6 +99,9 @@ function VideoForAppEdit() {
   // Tag Category Videos states
   const [selectedTags, setSelectedTags] = useState<(number | { name: string })[]>([]);
 
+  // needVip state
+  const [needVip, setNeedVip] = useState<boolean>(false);
+
   // Update category, subcategory, platform and tags when video data loads
   useEffect(() => {
     if (video?.categories) {
@@ -108,10 +111,13 @@ function VideoForAppEdit() {
       setSubCategory(video.sub_categories.find(sub => sub.code === "en"));
     }
     if (video?.type !== undefined) {
-      setVideoType(video.type === 1 ? "short" : "long");
+      setVideoType(video.type === "1" ? "short" : "long");
     }
     if (video?.tagCategoryVideos) {
       setSelectedTags(video.tagCategoryVideos.map(tag => tag.id));
+    }
+    if (typeof video?.need_vip === 'boolean') {
+      setNeedVip(video.need_vip);
     }
   }, [video]);
 
@@ -154,8 +160,9 @@ function VideoForAppEdit() {
         cn_title: titlesData.cn_title,
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
-        type: videoType === "short" ? 1 : 2,
+  type: videoType === "short" ? "1" : "2",
         tag_category_ids: selectedTags,
+        need_vip: needVip,
       });
 
       toast.success("✅ Updated successfully!");
@@ -235,6 +242,24 @@ function VideoForAppEdit() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                VIP
+              </label>
+              <button
+                type="button"
+                onClick={() => setNeedVip((v) => !v)}
+                className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"}`}
+                />
+              </button>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                {needVip ? 'true' : 'false'}
+              </span>
             </div>
 
             <div>

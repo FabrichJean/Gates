@@ -349,6 +349,14 @@ const VideoForAppDetails: React.FC = () => {
                         )}
                       </div>
                       <div>
+                        <span className="font-medium">VIP:</span>{' '}
+                        {video.need_vip ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 ml-1">VIP</span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400 ml-1">No VIP</span>
+                        )}
+                      </div>
+                      <div>
                         <span className="font-medium">Tags:</span>
                         {video.tagCategoryVideos && video.tagCategoryVideos.length > 0 ? (
                           <div className="flex flex-wrap gap-1 mt-1">
