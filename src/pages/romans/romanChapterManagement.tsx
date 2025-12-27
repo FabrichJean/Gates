@@ -50,6 +50,33 @@ interface RomanTitle {
     };
 }
 
+interface ChapterTitleItem {
+    id?: number;
+    chapter_id?: number;
+    i18_language: string;
+    title: string;
+    createdAt?: string;
+    updatedAt?: string;
+    language?: {
+        code: string;
+        name: string;
+    };
+}
+
+interface ChapterContentItem {
+    id?: number;
+    chapter_id?: number;
+    i18_language: string;
+    content: string;
+    nb_words?: number;
+    createdAt?: string;
+    updatedAt?: string;
+    language?: {
+        code: string;
+        name: string;
+    };
+}
+
 interface Roman {
     id: number;
     ref: string;
@@ -74,9 +101,10 @@ interface RomanChapter {
     roman_id: number;
     chapter_number: number;
     // multilingual fields coming from the API
-    titles?: Array<{ i18_language: string; title: string }>;
-    contents?: Array<{ i18_language: string; content: string }>;
-    word_count: number;
+    titles?: ChapterTitleItem[];
+    contents?: ChapterContentItem[];
+    // backend may provide aggregated `word_count` or only per-content `nb_words`
+    word_count?: number;
     isPublished: boolean;
     createdAt: string;
     updatedAt: string;
@@ -370,11 +398,39 @@ const RomanChapterManagement: React.FC = () => {
         return title?.title || roman.titles[0]?.title || roman.ref;
     };
 
+    function getChapterWordCount(chapter: RomanChapter) {
+        if (typeof chapter.word_count === "number") return chapter.word_count;
+        if (chapter.contents && chapter.contents.length) {
+            return chapter.contents.reduce((s, item) => {
+                if (typeof item.nb_words === "number") return s + item.nb_words;
+                if (item.content) return s + item.content.trim().split(/\s+/).filter(Boolean).length;
+                return s;
+            }, 0);
+        }
+        // fallback if single content string exists on the chapter object
+        const anyContent = (chapter as any).content;
+        if (typeof anyContent === "string") return anyContent.trim().split(/\s+/).filter(Boolean).length;
+        return 0;
+    }
+
+    // compute word count for a TranslatedText object; if `lang` provided, return count for that language
+    function computeTranslatedContentsWordCount(contents: TranslatedText | undefined, lang?: string) {
+        if (!contents) return 0;
+        if (lang) {
+            const txt = (contents as any)[lang] || "";
+            if (!txt) return 0;
+            return txt.trim().split(/\s+/).filter(Boolean).length;
+        }
+        const text = Object.values(contents).join(" ").trim();
+        if (!text) return 0;
+        return text.split(/\s+/).filter(Boolean).length;
+    }
+
     const stats = {
         total: chapters.length,
         published: chapters.filter((c) => c.isPublished).length,
         draft: chapters.filter((c) => !c.isPublished).length,
-        totalWords: chapters.reduce((sum, c) => sum + c.word_count, 0),
+        totalWords: chapters.reduce((sum, c) => sum + getChapterWordCount(c), 0),
     };
 
     if (loading) {
@@ -523,9 +579,6 @@ const RomanChapterManagement: React.FC = () => {
                                             Titre du Chapitre
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
-                                            Mots
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                                             Créateur
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
@@ -566,14 +619,6 @@ const RomanChapterManagement: React.FC = () => {
                                                     <div className="text-sm font-medium text-gray-900 dark:text-gray-100 max-w-xs truncate">
                                                         {getChapterTitle(chapter)}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                                <div className="flex items-center gap-2">
-                                                    <AlignLeft className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                                                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                                                        {chapter.word_count.toLocaleString()}
-                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 border border-gray-300 dark:border-gray-600">
@@ -740,7 +785,7 @@ const RomanChapterManagement: React.FC = () => {
                                             <BookOpen className="w-4 h-4" />
                                             Roman
                                         </div>
-                                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm underline truncate cursor-pointer">
+                                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
                                             {getRomanTitle(chapter.roman)}
                                         </div>
                                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -750,11 +795,8 @@ const RomanChapterManagement: React.FC = () => {
 
                                     {/* Stats */}
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                                        <div className="flex items-center gap-2">
-                                            <AlignLeft className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                                                {chapter.word_count.toLocaleString()} mots
-                                            </span>
+                                        <div className="">
+                                        <p>Activate</p>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                             <Calendar className="w-3 h-3" />
@@ -878,7 +920,7 @@ const RomanChapterManagement: React.FC = () => {
                                         )}
 
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {Object.values(createFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
+                                            Nombre de mots: {computeTranslatedContentsWordCount(createFormData.contents, createSelectedLanguages[0])}
                                         </p>
                                     </div>
 
@@ -1013,7 +1055,7 @@ const RomanChapterManagement: React.FC = () => {
                                         )}
 
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {Object.values(editFormData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
+                                            Nombre de mots: {computeTranslatedContentsWordCount(editFormData.contents, editSelectedLanguages[0])}
                                         </p>
                                     </div>
 

@@ -34,9 +34,10 @@ interface RomanChapter {
     id: number;
     roman_id: number;
     chapter_number: number;
-    titles?: Array<{ i18_language: string; title: string }>;
-    contents?: Array<{ i18_language: string; content: string }>;
-    word_count: number;
+    titles?: Array<{ i18_language: string; title: string; language?: { code: string; name: string } }>;
+    contents?: Array<{ i18_language: string; content: string; nb_words?: number; language?: { code: string; name: string } }>;
+    // word_count may be provided by backend or computed from contents
+    word_count?: number;
     isPublished: boolean;
     createdAt: string;
     updatedAt: string;
@@ -78,6 +79,36 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
             return c?.content || contents[0].content;
         }
         return "";
+    };
+
+    const getChapterWordCount = (chapter: RomanChapter, lang?: string) => {
+        // if a language is specified, prefer the nb_words for that language
+        if (lang) {
+            const contents = (chapter as any).contents as Array<{ i18_language: string; content: string; nb_words?: number }> | undefined;
+            if (contents && contents.length) {
+                const item = contents.find((c) => c.i18_language === lang);
+                if (item) {
+                    if (typeof item.nb_words === "number") return item.nb_words;
+                    if (item.content) return item.content.trim().split(/\s+/).filter(Boolean).length;
+                }
+            }
+        }
+
+        // fallback to aggregated value if provided
+        if (typeof chapter.word_count === "number") return chapter.word_count;
+
+        const contents = (chapter as any).contents as Array<{ i18_language: string; content: string; nb_words?: number }> | undefined;
+        if (contents && contents.length) {
+            return contents.reduce((s, item) => {
+                if (typeof item.nb_words === "number") return s + item.nb_words;
+                if (item.content) return s + item.content.trim().split(/\s+/).filter(Boolean).length;
+                return s;
+            }, 0);
+        }
+
+        const anyContent = (chapter as any).content;
+        if (typeof anyContent === "string") return anyContent.trim().split(/\s+/).filter(Boolean).length;
+        return 0;
     };
 
     const availableLangs = useMemo(() => {
@@ -143,16 +174,16 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                     </div>
                     <div className="flex items-center gap-2">
                         {availableLangs.length > 0 && (
-                            <div className="ml-4 relative inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-2 py-1">
+                            <div className="ml-4 relative inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-2 py-1 focus-within:outline-none focus-within:ring-0">
                                 <Globe className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                                 <select
                                     value={selectedLang}
                                     onChange={(e) => setSelectedLang(e.target.value)}
                                     aria-label="Select language"
-                                    className="appearance-none bg-transparent border-none text-sm pr-6 pl-1 py-0 text-gray-700 dark:text-gray-200 cursor-pointer"
+                                    className="appearance-none bg-transparent border-none text-sm pr-6 pl-1 py-0 text-gray-700 dark:text-gray-200 cursor-pointer focus:outline-none focus:ring-0"
                                 >
                                     {availableLangs.map((l) => (
-                                        <option key={l.code} value={l.code}>
+                                        <option key={l.code} value={l.code} className="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                                             {l.label ? `${l.label} (${l.code})` : l.code}
                                         </option>
                                     ))}
@@ -168,18 +199,19 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                         <X className="w-5 h-5 dark:text-gray-300" />
                     </button>
                 </div>
-
+                
+                {/* information d'un chapitre */}
                 <div className="p-6 space-y-6">
                     {/* Metadata */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                         <div>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Numéro</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chapter</p>
                             <p className="text-sm font-semibold dark:text-gray-100">#{chapter.chapter_number}</p>
                         </div>
                         <div>
                             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Mots</p>
                             <p className="text-sm font-semibold dark:text-gray-100">
-                                {chapter.word_count.toLocaleString()}
+                                {getChapterWordCount(chapter, selectedLang).toLocaleString()}
                             </p>
                         </div>
                         <div>

@@ -80,7 +80,11 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
         }
     };
 
-    const wordCount = Object.values(formData.contents || {}).join(' ').trim().split(/\s+/).filter((w) => w).length;
+    const wordCounts: Record<string, number> = Object.entries(formData.contents || {}).reduce((acc, [lang, text]) => {
+        const count = text ? String(text).trim().split(/\s+/).filter(Boolean).length : 0;
+        acc[lang] = count;
+        return acc;
+    }, {} as Record<string, number>);
 
     return (
         <AnimatePresence>
@@ -154,9 +158,31 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
                                     />
                                 )}
 
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                    Nombre de mots: {Object.values(formData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
-                                </p>
+                                <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    {selectedLanguages && selectedLanguages.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {selectedLanguages.map((lang) => (
+                                                <div key={lang} className="flex items-center gap-2">
+                                                    <span className="font-medium">{lang}:</span>
+                                                    <span>{wordCounts[lang] ?? 0} mots</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            {Object.entries(wordCounts).length === 0 ? (
+                                                <div>Nombre de mots: 0</div>
+                                            ) : (
+                                                Object.entries(wordCounts).map(([lang, count]) => (
+                                                    <div key={lang} className="flex items-center gap-2">
+                                                        <span className="font-medium">{lang}:</span>
+                                                        <span>{count} mots</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Published Status */}

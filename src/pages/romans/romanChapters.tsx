@@ -127,7 +127,9 @@ const RomanChaptersPage = () => {
                                     </div>
                                     <div className="mt-4 flex items-center justify-between">
                                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            <div>{c.word_count?.toLocaleString() || 0} words</div>
+                                            <div className="">
+                                                
+                                            </div>
                                             <div className="mt-1">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</div>
                                         </div>
                                         <div className="flex items-center gap-2">
