@@ -324,6 +324,12 @@ function Sidebar({
             <img src="/mangas.png" alt="" className="w-5 h-5"/>
           }
         />
+        <NavLink
+          to="/app-videos"
+          name="app-videos"
+          label="Video For App"
+          icon={BiLogoInternetExplorer}
+        />
 
         {user?.role === RoleEnum.SUPERADMIN && (
           <>
@@ -341,12 +347,6 @@ function Sidebar({
               name="bot-videos"
               label="Video Bot"
               icon={RiRobot2Line}
-            />
-            <NavLink
-              to="/app-videos"
-              name="app-videos"
-              label="Video For App"
-              icon={BiLogoInternetExplorer}
             />
             <NavLink
               to="/bot-posts"
