@@ -20,8 +20,6 @@ export interface VideoForApp {
     hi_title?: string;
     seconds: number;
     creator_id?: number;
-    category_id?: number;
-    sub_category_id?: number;
     plateform_id?: number;
     plateform?: { id: number; name: string };
     tag_category_ids?: (number | { name: string })[];

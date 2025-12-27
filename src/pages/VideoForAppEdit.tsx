@@ -151,19 +151,28 @@ function VideoForAppEdit() {
         return;
       }
 
-      await updateVideoForApp(targetId, {
+      // Only include category_id and sub_category_id if changed (compare to 'en' code)
+      const payload: any = {
         seconds: duration,
         creator_id: creatorId,
-        category_id: category?.id,
-        sub_category_id: subcategory?.id,
         plateform_id: platform?.id,
         cn_title: titlesData.cn_title,
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
-  type: videoType === "short" ? "1" : "2",
+        type: videoType === "short" ? "1" : "2",
         tag_category_ids: selectedTags,
         need_vip: needVip,
-      });
+      };
+      // Find the 'en' category and subcategory id from video data
+      const originalCategoryId = video?.categories?.find(cat => cat.code === 'en')?.id;
+      const originalSubCategoryId = video?.sub_categories?.find(sub => sub.code === 'en')?.id;
+      if (category?.id && category?.id !== originalCategoryId) {
+        payload.category_id = category.id;
+      }
+      if (subcategory?.id && subcategory?.id !== originalSubCategoryId) {
+        payload.sub_category_id = subcategory.id;
+      }
+      await updateVideoForApp(targetId, payload);
 
       toast.success("✅ Updated successfully!");
       navigate(`/app-videos/${video.id}`);
