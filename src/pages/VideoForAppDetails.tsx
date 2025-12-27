@@ -25,6 +25,8 @@ import { apiURL } from '../constant';
 import { Link, useParams } from 'react-router-dom';
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
+import ReactHlsPlayer from 'react-hls-player';
+
 
 // Helper function to get category display name
 const getCategoryDisplayName = (categories?: Array<{code: string, name: string}>): string => {
@@ -66,6 +68,7 @@ const VideoForAppDetails: React.FC = () => {
 
   const [modifying, setModifying] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const hlsPlayerRef = useRef<HTMLVideoElement>(null);
 
   // Platform data
   const { data: platforms } = usePlatformReactive();
@@ -81,11 +84,9 @@ const VideoForAppDetails: React.FC = () => {
   useEffect(() => {
     if (video?.m3u8_path) {
       // Fetch the M3U8 content from the backend play endpoint using axios
-      axios.post(apiURL+'/videos-for-app/play', { url: video.m3u8_path }, { responseType: 'text' })
+      axios.post(apiURL+'/videos-for-app/play', { url: video.m3u8_path, id: video.id })
         .then(response => {
-          const blob = new Blob([response.data], { type: 'application/vnd.apple.mpegurl' });
-          const url = URL.createObjectURL(blob);
-          setVideoSrc(url);
+          setVideoSrc(response.data.local_hls_url);
         })
         .catch(err => console.error('Failed to load M3U8', err));
     }
@@ -241,13 +242,15 @@ const VideoForAppDetails: React.FC = () => {
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                     <div className="aspect-video bg-black relative">
                       {videoSrc ? (
-                        <video
-                          controls
-                          className="w-full h-full"
+                        <ReactHlsPlayer
+                          playerRef={hlsPlayerRef}
+                          src={videoSrc}
+                          autoPlay={true}
+                          controls={true}
+                          width="100%"
+                          height="auto"
                           poster={video.cover || undefined}
-                        >
-                          <source src={videoSrc} type="application/x-mpegURL" />
-                        </video>
+                        />
                       ) : (
                         <div className="flex items-center justify-center h-full text-white">
                           Loading video...
