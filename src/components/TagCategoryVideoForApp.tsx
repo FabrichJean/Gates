@@ -91,7 +91,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
         });
         return tag.name.toLowerCase().includes(tagQuery.toLowerCase()) && !isSelected;
       });
-      setSuggestions(filtered.slice(0, 10)); // Limit to 10 suggestions
+      setSuggestions(filtered); // Limit to 10 suggestions
     } else {
       setSuggestions([]);
     }
@@ -164,7 +164,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
                   });
                   return !isSelected;
                 });
-                setSuggestions(availableTags.slice(0, 10));
+                setSuggestions(availableTags);
               }
             }}
             onBlur={() => {

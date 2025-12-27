@@ -9,6 +9,7 @@ import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 import { updateVideoForApp } from "../api/videoForApp";
+import VideoForAppFilter from "../components/VideoForAppFilter";
 
 
 
@@ -42,7 +43,7 @@ const VideoForAppManagement = () => {
 
   return (
     <div className="flex flex-col gap-2 min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 p-2 pb-0">
-      <VideoHeader
+      {/* <VideoHeader
         user={user}
         filters={filters as any}
         setFilters={setFilters}
@@ -51,6 +52,23 @@ const VideoForAppManagement = () => {
         onMutate={mutate}
         onWebApp={toWebapp}
         scope="videos"
+      /> */}
+
+      {/* Filter Button */}
+      <button
+        className="btn btn-outline btn-sm w-fit mb-2"
+        onClick={() => {
+          const modal = document.getElementById("search_modal_52") as HTMLDialogElement | null;
+          modal?.showModal();
+        }}
+      >
+        Filter
+      </button>
+      <VideoForAppFilter
+        filters={filters}
+        setFilters={setFilters}
+        params={params}
+        onSubmit={mutate}
       />
 
       {checkObjectContent(filters).hasContent ? (
@@ -77,6 +95,7 @@ const VideoForAppManagement = () => {
                   reFetchFn={reFetch}
                   detailsPath="/app-videos"
                   convertToMp4Fn={undefined}
+                  hideSend={true}
                 />
               ))}
             </tbody>

@@ -113,7 +113,7 @@ const VideoActions = ({
 
   return (
     <div className="flex items-center justify-center gap-2">
-      {user?.role === RoleEnum.SUPERADMIN && (
+      {user?.role === RoleEnum.SUPERADMIN && onSend && (
         <>
           {/* Main Action Button - Send or Status */}
           {!isProcessing && (

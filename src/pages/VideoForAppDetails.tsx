@@ -15,22 +15,9 @@ import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import { usePlatformReactive } from "../hooks/usePlatform";
 import {
-  Play,
   Edit3,
-  Send,
-  X,
   ChevronLeft,
   ChevronRight,
-  Film,
-  Tag,
-  Globe,
-  Clock,
-  Upload,
-  Image,
-  ChevronDown,
-  Plus,
-  Loader2,
-  Save,
 } from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
@@ -116,18 +103,6 @@ const VideoForAppDetails: React.FC = () => {
   const alert = createQuickAlert(showAlert);
 
   useSocketSend(reFetch);
-
-  const send = async (videoId: number) => {
-    // Implement send logic if needed
-    toast.success("✅ Send action");
-    reFetch();
-  };
-
-  const cancel = async (videoId: number) => {
-    // Implement cancel logic if needed
-    toast.success("✅ Cancel action");
-    reFetch();
-  };
 
   if (!video)
     return (
@@ -247,12 +222,6 @@ const VideoForAppDetails: React.FC = () => {
                       >
                         <Edit3 className="w-5 h-5" />
                       </Link>
-                      <button
-                        onClick={() => send(video.id)}
-                        className="p-2 rounded-lg bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
-                      >
-                        <Send className="w-5 h-5" />
-                      </button>
                     </div>
                   </motion.div>
                 </div>
