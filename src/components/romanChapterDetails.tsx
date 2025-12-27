@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Globe, ChevronDown } from "lucide-react";
 
 interface RomanTitle {
     title: string;
@@ -143,17 +143,22 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                     </div>
                     <div className="flex items-center gap-2">
                         {availableLangs.length > 0 && (
-                            <select
-                                value={selectedLang}
-                                onChange={(e) => setSelectedLang(e.target.value)}
-                                className="ml-4 px-2 py-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm rounded"
-                            >
-                                {availableLangs.map((l) => (
-                                    <option key={l.code} value={l.code}>
-                                        {l.label ? `${l.label} (${l.code})` : l.code}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="ml-4 relative inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-2 py-1">
+                                <Globe className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                                <select
+                                    value={selectedLang}
+                                    onChange={(e) => setSelectedLang(e.target.value)}
+                                    aria-label="Select language"
+                                    className="appearance-none bg-transparent border-none text-sm pr-6 pl-1 py-0 text-gray-700 dark:text-gray-200 cursor-pointer"
+                                >
+                                    {availableLangs.map((l) => (
+                                        <option key={l.code} value={l.code}>
+                                            {l.label ? `${l.label} (${l.code})` : l.code}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
                         )}
                     </div>
                     <button

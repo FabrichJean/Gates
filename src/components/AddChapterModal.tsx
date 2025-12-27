@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Loader2, FileText } from "lucide-react";
+import { LanguageSelector } from "./LanguageSelector";
+import { I18nContentFields } from "./I18nComponents";
 import toast from "react-hot-toast";
 import { createRomanChapterApi } from "../api/romanChapter";
 import I18nField from "./I18nField";
@@ -34,6 +36,7 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
         isPublished: false,
     });
     const [submitting, setSubmitting] = useState(false);
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["en"]);
 
     const handleSubmit = async () => {
         // prepare arrays like in romanChapterManagement
@@ -42,7 +45,11 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
             .filter((t) => t.title && t.title.trim().length > 0);
 
         const contentsArray = Object.entries(formData.contents || {})
-            .map(([i18_language, content]) => ({ i18_language, content }))
+            .map(([i18_language, content]) => ({
+                i18_language,
+                content,
+                nb_words: content ? content.trim().split(/\s+/).filter(Boolean).length : 0,
+            }))
             .filter((c) => c.content && c.content.trim().length > 0);
 
         if (titlesArray.length === 0 || contentsArray.length === 0 || !formData.chapter_number) {
@@ -123,32 +130,32 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
                                 />
                             </div>
 
-                            {/* Title (i18n) */}
+                            {/* Titles & Content with language selector */}
                             <div>
-                                <I18nField
-                                    value={formData.titles}
-                                    onChange={(titles) => setFormData({ ...formData, titles })}
-                                    label="Titre du Chapitre"
-                                    fieldType="input"
-                                    required={true}
+                                <LanguageSelector
+                                    selectedLanguages={selectedLanguages}
+                                    onChange={setSelectedLanguages}
+                                    maxLanguages={9}
+                                    className="mb-3"
                                 />
-                            </div>
 
-                            {/* Content (i18n) */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Contenu <span className="text-red-500 dark:text-red-400">*</span>
-                                </label>
-                                <I18nField
-                                    value={formData.contents}
-                                    onChange={(contents) => setFormData({ ...formData, contents })}
-                                    label="Contenu"
-                                    fieldType="textarea"
-                                    required={true}
-                                    rows={12}
-                                />
+                                {selectedLanguages.length > 0 && (
+                                    <I18nContentFields
+                                        title={formData.titles}
+                                        description={formData.contents}
+                                        onTitleChange={(titles) => setFormData({ ...formData, titles })}
+                                        onDescriptionChange={(contents) => setFormData({ ...formData, contents })}
+                                        onBothChange={(titles, contents) => setFormData({ ...formData, titles, contents })}
+                                        titleRequired={true}
+                                        descriptionRequired={true}
+                                        supportedLanguages={selectedLanguages}
+                                        showAutoFill={true}
+                                        page="roman"
+                                    />
+                                )}
+
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                    Nombre de mots: {wordCount}
+                                    Nombre de mots: {Object.values(formData.contents || {}).join(' ').trim().split(/\s+/).filter(w => w).length}
                                 </p>
                             </div>
 

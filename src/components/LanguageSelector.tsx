@@ -2,7 +2,7 @@
  * Composant pour sélectionner les langues à utiliser pour les titres
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Check, Plus, X } from 'lucide-react';
 import type { Language } from '../api/languages';
@@ -24,6 +24,24 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const [availableLanguages, setAvailableLanguages] = useState<Language[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // close when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (rootRef.current && !rootRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     fetchLanguages();
@@ -59,7 +77,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div ref={rootRef} className={`space-y-3 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -180,3 +198,22 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     </div>
   );
 };
+
+// Close dropdown when clicking outside
+// function useOutsideClose(ref: React.RefObject<HTMLDivElement>, isOpen: boolean, onClose: () => void) {
+//   useEffect(() => {
+//     if (!isOpen) return;
+//     const handleOutside = (e: MouseEvent | TouchEvent) => {
+//       const target = e.target as Node;
+//       if (ref.current && !ref.current.contains(target)) {
+//         onClose();
+//       }
+//     };
+//     document.addEventListener('mousedown', handleOutside);
+//     document.addEventListener('touchstart', handleOutside);
+//     return () => {
+//       document.removeEventListener('mousedown', handleOutside);
+//       document.removeEventListener('touchstart', handleOutside);
+//     };
+//   }, [ref, isOpen, onClose]);
+// }

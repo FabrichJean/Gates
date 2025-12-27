@@ -158,9 +158,6 @@ const RomansManagement = () => {
                             </div>
                         )}
                         <div className="absolute top-3 right-3 flex flex-col gap-1 items-end">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mapStatus(roman))}`}>
-                                {mapStatus(roman)}
-                            </span>
                             {/* Processing Status Badge */}
                             {roman.processing && (
                                 <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
@@ -315,7 +312,7 @@ const RomansManagement = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white" title={roman.ref}>
+                                        <p className="font-medium text-gray-900 dark:text-white text-nowrap" title={roman.ref}>
                                             {truncateText(roman.ref, 20)}
                                         </p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -347,11 +344,11 @@ const RomansManagement = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        <span className="text-sm font-medium text-gray-900 text-nowrap dark:text-gray-100">
                                             {roman.category?.name || "-"}
                                         </span>
                                         {roman.subCategory?.name && (
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            <span className="text-xs text-gray-500 text-nowrap dark:text-gray-400">
                                                 {roman.subCategory.name}
                                             </span>
                                         )}
@@ -364,11 +361,11 @@ const RomansManagement = () => {
                                     <div className="flex flex-col gap-1"> 
                                         {/* Processing Status Badge */}
                                         {roman.processing && (
-                                            <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                                            <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-green-100/60 dark:bg-green-200/60 text-green-800 dark:text-green-200" : "bg-yellow-100 text-yellow-800"}`}>
                                                 {roman.processing === "done" ? (
                                                     "✓ Uploaded"
                                                 ) : roman.processing === "working" ? (
-                                                    <span className="inline-flex items-center gap-2">
+                                                    <span className="flex items-center gap-2">
                                                         <Loader2 className="w-3 h-3 animate-spin" />
                                                         <span>Uploading</span>
                                                     </span>
@@ -458,11 +455,11 @@ const RomansManagement = () => {
 
     /* ===================== RENDER ===================== */
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 rounded-sm">
+        <div className="min-h-screen bg-transparent p-6 rounded-sm">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-gray-700 dark:text-gray-100">
                         Romans Management
                     </h1>
                     {/* bouton bascule vers `romans/upload` */}
@@ -475,7 +472,7 @@ const RomansManagement = () => {
                         </Link>
                         <Link
                             to="/romans/chapters"
-                            className="px-4 py-2 border border-teal-600 text-teal-600 dark:text-teal-700 rounded-sm shadow-sm hover:border-teal-700 transition-colors text-center whitespace-nowrap text-sm sm:text-base"
+                            className="px-4 py-2 border border-teal-500 text-teal-500 dark:text-teal-600 rounded-sm shadow-sm hover:border-teal-400 hover:dark:border-teal-400 transition-colors text-center whitespace-nowrap text-sm sm:text-base"
                         >
                             <GrChapterAdd className="w-4 h-4 inline-block mr-2" />
                             Manage Chapters
@@ -483,47 +480,47 @@ const RomansManagement = () => {
                     </div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                {/* Stats Cards (reduced size) */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                                <p className="text-xl font-semibold text-gray-900 dark:text-white">{stats.total}</p>
                             </div>
-                            <BookOpen className="w-8 h-8 text-blue-500" />
+                            <BookOpen className="w-6 h-6 text-blue-500" />
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Published</p>
-                                <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+                                <p className="text-xl font-semibold text-green-600">{stats.published}</p>
                             </div>
-                            <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <div className="w-7 h-7 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
-                                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                                <p className="text-xl font-semibold text-yellow-600">{stats.pending}</p>
                             </div>
-                            <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
-                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <div className="w-7 h-7 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Deleted</p>
-                                <p className="text-2xl font-bold text-gray-600">{stats.deleted}</p>
+                                <p className="text-xl font-semibold text-gray-600">{stats.deleted}</p>
                             </div>
-                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                            <div className="w-7 h-7 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 bg-gray-500 rounded-full"></div>
                             </div>
                         </div>
                     </div>
@@ -535,24 +532,22 @@ const RomansManagement = () => {
                         {/*  */}
                         <div className="flex items-center gap-4 w-full lg:w-auto"> </div>
                         {/* View Toggle */}
-                        <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 ml-auto">
+                        <div className="inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-800 p-1 ml-auto">
                             <button
                                 onClick={() => setViewMode("card")}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === "card"
-                                    ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
-                                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                    }`}
+                                aria-pressed={viewMode === "card"}
+                                title="Card view"
+                                className={`p-2 rounded-md ${viewMode === 'card' ? 'bg-white dark:bg-gray-700 shadow' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'}`}
                             >
-                                <Grid className="w-4 h-4" />
+                                <Grid className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                             </button>
                             <button
                                 onClick={() => setViewMode("table")}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === "table"
-                                    ? "bg-white dark:bg-gray-600 text-blue-500 shadow-sm"
-                                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                    }`}
+                                aria-pressed={viewMode === "table"}
+                                title="Table view"
+                                className={`p-2 rounded-md ${viewMode === 'table' ? 'bg-white dark:bg-gray-700 shadow' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'}`}
                             >
-                                <List className="w-4 h-4" />
+                                <List className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                             </button>
                         </div>
                     </div>

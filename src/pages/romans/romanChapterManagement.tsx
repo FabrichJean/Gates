@@ -272,13 +272,17 @@ const RomanChapterManagement: React.FC = () => {
             return;
         }
 
-        // convert translations objects to arrays
+        // convert translations objects to arrays (include nb_words for roman contents)
         const titlesArray = Object.entries(createFormData.titles || {})
             .map(([i18_language, title]) => ({ i18_language, title }))
             .filter((t) => t.title && t.title.trim().length > 0);
 
         const contentsArray = Object.entries(createFormData.contents || {})
-            .map(([i18_language, content]) => ({ i18_language, content }))
+            .map(([i18_language, content]) => ({
+                i18_language,
+                content,
+                nb_words: content ? content.trim().split(/\s+/).filter(Boolean).length : 0,
+            }))
             .filter((c) => c.content && c.content.trim().length > 0);
 
         if (titlesArray.length === 0 || contentsArray.length === 0) {
@@ -314,13 +318,17 @@ const RomanChapterManagement: React.FC = () => {
             return;
         }
 
-        // convert translations to arrays
+        // convert translations to arrays (include nb_words)
         const titlesArray = Object.entries(editFormData.titles || {})
             .map(([i18_language, title]) => ({ i18_language, title }))
             .filter((t) => t.title && t.title.trim().length > 0);
 
         const contentsArray = Object.entries(editFormData.contents || {})
-            .map(([i18_language, content]) => ({ i18_language, content }))
+            .map(([i18_language, content]) => ({
+                i18_language,
+                content,
+                nb_words: content ? content.trim().split(/\s+/).filter(Boolean).length : 0,
+            }))
             .filter((c) => c.content && c.content.trim().length > 0);
 
         setSubmitting(true);
@@ -568,7 +576,7 @@ const RomanChapterManagement: React.FC = () => {
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
+                                            <td className="px-6 py-4 border border-gray-300 dark:border-gray-600">
                                                 <div className="flex items-center gap-3">
                                                     {chapter.roman?.creatorObj?.avatar ? (
                                                         <img
@@ -578,18 +586,18 @@ const RomanChapterManagement: React.FC = () => {
                                                                     : `${server}/${chapter.roman.creatorObj.avatar}`
                                                             }
                                                             alt={chapter.roman?.creatorObj?.name || "Creator"}
-                                                            className="w-10 h-10 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900"
+                                                            className="w-10 h-10 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900 flex-shrink-0"
                                                         />
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-blue-100 dark:border-blue-900 flex items-center justify-center">
+                                                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-blue-100 dark:border-blue-900 flex items-center justify-center flex-shrink-0">
                                                             <UserCircle className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                                                         </div>
                                                     )}
-                                                    <div>
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                                                             {chapter.roman?.creatorObj?.name || "N/A"}
                                                         </div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize truncate">
                                                             {chapter.roman?.creatorObj?.gender || "N/A"}
                                                         </div>
                                                     </div>
