@@ -153,7 +153,7 @@ const VideoTableRow = ({
       <td className="py-4 px-6">
         <div className="relative group">
           <img
-            src={video.s3_urls.coverUrl || video.public_urls?.local_cover_url || ''}
+            src={`${video.s3_urls.coverUrl || video.public_urls?.local_cover_url || ''}?t=`+Date.now()}
             alt="cover"
             className="w-24 h-14 object-cover rounded-lg shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:scale-105"
           />
