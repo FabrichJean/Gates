@@ -13,6 +13,17 @@ const RomanChaptersPage = () => {
     const [selectedChapter, setSelectedChapter] = useState<RomanChapter | null>(null);
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
+    // Écoute de la navigation interne du modal (Prev/Next)
+    useEffect(() => {
+        function handleNavigate(e: any) {
+            if (e?.detail?.chapter) {
+                setSelectedChapter(e.detail.chapter);
+            }
+        }
+        window.addEventListener('romanChapterDetails:navigate', handleNavigate);
+        return () => window.removeEventListener('romanChapterDetails:navigate', handleNavigate);
+    }, []);
+
     useEffect(() => {
         const fetch = async () => {
             if (!id) return;
@@ -96,7 +107,7 @@ const RomanChaptersPage = () => {
                                                         <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{c.excerpt || ''}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden sm:table-cell">{c.isPublished ? <span className="text-green-600">Published</span> : <span className="text-yellow-500">Draft</span>}</td>
+                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden sm:table-cell">{c.isPublished ? <span className="rounded-full px-2 bg-green-100 dark:bg-teal-400/10 dark:text-green-300 font-light text-green-800">Published</span> : <span className="rounded-full px-2 bg-yellow-100 dark:bg-yellow-400/10 dark:text-yellow-300 font-light text-yellow-800">Draft</span>}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden md:table-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</td>
                                                 <td className="p-3 text-sm text-right">
                                                     <button
@@ -119,25 +130,23 @@ const RomanChaptersPage = () => {
                             {chapters.map((c: any) => (
                                 <div key={c.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex flex-col justify-between">
                                     <div>
-                                        {/* <div className="text-xs text-gray-500 dark:text-gray-400">#{c.chapter_number}</div> */}
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">Chapter - {c.chapter_number}</div>
                                         <h3 className="font-semibold text-md text-gray-800 dark:text-gray-100 mt-1">{(c.titles && c.titles[0]?.title) || c.title || `Chap ${c.chapter_number}`}</h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-300 mt-2 line-clamp-3">{c.excerpt || ''}</p>
                                     </div>
                                     <div className="mt-4 flex items-center justify-between">
                                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            <div className="">
-                                                
-                                            </div>
+                                            <div className=""></div>
                                             <div className="mt-1">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-0.5 text-xs rounded ${c.isPublished ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{c.isPublished ? 'Published' : 'Draft'}</span>
+                                            <span className={`px-2 py-0.5 text-xs rounded-full ${c.isPublished ? 'bg-green-100 dark:bg-teal-400/10 dark:text-green-300 font-light text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{c.isPublished ? 'Published' : 'Draft'}</span>
                                             <button
                                                 onClick={() => setSelectedChapter(c)}
-                                                className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-gray-800 dark:text-blue-300"
+                                                className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:dark:bg-slate-600 dark:bg-gray-800 dark:text-blue-300"
                                             >
                                                 <Eye className="w-4 h-4" />
-                                                <span>View r</span>
+                                                <span>View</span>
                                             </button>
                                         </div>
                                     </div>

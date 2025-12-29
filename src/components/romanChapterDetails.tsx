@@ -77,7 +77,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
             }
         }
         fetchChapters();
-    }, [chapter.roman?.id]);
+    }, [chapter.roman?.id, chapter.id]);
 
     useEffect(() => {
         if (!chapterList || chapterList.length === 0) {
@@ -240,7 +240,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                 {/* information d'un chapitre */}
                 <div className="p-6 space-y-6">
                     {/* Metadata */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
                         <div>
                             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chapter</p>
                             <p className="text-sm font-semibold dark:text-gray-100">#{chapter.chapter_number}</p>
@@ -309,7 +309,6 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                         </div>
                     </div>
 
-
                     {/* chapter */}
                     <div>
                         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -323,7 +322,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                     {/* Content */}
                     <div>
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contenu</h4>
-                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-6 rounded-sm h-60">
                             <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
                                 {getChapterContent(chapter)}
                             </p>

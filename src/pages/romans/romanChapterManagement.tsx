@@ -479,7 +479,7 @@ const RomanChapterManagement: React.FC = () => {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-blue-500 dark:border-blue-400">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -505,17 +505,6 @@ const RomanChapterManagement: React.FC = () => {
                                     <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.draft}</p>
                                 </div>
                                 <EyeOff className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-purple-500 dark:border-purple-400">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Mots</p>
-                                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                                        {stats.totalWords.toLocaleString()}
-                                    </p>
-                                </div>
-                                <AlignLeft className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                             </div>
                         </div>
                     </div>
