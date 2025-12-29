@@ -8,6 +8,7 @@ import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import toast from "react-hot-toast";
 import type { Category } from "../components/CategoryAutoComplete";
+import Pagination from "../components/Pagination";
 
 interface SubCategory {
   id: number;
@@ -23,6 +24,10 @@ export default function CategoryManager() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [subcategoriesMap, setSubcategoriesMap] = useState<Record<number, SubCategory[]>>({});
 
@@ -242,11 +247,31 @@ export default function CategoryManager() {
     setShowSubCategoryModal(true);
   };
 
-  // Filtered categories
-  const filteredCategories = categories.filter(
-    (cat) =>
-      cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Reset to page 1 when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  // Filtered and paginated categories
+  const filteredCategories = useMemo(() => {
+    return categories.filter(
+      (cat) =>
+        cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [categories, searchTerm]);
+
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredCategories.slice(startIndex, endIndex);
+  }, [filteredCategories, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
 
   if (loading) {
     return (
@@ -304,7 +329,7 @@ export default function CategoryManager() {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Rechercher une catégorie..."
               className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -319,7 +344,7 @@ export default function CategoryManager() {
           className="space-y-3"
         >
           <AnimatePresence>
-            {filteredCategories.map((category, index) => (
+            {paginatedCategories.map((category, index) => (
               <motion.div
                 key={category.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -356,7 +381,7 @@ export default function CategoryManager() {
 
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <Tag className="w-3.5 h-3.5" />
-                        <span>{getSubcategoriesForCategory(category.id).length} sous-catégories</span>
+                        <span>{category.subCategoryCount} sous-catégories</span>
                       </div>
                     </div>
 
@@ -459,6 +484,23 @@ export default function CategoryManager() {
             </div>
           )}
         </motion.div>
+
+        {/* Pagination */}
+        {filteredCategories.length > itemsPerPage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-6"
+          >
+            <Pagination
+              totalItems={filteredCategories.length}
+              pageSize={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* Category Modal */}
