@@ -2,12 +2,7 @@
 import { apiURL } from '../../constant';
 import useFetch from 'http-react';
 import { getToken } from '../../utils/storage';
-
-interface Category {
-    id: number;
-    name: string;
-    creator?: string | null;
-}
+import type { Category } from '../../components/CategoryAutoComplete';
 
 interface CategoryResponse {
     success: boolean;
