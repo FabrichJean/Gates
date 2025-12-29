@@ -37,7 +37,6 @@ import {
 import { getFilteredRomans } from "../../api/romans";
 import { server } from "../../constant";
 import RomanChapterDetails from "../../components/romanChapterDetails";
-import CreatorAutoComplete from "../../components/CreatorAutoComplete";
 import RomanAutoComplete from "../../components/RomanAutoComplete";
 
 // Types
@@ -123,6 +122,16 @@ const RomanChapterManagement: React.FC = () => {
     const [chapters, setChapters] = useState<RomanChapter[]>([]);
     const [allRomans, setAllRomans] = useState<Roman[]>([]);
     const [loading, setLoading] = useState(true);
+        // Gestion navigation chapitre depuis le modal
+        useEffect(() => {
+            function handleNavigate(e: any) {
+                if (e.detail?.chapter) {
+                    setViewingChapter(e.detail.chapter);
+                }
+            }
+            window.addEventListener('romanChapterDetails:navigate', handleNavigate);
+            return () => window.removeEventListener('romanChapterDetails:navigate', handleNavigate);
+        }, []);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedRomanId, setSelectedRomanId] = useState<number | null>(null);
     const [selectedStatus, setSelectedStatus] = useState<"all" | "published" | "draft">("all");
@@ -796,7 +805,7 @@ const RomanChapterManagement: React.FC = () => {
                                     {/* Stats */}
                                     <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                                         <div className="">
-                                        <p>Activate</p>
+                                            <p>Activate</p>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                             <Calendar className="w-3 h-3" />
@@ -919,9 +928,39 @@ const RomanChapterManagement: React.FC = () => {
                                             />
                                         )}
 
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {computeTranslatedContentsWordCount(createFormData.contents, createSelectedLanguages[0])}
-                                        </p>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                            {createSelectedLanguages && createSelectedLanguages.length > 0 ? (
+                                                <div className="space-y-1">
+                                                    {createSelectedLanguages.map((lang) => {
+                                                        const count = createFormData.contents && createFormData.contents[lang]
+                                                            ? String(createFormData.contents[lang]).trim().split(/\s+/).filter(Boolean).length
+                                                            : 0;
+                                                        return (
+                                                            <div key={lang} className="flex items-center gap-2">
+                                                                <span className="font-medium">{lang}:</span>
+                                                                <span>{count} mots</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {createFormData.contents && Object.entries(createFormData.contents).length === 0 ? (
+                                                        <div>Nombre de mots: 0</div>
+                                                    ) : (
+                                                        Object.entries(createFormData.contents || {}).map(([lang, text]) => {
+                                                            const count = text ? String(text).trim().split(/\s+/).filter(Boolean).length : 0;
+                                                            return (
+                                                                <div key={lang} className="flex items-center gap-2">
+                                                                    <span className="font-medium">{lang}:</span>
+                                                                    <span>{count} mots</span>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Published Status */}
@@ -1054,9 +1093,39 @@ const RomanChapterManagement: React.FC = () => {
                                             />
                                         )}
 
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                            Nombre de mots: {computeTranslatedContentsWordCount(editFormData.contents, editSelectedLanguages[0])}
-                                        </p>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                            {editSelectedLanguages && editSelectedLanguages.length > 0 ? (
+                                                <div className="space-y-1">
+                                                    {editSelectedLanguages.map((lang) => {
+                                                        const count = editFormData.contents && editFormData.contents[lang]
+                                                            ? String(editFormData.contents[lang]).trim().split(/\s+/).filter(Boolean).length
+                                                            : 0;
+                                                        return (
+                                                            <div key={lang} className="flex items-center gap-2">
+                                                                <span className="font-medium">{lang}:</span>
+                                                                <span>{count} mots</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {editFormData.contents && Object.entries(editFormData.contents).length === 0 ? (
+                                                        <div>Nombre de mots: 0</div>
+                                                    ) : (
+                                                        Object.entries(editFormData.contents || {}).map(([lang, text]) => {
+                                                            const count = text ? String(text).trim().split(/\s+/).filter(Boolean).length : 0;
+                                                            return (
+                                                                <div key={lang} className="flex items-center gap-2">
+                                                                    <span className="font-medium">{lang}:</span>
+                                                                    <span>{count} mots</span>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Published Status */}

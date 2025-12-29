@@ -81,7 +81,6 @@ const RomanChaptersPage = () => {
                                         <tr>
                                             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">#</th>
                                             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Title</th>
-                                            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Words</th>
                                             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Status</th>
                                             <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Date</th>
                                             <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Actions</th>
@@ -90,21 +89,20 @@ const RomanChaptersPage = () => {
                                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-700">
                                         {chapters.map((c: any, idx: number) => (
                                             <tr key={c.id} className={`transition-colors duration-150 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 w-16">{c.chapter_number}</td>
+                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 w-16 text-nowrap">Chapter - {c.chapter_number}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200">
                                                     <div className="flex flex-col">
                                                         <span className="font-medium">{(c.titles && c.titles[0]?.title) || c.title || `Chap ${c.chapter_number}`}</span>
                                                         <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{c.excerpt || ''}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden md:table-cell">{c.word_count?.toLocaleString() || 0}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden sm:table-cell">{c.isPublished ? <span className="text-green-600">Published</span> : <span className="text-yellow-500">Draft</span>}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden md:table-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</td>
                                                 <td className="p-3 text-sm text-right">
                                                     <button
                                                         onClick={() => setSelectedChapter(c)}
                                                         title="View"
-                                                        className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-gray-800 dark:text-blue-300"
+                                                        className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:dark:bg-slate-600 dark:bg-gray-800 dark:text-blue-300"
                                                     >
                                                         <Eye className="w-4 h-4" />
                                                         <span className="hidden sm:inline">View</span>
@@ -139,7 +137,7 @@ const RomanChaptersPage = () => {
                                                 className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-gray-800 dark:text-blue-300"
                                             >
                                                 <Eye className="w-4 h-4" />
-                                                <span>View</span>
+                                                <span>View r</span>
                                             </button>
                                         </div>
                                     </div>
