@@ -54,7 +54,15 @@ import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
 import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
 import MangasCategoriesPage from "../pages/MangasCategoriesPage";
-import { MangasProvider } from "../context/MangasContext";
+import RomanUpload from "../pages/romans/romanUpload";
+import RomansManagement from "../pages/romans/RomansManagement";
+import RomanDetails from "../pages/romans/romanDetails";
+import RomanEdit from "../pages/romans/romanEdit";
+import RomanCategoryPage from "../pages/romans/romanCategory";
+import RomanChapterManagement from "../pages/romans/romanChapterManagement";
+import RomanChaptersPage from "../pages/romans/romanChapters";
+
+
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -66,25 +74,169 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
-          <Route
-            path="/mangas/*"
+          <Route path="/romans/upload"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <MangasProvider>
-                    <Routes>
-                      <Route path="" element={<Mangas />} />
-                      <Route path="upload" element={<UploadMangas />} />
-                      <Route path=":mangaId" element={<MangasDetailsPage />} />
-                      <Route path=":mangaId/edit" element={<EditMangasPage />} />
-                      <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
-                      <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
-                    </Routes>
-                  </MangasProvider>
+                  <RomanUpload />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/romans"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomansManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/romans/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanDetails />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/romans/:id/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanEdit />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route path="/roman-category"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanCategoryPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/romans/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanChapterManagement />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/romans/:id/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <RomanChaptersPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/mangas"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <Mangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangas />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangaChaptersRouteWrapper />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasChapterPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/upload"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <UploadMangasEpisodePage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodesPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <MangasEpisodeDetailsPage />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <EditMangasEpisodePage />
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -432,9 +584,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                <InsideSidebar>
-                  <Settings />
-                </InsideSidebar>
+                  <InsideSidebar>
+                    <Settings />
+                  </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
             }
