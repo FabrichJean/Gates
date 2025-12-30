@@ -10,6 +10,7 @@ import {
     Globe,
     Loader2,
     FilePlus,
+    Check,
 } from "lucide-react";
 import { GrChapterAdd } from "react-icons/gr";
 import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
@@ -212,29 +213,31 @@ const RomansManagement = () => {
                                 <span>{roman.plateform?.name || "-"}</span>
                             </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <CheckingRoman
+                        <div className=" border-t pt-2 border-gray-200 dark:border-gray-700">
+                                <CheckingRoman
                                 roman={roman}
                                 user={user}
                                 index={filteredRomans.indexOf(roman)}
                             />
+                        </div>
+                        {/* Actions */}
+                        <div className="flex items-center justify-between pt-4">
+                            
                             <div className="flex items-center gap-2">
                                 <Link
                                     to={`/romans/${roman.id}`}
-                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700  rounded-lg transition-colors"
                                 >
                                     <Eye className="w-4 h-4" />
                                 </Link>
                                 <Link
                                     to={`/romans/${roman.id}/edit`}
-                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700rounded-lg transition-colors"
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </Link>
                                 <button
-                                    className={`p-2 rounded-lg transition-colors ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+                                    className={`p-2 cursor-pointer rounded-lg transition-colors ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
                                     onClick={() => handleSendRoman(roman.id)}
                                     disabled={roman.processing === "done" || roman.processing === "working"}
                                     title={roman.processing === "done" ? "Déjà envoyé" : "Envoyer la couverture sur S3"}
@@ -251,7 +254,7 @@ const RomansManagement = () => {
 
     /* ===================== RENDER TABLE ===================== */
     const renderTableView = () => (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
@@ -354,7 +357,7 @@ const RomansManagement = () => {
                                         {roman.processing && (
                                             <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-green-100/60 dark:bg-green-200/60 text-green-800 dark:text-green-200" : "bg-yellow-100 text-yellow-800"}`}>
                                                 {roman.processing === "done" ? (
-                                                    "✓ Uploaded"
+                                                    <span className="flex items-center gap-2"> <Check className="h-4 w-4" /> uploaded </span>
                                                 ) : roman.processing === "working" ? (
                                                     <span className="flex items-center gap-2">
                                                         <Loader2 className="w-3 h-3 animate-spin" />
@@ -401,19 +404,19 @@ const RomansManagement = () => {
                                     <div className="flex items-center justify-end gap-2">
                                         <Link
                                             to={`/romans/${roman.id}`}
-                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700  rounded-lg transition-colors"
                                         >
                                             <Eye className="w-4 h-4" />
                                         </Link>
                                         <Link
                                             to={`/romans/${roman.id}/edit`}
-                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                            className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700  rounded-lg transition-colors"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Link>
                                         {user.role === RoleEnum.SUPERADMIN && (
                                             <button
-                                                className={`p-2 rounded-lg transition-colors ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+                                                className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${roman.processing === "done" ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60" : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
                                                 onClick={() => handleSendRoman(roman.id)}
                                                 disabled={roman.processing === "done"}
                                                 title={roman.processing === "done"
