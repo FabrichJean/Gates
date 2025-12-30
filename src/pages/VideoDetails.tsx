@@ -73,7 +73,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   useEffect(() => {
     setCurrentCoverUrl(
       (video?.s3_urls?.coverUrl ||
-        video?.public_urls.cover_url ||
+        video?.public_urls.local_cover_url ||
         video?.cover) +
       "?t=" +
       Date.now()

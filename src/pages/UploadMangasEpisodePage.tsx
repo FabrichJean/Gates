@@ -207,21 +207,6 @@ const UploadMangasEpisodePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 resize-none"
-              placeholder="Décrivez l'épisode"
-              rows={4}
-            />
-          </div>
-
           {/* Titres multilingues */}
           <div>
             <MangaTitlesField

@@ -1,4 +1,4 @@
-import type { Creator } from "../hooks/useCreators";
+import type { Creator } from "../components/creators/CreatorList";
 
 export interface Post {
   id: number;

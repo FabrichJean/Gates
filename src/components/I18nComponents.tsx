@@ -90,21 +90,15 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
       const newDescriptions: TranslatedText = { ...description };
 
       translations.forEach((t: any) => {
-        console.log('Processing translation:', t);
         if (t.i18_language && supportedLanguages.includes(t.i18_language)) {
           if (t.title) {
-            console.log(`Setting title for ${t.i18_language}:`, t.title);
             newTitles[t.i18_language] = t.title;
           }
           if (t.description) {
-            console.log(`Setting description for ${t.i18_language}:`, t.description);
             newDescriptions[t.i18_language] = t.description;
           }
         }
       });
-
-      console.log('Final titles:', newTitles);
-      console.log('Final descriptions:', newDescriptions);
 
       // Utiliser le callback combiné si disponible, sinon les callbacks séparés
       if (onBothChange) {
@@ -316,6 +310,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
 
               <div className="modal-action">
                 <button
+                  type='button'
                   type='button'
                   className="btn btn-ghost"
                   onClick={() => setAutoOpen(false)}

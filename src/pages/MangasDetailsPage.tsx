@@ -13,14 +13,17 @@ import {
   Info,
   ChevronRight,
   Star,
-  Send
+  Send,
+  Loader2
 } from "lucide-react";
 import { getMangaById, updateManga, uploadMangaToS3 } from "../api/mangas";
 import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
-import type { MangaTitles } from "../types/mangaTitles";
+import { forceResetMangaUpload } from "../hooks/useMangaUploadSocket";
+import { useContextMangaUpload } from "../context/MangaUploadSocketContext";
+import { MangaUploadProgress } from "../components/MangaUploadProgress";
 
 interface Manga {
   s3_cover_url: string;
@@ -87,6 +90,23 @@ const MangasDetailsPage: React.FC = () => {
   const [manga, setManga] = useState<Manga | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Use context-based upload hook with callbacks
+  const { isUploading, progress, currentTask } = useContextMangaUpload(
+    Number(mangaId),
+    {
+      onProgress: (data) => {
+        console.log("Upload progress:", data);
+      },
+      onComplete: (data) => {
+        toast.success(data.message || "Upload completed!");
+        fetchManga(); // Refresh manga data
+      },
+      onError: (data) => {
+        toast.error(data.error || "Upload failed");
+      }
+    }
+  );
+
   useEffect(() => {
     if (mangaId) fetchManga();
   }, [mangaId]);
@@ -95,7 +115,13 @@ const MangasDetailsPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await getMangaById(Number(mangaId));
-      setManga(res.data || res);
+      const mangaData = res.data || res;
+      setManga(mangaData);
+      
+      // If manga is not in "working" state but we have upload progress, clear it
+      if (mangaData.processing !== "working" && mangaId) {
+        forceResetMangaUpload(Number(mangaId));
+      }
     } catch (error) {
       toast.error("Erreur lors du chargement du manga");
     } finally {
@@ -212,9 +238,17 @@ const MangasDetailsPage: React.FC = () => {
               {/* Send Button */}
               <button
                 onClick={handleSendManga}
-                disabled={manga.processing === "done" || manga.checking !== "checked"}
+                disabled={
+                  manga.processing === "done" || 
+                  manga.checking !== "checked" || 
+                  isUploading || 
+                  manga.processing === "working"
+                }
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 ${
-                  manga.processing === "done" || manga.checking !== "checked"
+                  manga.processing === "done" || 
+                  manga.checking !== "checked" || 
+                  isUploading || 
+                  manga.processing === "working"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-gray-700"
                     : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow border border-emerald-600"
                 }`}
@@ -223,11 +257,22 @@ const MangasDetailsPage: React.FC = () => {
                     ? "Already uploaded" 
                     : manga.checking !== "checked"
                     ? "Manga must be checked first"
+                    : isUploading || manga.processing === "working"
+                    ? "Upload in progress..."
                     : "Upload to S3"
                 }
               >
-                <Send className="w-3.5 h-3.5" />
-                {manga.processing === "done" ? "Uploaded" : "Upload"}
+                {isUploading || manga.processing === "working" ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Uploading... {progress > 0 && `${Math.round(progress)}%`}
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    {manga.processing === "done" ? "Uploaded" : "Upload"}
+                  </>
+                )}
               </button>
               
               {/* Toggle Active/Inactive */}
@@ -259,6 +304,9 @@ const MangasDetailsPage: React.FC = () => {
             </motion.div>
           </div>
         </motion.div>
+
+        {/* Upload Progress Bar */}
+        <MangaUploadProgress mangaId={Number(mangaId)} variant="full" className="mb-4" />
 
         {/* Section Titres Multilingues - Espace dédié */}
         <motion.div

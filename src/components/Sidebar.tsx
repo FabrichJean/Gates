@@ -313,6 +313,14 @@ function Sidebar({
         />
 
         <NavLink to="/post" name="post" label="Posts" icon={MdDynamicFeed} />
+        <NavLink
+          to="/mangas"
+          name="mangas"
+          label="Mangas"
+          iconComponent={
+            <img src="/mangas.png" alt="" className="w-5 h-5"/>
+          }
+        />
 
         {user?.role === RoleEnum.SUPERADMIN && (
           <>
