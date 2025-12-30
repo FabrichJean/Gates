@@ -49,8 +49,8 @@ export type TRoman = {
     plateform_id: number;
     checking: Checking;
     processing: "null" | "working" | "done";
-    createdAt: string; // ISO date string
-    updatedAt: string; // ISO date string
+    createdAt: string;
+    updatedAt: string;
     public_urls?: {
         cover_url?: string;
         local_cover_url?: string;
@@ -93,7 +93,6 @@ export default function UseRomans(
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function UseRomansWithParams(query: any) {
   return useFetch<{
     limit: number | null;

@@ -4,53 +4,8 @@ import { X, Globe, ChevronDown, UserCircle, BookOpen } from "lucide-react";
 import { apiURL, server } from "../constant";
 import { Link } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
-
-interface RomanTitle {
-    title: string;
-    i18_language: string;
-    language: {
-        code: string;
-        name: string;
-    };
-}
-
-interface Roman {
-    id: number;
-    ref: string;
-    user_id: number;
-    creator_id: number;
-    titles: RomanTitle[];
-    user: {
-        id: number;
-        username: string;
-        email: string;
-    };
-    creatorObj: {
-        id: number;
-        name: string;
-        avatar: string;
-        gender: string;
-    };
-}
-
-interface RomanChapter {
-    id: number;
-    roman_id: number;
-    chapter_number: number;
-    titles?: Array<{ i18_language: string; title: string; language?: { code: string; name: string } }>;
-    contents?: Array<{ i18_language: string; content: string; nb_words?: number; language?: { code: string; name: string } }>;
-    // word_count may be provided by backend or computed from contents
-    word_count?: number;
-    isPublished: boolean;
-    createdAt: string;
-    updatedAt: string;
-    roman?: Roman;
-}
-
-interface RomanChapterDetailsProps {
-    chapter: RomanChapter;
-    onClose: () => void;
-}
+import MarkdownPreview from '@uiw/react-markdown-preview';
+import type { Roman, RomanChapter, RomanChapterDetailsProps } from './romanChapterDetails.types';
 
 const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onClose }) => {
     const [selectedLang, setSelectedLang] = useState<string>("fr");
@@ -323,7 +278,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contenu</h4>
                         <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-6 rounded-sm max-h-60 overflow-auto">
                             <p className="whitespace-pre-wrap break-words max-w-full text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {getChapterContent(chapter)}
+                                <MarkdownPreview source={getChapterContent(chapter)} style={{ padding: 16 }} />
                             </p>
                         </div>
                     </div>

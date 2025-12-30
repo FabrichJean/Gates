@@ -214,7 +214,7 @@ const RomansManagement = () => {
                             </div>
                         </div>
                         <div className=" border-t pt-2 border-gray-200 dark:border-gray-700">
-                                <CheckingRoman
+                            <CheckingRoman
                                 roman={roman}
                                 user={user}
                                 index={filteredRomans.indexOf(roman)}
@@ -222,7 +222,7 @@ const RomansManagement = () => {
                         </div>
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-4">
-                            
+
                             <div className="flex items-center gap-2">
                                 <Link
                                     to={`/romans/${roman.id}`}
@@ -232,7 +232,7 @@ const RomansManagement = () => {
                                 </Link>
                                 <Link
                                     to={`/romans/${roman.id}/edit`}
-                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700rounded-lg transition-colors"
+                                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <Edit2 className="w-4 h-4" />
                                 </Link>
@@ -294,7 +294,7 @@ const RomansManagement = () => {
                                 <td className="px-6 py-4">
                                     {roman.public_urls?.cover_url ? (
                                         <img
-                                            src={ roman.s3_urls.coverUrl || roman.public_urls?.cover_url}
+                                            src={roman.s3_urls.coverUrl || roman.public_urls?.cover_url}
                                             alt={roman.ref}
                                             className="w-12 h-16 object-cover rounded"
                                         />
@@ -352,7 +352,7 @@ const RomansManagement = () => {
                                     {roman.plateform?.name || "-"}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <div className="flex flex-col gap-1"> 
+                                    <div className="flex flex-col gap-1">
                                         {/* Processing Status Badge */}
                                         {roman.processing && (
                                             <span className={`mt-1 px-2 py-1 rounded-full text-xs font-medium ${roman.processing === "done" ? "bg-green-100/60 dark:bg-green-200/60 text-green-800 dark:text-green-200" : "bg-yellow-100 text-yellow-800"}`}>
@@ -422,8 +422,8 @@ const RomansManagement = () => {
                                                 title={roman.processing === "done"
                                                     ? "Déjà envoyé"
                                                     : roman.checking !== "checked"
-                                                    ? "Roman must be checked first"
-                                                    : "Envoyer"
+                                                        ? "Roman must be checked first"
+                                                        : "Envoyer"
                                                 }
                                             >
                                                 <Send className="w-4 h-4" />

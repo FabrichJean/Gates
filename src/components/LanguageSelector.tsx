@@ -198,22 +198,3 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     </div>
   );
 };
-
-// Close dropdown when clicking outside
-// function useOutsideClose(ref: React.RefObject<HTMLDivElement>, isOpen: boolean, onClose: () => void) {
-//   useEffect(() => {
-//     if (!isOpen) return;
-//     const handleOutside = (e: MouseEvent | TouchEvent) => {
-//       const target = e.target as Node;
-//       if (ref.current && !ref.current.contains(target)) {
-//         onClose();
-//       }
-//     };
-//     document.addEventListener('mousedown', handleOutside);
-//     document.addEventListener('touchstart', handleOutside);
-//     return () => {
-//       document.removeEventListener('mousedown', handleOutside);
-//       document.removeEventListener('touchstart', handleOutside);
-//     };
-//   }, [ref, isOpen, onClose]);
-// }

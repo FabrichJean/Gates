@@ -5,6 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import I18nField from './I18nField';
 import I18nText from './I18nText';
+import RomanContentEditor from './RomanContentEditor';
 import type { TranslatedText } from '../types/i18n';
 import { LANGUAGE_NAMES, LANGUAGE_FLAGS } from '../types/i18n';
 import { translateServer } from '../constant';
@@ -81,9 +82,6 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
       });
 
       const translations = response.data;
-
-      console.log('API Response:', translations);
-      console.log('Supported languages:', supportedLanguages);
 
       // Parser les résultats et appliquer (conserver les valeurs existantes)
       const newTitles: TranslatedText = { ...title };
@@ -215,14 +213,25 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 { page === "roman" ? "Contents" : "Description"} {descriptionRequired && <span className="text-red-500">*</span>}
               </label>
-              <textarea
-                value={description[selectedLang] || ''}
-                onChange={(e) => handleDescriptionChange(selectedLang, e.target.value)}
-                rows={page === 'roman' ? 12 : 6}
-                placeholder={`Entrez la ${page === "roman" ? "contenu" : "description"} en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
-                className={`w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${page === 'roman' ? 'min-h-[220px]' : ''}`}
-                required={descriptionRequired && selectedLang === supportedLanguages[0]}
-              />
+              {page === 'roman' ? (
+                <RomanContentEditor
+                  value={description[selectedLang] || ''}
+                  onChange={(v) => handleDescriptionChange(selectedLang, v)}
+                  rows={12}
+                  placeholder={`Entrez le contenu en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+                  className={`w-full px-3 py-2 ${page === 'roman' ? 'min-h-[220px]' : ''}`}
+                  required={descriptionRequired && selectedLang === supportedLanguages[0]}
+                />
+              ) : (
+                <textarea
+                  value={description[selectedLang] || ''}
+                  onChange={(e) => handleDescriptionChange(selectedLang, e.target.value)}
+                  rows={6}
+                  placeholder={`Entrez la ${page === "roman" ? "contenu" : "description"} en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+                  className={`w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+                  required={descriptionRequired && selectedLang === supportedLanguages[0]}
+                />
+              )}
             </div>
           </motion.div>
         </AnimatePresence>

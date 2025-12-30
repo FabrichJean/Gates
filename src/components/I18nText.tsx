@@ -1,5 +1,7 @@
 import React from 'react';
 import type { TranslatedText, SupportedLanguage } from '../types/i18n';
+import Markdown from 'react-markdown'
+
 
 interface I18nTextProps {
   content: TranslatedText | string;
@@ -72,7 +74,9 @@ const I18nText: React.FC<I18nTextProps> = ({
 
   const displayText = getDisplayText();
 
-  return <Component className={className}>{displayText}</Component>;
+  return <Component className={className}>
+    {displayText}
+    </Component>;
 };
 
 export default I18nText;
