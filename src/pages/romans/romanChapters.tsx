@@ -88,18 +88,17 @@ const RomanChaptersPage = () => {
                         <div className="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                    <thead className="sticky top-0 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-b">
+                                    <thead className="sticky top-0 z-10 bg-slate-200/60 dark:bg-slate-900/60 backdrop-blur border-b">
                                         <tr>
-                                            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">#</th>
-                                            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Title</th>
-                                            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Status</th>
-                                            <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Date</th>
-                                            <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                            <th className="text-left p-3 text-sm font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
+                                            <th className="text-left p-3 text-sm font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+                                            <th className="text-left p-3 text-sm font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Date</th>
+                                            <th className="text-right p-3 text-sm font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-700">
                                         {chapters.map((c: any, idx: number) => (
-                                            <tr key={c.id} className={`transition-colors duration-150 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                                            <tr key={c.id} className={`transition-colors duration-150 bg-gray-50 dark:bg-gray-800`}>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200 w-16 text-nowrap">Chapter - {c.chapter_number}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200">
                                                     <div className="flex flex-col">
@@ -107,13 +106,12 @@ const RomanChaptersPage = () => {
                                                         <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{c.excerpt || ''}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden sm:table-cell">{c.isPublished ? <span className="rounded-full px-2 bg-green-100 dark:bg-teal-400/10 dark:text-green-300 font-light text-green-800">Published</span> : <span className="rounded-full px-2 bg-yellow-100 dark:bg-yellow-400/10 dark:text-yellow-300 font-light text-yellow-800">Draft</span>}</td>
                                                 <td className="p-3 text-sm text-gray-700 dark:text-gray-200 hidden md:table-cell">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</td>
                                                 <td className="p-3 text-sm text-right">
                                                     <button
                                                         onClick={() => setSelectedChapter(c)}
                                                         title="View"
-                                                        className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:dark:bg-slate-600 dark:bg-gray-800 dark:text-blue-300"
+                                                        className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:dark:bg-slate-600 dark:bg-gray-700/30 dark:text-blue-300"
                                                     >
                                                         <Eye className="w-4 h-4" />
                                                         <span className="hidden sm:inline">View</span>
@@ -140,7 +138,7 @@ const RomanChaptersPage = () => {
                                             <div className="mt-1">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-0.5 text-xs rounded-full ${c.isPublished ? 'bg-green-100 dark:bg-teal-400/10 dark:text-green-300 font-light text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{c.isPublished ? 'Published' : 'Draft'}</span>
+                                            
                                             <button
                                                 onClick={() => setSelectedChapter(c)}
                                                 className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 hover:dark:bg-slate-600 dark:bg-gray-800 dark:text-blue-300"

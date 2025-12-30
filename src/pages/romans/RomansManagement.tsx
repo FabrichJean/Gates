@@ -1,31 +1,22 @@
 import { useMemo, useState } from "react";
 import {
-    Search,
-    Filter,
-    MoreVertical,
     Eye,
     Edit2,
-    Trash2,
     Grid,
     List,
     Send,
     BookOpen,
-    User,
-    Calendar,
     Tag,
     Globe,
     Loader2,
-    ChevronDown,
     FilePlus,
 } from "lucide-react";
 import { GrChapterAdd } from "react-icons/gr";
-import { MdAssignmentAdd } from "react-icons/md";
 import UseRomans, { type TRoman } from "../../hooks/romans/useRomans";
 import { Link } from "react-router-dom";
 import CheckingRoman from "../../components/CheckingRoman";
 import { useAuth } from "../../hooks/useAuth";
 import useSocketCheckRomans from "../../hooks/romans/useSocketRomans";
-import { FaBookOpen } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { toggleIsDeleted, deepUploadRoman } from "../../api/romans";
 import RoleEnum from "../../utils/roleEnum";
@@ -481,50 +472,6 @@ const RomansManagement = () => {
                 </div>
 
                 {/* Stats Cards (reduced size) */}
-                {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
-                                <p className="text-xl font-semibold text-gray-900 dark:text-white">{stats.total}</p>
-                            </div>
-                            <BookOpen className="w-6 h-6 text-blue-500" />
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Published</p>
-                                <p className="text-xl font-semibold text-green-600">{stats.published}</p>
-                            </div>
-                            <div className="w-7 h-7 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
-                                <p className="text-xl font-semibold text-yellow-600">{stats.pending}</p>
-                            </div>
-                            <div className="w-7 h-7 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Deleted</p>
-                                <p className="text-xl font-semibold text-gray-600">{stats.deleted}</p>
-                            </div>
-                            <div className="w-7 h-7 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 bg-gray-500 rounded-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
 
                 {/* Filters */}
                 <div className="mb-6">

@@ -480,35 +480,6 @@ const RomanChapterManagement: React.FC = () => {
                     </div>
 
                     {/* Stats */}
-                    {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-blue-500 dark:border-blue-400">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Chapitres</p>
-                                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.total}</p>
-                                </div>
-                                <FileText className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-green-500 dark:border-green-400">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Publiés</p>
-                                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.published}</p>
-                                </div>
-                                <Eye className="w-4 h-4 text-green-500 dark:text-green-400" />
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-yellow-500 dark:border-yellow-400">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Brouillons</p>
-                                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">{stats.draft}</p>
-                                </div>
-                                <EyeOff className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
-                            </div>
-                        </div>
-                    </div> */}
 
                     {/* Filters */}
 
@@ -581,9 +552,6 @@ const RomanChapterManagement: React.FC = () => {
                                             Créateur
                                         </th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
-                                            Statut
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                                             Date
                                         </th>
                                         <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider border border-gray-300 dark:border-gray-600">
@@ -649,26 +617,7 @@ const RomanChapterManagement: React.FC = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${chapter.isPublished
-                                                        ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                                                        : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-                                                        }`}
-                                                >
-                                                    {chapter.isPublished ? (
-                                                        <>
-                                                            <Eye className="w-3 h-3" />
-                                                            Publié
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <EyeOff className="w-3 h-3" />
-                                                            Brouillon
-                                                        </>
-                                                    )}
-                                                </span>
-                                            </td>
+                                            
                                             <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
                                                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                                                     <Calendar className="w-4 h-4" />
