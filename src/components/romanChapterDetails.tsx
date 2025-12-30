@@ -175,20 +175,19 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
         const codes = new Set<string>();
         const list: Array<{ code: string; label?: string }> = [];
 
-        // from chapter titles
-        const ct = (chapter as any).titles as Array<{ i18_language: string; title: string }> | undefined;
+        // collect codes only from the chapter (titles + contents)
+        const ct = (chapter as any).titles as Array<{ i18_language: string; title: string; language?: { code: string; name: string } }> | undefined;
         if (ct) ct.forEach((t) => codes.add(t.i18_language));
 
-        // from chapter contents
-        const cc = (chapter as any).contents as Array<{ i18_language: string; content: string }> | undefined;
+        const cc = (chapter as any).contents as Array<{ i18_language: string; content: string; language?: { code: string; name: string } }> | undefined;
         if (cc) cc.forEach((c) => codes.add(c.i18_language));
 
-        // from roman titles (to get labels)
-        const rt = chapter.roman?.titles;
-        if (rt) rt.forEach((t) => codes.add(t.i18_language));
-
+        // build label: prefer chapter entries' language name, else fall back to roman title language
         codes.forEach((code) => {
-            const label = chapter.roman?.titles?.find((t) => t.i18_language === code)?.language?.name;
+            const labelFromTitle = ct?.find((t) => t.i18_language === code)?.language?.name;
+            const labelFromContent = cc?.find((c) => c.i18_language === code)?.language?.name;
+            const labelFromRoman = chapter.roman?.titles?.find((t) => t.i18_language === code)?.language?.name;
+            const label = labelFromTitle || labelFromContent || labelFromRoman;
             list.push({ code, label });
         });
 
@@ -322,8 +321,8 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                     {/* Content */}
                     <div>
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contenu</h4>
-                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-6 rounded-sm h-60">
-                            <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-6 rounded-sm max-h-60 overflow-auto">
+                            <p className="whitespace-pre-wrap break-words max-w-full text-gray-700 dark:text-gray-300 leading-relaxed">
                                 {getChapterContent(chapter)}
                             </p>
                         </div>

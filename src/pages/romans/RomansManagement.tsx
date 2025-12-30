@@ -237,7 +237,7 @@ const RomansManagement = () => {
                                     <Eye className="w-4 h-4" />
                                 </Link>
                                 <Link
-                                    to={`/romans/edit/${roman.id}`}
+                                    to={`/romans/${roman.id}/edit`}
                                     className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                 >
                                     <Edit2 className="w-4 h-4" />
@@ -415,7 +415,7 @@ const RomansManagement = () => {
                                             <Eye className="w-4 h-4" />
                                         </Link>
                                         <Link
-                                            to={`/romans/edit/${roman.id}`}
+                                            to={`/romans/${roman.id}/edit`}
                                             className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                         >
                                             <Edit2 className="w-4 h-4" />
@@ -481,7 +481,7 @@ const RomansManagement = () => {
                 </div>
 
                 {/* Stats Cards (reduced size) */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
                     <div className="bg-white dark:bg-gray-800 p-4 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
                         <div className="flex items-center justify-between">
                             <div>
@@ -524,7 +524,7 @@ const RomansManagement = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Filters */}
                 <div className="mb-6">

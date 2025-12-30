@@ -38,6 +38,7 @@ import { getFilteredRomans } from "../../api/romans";
 import { server } from "../../constant";
 import RomanChapterDetails from "../../components/romanChapterDetails";
 import RomanAutoComplete from "../../components/RomanAutoComplete";
+import { Link } from "react-router-dom";
 
 // Types
 interface RomanTitle {
@@ -479,7 +480,7 @@ const RomanChapterManagement: React.FC = () => {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="bg-white dark:bg-gray-800 p-2 border-t-2 border-blue-500 dark:border-blue-400">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -507,7 +508,7 @@ const RomanChapterManagement: React.FC = () => {
                                 <EyeOff className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Filters */}
 
@@ -602,7 +603,9 @@ const RomanChapterManagement: React.FC = () => {
                                             <td className="px-6 py-4 border border-gray-300 dark:border-gray-600">
                                                 <div className="text-sm">
                                                     <div className="font-bold text-blue-500 dark:text-blue-400 text-nowrap">
-                                                        {getRomanTitle(chapter.roman)}
+                                                        <Link to={`/romans/${chapter.roman_id}`}>
+                                                            {getRomanTitle(chapter.roman)}
+                                                        </Link>
                                                     </div>
                                                     <div className="text-gray-500 dark:text-gray-400 text-xs">
                                                         {chapter.roman?.ref}
