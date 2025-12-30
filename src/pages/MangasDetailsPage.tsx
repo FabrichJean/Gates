@@ -566,7 +566,7 @@ const MangasDetailsPage: React.FC = () => {
                 <div className="p-4">
                   <div className="space-y-2">
                     <AnimatePresence>
-                      {manga.chapters.slice(0, 5).map((chapter, index) => (
+                      {manga.chapters.map((chapter, index) => (
                         <motion.div
                           key={chapter.id}
                           initial={{ opacity: 0, y: 10 }}

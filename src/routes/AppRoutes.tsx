@@ -63,305 +63,173 @@ import RomanChapterManagement from "../pages/romans/romanChapterManagement";
 import RomanChaptersPage from "../pages/romans/romanChapters";
 
 
+import { AppVideosProvider } from "../context/AppVideosContext";
+import VideoForAppManagement from "../pages/VideoForAppManagement";
+import VideoForAppDetails from "../pages/VideoForAppDetails";
+import VideoForAppEdit from "../pages/VideoForAppEdit";
+import { VideoForAppProvider } from "../context/VideoForAppContext";
+import { MangaUploadSocketProvider } from "../context/MangaUploadSocketContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
 
   return (
     <BrowserRouter>
-      <VideosProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/videos" />} />
-          <Route path="/romans/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanUpload />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomansManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans/:id/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanEdit />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route path="/roman-category"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanCategoryPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Navigate to="/videos" />} />
+        <Route
+          path="/*"
+          element={
+            <VideosProvider>
+              <Routes>
+                <Route
+                  path="/mangas/*"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <MangaUploadSocketProvider>
+                          <MangasProvider>
+                            <Routes>
+                              <Route path="" element={<Mangas />} />
+                              <Route path="upload" element={<UploadMangas />} />
+                              <Route path=":mangaId" element={<MangasDetailsPage />} />
+                              <Route path=":mangaId/edit" element={<EditMangasPage />} />
+                              <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
+                              <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
+                              <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
+                              <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
+                              <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
+                              <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
+                            </Routes>
+                          </MangasProvider>
+                        </MangaUploadSocketProvider>
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/mangas-categories"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <MangasCategoriesPage />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/users"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Users />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/videos"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <VideosManagment />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/videos/upload"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <Upload />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bot-videos"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <BotVideosProvider>
+                          <VideoBotManagement />
+                        </BotVideosProvider>
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
-          <Route path="/romans/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanChapterManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+                <Route
+                  path="/bot-posts"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostBotManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
-          <Route path="/romans/:id/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanChaptersPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+                <Route
+                  path="/bot-post/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostBotDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
-          <Route
-            path="/mangas"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <Mangas />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <UploadMangas />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasDetailsPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangaChaptersRouteWrapper />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasChapterPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <UploadMangasEpisodePage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasEpisodesPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasEpisodeDetailsPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasEpisodePage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas-categories"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <MangasCategoriesPage />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <Users />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/videos"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideosManagment />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/videos/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <Upload />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/bot-videos"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <BotVideosProvider>
-                    <VideoBotManagement />
-                  </BotVideosProvider>
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+                <Route
+                  path="/bot-videos/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <VideoBotDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
-          <Route
-            path="/bot-posts"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostBotManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+                <Route
+                  path="/bot-posts/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostBotDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bot-videos/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <VideoBotEdit />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
-          <Route
-            path="/bot-post/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostBotDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/bot-videos/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoBotDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/bot-posts/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostBotDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/bot-videos/:id/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoBotEdit />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/bot-posts/edit/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostBotEdit />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+                <Route
+                  path="/bot-posts/edit/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostBotEdit />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
 
           <Route
             path="/post"
@@ -584,9 +452,9 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                  <InsideSidebar>
-                    <Settings />
-                  </InsideSidebar>
+                <InsideSidebar>
+                  <Settings />
+                </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
             }
@@ -639,6 +507,4 @@ const AppRoutes = () => {
       </VideosProvider>
     </BrowserRouter>
   );
-};
-
-export default AppRoutes;
+};export default AppRoutes;

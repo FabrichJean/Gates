@@ -1027,7 +1027,7 @@ function EditVideo({
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
                       >
-                        {postTagSuggestions.slice(0, 8).map((s, index) => (
+                        {postTagSuggestions.map((s, index) => (
                           <motion.button
                             key={s.id ?? s.name}
                             initial={{ opacity: 0, x: -20 }}
