@@ -97,6 +97,48 @@ export interface AudioFilter {
   order?: "ASC" | "DESC";
 }
 
+export interface AudioAlbum {
+  id: number;
+  ref?: string;
+  album_number?: number;
+  total_tracks?: number;
+  audio_id?: number;
+  user_id?: number;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+
+  // Relations
+  audio?: Audio;
+  user?: any; // User relation
+  tracks?: AudioAlbumTrack[];
+}
+
+export interface AudioAlbumTrack {
+  id: number;
+  ref?: string;
+  track_number: number;
+  title: string;
+  description?: string;
+  duration?: number;
+  album_id: number;
+  lyrics?: string;
+  audio_file?: string;
+  local_audio_path?: string;
+  upload_status?: "pending" | "uploading" | "completed" | "failed";
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+
+  // Relations
+  album?: AudioAlbum;
+  titles?: AudioTitle[];
+
+  // URLs
+  audio_url?: string;
+  s3_audio_url?: string;
+}
+
 export interface AudioListResponse {
   total: number;
   page: number;

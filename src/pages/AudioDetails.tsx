@@ -59,7 +59,7 @@ const AudioDetails: React.FC = () => {
   const fetchAudioAlbums = async (audioId: string|number) => {
     try {
       const res = await getAudioAlbumsByAudioIdApi(audioId);
-      setAudioAlbums(res.data?.items || res.data || []);
+      setAudioAlbums(res.data?.data || []);
     } catch (e) {
       setAudioAlbums([]);
     }
