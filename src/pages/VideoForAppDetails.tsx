@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { UseAppVideo, useNextAppVideo } from "../hooks/app/useAppVideos";
 import { formatDateFR } from "../utils/date";
