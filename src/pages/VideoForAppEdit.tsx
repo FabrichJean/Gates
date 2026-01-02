@@ -8,6 +8,7 @@ import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import { I18nField } from "../components/I18nComponents";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
+import { getTagCategoriesVideoForAppApi } from "../api/videoForApp";
 import type { TranslatedText } from "../types/i18n";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
@@ -104,6 +105,34 @@ function VideoForAppEdit() {
 
   // Tag Category Videos states
   const [selectedTags, setSelectedTags] = useState<(number | { name: string })[]>([]);
+
+  // If no tags are present on the video, pick 5 random tag categories as defaults
+  useEffect(() => {
+    const setRandomDefaults = async () => {
+      try {
+        // Don't override if video already has tags or user already selected tags
+        if (video?.tagCategoryVideos && video.tagCategoryVideos.length > 0) return;
+        if (selectedTags.length > 0) return;
+
+        const res = await getTagCategoriesVideoForAppApi();
+        const tags = (res?.data?.items ?? res?.data ?? []) as { id?: number; name: string }[];
+        if (!tags || tags.length === 0) return;
+
+        // Shuffle and pick up to 5 tags with ids
+        const shuffled = [...tags].sort(() => 0.5 - Math.random());
+        const picked = shuffled.slice(0, Math.min(5, shuffled.length));
+        const ids = picked.map(t => t.id).filter(Boolean) as number[];
+        if (ids.length > 0) {
+          setSelectedTags(ids);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tag categories for defaults", err);
+      }
+    };
+
+    setRandomDefaults();
+    // run when video loads
+  }, [video]);
 
   // needVip state
   const [needVip, setNeedVip] = useState<boolean>(false);
