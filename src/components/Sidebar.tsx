@@ -230,8 +230,8 @@ function Sidebar({
         >
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-50" />
-            <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl">
-              <SiGoogledisplayandvideo360 className="w-6 h-6 text-white" />
+            <div className="relative bg-gradient-to-br to-blue-500 dark:via-transparent from-transparent p-2.5 rounded-xl">
+              <SiGoogledisplayandvideo360 className="w-5 h-5 text-white" />
             </div>
           </div>
 

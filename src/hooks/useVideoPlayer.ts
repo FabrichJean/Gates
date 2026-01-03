@@ -61,7 +61,6 @@ export const useVideoPlayer = ({
             "Authorization": `Bearer ${token()}`
           },
           params: {
-            key: 'xokey',
             url: videoUrls.hlsUrl
           },
           responseType: 'blob'
@@ -76,13 +75,6 @@ export const useVideoPlayer = ({
     } catch (err) {
       console.error('Failed to load video', err);
       setError('Failed to load video');
-
-      // Fallback to direct URL if HLS fails
-      if (videoUrls.hlsUrl) {
-        // setVideoSrc(`${apiURL}/videos/play?key=xokey&url=${videoUrls.hlsUrl}`);
-      } else if (videoUrls.temp_url) {
-        setVideoSrc(videoUrls.temp_url);
-      }
     } finally {
       setIsLoading(false);
     }
