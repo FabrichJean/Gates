@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface PaginationProps {
   totalItems: number;
@@ -13,6 +13,7 @@ const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   onPageChange,
 }) => {
+  const [goToPage, setGoToPage] = useState("");
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const handlePrev = () => {
@@ -21,6 +22,20 @@ const Pagination: React.FC<PaginationProps> = ({
 
   const handleNext = () => {
     if (currentPage < totalPages) onPageChange(currentPage + 1);
+  };
+
+  const handleGoToPage = () => {
+    const page = parseInt(goToPage);
+    if (page >= 1 && page <= totalPages) {
+      onPageChange(page);
+      setGoToPage("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleGoToPage();
+    }
   };
 
   const visiblePages = Array.from({ length: totalPages }, (_, i) => i + 1).slice(
@@ -67,11 +82,33 @@ const Pagination: React.FC<PaginationProps> = ({
         </svg>
       </button>
 
-      {/* Info */}
-      <span className="ml-4 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
-        Page <span className="font-semibold text-gray-700 dark:text-gray-300">{currentPage}</span> /{" "}
-        <span className="font-semibold text-gray-700 dark:text-gray-300">{totalPages || null}</span>
-      </span>
+      {/* Info et Aller à la page */}
+      <div className="ml-4 flex items-center gap-2">
+        <span className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+          Page <span className="font-semibold text-gray-700 dark:text-gray-300">{currentPage}</span> /{" "}
+          <span className="font-semibold text-gray-700 dark:text-gray-300">{totalPages || null}</span>
+        </span>
+        
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={goToPage}
+            onChange={(e) => setGoToPage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Aller à..."
+            className="w-16 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+          />
+          <button
+            onClick={handleGoToPage}
+            disabled={!goToPage || parseInt(goToPage) < 1 || parseInt(goToPage) > totalPages}
+            className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors duration-200"
+          >
+            Aller
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
