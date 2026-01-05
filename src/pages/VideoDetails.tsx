@@ -14,7 +14,9 @@ import {
   cancelUpload,
   sendProcessing,
   updateVideo,
+  singleSync,
 } from "../api/videos";
+import SingleSyncModal from "../components/SingleSyncModal";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
@@ -52,6 +54,9 @@ import { apiURL, token } from "../constant";
 import {VideoPlayer} from "../components/VideoPlayer";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+
   const { data: user } = useAuthMe();
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
@@ -82,7 +87,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     );
   }, [video]);
 
-  
+
   const send = async (videoId: number) => {
     try {
       await sendProcessing(videoId);
@@ -101,6 +106,20 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       });
   };
 
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!video) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({ entity: "video", origin_id: video.id, isForce });
+      toast.success("✅ Sync single exécuté");
+      reFetch();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+    }
+  };
+
   if (!video)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -112,7 +131,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           Video not found
         </motion.div>
       </div>
-  );
+    );
 
   if (loading) {
     return <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-20 rounded-xl">
@@ -393,6 +412,21 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               Cancel
                             </motion.button>
                           )}
+
+                          {/* bouton single sync */}
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setSingleSyncOpen(true)}
+                            className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700`}>
+                            Sync
+                          </motion.button>
+                          <SingleSyncModal
+                            open={singleSyncOpen}
+                            onClose={() => setSingleSyncOpen(false)}
+                            onSubmit={handleSingleSync}
+                            title="Synchroniser cette vidéo"
+                          />
                         </>
                       )}
 
