@@ -11,8 +11,8 @@ type PaginatedCreators = {
 };
 
 export default function UseCreators(opts?: { page?: number; limit?: number; q?: string }) {
-  const page = opts?.page ?? 1;
-  const limit = opts?.limit ?? 10;
+  const page = opts?.page;
+  const limit = opts?.limit;
   const q = opts?.q ?? '';
   const url = `${apiURL}/creators?page=${page}&limit=${limit}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
 

@@ -23,8 +23,6 @@ export default function CreatorManager() {
 
   const onDelete = async (id: number) => {
     try {
-      const ok = window.confirm('Delete this creator?');
-      if (!ok) return;
       setIsLoading(true);
       await deleteCreator(id);
       toast.success('Creator deleted');

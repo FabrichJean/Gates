@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import UseCreators from '../hooks/useCreators';
 import type { Creator } from './creators/CreatorList';
 import { Shuffle } from 'lucide-react';
@@ -18,9 +18,8 @@ interface Props {
 }
 
 const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled, isDefault, autoSuggest }: Props) => {
-  const { data: creators } = UseCreators();
+  const { data: creators } = UseCreators({ page: 1, limit: 1000 });
   const [query, setQuery] = useState<string>(value ?? '');
-  const [filtered, setFiltered] = useState<Creator[]>([]);
   const [open, setOpen] = useState(false);
   const [isSuggested, setIsSuggested] = useState(false);
   const hasAutoSuggested = useRef(false);
@@ -37,12 +36,11 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
     else setQuery((value as Creator).name || '');
   }, [value]);
 
-  useEffect(() => {
+  const filtered = useMemo(() => {
     const list = creators || [];
-    // setFiltered(list)
     const q = query?.trim().toLowerCase();
-    // if (!q) setFiltered(list.slice(0, 20));
-    setFiltered(list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30));
+    if (!q) return list.slice(0, 30);
+    return list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30);
   }, [creators, query]);
 
   useEffect(() => {

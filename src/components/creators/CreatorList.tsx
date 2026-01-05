@@ -6,6 +6,7 @@ import { useState } from "react";
 import { singleSync } from "../../api/videos";
 import toast from "react-hot-toast";
 import { LiaSyncSolid } from "react-icons/lia";
+import ConfirmAlert from "../ConfirmAlert";
 
 
 export interface Creator {
@@ -18,9 +19,13 @@ export interface Creator {
   highestNFTPrice?: string;
   totalSales?: string;
   followers?: number;
+  source?: string;
   need_vip?: boolean;
   verified?: boolean;
   isDeleted?: boolean;
+  video_count?: number;
+  video_bot_count?: number;
+  post_count?: number;
 }
 
 export default function CreatorList({
@@ -40,6 +45,7 @@ export default function CreatorList({
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Creator | null>(null);
 
   const extractErrorMessage = (err: unknown) => {
     try {
@@ -148,21 +154,29 @@ export default function CreatorList({
                 </div>
 
                 <div className="flex flex-col w-full mt-2 gap-2 items-start">
-                  
+                  <p className="text-sm font-bold text-gray-400 dark:text-gray-300 text-nowrap">
+                    Source : <span className="font-medium">{creator.source ?? '...'}</span>
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
                     Followers: <span className="font-medium">{creator.followers ?? '...'}</span>
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
+                    Videos: <span className="font-medium">{creator.video_count ?? ''}</span>
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
+                    Posts: <span className="font-medium">{creator.post_count ?? ''}</span>
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
                     Verified: {creator.verified ? (
                       <span className="text-green-600 font-medium">Yes</span>) : (
-                      <span className="text-red-600 font-medium">No </span>
+                      <span className="text-orange-400 font-medium">Pending </span>
                     )}
                   </p>
                   {/* btn suprimer */}
                   <button
                     type="button"
                     title="Delete"
-                    onClick={() => handleDelete(creator.id)}
+                    onClick={() => setConfirmTarget(creator)}
                     className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-500 text-sm font-medium transition-all duration-200"
                   >
                     <MdDelete className="w-4 h-4" />
@@ -198,6 +212,15 @@ export default function CreatorList({
         onClose={() => { setSingleSyncOpen(false); setSelectedCreator(null); }}
         onSubmit={handleSingleSync}
         title={selectedCreator ? `Synchroniser ${selectedCreator.name}` : "Synchroniser"}
+      />
+
+      <ConfirmAlert
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={async () => {
+          if (!confirmTarget) return;
+          await handleDelete(confirmTarget.id);
+        }}
       />
     </div>
   );
