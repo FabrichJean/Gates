@@ -74,11 +74,11 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory(); // ------------ TAG CATEGORIES
+  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory();
   const { data: allSubCategories } = UseSubCategory();
 
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
-  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]); //-------------TAG CATEGORIES
+  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
@@ -95,7 +95,16 @@ export default function PlateformRelationsManager() {
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
-  const fetchPlatforms = async () => {
+
+  // post hooks
+  const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
+  const { data: allPostSubCategories } = useSubCategoryPost();
+  const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
+
+  // Creator linking handlers
+  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
+
+    const fetchPlatforms = async () => {
     reFetchPlateform();
   };
 
@@ -300,11 +309,6 @@ export default function PlateformRelationsManager() {
     fetchRelations(selectedPlateform);
   }, [selectedPlateform, fetchRelations]);
 
-  // post hooks
-  const { data: allPostCategories, reFetch: reFetchPostCategories } =
-    useCategoryPost();
-  const { data: allPostSubCategories } = useSubCategoryPost();
-  const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
 
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -532,8 +536,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  // Creator linking handlers
-  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
+  
 
   const handleAddCreator = async (creatorId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
