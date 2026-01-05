@@ -104,7 +104,7 @@ export default function PlateformRelationsManager() {
   // Creator linking handlers
   const [creatorModalOpen, setCreatorModalOpen] = useState(false);
 
-    const fetchPlatforms = async () => {
+  const fetchPlatforms = async () => {
     reFetchPlateform();
   };
 
@@ -536,7 +536,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  
+
 
   const handleAddCreator = async (creatorId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -621,9 +621,9 @@ export default function PlateformRelationsManager() {
         🧩 WebApp Relations Manager
       </h1>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 items-center justify-between sm:flex-row">
         {/* Sidebar - Platforms */}
-        <div className="w-full bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
             <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
               WebApps
@@ -654,13 +654,13 @@ export default function PlateformRelationsManager() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span>add</span>
+              <span>New</span>
             </button>
           </div>
           <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
             {plateforms?.map((p: Platform) => (
               <div key={p.id} className="flex justify-between items-center">
-                <div className="flex gap-1 mr-2">
+                {/* <div className="flex gap-1 mr-2">
                   <button
                     onClick={() => {
                       setEditingPlatform(p);
@@ -685,7 +685,7 @@ export default function PlateformRelationsManager() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
                   </button>
-                </div>
+                </div> */}
                 <button
                   onClick={() => setSelectedPlateform(p.id)}
                   className={`text-success flex flex-1 items-center gap-3 bg-neutral-primary border border-info hover:bg-slate-200 cursor-pointer hover:text-white focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none
@@ -756,7 +756,7 @@ export default function PlateformRelationsManager() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white dark:bg-gray-800 shadow rounded-xl p-4 w-full">
+        <div className="flex-1 bg-white dark:bg-gray-800 shadow rounded-xl p-4 w-auto">
           {selectedPlateform ? (
             <>
               <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">
