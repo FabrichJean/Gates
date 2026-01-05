@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { MdChevronLeft, MdChevronRight, MdClose, MdAdd } from 'react-icons/md';
 import UseCreators from '../hooks/useCreators';
 import { deleteCreator } from '../api/creators';
 import toast from 'react-hot-toast';
@@ -55,13 +55,29 @@ export default function CreatorManager() {
               </div>
 
               <div className="mb-3 flex items-center justify-between gap-3">
-                <input
-                  placeholder="Search creators..."
-                  className={`flex-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${isLoading ? 'opacity-60' : ''}`}
-                  onChange={(e) => setQuery(e.currentTarget.value)}
-                  disabled={isLoading}
-                />
-                <button onClick={openCreateModal} disabled={isLoading} className={`ml-3 px-3 py-2 rounded-md bg-indigo-600 text-white text-sm ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}>New</button>
+                <div className="relative flex-1">
+                  <input
+                    value={query}
+                    placeholder="Search creators..."
+                    className={`w-full pr-8 px-3 h-10 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${isLoading ? 'opacity-60' : ''}`}
+                    onChange={(e) => setQuery(e.currentTarget.value)}
+                    disabled={isLoading}
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      title="Clear"
+                      onClick={() => setQuery("")}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      <MdClose className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <button onClick={openCreateModal} disabled={isLoading} className={`ml-3 px-3 h-10 flex items-center justify-center rounded-md bg-indigo-600 text-white text-sm ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}>
+                  <MdAdd className="w-4 h-4 mr-2" />
+                  New
+                </button>
               </div>
 
               <CreatorList creators={creators || []} onEdit={openEditModal} onDelete={onDelete} isLoading={isLoading} />
