@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Tag as TagIcon, Plus, Edit, Trash2, Search, X } from "lucide-react";
+import { Loader2, Tag as TagIcon, Plus, Edit, Trash2, Search, X, Save } from "lucide-react";
 import AnimatedList from "../components/AnimatedList";
 import TagCard from "../components/TagCard";
 import Pagination from "../components/Pagination";
@@ -8,6 +8,7 @@ import {
     getTagCategoriesApi,
     createTagCategoryApi,
     deleteTagCategoryApi,
+    updateTagCategoryApi,
 } from "../api/tagCategory";
 import { getTagCategoriesPostApi, createTagCategoryPostApi, deleteTagCategoryPostApi, updateTagCategoryPostApi } from "../api/tagCategoryPost";
 import toast from "react-hot-toast";
@@ -35,6 +36,12 @@ export default function TagCategory() {
 
     // Pagination states for post tags
     const [currentPostPage, setCurrentPostPage] = useState(1);
+
+    // Edit states
+    const [editingVideoTagId, setEditingVideoTagId] = useState<number | null>(null);
+    const [editingVideoTagName, setEditingVideoTagName] = useState("");
+    const [editingPostTagId, setEditingPostTagId] = useState<number | null>(null);
+    const [editingPostTagName, setEditingPostTagName] = useState("");
 
     useEffect(() => {
         fetchTags();
@@ -117,6 +124,13 @@ export default function TagCategory() {
     };
 
     const removeCategory = async (id: number) => {
+        const category = categories.find(cat => cat.id === id);
+        const confirmed = window.confirm(
+            `Êtes-vous sûr de vouloir supprimer le tag "${category?.name}" ? Cette action est irréversible.`
+        );
+
+        if (!confirmed) return;
+
         try {
             await deleteTagCategoryApi(id);
             if (selectedId === id) setSelectedId(null);
@@ -126,6 +140,64 @@ export default function TagCategory() {
             console.error(err);
             toast.error("Failed to remove tag");
         }
+    };
+
+    // Update video tag
+    const updateVideoTag = async (id: number, newName: string) => {
+        if (!newName.trim()) {
+            toast.error("Le nom ne peut pas être vide");
+            return;
+        }
+
+        try {
+            await updateTagCategoryApi(id, { name: newName.trim() });
+            toast.success("Tag mis à jour");
+            setEditingVideoTagId(null);
+            setEditingVideoTagName("");
+            fetchTags();
+        } catch (err) {
+            console.error(err);
+            toast.error("Échec de la mise à jour du tag");
+        }
+    };
+
+    // Update post tag
+    const updatePostTag = async (id: number, newName: string) => {
+        if (!newName.trim()) {
+            toast.error("Le nom ne peut pas être vide");
+            return;
+        }
+
+        try {
+            await updateTagCategoryPostApi({ id, name: newName.trim() });
+            toast.success("Tag mis à jour");
+            setEditingPostTagId(null);
+            setEditingPostTagName("");
+            fetchPostTags();
+        } catch (err) {
+            console.error(err);
+            toast.error("Échec de la mise à jour du tag");
+        }
+    };
+
+    // Start editing video tag
+    const startEditingVideoTag = (category: any) => {
+        setEditingVideoTagId(category.id);
+        setEditingVideoTagName(category.name);
+    };
+
+    // Start editing post tag
+    const startEditingPostTag = (category: any) => {
+        setEditingPostTagId(category.id);
+        setEditingPostTagName(category.name);
+    };
+
+    // Cancel editing
+    const cancelEditing = () => {
+        setEditingVideoTagId(null);
+        setEditingVideoTagName("");
+        setEditingPostTagId(null);
+        setEditingPostTagName("");
     };
 
     // Helpers for post tag inputs (same non-space limit behavior)
@@ -284,27 +356,65 @@ export default function TagCategory() {
                                                             <TagIcon className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                                {category.name}
-                                                            </h3>
+                                                            {editingVideoTagId === category.id ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editingVideoTagName}
+                                                                    onChange={(e) => setEditingVideoTagName(e.target.value)}
+                                                                    onKeyPress={(e) => {
+                                                                        if (e.key === 'Enter') {
+                                                                            updateVideoTag(category.id, editingVideoTagName);
+                                                                        } else if (e.key === 'Escape') {
+                                                                            cancelEditing();
+                                                                        }
+                                                                    }}
+                                                                    className="w-full px-2 py-1 text-sm border border-blue-300 dark:border-blue-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                                    autoFocus
+                                                                />
+                                                            ) : (
+                                                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                                    {category.name}
+                                                                </h3>
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-center gap-1 flex-shrink-0">
-                                                        <button
-                                                            onClick={() => setSelectedId(selectedId === category.id ? null : category.id)}
-                                                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                                            title="Select"
-                                                        >
-                                                            <Edit className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => removeCategory(category.id)}
-                                                            className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </button>
+                                                        {editingVideoTagId === category.id ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => updateVideoTag(category.id, editingVideoTagName)}
+                                                                    className="p-1.5 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded transition-colors"
+                                                                    title="Save"
+                                                                >
+                                                                    <Save className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={cancelEditing}
+                                                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                                    title="Cancel"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => startEditingVideoTag(category)}
+                                                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => removeCategory(category.id)}
+                                                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
+                                                                    title="Delete"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </motion.div>
                                             ))}
@@ -455,37 +565,81 @@ export default function TagCategory() {
                                                             <TagIcon className="w-3 h-3 text-green-600 dark:text-green-400" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                                {category.name}
-                                                            </h3>
+                                                            {editingPostTagId === category.id ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editingPostTagName}
+                                                                    onChange={(e) => setEditingPostTagName(e.target.value)}
+                                                                    onKeyPress={(e) => {
+                                                                        if (e.key === 'Enter') {
+                                                                            updatePostTag(category.id, editingPostTagName);
+                                                                        } else if (e.key === 'Escape') {
+                                                                            cancelEditing();
+                                                                        }
+                                                                    }}
+                                                                    className="w-full px-2 py-1 text-sm border border-green-300 dark:border-green-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                                                    autoFocus
+                                                                />
+                                                            ) : (
+                                                                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                                    {category.name}
+                                                                </h3>
+                                                            )}
                                                         </div>
                                                     </div>
 
                                                     <div className="flex items-center gap-1 flex-shrink-0">
-                                                        <button
-                                                            onClick={() => setSelectedPostId(selectedPostId === category.id ? null : category.id)}
-                                                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                                            title="Select"
-                                                        >
-                                                            <Edit className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={async () => {
-                                                                try {
-                                                                    await deleteTagCategoryPostApi(category.id);
-                                                                    if (selectedPostId === category.id) setSelectedPostId(null);
-                                                                    toast.success("Post tag removed");
-                                                                    fetchPostTags();
-                                                                } catch (err) {
-                                                                    console.error(err);
-                                                                    toast.error("Failed to remove post tag");
-                                                                }
-                                                            }}
-                                                            className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </button>
+                                                        {editingPostTagId === category.id ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => updatePostTag(category.id, editingPostTagName)}
+                                                                    className="p-1.5 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded transition-colors"
+                                                                    title="Save"
+                                                                >
+                                                                    <Save className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={cancelEditing}
+                                                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                                    title="Cancel"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => startEditingPostTag(category)}
+                                                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <Edit className="w-3.5 h-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        const confirmed = window.confirm(
+                                                                            `Êtes-vous sûr de vouloir supprimer le tag "${category.name}" ? Cette action est irréversible.`
+                                                                        );
+
+                                                                        if (!confirmed) return;
+
+                                                                        try {
+                                                                            await deleteTagCategoryPostApi(category.id);
+                                                                            if (selectedPostId === category.id) setSelectedPostId(null);
+                                                                            toast.success("Post tag removed");
+                                                                            fetchPostTags();
+                                                                        } catch (err) {
+                                                                            console.error(err);
+                                                                            toast.error("Failed to remove post tag");
+                                                                        }
+                                                                    }}
+                                                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
+                                                                    title="Delete"
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </motion.div>
                                             ))}

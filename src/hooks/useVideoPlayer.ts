@@ -54,6 +54,8 @@ export const useVideoPlayer = ({
     setError(null);
 
     try {
+      console.log(videoUrls);
+      
       if (videoUrls.hlsUrl) {
         // Fetch HLS content as blob
         const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {

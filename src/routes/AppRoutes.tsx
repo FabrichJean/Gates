@@ -475,7 +475,16 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/touch/video/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <TouchVideo />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/touch/post/:id"
             element={
