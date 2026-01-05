@@ -38,9 +38,10 @@ export function UseSubCategoryReactive(category: Category) {
                params: { category_id: category?.id },
             }
          );
-         setSubCategories(res.data.SubCategorys);
+         setSubCategories(res.data?.SubCategorys || []);
       } catch (error) {
          console.error("Erreur lors du chargement des sous-catégories :", error);
+         setSubCategories([]);
       }
    };
 

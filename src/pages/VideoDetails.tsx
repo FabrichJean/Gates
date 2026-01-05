@@ -759,7 +759,14 @@ function EditVideo({
                   }`}
               />
             </button>
+             <Link
+                to={`/touch/video/${video.id}`}
+                className="underline"
+              >
+                Edit with Video
+              </Link>
           </div>
+          
         </div>
 
         <div className="flex flex-col gap-8">
