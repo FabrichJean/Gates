@@ -8,10 +8,6 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  
-  console.log('protected fvdfjkfkdj');
-  
-
   const { token, loading, user } = useAuth();
 
   // While auth is loading, show spinner

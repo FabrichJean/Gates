@@ -2,7 +2,7 @@
  * Types pour l'internationalisation (i18n)
  */
 
-export type SupportedLanguage = 'en' | 'fr' | 'es' | 'de' | 'pt' | 'ar' | 'zh' | 'ja' | 'ko';
+export type SupportedLanguage = 'en' | 'fr' | 'es' | 'de' | 'pt' | 'ar' | 'zh' | 'ja' | 'ko' | 'hi';
 
 export interface TranslatedText {
   [key: string]: string; // key is language code (en, fr, es, etc.)
@@ -36,6 +36,7 @@ export const LANGUAGE_NAMES: Record<SupportedLanguage, string> = {
   zh: '中文',
   ja: '日本語',
   ko: '한국어',
+  hi: 'हिन्दी',
 };
 
 export const LANGUAGE_FLAGS: Record<SupportedLanguage, string> = {
@@ -48,4 +49,5 @@ export const LANGUAGE_FLAGS: Record<SupportedLanguage, string> = {
   zh: '🇨🇳',
   ja: '🇯🇵',
   ko: '🇰🇷',
+  hi: '🇮🇳',
 };

@@ -5,10 +5,7 @@ import { useParams } from 'react-router-dom';
 function MediaPostManager() {
   const { id } = useParams<{ id: string }>();
 
-  const handleUploadComplete = (couples: any) => {
-    console.log('Upload completed:', couples);
-    // Redirection ou notification de succès
-  };
+  const handleUploadComplete = (couples: any) => {};
 
   return (
     <div className="min-h-screen bg-gray-100">

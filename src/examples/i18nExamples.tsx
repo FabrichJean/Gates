@@ -33,7 +33,6 @@ const ExampleMangaForm: React.FC = () => {
     };
 
     // Envoyer à l'API
-    console.log('Data to send:', dataToSend);
     // await createManga(dataToSend);
   };
 

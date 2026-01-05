@@ -48,6 +48,8 @@ import {
   Save,
 } from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
+import { apiURL, token } from "../constant";
+import {VideoPlayer} from "../components/VideoPlayer";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -245,67 +247,20 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
                         }`}
                     >
-                      <AnimatePresence mode="wait">
-                        {videoPlayed ? (
-                          <motion.video
-                            key="video"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4, ease: "easeInOut" }}
-                            src={
-                              video.s3_urls.hlsUrl || video.public_urls.temp_url
-                            }
-                            className="w-full h-full object-cover"
-                            controls
-                            autoPlay
-                            playsInline
-                            onLoadedMetadata={(e) => {
-                              const el = e.currentTarget;
-                              el.style.objectFit = "cover";
-                              el.style.objectPosition = "center";
-                            }}
-                          />
-                        ) : (
-                          <>
-                            {/* Play Button */}
-                            <motion.div
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => setVideoPlayed(true)}
-                              className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
-                            >
-                              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
-                                <Play className="w-10 h-10 text-white ml-1" />
-                              </div>
-                            </motion.div>
-
-                            {/* VIP Badge */}
-                            {video?.need_vip && (
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute right-2 top-2 z-20"
-                              >
-                                <div className="w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                  <RiVipCrown2Fill className="w-5 h-5 text-orange-400" />
-                                </div>
-                              </motion.div>
-                            )}
-
-                            {/* Cover Image */}
-                            <img
-                              src={
-                                currentCoverUrl ||
-                                video.s3_urls.coverUrl ||
-                                video.public_urls.cover_url
-                              }
-                              alt="cover"
-                              className="w-full h-full object-cover"
-                            />
-                          </>
-                        )}
-                      </AnimatePresence>
+                      <VideoPlayer
+                        videoUrls={{
+                          hlsUrl: video?.s3_urls?.hlsUrl,
+                          temp_url: video?.public_urls?.temp_url,
+                          coverUrl: video?.s3_urls?.coverUrl,
+                          cover_url: video?.public_urls?.cover_url
+                        }}
+                        poster={currentCoverUrl || video?.s3_urls?.coverUrl || video?.public_urls?.cover_url}
+                        isPlaying={videoPlayed}
+                        onPlay={() => setVideoPlayed(true)}
+                        className="w-full h-full"
+                        showVipBadge={video?.need_vip || false}
+                        autoPlay={true}
+                      />
 
                     </div>
 
@@ -1027,7 +982,7 @@ function EditVideo({
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
                       >
-                        {postTagSuggestions.slice(0, 8).map((s, index) => (
+                        {postTagSuggestions.map((s, index) => (
                           <motion.button
                             key={s.id ?? s.name}
                             initial={{ opacity: 0, x: -20 }}

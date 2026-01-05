@@ -8,6 +8,10 @@ import axios from "axios";
 export type SubCategory = {
    id: number;
    name: string;
+   sub_categories?: Array<{
+     code: string;
+     name: string;
+   }>;
    categoryId: string;
    createdAt: Date;
    updatedAt: Date;

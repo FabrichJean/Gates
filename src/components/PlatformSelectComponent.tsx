@@ -18,6 +18,13 @@ const PlatformSelectComponent = ({ onSelect, defaultValue }: Props) => {
         }
     }, [data]);
 
+    // Update selected value when defaultValue changes
+    useEffect(() => {
+        if (defaultValue) {
+            setSelected(defaultValue.id);
+        }
+    }, [defaultValue]);
+
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         if (value === "" || value === "all") {

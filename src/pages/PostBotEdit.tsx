@@ -951,7 +951,7 @@ const PostBotEdit = () => {
                                         postTagSuggestions &&
                                         postTagSuggestions.length > 0 && (
                                             <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
-                                                {postTagSuggestions.slice(0, 8).map((s) => (
+                                                {postTagSuggestions.map((s) => (
                                                     <li
                                                         key={s.id ?? s.name}
                                                         onClick={() => {

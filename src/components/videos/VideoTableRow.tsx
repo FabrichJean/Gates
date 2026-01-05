@@ -20,6 +20,7 @@ interface VideoTableRowProps {
   reFetchFn?: (delay?: number) => void;
   detailsPath?: string;
   convertToMp4Fn?: (videoId: number) => Promise<any>;
+  hideSend?: boolean;
 }
 
 const VideoTableRow = ({
@@ -33,6 +34,7 @@ const VideoTableRow = ({
   reFetchFn,
   detailsPath,
   convertToMp4Fn,
+  hideSend,
 }: VideoTableRowProps) => {
   const { user } = useAuth();
 
@@ -202,7 +204,7 @@ const VideoTableRow = ({
         <VideoActions
           video={video}
           user={user!}
-          onSend={onSend}
+          onSend={hideSend ? undefined : onSend}
           cancelFn={cancelFn}
           reFetchFn={reFetchFn}
           detailsPath={detailsPath}

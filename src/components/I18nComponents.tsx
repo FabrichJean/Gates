@@ -5,6 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import I18nField from './I18nField';
 import I18nText from './I18nText';
+import RomanContentEditor from './RomanContentEditor';
 import type { TranslatedText } from '../types/i18n';
 import { LANGUAGE_NAMES, LANGUAGE_FLAGS } from '../types/i18n';
 import { translateServer } from '../constant';
@@ -23,6 +24,7 @@ interface I18nContentFieldsProps {
   descriptionRequired?: boolean;
   supportedLanguages?: string[];
   showAutoFill?: boolean; // Nouvelle prop pour activer/désactiver Auto-fill
+  page?: string; // Optionnel, pour contexte additionnel
 }
 
 export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
@@ -35,6 +37,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
   descriptionRequired = false,
   supportedLanguages = ['en', 'fr'],
   showAutoFill = false,
+  page,
 }) => {
   const [selectedLang, setSelectedLang] = useState<string>(supportedLanguages[0]);
   const [isLoading, setLoading] = useState(false);
@@ -58,7 +61,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
   };
 
   const getCompletionPercentage = () => {
-    const filledLangs = supportedLanguages.filter(lang => 
+    const filledLangs = supportedLanguages.filter(lang =>
       title[lang]?.trim() || description[lang]?.trim()
     ).length;
     return Math.round((filledLangs / supportedLanguages.length) * 100);
@@ -79,30 +82,21 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
       });
 
       const translations = response.data;
-      
-      console.log('API Response:', translations);
-      console.log('Supported languages:', supportedLanguages);
-      
+
       // Parser les résultats et appliquer (conserver les valeurs existantes)
       const newTitles: TranslatedText = { ...title };
       const newDescriptions: TranslatedText = { ...description };
 
       translations.forEach((t: any) => {
-        console.log('Processing translation:', t);
         if (t.i18_language && supportedLanguages.includes(t.i18_language)) {
           if (t.title) {
-            console.log(`Setting title for ${t.i18_language}:`, t.title);
             newTitles[t.i18_language] = t.title;
           }
           if (t.description) {
-            console.log(`Setting description for ${t.i18_language}:`, t.description);
             newDescriptions[t.i18_language] = t.description;
           }
         }
       });
-
-      console.log('Final titles:', newTitles);
-      console.log('Final descriptions:', newDescriptions);
 
       // Utiliser le callback combiné si disponible, sinon les callbacks séparés
       if (onBothChange) {
@@ -111,7 +105,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
         onTitleChange(newTitles);
         onDescriptionChange(newDescriptions);
       }
-      
+
       toast.success("✨ Auto-fill successful!");
       setAutoOpen(false);
       setAutoTitle("");
@@ -136,23 +130,22 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <Languages className="w-4 h-4" />
-          Titres et Descriptions
+          { page === "roman" ? "Titles and Contents" : "Titre et Description" }
           {titleRequired && <span className="text-red-500">*</span>}
         </label>
-        
+
         <div className="flex items-center gap-2">
-          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-            getCompletionPercentage() === 100
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getCompletionPercentage() === 100
               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
               : getCompletionPercentage() > 0
-              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-          }`}>
+                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+            }`}>
             {getCompletionPercentage()}% traduit
           </span>
 
           {/* Bouton Auto-fill */}
-          {showAutoFill && (
+          {page !== "roman" && showAutoFill && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -176,11 +169,10 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
               key={lang}
               type="button"
               onClick={() => setSelectedLang(lang)}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                selectedLang === lang
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${selectedLang === lang
                   ? 'bg-blue-500 text-white shadow-sm'
                   : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
+                }`}
             >
               <span className="text-base">{LANGUAGE_FLAGS[lang] || '🌐'}</span>
               <span>{LANGUAGE_NAMES[lang] || lang.toUpperCase()}</span>
@@ -204,31 +196,42 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
             {/* Title input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Titre {titleRequired && <span className="text-red-500">*</span>}
+              {page === "roman" ? "Chapter Title" : "Title"} {titleRequired && <span className="text-red-500">*</span>}
               </label>
               <input
-                type="text"
-                value={title[selectedLang] || ''}
-                onChange={(e) => handleTitleChange(selectedLang, e.target.value)}
-                placeholder={`Entrez le titre en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required={titleRequired && selectedLang === supportedLanguages[0]}
+              type="text"
+              value={title[selectedLang] || ''}
+              onChange={(e) => handleTitleChange(selectedLang, e.target.value)}
+              placeholder={page === "roman" ? `Enter the chapter title in ${LANGUAGE_NAMES[selectedLang] || selectedLang}` : `Enter the title in ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+              className={`w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              required={titleRequired && selectedLang === supportedLanguages[0]}
               />
             </div>
 
             {/* Description textarea */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description {descriptionRequired && <span className="text-red-500">*</span>}
+                { page === "roman" ? "Contents" : "Description"} {descriptionRequired && <span className="text-red-500">*</span>}
               </label>
-              <textarea
-                value={description[selectedLang] || ''}
-                onChange={(e) => handleDescriptionChange(selectedLang, e.target.value)}
-                rows={6}
-                placeholder={`Entrez la description en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                required={descriptionRequired && selectedLang === supportedLanguages[0]}
-              />
+              {page === 'roman' ? (
+                <RomanContentEditor
+                  value={description[selectedLang] || ''}
+                  onChange={(v) => handleDescriptionChange(selectedLang, v)}
+                  rows={12}
+                  placeholder={`Entrez le contenu en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+                  className={`w-full px-3 py-2 ${page === 'roman' ? 'min-h-[220px]' : ''}`}
+                  required={descriptionRequired && selectedLang === supportedLanguages[0]}
+                />
+              ) : (
+                <textarea
+                  value={description[selectedLang] || ''}
+                  onChange={(e) => handleDescriptionChange(selectedLang, e.target.value)}
+                  rows={6}
+                  placeholder={`Entrez la ${page === "roman" ? "contenu" : "description"} en ${LANGUAGE_NAMES[selectedLang] || selectedLang}`}
+                  className={`w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+                  required={descriptionRequired && selectedLang === supportedLanguages[0]}
+                />
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -238,11 +241,10 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
           {supportedLanguages.map((lang) => (
             <div
               key={lang}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${
-                isLanguageFilled(lang)
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${isLanguageFilled(lang)
                   ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
                   : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
-              }`}
+                }`}
             >
               <span>{LANGUAGE_FLAGS[lang] || '🌐'}</span>
               <span>{lang.toUpperCase()}</span>
@@ -326,7 +328,7 @@ export const I18nContentFields: React.FC<I18nContentFieldsProps> = ({
                 </button>
                 <button
                   type='button'
-                  className="btn btn-primary gap-2" 
+                  className="btn btn-primary gap-2"
                   onClick={applyAuto}
                   disabled={isLoading || !autoTitle.trim()}
                 >
@@ -377,7 +379,7 @@ export const I18nContentDisplay: React.FC<I18nContentDisplayProps> = ({
         className={titleClassName}
         fallbackLang="en"
       />
-      
+
       {description && (
         <I18nText
           content={description}
