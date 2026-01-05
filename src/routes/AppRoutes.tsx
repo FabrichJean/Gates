@@ -69,15 +69,14 @@ import VideoForAppManagement from "../pages/VideoForAppManagement";
 import VideoForAppDetails from "../pages/VideoForAppDetails";
 import VideoForAppEdit from "../pages/VideoForAppEdit";
 import { VideoForAppProvider } from "../context/VideoForAppContext";
+import { MangaUploadSocketProvider } from "../context/MangaUploadSocketContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
 
   return (
     <BrowserRouter>
-      <VideosProvider>
-        <AudiosProvider>
-          <Routes>
+      <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
@@ -87,66 +86,43 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <InsideSidebar>
                   <MangasProvider>
-                    <Routes>
-                      <Route path="" element={<Mangas />} />
-                      <Route path="upload" element={<UploadMangas />} />
-                      <Route path=":mangaId" element={<MangasDetailsPage />} />
-                      <Route path=":mangaId/edit" element={<EditMangasPage />} />
-                      <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
-                      <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
-                      <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
-                    </Routes>
+                    <MangaUploadSocketProvider>
+                      <Routes>
+                        <Route path="" element={<Mangas />} />
+                        <Route path="upload" element={<UploadMangas />} />
+                        <Route path=":mangaId" element={<MangasDetailsPage />} />
+                        <Route path=":mangaId/edit" element={<EditMangasPage />} />
+                        <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
+                        <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
+                      </Routes>
+                    </MangaUploadSocketProvider>
                   </MangasProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
           />
           <Route
-            path="/audios"
+            path="/audios/*"
             element={
               <ProtectedRoute>
                 <SuperProtected>
                   <InsideSidebar>
-                    <Audios />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audios/upload"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <UploadAudio />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audios/:id"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <AudioDetails />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audios/:id/edit"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <AudioEdit />
+                    <AudiosProvider>
+                      <Routes>
+                        <Route path="" element={<Audios />} />
+                        <Route path="upload" element={<UploadAudio />} />
+                        <Route path=":id" element={<AudioDetails />} />
+                        <Route path=":id/edit" element={<AudioEdit />} />
+                        <Route path="albums" element={<AudioAlbums />} />
+                        <Route path="albums/upload" element={<UploadAudioAlbum />} />
+                        <Route path="albums/:id" element={<AudioAlbumDetails />} />
+                        <Route path="albums/:id/edit" element={<AudioAlbumEdit />} />
+                      </Routes>
+                    </AudiosProvider>
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
@@ -177,21 +153,18 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="/videos"
+            path="/videos/*"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <VideosManagment />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/videos/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <Upload />
+                  <VideosProvider>
+                    <Routes>
+                      <Route path="" element={<VideosManagment />} />
+                      <Route path="upload" element={<Upload />} />
+                      <Route path=":id" element={<VideoDetails />} />
+                      <Route path="touch/:id" element={<TouchVideo />} />
+                    </Routes>
+                  </VideosProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -502,26 +475,7 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/videos/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/touch/video/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <TouchVideo />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/touch/post/:id"
             element={
@@ -545,72 +499,19 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="/audio-albums"
+            path="/audio-albums/*"
             element={
               <ProtectedRoute>
                 <SuperProtected>
                   <InsideSidebar>
-                    <AudioAlbums />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app-videos"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoForAppProvider>
-                    <VideoForAppManagement />
-                  </VideoForAppProvider>
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audio-albums/upload"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <UploadAudioAlbum />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app-videos/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoForAppProvider>
-                    <VideoForAppDetails />
-                  </VideoForAppProvider>
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audio-albums/:id"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <AudioAlbumDetails />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audio-albums/:id/edit"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <AudioAlbumEdit />
+                    <AudiosProvider>
+                      <Routes>
+                        <Route path="" element={<AudioAlbums />} />
+                        <Route path="upload" element={<UploadAudioAlbum />} />
+                        <Route path=":id" element={<AudioAlbumDetails />} />
+                        <Route path=":id/edit" element={<AudioAlbumEdit />} />
+                      </Routes>
+                    </AudiosProvider>
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>
@@ -631,8 +532,6 @@ const AppRoutes = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         {modalFloat && <CardFlottant />}
-        </AudiosProvider>
-      </VideosProvider>
     </BrowserRouter>
   );
 };
