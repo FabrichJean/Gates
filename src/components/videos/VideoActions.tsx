@@ -38,7 +38,8 @@ const VideoActions = ({
   const { showAlert } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
   const { count: processingCount } = useProcessingCount();
-  const ctx = useVideosContext();
+  // Only use VideosContext if reFetchFn is not provided
+  const ctx = reFetchFn ? null : useVideosContext();
   const refetch = reFetchFn || ctx?.reFetch;
 
   const [resending, setResending] = useState(false);

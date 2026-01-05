@@ -169,6 +169,30 @@ const AppRoutes = () => {
             }
           />
           <Route
+            path="/app-videos"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppManagement />
+                  </VideoForAppProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppDetails />
+                  </VideoForAppProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/bot-videos"
             element={
               <ProtectedRoute>
