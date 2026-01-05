@@ -1,5 +1,11 @@
 import { MdOutlineVerifiedUser } from "react-icons/md";
 import { Link } from "react-router-dom";
+import SingleSyncModal from "../SingleSyncModal";
+import { useState } from "react";
+import { singleSync } from "../../api/videos";
+import toast from "react-hot-toast";
+import { LiaSyncSolid } from "react-icons/lia";
+
 
 export interface Creator {
   id: number;
@@ -17,13 +23,56 @@ export interface Creator {
 
 export default function CreatorList({
   creators,
+  onEdit,
+  onDelete,
+  reFetch,
   isLoading,
 }: {
   creators: Creator[];
   onEdit: (c: Creator) => void;
   onDelete: (id: number) => void;
+  reFetch?: (delay?: number) => void;
   isLoading?: boolean;
 }) {
+
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+
+  const extractErrorMessage = (err: unknown) => {
+    try {
+      if (!err) return "Error";
+      if (typeof err === "string") return err;
+      if (typeof err === "object" && err !== null) {
+        return (
+          (err as any)?.response?.data?.message ??
+          (err as any)?.message ??
+          "Error"
+        );
+      }
+      return String(err);
+    } catch {
+      return "Error";
+    }
+  };
+
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!selectedCreator) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({ entity: "creator", origin_id: selectedCreator.id, isForce });
+      toast.success("✅ Sync single exécuté");
+      reFetch?.(500);
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+      setSingleSyncOpen(false);
+      setSelectedCreator(null);
+    }
+  };
+
+
 
   // Répartir les créateurs en 3 lignes
   let rows = [[], [], []] as Creator[][];
@@ -36,7 +85,7 @@ export default function CreatorList({
     rows = [creators]
   }
 
-  
+
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-10">
@@ -53,7 +102,7 @@ export default function CreatorList({
             {row.map((creator) => (
               <div
                 key={creator.id}
-                className="w-full md:w-max h-[8rem] bg-white dark:bg-slate-700 rounded-lg p-4 flex flex-col items-start transition-all hover:shadow-lg hover:-translate-y-1 border border-gray-200 dark:border-gray-500"
+                className="w-full md:w-max h-[8rem] bg-white dark:bg-slate-700 rounded-lg p-4 flex flex-col items-start transition-all hover:shadow-lg  border border-gray-200 dark:border-gray-500"
                 style={{ backdropFilter: "blur(6px)" }}
               >
                 <div className="flex items-center gap-4 w-full">
@@ -74,6 +123,15 @@ export default function CreatorList({
                       {creator.followers ?? 0} followers
                     </p>
                   </div>
+                  {/* btn single sync */}
+                  <button
+                    type="button"
+                    title="Synchroniser"
+                    onClick={() => { setSelectedCreator(creator); setSingleSyncOpen(true); }}
+                    className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-medium transition-all duration-200"
+                  >
+                    <LiaSyncSolid className="w-4 h-4" />
+                  </button>
                 </div>
 
                 <div className="mt-4 text-sm text-gray-700">
@@ -99,6 +157,13 @@ export default function CreatorList({
           </div>
         ))}
       </div>
+
+      <SingleSyncModal
+        open={singleSyncOpen}
+        onClose={() => { setSingleSyncOpen(false); setSelectedCreator(null); }}
+        onSubmit={handleSingleSync}
+        title={selectedCreator ? `Synchroniser ${selectedCreator.name}` : "Synchroniser"}
+      />
     </div>
   );
 }

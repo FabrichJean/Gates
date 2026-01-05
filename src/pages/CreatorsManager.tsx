@@ -32,7 +32,7 @@ export default function CreatorManager() {
   const filtered = (creators || []).filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900 rounded-lg transition-all duration-300">
       {isLoading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
