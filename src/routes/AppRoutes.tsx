@@ -90,7 +90,7 @@ const AppRoutes = () => {
                     <ProtectedRoute>
                       <InsideSidebar>
                         <MangaUploadSocketProvider>
-                          <MangasProvider>
+                          <>
                             <Routes>
                               <Route path="" element={<Mangas />} />
                               <Route path="upload" element={<UploadMangas />} />
@@ -103,7 +103,7 @@ const AppRoutes = () => {
                               <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
                               <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
                             </Routes>
-                          </MangasProvider>
+                          </>
                         </MangaUploadSocketProvider>
                       </InsideSidebar>
                     </ProtectedRoute>
@@ -121,6 +121,74 @@ const AppRoutes = () => {
                     </ProtectedRoute>
                   }
                 />
+
+                <Route path="/romans/upload"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanUpload />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomansManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanEdit />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/roman-category"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanCategoryPage />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/romans/chapters"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanChapterManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/romans/:id/chapters"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanChaptersPage />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route
                   path="/users"
                   element={
@@ -231,280 +299,285 @@ const AppRoutes = () => {
                   }
                 />
 
-          <Route
-            path="/post"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <UploadPost />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post/edit/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <PostEdit />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post/edit-media/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MediaPostManager />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profil"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <Profil />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users/create"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <CreateUser />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users/:id"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <UserDetails />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/archive"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <UsersArchives />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/category-manager"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <CategoryManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/plateform-subcategories"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <PlateformSubCategoryManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/plateform-categories"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <PlateformCategoryManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/plateform-relations"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <PlateformRelationsManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post-categories"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <PostCategoryManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tag-category"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <TagCategory />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/creators"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <CreatorManager />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/creators/:id"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <Creatorr />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/plateform"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <Plateform />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/conversion"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <Conversion />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                <InsideSidebar>
-                  <Settings />
-                </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/videos/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <VideoDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/touch/video/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <TouchVideo />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/touch/post/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <TouchPost />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sync"
-            element={
-              <ProtectedRoute>
-                <SuperProtected>
-                  <InsideSidebar>
-                    <Synchronisation />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        {modalFloat && <CardFlottant />}
-      </VideosProvider>
+                <Route
+                  path="/post"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post/upload"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <UploadPost />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post/edit/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <PostEdit />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post/edit-media/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <MediaPostManager />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profil"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <Profil />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/users/create"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <CreateUser />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/users/:id"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <UserDetails />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/archive"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <UsersArchives />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/category-manager"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <CategoryManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/plateform-subcategories"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <PlateformSubCategoryManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/plateform-categories"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <PlateformCategoryManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/plateform-relations"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <PlateformRelationsManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post-categories"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <PostCategoryManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tag-category"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <TagCategory />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/creators"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <CreatorManager />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/creators/:id"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Creatorr />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/plateform"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Plateform />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/conversion"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Conversion />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Settings />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/videos/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <VideoDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/touch/video/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <TouchVideo />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/touch/post/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <TouchPost />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/sync"
+                  element={
+                    <ProtectedRoute>
+                      <SuperProtected>
+                        <InsideSidebar>
+                          <Synchronisation />
+                        </InsideSidebar>
+                      </SuperProtected>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              {modalFloat && <CardFlottant />}
+            </VideosProvider>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
-};export default AppRoutes;
+};
+
+export default AppRoutes;
