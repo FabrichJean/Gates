@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
-import { MangaUploadSocketProvider } from './context/MangaUploadSocketContext.tsx'
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById('root')!).render(

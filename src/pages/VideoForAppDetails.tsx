@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { UseAppVideo, useNextAppVideo } from "../hooks/app/useAppVideos";
 import { formatDateFR } from "../utils/date";
@@ -25,7 +24,7 @@ import { apiURL } from '../constant';
 import { Link, useParams } from 'react-router-dom';
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
-import ReactHlsPlayer from 'react-hls-player';
+import VideoPlayer from "../components/VideoPlayer";
 
 
 // Helper function to get category display name
@@ -67,8 +66,6 @@ const VideoForAppDetails: React.FC = () => {
   const [videoPlayed, setVideoPlayed] = useState(false);
 
   const [modifying, setModifying] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
-  const hlsPlayerRef = useRef<HTMLVideoElement>(null);
 
   // Platform data
   const { data: platforms } = usePlatformReactive();
@@ -81,18 +78,6 @@ const VideoForAppDetails: React.FC = () => {
     ...(video.hi_title ? [{ i18_language: 'hi' as any, title: video.hi_title, description: '' }] : []),
   ] : [];
 
-  useEffect(() => {
-    if (video?.m3u8_path) {
-      // Fetch the M3U8 content from the backend play endpoint using axios
-      axios.post(apiURL+'/videos-for-app/play', { url: video.m3u8_path, id: video.id })
-        .then(response => {
-          setVideoSrc(response.data.local_hls_url);
-        })
-        .catch(err => console.error('Failed to load M3U8', err));
-    }
-  }, [video?.m3u8_path]);
-
-  // Fetch platform data when video loads
   useEffect(() => {
     if (video?.plateform_id && platforms) {
       const videoPlatform = platforms.find(p => p.id === video.plateform_id);
@@ -241,21 +226,16 @@ const VideoForAppDetails: React.FC = () => {
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                     <div className="aspect-video bg-black relative">
-                      {videoSrc ? (
-                        <ReactHlsPlayer
-                          playerRef={hlsPlayerRef}
-                          src={videoSrc}
-                          autoPlay={true}
-                          controls={true}
-                          width="100%"
-                          height="auto"
-                          poster={video.cover || undefined}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-white">
-                          Loading video...
-                        </div>
-                      )}
+                      <VideoPlayer
+                        videoUrls={{
+                          hlsUrl: video?.m3u8_path,
+                          coverUrl: video?.s3_urls?.coverUrl,
+                        }}
+                        poster={video?.cover}
+                        className="w-full h-full"
+                        isForApp={true}
+                        autoPlay={true}
+                      />
                     </div>
                   </div>
                 </motion.div>

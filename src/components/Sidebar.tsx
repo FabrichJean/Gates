@@ -139,10 +139,9 @@ function Sidebar({
       className={`
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-300 overflow-hidden
-        ${
-          isActive(name)
-            ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
-            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+        ${isActive(name)
+          ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
+          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
         }
       `}
     >
@@ -155,11 +154,10 @@ function Sidebar({
       <div
         className={`
         relative z-10 transition-transform duration-300
-        ${
-          isActive(name)
+        ${isActive(name)
             ? "scale-110"
             : "group-hover:scale-110 group-hover:rotate-3"
-        }
+          }
       `}
       >
         {iconComponent || (Icon && <Icon className="w-5 h-5" />)}
@@ -170,11 +168,10 @@ function Sidebar({
         <span
           className={`
           relative z-10 font-medium text-sm
-          ${
-            isActive(name)
+          ${isActive(name)
               ? ""
               : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
-          }
+            }
         `}
         >
           {label}
@@ -233,8 +230,8 @@ function Sidebar({
         >
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-50" />
-            <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl">
-              <SiGoogledisplayandvideo360 className="w-6 h-6 text-white" />
+            <div className="relative bg-gradient-to-br to-blue-500 dark:via-transparent from-transparent p-2.5 rounded-xl">
+              <SiGoogledisplayandvideo360 className="w-5 h-5 text-white" />
             </div>
           </div>
 
@@ -389,6 +386,13 @@ function Sidebar({
               icon={MdOutlineCategory}
             />
 
+            <NavLink
+              to="/roman-category"
+              name="roman-category"
+              label="Roman Category"
+              icon={MdOutlineCategory}
+            />
+
             {/* Separator */}
             {!isCollapsed && (
               <div className="pt-4 pb-2">
@@ -397,6 +401,134 @@ function Sidebar({
                 </p>
               </div>
             )}
+
+            <NavLink
+              to="/mangas"
+              name="mangas"
+              label="Mangas"
+              iconComponent={
+                <img src="/mangas.png" alt="" className="w-5 h-5"/>
+              }
+            />
+
+            <NavLink
+              to="/audios"
+              name="audios"
+              label="Audios"
+              iconComponent={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
+              }
+            />
+
+            <Link
+              to="/mangas"
+              onClick={() => handleNav('mangas')}
+              className={` group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 overflow-hidden ${isActive("mangas") ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                }`}
+            >
+              {/* Active indicator */}
+              {isActive("mangas") && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+              )}
+
+              {/* Icon */}
+              <div
+                className={`
+        relative z-10 transition-transform duration-300
+        ${isActive("mangas")
+                    ? "scale-110"
+                    : "group-hover:scale-110 group-hover:rotate-3"
+                  }
+      `}
+              >
+                <img src="/mangas.png" alt="" className="w-7 h-7" />
+              </div>
+
+              {/* Label */}
+              {!isCollapsed && (
+                <span
+                  className={`
+          relative z-10 font-medium text-sm
+          ${isActive("mangas")
+                      ? ""
+                      : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
+                    }
+        `}
+                >
+                  Mangas
+                </span>
+              )}
+
+              {/* Hover arrow */}
+              {!isCollapsed && !isActive("mangas") && (
+                <ChevronRight
+                  className="
+          w-4 h-4 ml-auto opacity-0 -translate-x-2
+          group-hover:opacity-100 group-hover:translate-x-0
+          transition-all duration-300
+        "
+                />
+              )}
+            </Link>
+
+
+            {/* '''''''' */}
+
+             <NavLink
+              to="/romans"
+              name="romans"
+              label="Romans"
+              iconComponent={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+                  />
+                </svg>
+              }
+            />
+
+            {/* <NavLink
+              to="/romans/chapters"
+              name="romans-chapters"
+              label="Roman Chapters"
+              iconComponent={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              }
+            /> */}
+          
 
             {/* Separator */}
             {!isCollapsed && (

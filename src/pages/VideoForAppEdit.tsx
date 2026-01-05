@@ -8,6 +8,7 @@ import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import { I18nField } from "../components/I18nComponents";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
+import { getTagCategoriesVideoForAppApi } from "../api/videoForApp";
 import type { TranslatedText } from "../types/i18n";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
@@ -88,13 +89,22 @@ function VideoForAppEdit() {
   const [creator, setCreator] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<number | null>(null);
 
+  // whether the current creator value was auto-suggested by the app
+  const [creatorSuggested, setCreatorSuggested] = useState<boolean>(false);
+
   // Update creator when video data loads
   useEffect(() => {
     if (video?.creatorObj) {
       setCreator(video.creatorObj.name);
       setCreatorId(video.creatorObj.id);
+      setCreatorSuggested(false);
+    } else if (video) {
+      // Video loaded but has no creator, reset states
+      setCreator(null);
+      setCreatorId(null);
+      setCreatorSuggested(false);
     }
-  }, [video?.creatorObj]);
+  }, [video?.creatorObj, videoId]); // Added videoId to reset when navigating to different video
 
   // Category and SubCategory states
   const [category, setCategory] = useState<Category | null>(null);
@@ -104,6 +114,35 @@ function VideoForAppEdit() {
 
   // Tag Category Videos states
   const [selectedTags, setSelectedTags] = useState<(number | { name: string })[]>([]);
+
+  // If no tags are present on the video, pick 5 random tag categories as defaults
+  useEffect(() => {
+    const setRandomDefaults = async () => {
+      try {
+        // Don't override if video already has tags or user already selected tags
+        if (video?.tagCategoryVideos && video.tagCategoryVideos.length > 0) return;
+        if (selectedTags.length > 0) return;
+
+        const res = await getTagCategoriesVideoForAppApi();
+        const tags = (res?.data?.items ?? res?.data ?? []) as { id?: number; name: string }[];
+        if (!tags || tags.length === 0) return;
+
+        // Shuffle and pick up to 5 tags with ids
+        const shuffled = [...tags].sort(() => 0.5 - Math.random());
+          const picked = shuffled.slice(0, Math.min(5, shuffled.length));
+          // Use objects with id+name so the Tag component can render them immediately
+          const pickedObjs = picked.map(t => ({ id: t.id, name: t.name }));
+          if (pickedObjs.length > 0) {
+            setSelectedTags(pickedObjs as any);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tag categories for defaults", err);
+      }
+    };
+
+    setRandomDefaults();
+    // run when video loads
+  }, [video]);
 
   // needVip state
   const [needVip, setNeedVip] = useState<boolean>(false);
@@ -166,7 +205,7 @@ function VideoForAppEdit() {
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
         type: videoType === "short" ? "1" : "2",
-        tag_category_ids: selectedTags,
+  tag_category_ids: selectedTags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name)),
         need_vip: needVip,
       };
       // Find the 'en' category and subcategory id from video data
@@ -193,6 +232,9 @@ function VideoForAppEdit() {
     }
   };
 
+  console.log(creatorSuggested);
+  
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
       <div className="flex flex-col w-full">
@@ -207,8 +249,22 @@ function VideoForAppEdit() {
               </label>
               <CreatorAutoComplete
                 value={creator}
-                onChange={(v: string | null) => setCreator(v)}
-                onSelect={(c) => setCreatorId(c?.id ?? null)}
+                onChange={(v: string | null) => { 
+                  setCreator(v); 
+                  // Only reset suggested flag if the value actually changed from the current creator
+                  if (v !== creator) {
+                    setCreatorSuggested(false);
+                  }
+                }}
+                onSelect={(c) => { 
+                  setCreatorId(c?.id ?? null); 
+                  // Only reset suggested flag if the selection actually changed
+                  if (c?.id !== creatorId) {
+                    setCreatorSuggested(false);
+                  }
+                }}
+                isDefault={creatorSuggested}
+                autoSuggest={true}
               />
             </div>
 

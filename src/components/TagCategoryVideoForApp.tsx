@@ -22,6 +22,7 @@ interface SelectedTag {
   id?: number;
   name: string;
   isNew?: boolean;
+  isDefault?: boolean;
 }
 
 const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
@@ -34,7 +35,10 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
   const [suggestions, setSuggestions] = useState<TagCategory[]>([]);
   const [selectedTagCategories, setSelectedTagCategories] = useState<SelectedTag[]>([]);
   const [allTags, setAllTags] = useState<TagCategory[]>([]);
-
+  const [defaultAssigned, setDefaultAssigned] = useState(false);
+  const [defaultAssignedIds, setDefaultAssignedIds] = useState<number[]>([]);
+  const [suppressSuggestions, setSuppressSuggestions] = useState(false);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
   const fetchAllTags = useCallback(async () => {
     try {
       const [videoTagsRes] = await Promise.all([
@@ -58,6 +62,36 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
     fetchAllTags();
   }, [fetchAllTags]);
 
+  // If no tags selected and we have tags available, pick 5 random defaults once
+  useEffect(() => {
+    if (defaultAssigned) return;
+    if (allTags.length === 0) return;
+
+    // Delay auto-assign slightly to avoid racing with parent components that
+    // may set selectedTags shortly after mount (prevents update loops).
+    const timer = setTimeout(() => {
+      if (defaultAssigned) return;
+      if (selectedTags && selectedTags.length > 0) return; // parent provided tags — abort
+
+      const available = allTags.filter(t => typeof t.id === 'number');
+      if (available.length === 0) return;
+
+      const shuffled = [...available].sort(() => 0.5 - Math.random());
+      const pick = shuffled.slice(0, Math.min(5, shuffled.length));
+      const idsPicked: number[] = [];
+      pick.forEach(tag => {
+        if (tag.id) {
+          onTagSelect(tag.id);
+          idsPicked.push(tag.id);
+        }
+      });
+      setDefaultAssignedIds(idsPicked);
+      setDefaultAssigned(true);
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [allTags, selectedTags, defaultAssigned, onTagSelect]);
+
   useEffect(() => {
     // Update selectedTagCategories based on selectedTags
     const selected: SelectedTag[] = [];
@@ -67,16 +101,19 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
         // Existing tag by ID
         const existingTag = allTags.find(t => t.id === tag);
         if (existingTag) {
-          selected.push({ ...existingTag, isNew: false });
+          selected.push({ ...existingTag, isNew: false, isDefault: defaultAssignedIds.includes(existingTag.id as number) });
         }
       } else {
         // New tag object
-        selected.push({ ...tag, isNew: true });
+        selected.push({ ...tag, isNew: true, isDefault: false });
       }
     });
     
     setSelectedTagCategories(selected);
-  }, [selectedTags, allTags]);
+  }, [selectedTags, allTags, defaultAssignedIds]);
+
+  // Note: we intentionally do not auto-remove defaults here to avoid
+  // complexity and update loops; the delayed auto-assign above avoids most races.
 
   useEffect(() => {
     if (tagQuery.trim().length > 0) {
@@ -133,6 +170,25 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
         // New tag - remove by object
         onTagDeselect({ name: tagToRemove.name });
       }
+
+      // Immediately hide suggestions and clear transient query to avoid
+      // the dropdown re-opening due to focus or effects.
+      setShowTagDropdown(false);
+      setSuggestions([]);
+      setTagQuery("");
+
+      // Blur the input to prevent it from receiving focus (which can re-open suggestions)
+      try {
+        inputRef.current?.blur();
+      } catch (err) {
+        // ignore
+      }
+
+      // If removing the last selected tag, suppress showing suggestions until
+      // the user types or manually triggers the dropdown.
+      if (selectedTagCategories.length <= 1) {
+        setSuppressSuggestions(true);
+      }
     }
   };
 
@@ -147,11 +203,18 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
             type="text"
             value={tagQuery}
             onChange={(e) => {
-              setTagQuery(e.target.value);
-              setShowTagDropdown(true);
+              const v = e.target.value;
+              setTagQuery(v);
+              // typing should re-enable suggestions
+              if (v.trim().length > 0 && suppressSuggestions) {
+                setSuppressSuggestions(false);
+              }
+              if (!suppressSuggestions) setShowTagDropdown(true);
             }}
+            ref={inputRef}
             onFocus={() => {
-              setShowTagDropdown(true);
+          if (suppressSuggestions) return;
+          setShowTagDropdown(true);
               if (tagQuery.trim().length === 0) {
                 // Show all available tags when focused and no query
                 const availableTags = allTags.filter(tag => {
@@ -230,10 +293,13 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 px-4 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 px-4 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
             >
               <Tag className="w-3 h-3" />
               <span>{t.name}</span>
+                {t.isDefault && (
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">suggestion</span>
+                )}
               <button
                 type="button"
                 onClick={() => removeSelectedTag(i)}

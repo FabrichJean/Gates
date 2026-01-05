@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Video, X, Trash2 } from "lucide-react";
-import { FaPlayCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { deletePostVideo } from "../../api/posts";
 import type { Video as VideoType } from "../../hooks/usePost";
 import { getToken } from "../../utils/storage";
 import { apiURL } from "../../constant";
+import VideoPlayer from "../../components/VideoPlayer";
 
 interface GetVideoPostProps {
   videos: VideoType[];
@@ -128,53 +128,31 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
               "";
 
             return (
-              <>
-
-                <div key={video.id || index} className="relative w-full md:w-64">
-                  {!hasVideoWithoutMp4 && video.public_urls?.local_mp4_url && (
+              <div key={video.id || index} className="relative w-full md:w-64">
+                {!hasVideoWithoutMp4 && video.public_urls?.local_mp4_url && (
                   <button
                     onClick={() => downloadAsMp4(video.public_urls!.local_mp4_url!, `video_${video.id}.mp4`)}
-                  className="cursor-pointer px-3 py-0.5 active:scale-95 border rounded-lg border-green-600 flex gap-2 items-center mb-1">
+                    className="cursor-pointer px-3 py-0.5 active:scale-95 border rounded-lg border-green-600 flex gap-2 items-center mb-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
-                    {/* <span className="text-gray-800 dark:text-amber-100">MP4</span> */}
                   </button>
-                  )}
-                  {playingId === video.id ? (
-                    <div className="relative">
-                      <video
-                        src={videoUrl || ""}
-                        controls
-                        autoPlay
-                        className="w-full h-40 md:h-48 object-cover rounded-lg shadow-md"
-                        onEnded={() => setPlayingId(null)}
-                      />
-                      <button
-                        onClick={() => setPlayingId(null)}
-                        className="absolute top-2 right-2 p-1 rounded bg-black/60 text-white"
-                        title="Close"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="relative h-40 md:h-48 rounded-lg overflow-hidden bg-black">
-                      <span className="absolute top-2 left-2 px-3 py-1 text-xs rounded-md bg-indigo-600 text-white">{video.type === '1' ? 'short' : 'long'}</span>
-                      <img
-                        src={coverUrl}
-                        alt={`cover-${video.id}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => ((e.target as HTMLImageElement).src = "")}
-                      />
-                      <FaPlayCircle
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-6xl opacity-90 cursor-pointer"
-                        onClick={() => setPlayingId(video.id)}
-                      />
-                    </div>
-                  )}
+                )}
+
+                <div className="relative">
+                  <span className="absolute top-2 left-2 px-3 py-1 text-xs rounded-md bg-indigo-600 text-white z-10">{video.type === '1' ? 'short' : 'long'}</span>
+                  <VideoPlayer
+                    videoUrls={{
+                      hlsUrl: video.s3_urls?.hlsUrl,
+                      temp_url: video.public_urls?.local_mp4_url || video.cdn_url
+                    }}
+                    poster={coverUrl}
+                    isPlaying={playingId === video.id}
+                    onPlay={() => setPlayingId(video.id)}
+                    className="w-full h-40 md:h-48 rounded-lg shadow-md"
+                  />
                 </div>
-              </>
+              </div>
             );
           })}
         </div>
@@ -222,39 +200,16 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
 
               return (
                 <div key={video.id} className="relative group">
-                  {playingId === video.id ? (
-                    <div className="relative">
-                      <video
-                        src={videoUrl || ""}
-                        controls
-                        autoPlay
-                        className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                        onEnded={() => setPlayingId(null)}
-                      />
-                      <button
-                        onClick={() => setPlayingId(null)}
-                        className="absolute top-2 right-2 p-2 rounded bg-black/60 text-white"
-                        title="Close"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <div className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden bg-black">
-                        <img
-                          src={coverUrl}
-                          alt={`cover-${video.id}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => ((e.target as HTMLImageElement).src = "")}
-                        />
-                        <FaPlayCircle
-                          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-6xl opacity-90 cursor-pointer"
-                          onClick={() => setPlayingId(video.id)}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <VideoPlayer
+                    videoUrls={{
+                      hlsUrl: video.s3_urls?.hlsUrl,
+                      temp_url: video.public_urls?.local_mp4_url || video.cdn_url
+                    }}
+                    poster={coverUrl}
+                    isPlaying={playingId === video.id}
+                    onPlay={() => setPlayingId(video.id)}
+                    className="w-full h-64 rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                  />
 
                   <div className="absolute top-2 right-2 badge badge-neutral">
                     {index + 1}/{localVideos.length}

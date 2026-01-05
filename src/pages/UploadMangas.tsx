@@ -348,7 +348,7 @@ const UploadMangas: React.FC = () => {
           {/* Platform & Creator */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                 <Globe className="w-4 h-4" />
                 Plateforme
               </label>
@@ -370,7 +370,7 @@ const UploadMangas: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Créateur
               </label>
@@ -470,7 +470,7 @@ const UploadMangas: React.FC = () => {
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
               <Tag className="w-4 h-4" />
               Tags
             </label>
@@ -570,7 +570,7 @@ const UploadMangas: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
                 Image de couverture
               </label>
