@@ -44,7 +44,6 @@ import {
   getCreatorsByPlateformApi,
   clearCreatorsFromPlateformApi,
 } from "../api/plateformCreator";
-
 import {
   addTagCategoryToPlateformApi,
   getTagCategoriesByPlateformApi,
@@ -53,18 +52,42 @@ import {
 } from "../api/plateformTagCategory";
 import { createTagCategoryApi } from "../api/tagCategory";
 
-
-
-
-
-// Local types
+// Types
 type RelationItem = { id: number; name?: string; relationId?: number | null };
+type Platform = { id: number; name: string; video_sync_url?: string; post_sync_url?: string };
 
-type Platform = {
-  id: number;
-  name: string;
-  video_sync_url?: string;
-  post_sync_url?: string;
+// Icones SVG
+const Icons = {
+  plus: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  ),
+  edit: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+  ),
+  trash: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+    </svg>
+  ),
+  close: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  ),
+  check: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  ),
+  empty: (
+    <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6h17.138l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V19.5a2.25 2.25 0 0 0 2.25 2.25h15a2.25 2.25 0 0 0 2.25-2.25V9.776m-16.5 0A2.25 2.25 0 0 0 3.75 7.5h16.5a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 21.75 4.5H3.75A2.25 2.25 0 0 0 1.5 6.75v.024a2.25 2.25 0 0 0 2.25 2.25Z" />
+    </svg>
+  )
 };
 
 export default function PlateformRelationsManager() {
@@ -88,50 +111,33 @@ export default function PlateformRelationsManager() {
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState("");
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
-
-  // post hooks
+  // Post hooks
   const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
   const { data: allPostSubCategories } = useSubCategoryPost();
   const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
 
-  // Creator linking handlers
   const [creatorModalOpen, setCreatorModalOpen] = useState(false);
 
-  const fetchPlatforms = async () => {
-    reFetchPlateform();
-  };
+  const fetchPlatforms = async () => reFetchPlateform();
 
   const handleSavePlatform = async () => {
     if (!platformName.trim()) return toast.error("Enter a platform name");
     const isValidUrl = (u: string) => {
       if (!u) return true;
-      try {
-        new URL(u);
-        return true;
-      } catch {
-        return false;
-      }
+      try { new URL(u); return true; } catch { return false; }
     };
 
-    if (!isValidUrl(platformVideoSyncUrl))
-      return toast.error("Invalid Video sync URL");
-    if (!isValidUrl(platformPostSyncUrl))
-      return toast.error("Invalid Post sync URL");
+    if (!isValidUrl(platformVideoSyncUrl)) return toast.error("Invalid Video sync URL");
+    if (!isValidUrl(platformPostSyncUrl)) return toast.error("Invalid Post sync URL");
+
     try {
-      const payload: {
-        name: string;
-        video_sync_url?: string;
-        post_sync_url?: string;
-      } = {
-        name: platformName,
-      };
+      const payload: any = { name: platformName };
       if (platformVideoSyncUrl) payload.video_sync_url = platformVideoSyncUrl;
       if (platformPostSyncUrl) payload.post_sync_url = platformPostSyncUrl;
 
@@ -171,145 +177,114 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const fetchRelations = useCallback(
-    async (plateformId: number | null) => {
-      if (!plateformId) return;
+  const fetchRelations = useCallback(async (plateformId: number | null) => {
+    if (!plateformId) return;
+    try {
+      const [catsRes, subsRes] = relationMode === "post"
+        ? await Promise.all([getPostCategoriesByPlateformApi(plateformId), getPostSubCategoriesForPlateformApi(plateformId)])
+        : await Promise.all([getCategoriesByPlateformApi(plateformId), getSubCategoriesForPlateformApi(plateformId)]);
+
+      const normalizeCategories = (res: unknown): RelationItem[] => {
+        const payload = ((res as any)?.data) ?? res;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload;
+        else {
+          const p = payload as Record<string, unknown>;
+          if (Array.isArray(p["Categories"])) list = p["Categories"] as unknown[];
+          else if (Array.isArray(p["Categorys"])) list = p["Categorys"] as unknown[];
+          else if (Array.isArray(p["categories"])) list = p["categories"] as unknown[];
+          else {
+            const arr = Object.values(p).find((v) => Array.isArray(v));
+            list = Array.isArray(arr) ? arr : [];
+          }
+        }
+        return list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.id ?? it.categoryId ?? it.CategoryId) as unknown;
+          const name = (it.name ?? it.title ?? it.label) as unknown;
+          return {
+            id: typeof id === "number" ? id : Number(id ?? 0),
+            name: typeof name === "string" ? name : String(name ?? ""),
+          };
+        });
+      };
+
+      const normalizeSubcategories = (res: unknown) => {
+        const payload = ((res as any)?.data) ?? res;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload;
+        else {
+          const p = payload as Record<string, unknown>;
+          if (Array.isArray(p["SubCategorys"])) list = p["SubCategorys"] as unknown[];
+          else if (Array.isArray(p["subcategories"])) list = p["subcategories"] as unknown[];
+          else if (Array.isArray(p["SubCategories"])) list = p["SubCategories"] as unknown[];
+          else {
+            const arr = Object.values(p).find((v) => Array.isArray(v));
+            list = Array.isArray(arr) ? arr : [];
+          }
+        }
+
+        return list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.id ?? it.subCategoryId ?? it.SubCategoryId) as unknown;
+          const name = (it.name ?? it.title ?? it.label) as unknown;
+          const relationId = (() => {
+            const p1 = it.PlateformSubCategory as Record<string, unknown> | undefined;
+            if (p1 && typeof p1.id === "number") return p1.id;
+            const p2 = it.Plateform_SubCategory as Record<string, unknown> | undefined;
+            if (p2 && typeof p2.id === "number") return p2.id;
+            if (typeof it.relationId === "number") return it.relationId as number;
+            return null;
+          })();
+          return {
+            id: typeof id === "number" ? id : Number(id ?? 0),
+            name: typeof name === "string" ? name : String(name ?? ""),
+            relationId: relationId as number | null,
+          };
+        });
+      };
+
+      setCatRelations(normalizeCategories(catsRes));
+      setSubcatRelations(normalizeSubcategories(subsRes));
+
       try {
-        const [catsRes, subsRes] =
-          relationMode === "post"
-            ? await Promise.all([
-              getPostCategoriesByPlateformApi(plateformId),
-              getPostSubCategoriesForPlateformApi(plateformId),
-            ])
-            : await Promise.all([
-              getCategoriesByPlateformApi(plateformId),
-              getSubCategoriesForPlateformApi(plateformId),
-            ]);
-
-        const normalizeCategories = (res: unknown): RelationItem[] => {
-          const payload =
-            ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
-            res;
-          let list: unknown[] = [];
-          if (Array.isArray(payload)) list = payload as unknown[];
-          else {
-            const p = payload as Record<string, unknown>;
-            if (Array.isArray(p["Categories"]))
-              list = p["Categories"] as unknown[];
-            else if (Array.isArray(p["Categorys"]))
-              list = p["Categorys"] as unknown[];
-            else if (Array.isArray(p["categories"]))
-              list = p["categories"] as unknown[];
-            else {
-              const arr = Object.values(p).find((v) => Array.isArray(v));
-              list = Array.isArray(arr) ? (arr as unknown[]) : [];
-            }
-          }
-          return list.map((item) => {
-            const it = item as Record<string, unknown>;
-            const id = (it.id ?? it.categoryId ?? it.CategoryId) as unknown;
-            const name = (it.name ?? it.title ?? it.label) as unknown;
-            return {
-              id: typeof id === "number" ? id : Number(id ?? 0),
-              name: typeof name === "string" ? name : String(name ?? ""),
-            };
-          });
-        };
-
-        const normalizeSubcategories = (res: unknown) => {
-          const payload =
-            ((res as unknown) && (res as Record<string, unknown>)["data"]) ??
-            res;
-          let list: unknown[] = [];
-          if (Array.isArray(payload)) list = payload as unknown[];
-          else {
-            const p = payload as Record<string, unknown>;
-            if (Array.isArray(p["SubCategorys"]))
-              list = p["SubCategorys"] as unknown[];
-            else if (Array.isArray(p["subcategories"]))
-              list = p["subcategories"] as unknown[];
-            else if (Array.isArray(p["SubCategories"]))
-              list = p["SubCategories"] as unknown[];
-            else {
-              const arr = Object.values(p).find((v) => Array.isArray(v));
-              list = Array.isArray(arr) ? (arr as unknown[]) : [];
-            }
-          }
-
-          return list.map((item) => {
-            const it = item as Record<string, unknown>;
-            const id = (it.id ??
-              it.subCategoryId ??
-              it.SubCategoryId) as unknown;
-            const name = (it.name ?? it.title ?? it.label) as unknown;
-            const relationId = (() => {
-              const p1 = it.PlateformSubCategory as
-                | Record<string, unknown>
-                | undefined;
-              if (p1 && typeof p1.id === "number") return p1.id;
-              const p2 = it.Plateform_SubCategory as
-                | Record<string, unknown>
-                | undefined;
-              if (p2 && typeof p2.id === "number") return p2.id;
-              if (typeof it.relationId === "number")
-                return it.relationId as number;
-              return null;
-            })();
-            return {
-              id: typeof id === "number" ? id : Number(id ?? 0),
-              name: typeof name === "string" ? name : String(name ?? ""),
-              relationId: relationId as number | null,
-            };
-          });
-        };
-
-        setCatRelations(normalizeCategories(catsRes));
-        setSubcatRelations(normalizeSubcategories(subsRes));
-
-        try {
-          const tagCatsRes = await getTagCategoriesByPlateformApi(plateformId);
-          setTagCatRelations(normalizeCategories(tagCatsRes));
-        } catch {
-          setTagCatRelations([]);
-        }
-
-        try {
-          const creatorsRes = await getCreatorsByPlateformApi(plateformId);
-          const payload =
-            ((creatorsRes as any) && (creatorsRes as any).data) ?? creatorsRes;
-          let list: unknown[] = [];
-          if (Array.isArray(payload)) list = payload as unknown[];
-          else if (Array.isArray((payload as any).creators))
-            list = (payload as any).creators as unknown[];
-          const normalizedCreators: RelationItem[] = list.map((item) => {
-            const it = item as Record<string, unknown>;
-            const id = (it.creator ? (it.creator as Record<string, unknown>).id : it.creatorId ?? it.CreatorId) as unknown;
-            const creator = it.creator as Record<string, unknown> | undefined;
-            const name = (creator?.name ??
-              it.fullName ??
-              it.username) as unknown;
-            return {
-              id: typeof id === "number" ? id : Number(id ?? 0),
-              name: typeof name === "string" ? name : String(name ?? ""),
-            };
-          });
-
-          setCreatorRelations(normalizedCreators);
-        } catch {
-          setCreatorRelations([]);
-        }
+        const tagCatsRes = await getTagCategoriesByPlateformApi(plateformId);
+        setTagCatRelations(normalizeCategories(tagCatsRes));
       } catch {
-        toast.error("Error loading relations");
+        setTagCatRelations([]);
       }
-    },
-    [relationMode]
-  );
+
+      try {
+        const creatorsRes = await getCreatorsByPlateformApi(plateformId);
+        const payload = (creatorsRes as any)?.data ?? creatorsRes;
+        let list: unknown[] = [];
+        if (Array.isArray(payload)) list = payload;
+        else if (Array.isArray((payload as any).creators)) list = (payload as any).creators;
+        
+        const normalizedCreators: RelationItem[] = list.map((item) => {
+          const it = item as Record<string, unknown>;
+          const id = (it.creator ? (it.creator as Record<string, unknown>).id : it.creatorId ?? it.CreatorId) as unknown;
+          const creator = it.creator as Record<string, unknown> | undefined;
+          const name = (creator?.name ?? it.fullName ?? it.username) as unknown;
+          return {
+            id: typeof id === "number" ? id : Number(id ?? 0),
+            name: typeof name === "string" ? name : String(name ?? ""),
+          };
+        });
+        setCreatorRelations(normalizedCreators);
+      } catch {
+        setCreatorRelations([]);
+      }
+    } catch {
+      toast.error("Error loading relations");
+    }
+  }, [relationMode]);
 
   useEffect(() => {
     fetchRelations(selectedPlateform);
   }, [selectedPlateform, fetchRelations]);
 
-
+  // Handlers pour les catégories
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
@@ -317,13 +292,11 @@ export default function PlateformRelationsManager() {
       toast.success("Category linked");
       reFetchCategories();
       fetchRelations(selectedPlateform);
-      // setCategoryModalOpen(false);
     } catch {
       toast.error("Error adding category");
     }
   };
 
-  // tag category linking handler
   const handleAddTagCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
@@ -331,7 +304,6 @@ export default function PlateformRelationsManager() {
       toast.success("Tag category linked");
       reFetchCategoriesTag();
       fetchRelations(selectedPlateform);
-      // setCategoryModalOpen(false);
     } catch {
       toast.error("Error adding tag category");
     }
@@ -349,7 +321,6 @@ export default function PlateformRelationsManager() {
     }
   };
 
-
   const handleCreateAndLinkCategory = async (name: string) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     if (!name.trim()) return toast.error("Name required");
@@ -359,7 +330,6 @@ export default function PlateformRelationsManager() {
       const id = newCat.category.id;
       if (!id) throw new Error("Invalid create response");
       await handleAddCategory(id);
-
       setCategoryModalOpen(false);
       setSearch("");
     } catch (err) {
@@ -397,13 +367,13 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  // Handlers pour les sous-catégories
   const handleAddSubcategory = async (subId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
       toast.success("Subcategory linked");
       fetchRelations(selectedPlateform);
-
     } catch {
       toast.error("Error adding subcategory");
     }
@@ -420,6 +390,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  // Handlers pour la suppression
   const handleRemoveCategory = async (categoryId: number) => {
     if (!selectedPlateform) return;
     try {
@@ -473,6 +444,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
+  // Handlers pour les clear all
   const handleClearCategories = async () => {
     if (!selectedPlateform) return;
     if (!confirm("Remove all categories from this platform?")) return;
@@ -497,19 +469,17 @@ export default function PlateformRelationsManager() {
     }
   };
 
-
   const handleClearSubCategories = async () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all categories from this platform?")) return;
+    if (!confirm("Remove all subcategories from this platform?")) return;
     try {
       await clearSubCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All categories removed");
+      toast.success("All subcategories removed");
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error clearing categories");
+      toast.error("Error clearing subcategories");
     }
   };
-
 
   const handleClearPostCategories = async () => {
     if (!selectedPlateform) return;
@@ -527,7 +497,6 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return;
     if (!confirm("Remove all post subcategories from this platform?")) return;
     try {
-      // new clear endpoint for post subcategories
       await clearPostSubCategoriesFromPlateformApi(selectedPlateform);
       toast.success("All post subcategories removed");
       fetchRelations(selectedPlateform);
@@ -536,8 +505,7 @@ export default function PlateformRelationsManager() {
     }
   };
 
-
-
+  // Handlers pour les créateurs
   const handleAddCreator = async (creatorId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
     try {
@@ -573,23 +541,18 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const videoFilteredCategories =
-    allCategories?.filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase())
-    ) || [];
+  // Filtrage des données
+  const videoFilteredCategories = allCategories?.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
+  const videoFilteredTagCategories = allCategoriesTag?.items.filter((c) =>
+    (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
-  const videoFilteredTagCategories =
-    allCategoriesTag?.items.filter((c) =>
-      (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-    ) || [];
-
-
-
-  const videoFilteredSubcategories =
-    allSubCategories?.SubCategorys?.filter((s) =>
-      s.name.toLowerCase().includes(search.toLowerCase())
-    ) || [];
+  const videoFilteredSubcategories = allSubCategories?.SubCategorys?.filter((s) =>
+    s.name.toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
   const postCategoriesList = allPostCategories?.categories || [];
   const filteredCategories = (
@@ -599,11 +562,10 @@ export default function PlateformRelationsManager() {
     return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
-  const filteredTagCategories = (videoFilteredTagCategories).filter((tc: unknown) => {
+  const filteredTagCategories = videoFilteredTagCategories.filter((tc: unknown) => {
     const tagcat = tc as { name?: string };
     return (tagcat.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
-
 
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
   const filteredSubcategories = (
@@ -613,845 +575,719 @@ export default function PlateformRelationsManager() {
     return (sub.name ?? "").toLowerCase().includes(search.toLowerCase());
   });
 
+  // Composants UI réutilisables
+  const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+      {children}
+    </div>
+  );
 
+  const Button = ({ 
+    children, 
+    onClick, 
+    variant = "primary", 
+    size = "md", 
+    icon, 
+    disabled = false,
+    className = ""
+  }: { 
+    children: React.ReactNode; 
+    onClick?: () => void; 
+    variant?: "primary" | "secondary" | "danger" | "ghost"; 
+    size?: "sm" | "md" | "lg";
+    icon?: React.ReactNode;
+    disabled?: boolean;
+    className?: string;
+  }) => {
+    const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    
+    const variants = {
+      primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
+      secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white focus:ring-gray-500",
+      danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+      ghost: "bg-transparent hover:bg-gray-100 text-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 focus:ring-gray-500"
+    };
 
-  return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto text-gray-900 dark:text-gray-100">
-      <h1 className="text-2xl font-semibold mb-6 text-start">
-        🧩 WebApp Relations Manager
-      </h1>
+    const sizes = {
+      sm: "px-3 py-1.5 text-sm",
+      md: "px-4 py-2 text-sm",
+      lg: "px-6 py-3 text-base"
+    };
 
-      <div className="flex flex-col gap-6 items-center justify-between sm:flex-row">
-        {/* Sidebar - Platforms */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
-          <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
-            <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-              WebApps
-            </h2>
+    return (
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+      >
+        {icon && <span className="mr-2">{icon}</span>}
+        {children}
+      </button>
+    );
+  };
+
+  const EmptyState = ({ message, icon }: { message: string; icon?: React.ReactNode }) => (
+    <div className="text-center py-12">
+      {icon || Icons.empty}
+      <p className="mt-4 text-gray-500 dark:text-gray-400">{message}</p>
+    </div>
+  );
+
+  const Modal = ({ 
+    isOpen, 
+    onClose, 
+    title, 
+    children,
+    size = "md"
+  }: { 
+    isOpen: boolean; 
+    onClose: () => void; 
+    title: string; 
+    children: React.ReactNode;
+    size?: "sm" | "md" | "lg" | "xl";
+  }) => {
+    const sizes = {
+      sm: "max-w-sm",
+      md: "max-w-md",
+      lg: "max-w-lg",
+      xl: "max-w-xl"
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 bg-opacity-50 backdrop-blur-sm">
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden`}>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
             <button
-              onClick={() => {
-
-                setEditingPlatform(null);
-                setPlatformName("");
-                setPlatformVideoSyncUrl("");
-                setPlatformPostSyncUrl("");
-                setPlatformModalOpen(true);
-              }}
-              className="text-gray-700 dark:text-gray-200 bg-neutral-secondary-medium rounded-lg box-border border border-blue-400 dark:border-blue-400 hover:bg-neutral-tertiary-medium hover:text-heading  cursor-pointer focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4 mr-2 inline-block"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              <span>New</span>
+              {Icons.close}
             </button>
           </div>
-          <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
-            {plateforms?.map((p: Platform) => (
-              <div key={p.id} className="flex justify-between items-center">
-                {/* <div className="flex gap-1 mr-2">
-                  <button
-                    onClick={() => {
-                      setEditingPlatform(p);
-                      setPlatformName(p.name);
-                      setPlatformVideoSyncUrl(p.video_sync_url ?? "");
-                      setPlatformPostSyncUrl(p.post_sync_url ?? "");
-                      setPlatformModalOpen(true);
-                    }}
-                    aria-label="Edit platform"
-                    className="rounded-sm cursor-pointer border border-teal-500 dark:border-teal-400 px-3 py-2 text-sm font-medium bg-transparent"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-teal-500 dark:text-teal-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => handleDeletePlatform(p.id)}
-                    aria-label="Delete platform"
-                    className="rounded-sm cursor-pointer border border-pink-500 dark:border-pink-400 px-3 py-2 text-sm font-medium bg-transparent"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-pink-500 dark:text-pink-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
-                  </button>
-                </div> */}
-                <button
-                  onClick={() => setSelectedPlateform(p.id)}
-                  className={`text-success flex flex-1 items-center gap-3 bg-neutral-primary border border-info hover:bg-slate-200 cursor-pointer hover:text-white focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none
-                     ${selectedPlateform === p.id
-                      ? "bg-blue-200 dark:text-red-700 dark:bg-blue-950 border-blue-200 dark:dark:hover:bg-gray-700 dark:border-info"
-                      : "hover:bg-slate-200 dark:hover:bg-gray-700"
-                    }`}
-                >
-                  <span
-                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${selectedPlateform === p.id ? "bg-green-600" : "bg-transparent"} ring-2 ring-white dark:ring-gray-900`}
-                    title="Theme: light/dark"
-                  ></span>
-                  <span className=" text-gray-800 dark:text-gray-100">
-                    {p.name}
-                  </span>
-                </button>
-              </div>
-            ))}
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
+            {children}
           </div>
+        </div>
+      </div>
+    );
+  };
 
-          {/* // Platform Modal */}
-          <dialog className={`modal ${platformModalOpen ? "modal-open" : ""}`}>
-            <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-              <h3 className="font-bold text-lg mb-3">
-                {editingPlatform ? "Edit WebApp" : "Add WebApp"}
-              </h3>
-              <input
-                type="text"
-                placeholder="WebApp name"
-                className="input w-full mb-3 bg-white border border-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                maxLength={20}
-                value={platformName}
-                onChange={(e) => setPlatformName(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Video sync URL"
-                className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                value={platformVideoSyncUrl}
-                onChange={(e) => setPlatformVideoSyncUrl(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Post sync URL"
-                className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                value={platformPostSyncUrl}
-                onChange={(e) => setPlatformPostSyncUrl(e.target.value)}
-                required
-              />
-              <div className="modal-action">
-                <button
-                  onClick={() => setPlatformModalOpen(false)}
-                  className="px-3 py-1 rounded-sm bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-400 dark:hover:bg-gray-500"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={handleSavePlatform}
-                  className="px-3 py-1 rounded-sm bg-blue-600 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-500"
-                >
-                  {editingPlatform ? "Save" : "+ Add"}
-                </button>
-              </div>
-            </div>
-          </dialog>
+  const SearchInput = ({ 
+    placeholder, 
+    value, 
+    onChange 
+  }: { 
+    placeholder: string; 
+    value: string; 
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  }) => (
+    <div className="relative">
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+  );
+
+  const TabButton = ({ 
+    active, 
+    onClick, 
+    children 
+  }: { 
+    active: boolean; 
+    onClick: () => void; 
+    children: React.ReactNode;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+        active
+          ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+          : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+      }`}
+    >
+      {children}
+    </button>
+  );
+
+  const RelationCard = ({ 
+    title, 
+    count,
+    onAdd, 
+    onClear, 
+    children,
+    addLabel = "Add",
+    clearLabel = "Clear All"
+  }: { 
+    title: string;
+    count?: number;
+    onAdd: () => void; 
+    onClear: () => void; 
+    children: React.ReactNode;
+    addLabel?: string;
+    clearLabel?: string;
+  }) => (
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+          {count !== undefined && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">{count} items</span>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={onAdd} icon={Icons.plus}>
+            {addLabel}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClear}>
+            {clearLabel}
+          </Button>
+        </div>
+      </div>
+      {children}
+    </Card>
+  );
+
+  const RelationItem = ({ 
+    name, 
+    onRemove,
+    indicatorColor = "bg-blue-500"
+  }: { 
+    name: string; 
+    onRemove: () => void;
+    indicatorColor?: string;
+  }) => (
+    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+      <div className="flex items-center gap-3">
+        <div className={`w-3 h-3 rounded-full ${indicatorColor}`}></div>
+        <span className="text-gray-900 dark:text-white font-medium">{name}</span>
+      </div>
+      <button
+        onClick={onRemove}
+        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-all"
+      >
+        <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Platform Relations Manager
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Manage relationships between platforms, categories, and creators
+          </p>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 bg-white dark:bg-gray-800 shadow rounded-xl p-4 w-auto">
-          {selectedPlateform ? (
-            <>
-              <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">
-                <div className="flex gap-2 flex-wrap justify-between w-full"></div>
-              </div>
-
-              <div className="mb-2 flex gap-2">
-                <button
-                  type="button"
-                  className={`px-4 font-bold py-1 cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "video" ? "border-b-2 border-purple-700 text-purple-500" : "border-transparent"
-                    }`}
-                  onClick={() => setRelationMode("video")}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar - Platforms */}
+          <div className="lg:col-span-1">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Platforms
+                </h2>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEditingPlatform(null);
+                    setPlatformName("");
+                    setPlatformVideoSyncUrl("");
+                    setPlatformPostSyncUrl("");
+                    setPlatformModalOpen(true);
+                  }}
+                  icon={Icons.plus}
                 >
-                  Video
-                </button>
-                <button
-                  type="button"
-                  className={`px-4 font-bold py-1 cursor-pointer text-gray-700 dark:text-gray-200 ${relationMode === "post" ? "border-b-2 border-purple-700 text-purple-500" : "border-transparent"
+                  New Platform
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                {plateforms?.map((p: Platform) => (
+                  <div
+                    key={p.id}
+                    className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                      selectedPlateform === p.id
+                        ? "bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-700"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
-                  onClick={() => setRelationMode("post")}
-                >
-                  Post
-                </button>
-              </div>
-              <div className="border border-slate-100 dark:border-gray-700 mb-5"></div>
-
-              <div className={`grid ${relationMode === "post" ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-6`}>
-                <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
-                  <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    Linked Categories
-                  </legend>
-
-                  <div className="flex flex-wrap gap-2 justify-between">
-                    <button
-                      onClick={() => setCategoryModalOpen(true)}
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                      </svg>
-                      <span>
-                        link {relationMode === "post" ? "Post Category" : "Category"}
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={
-                        relationMode === "post"
-                          ? handleClearPostCategories
-                          : handleClearCategories
-                      }
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                        />
-                      </svg>
-                      <span>Clear All</span>
-                    </button>
-                  </div>
-
-                  {catRelations.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No categories linked
-                    </p>
-                  ) : (
-                    catRelations.map((c) => (
-                      <div
-                        key={c.id}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                      >
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                          title="Theme: light/dark"
-                        ></span>
-
-                        <span className="ml-5">{c.name}</span>
-
-                        <button
-                          onClick={() =>
-                            relationMode === "post"
-                              ? handleRemovePostCategory(c.id)
-                              : handleRemoveCategory(c.id)
-                          }
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="size-6 text-pink-600 dark:text-pink-500"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </fieldset>
-
-
-                <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
-                  <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    Linked Subcategories
-                  </legend>
-
-                  <div className="flex gap-2 flex-wrap justify-between">
-                    <button
-                      onClick={() => setSubCategoryModalOpen(true)}
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      <span>
-                        link{" "}
-                        {relationMode === "post"
-                          ? "Post Subcategory"
-                          : "Subcategory"}
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={
-                        relationMode === "post"
-                          ? handleClearPostSubCategories
-                          : handleClearSubCategories
-                      }
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 mr-2 inline-block"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                        />
-                      </svg>
-                      <span>Clear All</span>
-                    </button>
-                  </div>
-
-                  {subcatRelations?.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No subcategories linked
-                    </p>
-                  ) : (
-                    subcatRelations?.map((s) => (
-                      <div
-                        key={s.id}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                      >
-                        {/* Theme indicator node (light/dark) */}
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                          title="Theme: light/dark"
-                        ></span>
-
-                        <span className="ml-5">{s.name}</span>
-
-                        <button
-                          onClick={() => {
-                            if (!s.relationId) return;
-                            if (relationMode === "post")
-                              return handleRemovePostSubcategory(s.relationId);
-                            return handleRemoveSubcategory(s.relationId);
-                          }}
-                          disabled={!s.relationId}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="size-6 text-pink-600 dark:text-pink-500"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </fieldset>
-
-
-                {/* link tag category */}
-                {
-                  relationMode === "video" && (
-                    <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
-                      <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                        Linked Tag Category
-                      </legend>
-
-                      <div className="flex gap-2 flex-wrap justify-between">
-                        <button
-                          onClick={() => setTagCatModalOpen(true)}
-                          className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-4 h-4 mr-2 inline-block"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                            aria-hidden="true"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                          </svg>
-                          <span>Link tag category</span>
-                        </button>
-
-                        <button
-                          onClick={handleClearTagCategories}
-                          className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-4 h-4 mr-2 inline-block"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                            aria-hidden="true"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                            />
-                          </svg>
-                          <span>Clear All</span>
-                        </button>
-                      </div>
-
-                      {tagCatRelations?.map((tc) => (
-                        <div
-                          key={tc.id}
-                          className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                        >
-                          {/* Theme indicator node (light/dark) */}
-                          <span
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                            title="Theme: light/dark"
-                          ></span>
-
-                          <span className="ml-5">{tc.name}</span>
-
-                          <button
-                            onClick={() => handleRemoveTagCategory(tc.id)}
-                            disabled={!selectedPlateform}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="size-6 text-pink-600 dark:text-pink-500"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </fieldset>
-                  )
-                }
-              </div>
-              {/* Creators block */}
-              <fieldset className="mt-6 flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
-                <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                  Linked Creators
-                </legend>
-
-                <div className="flex gap-2 flex-wrap mb-3 justify-between">
-                  <button
-                    onClick={() => setCreatorModalOpen(true)}
-                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
+                    onClick={() => setSelectedPlateform(p.id)}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-2 inline-block"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>link Creator</span>
-                  </button>
-
-                  <button
-                    onClick={handleClearCreators}
-                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-2 inline-block"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                      />
-                    </svg>
-                    <span>Clear All</span>
-                  </button>
-                </div>
-
-                {creatorRelations.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No creators linked
-                  </p>
-                ) : (
-                  creatorRelations.map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                    >
-                      <span className="ml-5">{c.name}</span>
-
-                      <button onClick={() => handleRemoveCreator(Number(c.id))}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6 text-pink-600 dark:text-pink-500"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                          />
-                        </svg>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          selectedPlateform === p.id ? "bg-blue-600" : "bg-gray-400"
+                        }`}
+                      ></div>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {p.name}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingPlatform(p);
+                          setPlatformName(p.name);
+                          setPlatformVideoSyncUrl(p.video_sync_url ?? "");
+                          setPlatformPostSyncUrl(p.post_sync_url ?? "");
+                          setPlatformModalOpen(true);
+                        }}
+                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                      >
+                        {Icons.edit}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePlatform(p.id);
+                        }}
+                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900"
+                      >
+                        {Icons.trash}
                       </button>
                     </div>
-                  ))
-                )}
-              </fieldset>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
 
-            </>
-          ) : (
-            <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
-              Select a platform to manage its relations.
-            </div>
-          )}
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {selectedPlateform ? (
+              <div className="space-y-6">
+                {/* Mode Tabs */}
+                <Card className="p-4">
+                  <div className="flex gap-2">
+                    <TabButton
+                      active={relationMode === "video"}
+                      onClick={() => setRelationMode("video")}
+                    >
+                      Video Relations
+                    </TabButton>
+                    <TabButton
+                      active={relationMode === "post"}
+                      onClick={() => setRelationMode("post")}
+                    >
+                      Post Relations
+                    </TabButton>
+                  </div>
+                </Card>
+
+                {/* Relations Grid */}
+                <div className={`grid grid-cols-1 ${relationMode === "post" ? "lg:grid-cols-2" : "lg:grid-cols-3"} gap-6`}>
+                  {/* Categories */}
+                  <RelationCard
+                    title={relationMode === "post" ? "Post Categories" : "Categories"}
+                    count={catRelations.length}
+                    onAdd={() => setCategoryModalOpen(true)}
+                    onClear={relationMode === "post" ? handleClearPostCategories : handleClearCategories}
+                  >
+                    {catRelations.length === 0 ? (
+                      <EmptyState message="No categories linked" />
+                    ) : (
+                      <div className="space-y-2">
+                        {catRelations.map((c) => (
+                          <RelationItem
+                            key={c.id}
+                            name={c.name}
+                            onRemove={() =>
+                              relationMode === "post"
+                                ? handleRemovePostCategory(c.id)
+                                : handleRemoveCategory(c.id)
+                            }
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </RelationCard>
+
+                  {/* Subcategories */}
+                  <RelationCard
+                    title={relationMode === "post" ? "Post Subcategories" : "Subcategories"}
+                    count={subcatRelations.length}
+                    onAdd={() => setSubCategoryModalOpen(true)}
+                    onClear={relationMode === "post" ? handleClearPostSubCategories : handleClearSubCategories}
+                  >
+                    {subcatRelations.length === 0 ? (
+                      <EmptyState message="No subcategories linked" />
+                    ) : (
+                      <div className="space-y-2">
+                        {subcatRelations.map((s) => (
+                          <RelationItem
+                            key={s.id}
+                            name={s.name}
+                            onRemove={() => {
+                              if (!s.relationId) return;
+                              if (relationMode === "post")
+                                return handleRemovePostSubcategory(s.relationId);
+                              return handleRemoveSubcategory(s.relationId);
+                            }}
+                            indicatorColor="bg-green-500"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </RelationCard>
+
+                  {/* Tag Categories (Video mode only) */}
+                  {relationMode === "video" && (
+                    <RelationCard
+                      title="Tag Categories"
+                      count={tagCatRelations.length}
+                      onAdd={() => setTagCatModalOpen(true)}
+                      onClear={handleClearTagCategories}
+                    >
+                      {tagCatRelations.length === 0 ? (
+                        <EmptyState message="No tag categories linked" />
+                      ) : (
+                        <div className="space-y-2">
+                          {tagCatRelations.map((tc) => (
+                            <RelationItem
+                              key={tc.id}
+                              name={tc.name}
+                              onRemove={() => handleRemoveTagCategory(tc.id)}
+                              indicatorColor="bg-purple-500"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </RelationCard>
+                  )}
+                </div>
+
+                {/* Creators Section */}
+                <RelationCard
+                  title="Creators"
+                  count={creatorRelations.length}
+                  onAdd={() => setCreatorModalOpen(true)}
+                  onClear={handleClearCreators}
+                  addLabel="Link Creator"
+                >
+                  {creatorRelations.length === 0 ? (
+                    <EmptyState message="No creators linked" />
+                  ) : (
+                    <div className="space-y-2">
+                      {creatorRelations.map((c) => (
+                        <RelationItem
+                          key={c.id}
+                          name={c.name}
+                          onRemove={() => handleRemoveCreator(Number(c.id))}
+                          indicatorColor="bg-orange-500"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </RelationCard>
+              </div>
+            ) : (
+              <Card className="p-12">
+                <EmptyState 
+                  message="Select a platform to manage its relations"
+                  icon={
+                    <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859" />
+                    </svg>
+                  }
+                />
+              </Card>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Category Modal */}
-      <dialog
-        id="categoryModal"
-        className={`modal ${categoryModalOpen ? "modal-open" : ""}`}
+      {/* Modals */}
+      <Modal
+        isOpen={platformModalOpen}
+        onClose={() => setPlatformModalOpen(false)}
+        title={editingPlatform ? "Edit Platform" : "Create Platform"}
       >
-        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Category</h3>
-          <input
-            type="text"
-            placeholder="Search category..."
-            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Platform Name
+            </label>
+            <input
+              type="text"
+              placeholder="Enter platform name"
+              value={platformName}
+              onChange={(e) => setPlatformName(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Video Sync URL (optional)
+            </label>
+            <input
+              type="url"
+              placeholder="https://example.com/video-sync"
+              value={platformVideoSyncUrl}
+              onChange={(e) => setPlatformVideoSyncUrl(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Post Sync URL (optional)
+            </label>
+            <input
+              type="url"
+              placeholder="https://example.com/post-sync"
+              value={platformPostSyncUrl}
+              onChange={(e) => setPlatformPostSyncUrl(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" onClick={() => setPlatformModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSavePlatform}>
+              {editingPlatform ? "Update Platform" : "Create Platform"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        title={`Add ${relationMode === "post" ? "Post Category" : "Category"}`}
+      >
+        <div className="space-y-4">
+          <SearchInput
+            placeholder={`Search ${relationMode === "post" ? "post category" : "category"}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="max-h-60 overflow-auto">
+          <div className="max-h-80 overflow-y-auto space-y-2">
             {filteredCategories?.length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new{" "}
-                  {relationMode === "post" ? "post category" : "category"} "
-                  {search}"
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Create new {relationMode === "post" ? "post category" : "category"} "{search}"
                 </span>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() =>
                     relationMode === "post"
                       ? handleCreateAndLinkPostCategory(search)
                       : handleCreateAndLinkCategory(search)
                   }
-                  className="btn btn-xs btn-success"
                 >
                   Create & Link
-                </button>
+                </Button>
               </div>
             ) : (
-              filteredCategories?.map((cat) => {
+              filteredCategories?.map((cat: any) => {
                 const isLinked = catRelations.some((rc) => rc.id === cat.id);
                 return (
                   <div
                     key={cat.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                   >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-5">{cat.name}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{cat.name}</span>
                     {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
+                      <Button variant="secondary" size="sm" disabled icon={Icons.check}>
                         Linked
-                      </button>
+                      </Button>
                     ) : (
-                      <button
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() =>
                           relationMode === "post"
                             ? handleAddPostCategory(cat.id)
                             : handleAddCategory(cat.id)
                         }
-                        className="btn btn-xs btn-primary"
                       >
-                        Add
-                      </button>
+                        Link
+                      </Button>
                     )}
                   </div>
                 );
               })
             )}
           </div>
-          <div className="modal-action">
-            <button
-              onClick={() => setCategoryModalOpen(false)}
-              className="btn btn-outline"
-            >
-              Close
-            </button>
-          </div>
         </div>
-      </dialog>
+      </Modal>
 
-      {/* Creator Modal */}
-      <dialog
-        id="creatorModal"
-        className={`modal ${creatorModalOpen ? "modal-open" : ""}`}
+      <Modal
+        isOpen={subCategoryModalOpen}
+        onClose={() => setSubCategoryModalOpen(false)}
+        title={`Add ${relationMode === "post" ? "Post Subcategory" : "Subcategory"}`}
       >
-        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Link Creator</h3>
-          <input
-            type="text"
-            placeholder="Search creator..."
-            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        <div className="space-y-4">
+          <SearchInput
+            placeholder={`Search ${relationMode === "post" ? "post subcategory" : "subcategory"}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="max-h-60 overflow-auto">
-            {(allCreators || []).filter((c: any) =>
-              (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-            ).length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  No creator
+          <div className="max-h-80 overflow-y-auto space-y-2">
+            {filteredSubcategories?.length === 0 && search.trim() !== "" ? (
+              <div className="p-3 text-center text-gray-500 dark:text-gray-400">
+                No {relationMode === "post" ? "post subcategory" : "subcategory"} found
+              </div>
+            ) : (
+              filteredSubcategories?.map((sub: any) => {
+                const isLinked = subcatRelations.some((rs) => rs.id === sub.id);
+                return (
+                  <div
+                    key={sub.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <span className="font-medium text-gray-900 dark:text-white">{sub.name}</span>
+                    {isLinked ? (
+                      <Button variant="secondary" size="sm" disabled icon={Icons.check}>
+                        Linked
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() =>
+                          relationMode === "post"
+                            ? handleAddPostSubcategory(sub.id)
+                            : handleAddSubcategory(sub.id)
+                        }
+                      >
+                        Link
+                      </Button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={tagCatModalOpen}
+        onClose={() => setTagCatModalOpen(false)}
+        title="Add Tag Category"
+      >
+        <div className="space-y-4">
+          <SearchInput
+            placeholder="Search tag category..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="max-h-80 overflow-y-auto space-y-2">
+            {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Create new tag category "{search}"
                 </span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleCreateAndLinkTagCategory(search)}
+                >
+                  Create & Link
+                </Button>
+              </div>
+            ) : (
+              filteredTagCategories?.map((tagCat: any) => {
+                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
+                return (
+                  <div
+                    key={tagCat.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <span className="font-medium text-gray-900 dark:text-white">{tagCat.name}</span>
+                    {isLinked ? (
+                      <Button variant="secondary" size="sm" disabled icon={Icons.check}>
+                        Linked
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleAddTagCategory(tagCat.id)}
+                      >
+                        Link
+                      </Button>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={creatorModalOpen}
+        onClose={() => setCreatorModalOpen(false)}
+        title="Link Creator"
+      >
+        <div className="space-y-4">
+          <SearchInput
+            placeholder="Search creator..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="max-h-80 overflow-y-auto space-y-2">
+            {(allCreators || [])
+              .filter((c: any) => (c.name ?? "").toLowerCase().includes(search.toLowerCase()))
+              .length === 0 && search.trim() !== "" ? (
+              <div className="p-3 text-center text-gray-500 dark:text-gray-400">
+                No creator found
               </div>
             ) : (
               (allCreators || [])
-                .filter((c: any) =>
-                  (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-                )
+                .filter((c: any) => (c.name ?? "").toLowerCase().includes(search.toLowerCase()))
                 .map((creator: any) => {
-                  const isLinked = creatorRelations.some(
-                    (rc) => rc.id === creator.id
-                  );
+                  const isLinked = creatorRelations.some((rc) => rc.id === creator.id);
                   return (
                     <div
                       key={creator.id}
-                      className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <span className="ml-5">{creator.name}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{creator.name}</span>
                       {isLinked ? (
-                        <button className="btn btn-xs btn-disabled">
+                        <Button variant="secondary" size="sm" disabled icon={Icons.check}>
                           Linked
-                        </button>
+                        </Button>
                       ) : (
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
                           onClick={() => {
                             handleAddCreator(creator.id);
-                            setCreatorModalOpen(true);
+                            setCreatorModalOpen(false);
                           }}
-                          className="btn btn-xs btn-primary"
                         >
-                          Add
-                        </button>
+                          Link
+                        </Button>
                       )}
                     </div>
                   );
                 })
             )}
           </div>
-          <div className="modal-action">
-            <button
-              onClick={() => setCreatorModalOpen(false)}
-              className="btn btn-outline"
-            >
-              Close
-            </button>
-          </div>
         </div>
-      </dialog>
-
-      {/* Subcategory Modal */}
-      <dialog
-        id="subCategoryModal"
-        className={`modal ${subCategoryModalOpen ? "modal-open" : ""}`}
-      >
-        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Subcategory</h3>
-          <input
-            type="text"
-            placeholder="Search subcategory..."
-            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="max-h-60 overflow-auto">
-            {filteredSubcategories?.length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  no subcategory
-                </span>
-              </div>
-            ) : (
-              filteredSubcategories?.map((sub) => {
-                const isLinked = subcatRelations.some((rs) => rs.id === sub.id);
-                return (
-                  <div
-                    key={sub.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                  >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-5">{sub.name}</span>
-                    {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
-                        Linked
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          relationMode === "post"
-                            ? handleAddPostSubcategory(sub.id)
-                            : handleAddSubcategory(sub.id)
-                        }
-                        className="btn btn-xs btn-secondary"
-                      >
-                        Add
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-          <div className="modal-action">
-            <button
-              onClick={() => setSubCategoryModalOpen(false)}
-              className="btn btn-outline"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </dialog>
-
-      {/* dialog for tag category */}
-      <dialog
-        id="tagCatModal"
-        className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}
-      >
-        <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Tag Category</h3>
-          <input
-            type="text"
-            placeholder="Search category..."
-            className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="max-h-60 overflow-auto">
-            {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new{" "}
-                  Tag category
-                  "{search}"
-                </span>
-                <button
-                  onClick={() => handleCreateAndLinkTagCategory(search)}
-                  className="btn btn-xs btn-success"
-                >
-                  Create & Link
-                </button>
-              </div>
-            ) : (
-              filteredTagCategories?.map((tagCat) => {
-                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
-
-                return (
-                  <div
-                    key={tagCat.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                  >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-7">{tagCat.name}</span>
-                    {isLinked ? (
-                      <button className="disabled text-gray-200 dark:text-gray-700 border rounded-sm w-20 border-gray-200 dark:border-gray-700 px-3 py-1">Linked</button>
-                    ) : (
-                      <button
-                        onClick={() => handleAddTagCategory(tagCat.id)}
-                        className="text-purple-500 border w-20 bg-purple-100 dark:bg-purple-500 dark:hover:bg-purple-600 dark:text-white cursor-pointer rounded-sm border-purple-500 px-3 py-1"
-                      >
-                        Add
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-          <div className="modal-action">
-            <button
-              onClick={() => setTagCatModalOpen(false)}
-              className="text-red-500 dark:text-pink-500 rounded-lg cursor-pointer bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </dialog>
+      </Modal>
     </div>
   );
 }
