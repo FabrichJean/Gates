@@ -898,7 +898,7 @@ export default function PlateformRelationsManager() {
               </div>
               <div className="border border-slate-100 dark:border-gray-700 mb-5"></div>
 
-              <div className={`grid ${relationMode === "post" ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-6`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
                   <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                     Linked Categories
@@ -1262,127 +1262,127 @@ export default function PlateformRelationsManager() {
                     </fieldset>
                   )
                 }
+                <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
+                  <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    Linked Creators
+                  </legend>
+
+                  <div className="flex gap-2 flex-wrap mb-3 justify-between">
+                    <button
+                      onClick={() => {
+                        setCreatorModalOpen(true);
+                        setCreatorPage(1);
+                      }}
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>link Creator</span>
+                    </button>
+
+                    <button
+                      onClick={handleClearCreators}
+                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4 mr-2 inline-block"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                        />
+                      </svg>
+                      <span>Clear All</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 my-3">
+                    <input
+                      type="text"
+                      placeholder="Filter linked creators..."
+                      className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      value={linkedCreatorFilter}
+                      onChange={(e) => {
+                        setLinkedCreatorFilter(e.target.value);
+                        setLinkedCreatorPage(1);
+                      }}
+                    />
+
+                    <select
+                      value={linkedCreatorPerPage}
+                      onChange={(e) => {
+                        setLinkedCreatorPerPage(Number(e.target.value));
+                        setLinkedCreatorPage(1);
+                      }}
+                      className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value={5}>5 / page</option>
+                      <option value={10}>10 / page</option>
+                      <option value={20}>20 / page</option>
+                    </select>
+                  </div>
+
+                  {creatorRelations.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
+                  ) : (
+                    (() => {
+                      const filtered = creatorRelations.filter((c) => (c.name ?? "").toLowerCase().includes(linkedCreatorFilter.toLowerCase()));
+                      const start = (linkedCreatorPage - 1) * linkedCreatorPerPage;
+                      const pageItems = filtered.slice(start, start + linkedCreatorPerPage);
+                      return (
+                        <>
+                          {pageItems.map((c) => (
+                            <RelationListItem
+                              key={c.id}
+                              id={c.id}
+                              name={c.name ?? ""}
+                              onRemove={() =>
+                                openConfirm({
+                                  title: "Remove creator",
+                                  message: `Remove creator \"${c.name ?? ""}\" from this platform?`,
+                                  type: "warning",
+                                  confirmText: "Remove",
+                                  cancelText: "Cancel",
+                                  onConfirm: async () => {
+                                    await handleRemoveCreator(Number(c.id));
+                                  },
+                                })
+                              }
+                              styleType="card"
+                            />
+                          ))}
+
+                          <div className="mt-2">
+                            <Pagination
+                              totalItems={filtered.length}
+                              pageSize={linkedCreatorPerPage}
+                              currentPage={linkedCreatorPage}
+                              onPageChange={(p) => setLinkedCreatorPage(p)}
+                            />
+                          </div>
+                        </>
+                      );
+                    })()
+                  )}
+                </fieldset>
+
               </div>
-              {/* Creators block */}
-              <fieldset className="mt-6 flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
-                <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                  Linked Creators
-                </legend>
-
-                <div className="flex gap-2 flex-wrap mb-3 justify-between">
-                  <button
-                    onClick={() => {
-                      setCreatorModalOpen(true);
-                      setCreatorPage(1);
-                    }}
-                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-2 inline-block"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>link Creator</span>
-                  </button>
-
-                  <button
-                    onClick={handleClearCreators}
-                    className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 mr-2 inline-block"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                      />
-                    </svg>
-                    <span>Clear All</span>
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 my-3">
-                  <input
-                    type="text"
-                    placeholder="Filter linked creators..."
-                    className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    value={linkedCreatorFilter}
-                    onChange={(e) => {
-                      setLinkedCreatorFilter(e.target.value);
-                      setLinkedCreatorPage(1);
-                    }}
-                  />
-
-                  <select
-                    value={linkedCreatorPerPage}
-                    onChange={(e) => {
-                      setLinkedCreatorPerPage(Number(e.target.value));
-                      setLinkedCreatorPage(1);
-                    }}
-                    className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  >
-                    <option value={5}>5 / page</option>
-                    <option value={10}>10 / page</option>
-                    <option value={20}>20 / page</option>
-                  </select>
-                </div>
-
-                {creatorRelations.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
-                ) : (
-                  (() => {
-                    const filtered = creatorRelations.filter((c) => (c.name ?? "").toLowerCase().includes(linkedCreatorFilter.toLowerCase()));
-                    const start = (linkedCreatorPage - 1) * linkedCreatorPerPage;
-                    const pageItems = filtered.slice(start, start + linkedCreatorPerPage);
-                    return (
-                      <>
-                        {pageItems.map((c) => (
-                          <RelationListItem
-                            key={c.id}
-                            id={c.id}
-                            name={c.name ?? ""}
-                            onRemove={() =>
-                              openConfirm({
-                                title: "Remove creator",
-                                message: `Remove creator \"${c.name ?? ""}\" from this platform?`,
-                                type: "warning",
-                                confirmText: "Remove",
-                                cancelText: "Cancel",
-                                onConfirm: async () => {
-                                  await handleRemoveCreator(Number(c.id));
-                                },
-                              })
-                            }
-                            styleType="card"
-                          />
-                        ))}
-
-                        <div className="mt-2">
-                          <Pagination
-                            totalItems={filtered.length}
-                            pageSize={linkedCreatorPerPage}
-                            currentPage={linkedCreatorPage}
-                            onPageChange={(p) => setLinkedCreatorPage(p)}
-                          />
-                        </div>
-                      </>
-                    );
-                  })()
-                )}
-              </fieldset>
 
             </>
           ) : (
