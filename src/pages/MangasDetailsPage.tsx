@@ -292,6 +292,10 @@ const MangasDetailsPage: React.FC = () => {
               {/* Toggle Banned/Unbanned */}
               <button
                 onClick={async () => {
+                  const should = window.confirm(
+                    manga.isBanned ? "Are you sure you want to unban this manga?" : "Are you sure you want to ban this manga?"
+                  );
+                  if (!should) return;
                   try {
                     await updateMangaBannedStatus(manga.id, !manga.isBanned);
                     toast.success(`Manga ${!manga.isBanned ? 'banned' : 'unbanned'} successfully`);

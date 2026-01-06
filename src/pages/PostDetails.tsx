@@ -71,6 +71,10 @@ const PostDetails = () => {
 
           <button
             onClick={async () => {
+              const should = window.confirm(
+                post.isBanned ? "Are you sure you want to unban this post?" : "Are you sure you want to ban this post?"
+              );
+              if (!should) return;
               try {
                 await updatePostBannedStatus(post.id, !post.isBanned);
                 toast.success(`Post ${!post.isBanned ? 'banned' : 'unbanned'} successfully`);

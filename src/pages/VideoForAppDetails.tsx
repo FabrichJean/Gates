@@ -214,6 +214,10 @@ const VideoForAppDetails: React.FC = () => {
 
                       <button
                         onClick={async () => {
+                          const should = window.confirm(
+                            video.isBanned ? "Are you sure you want to unban this video?" : "Are you sure you want to ban this video?"
+                          );
+                          if (!should) return;
                           try {
                             await updateVideoForAppBannedStatus(video.id, !video.isBanned);
                             toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
