@@ -86,8 +86,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       "?t=" +
       Date.now()
     );
-    const saved = localStorage.getItem(`video-show-cover-${videoId}`);
-    if (saved !== null) setShowCover(saved === "true");
   }, [video]);
 
   
@@ -262,30 +260,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               onClick={() => {
                                 const next = !showCover;
                                 setShowCover(next);
-                                localStorage.setItem(`video-show-cover-${videoId}`, String(next));
                               }}
                               className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
                               title={showCover ? "Hide cover" : "Show cover"}
                             >
                               {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (!window.confirm('Remove cover from server? This action may be irreversible.')) return;
-                                try {
-                                  const form = new FormData();
-                                  form.append('remove_cover', '1');
-                                  await updateVideo(video.id, form);
-                                  toast.success('Cover removed');
-                                  reFetch();
-                                } catch (err: any) {
-                                  toast.error(err?.response?.data?.message || 'Failed to remove cover');
-                                }
-                              }}
-                              className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition"
-                              title="Remove cover"
-                            >
-                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -299,7 +278,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             coverUrl: video?.s3_urls?.coverUrl,
                             cover_url: video?.public_urls?.cover_url
                           }}
-                          poster={showCover ? (currentCoverUrl || video?.s3_urls?.coverUrl || video?.public_urls?.cover_url) : undefined}
+                          poster={currentCoverUrl || video?.s3_urls?.coverUrl || video?.public_urls?.cover_url}
                           isPlaying={videoPlayed}
                           onPlay={() => setVideoPlayed(true)}
                           className="w-full h-full"

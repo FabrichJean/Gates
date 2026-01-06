@@ -87,8 +87,6 @@ const VideoForAppDetails: React.FC = () => {
       const videoPlatform = platforms.find(p => p.id === video.plateform_id);
       setPlatform(videoPlatform || null);
     }
-    const saved = localStorage.getItem(`app-video-show-cover-${routeId}`);
-    if (saved !== null) setShowCover(saved === 'true');
   }, [video?.plateform_id, platforms]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
@@ -270,24 +268,6 @@ const VideoForAppDetails: React.FC = () => {
                             >
                               {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
-                            <button
-                              onClick={async () => {
-                                if (!window.confirm('Remove cover from server? This action may be irreversible.')) return;
-                                try {
-                                  const form = new FormData();
-                                  form.append('remove_cover', '1');
-                                  await updateVideoForApp(video.id, form as any);
-                                  toast.success('Cover removed');
-                                  reFetch();
-                                } catch (err: any) {
-                                  toast.error(err?.response?.data?.message || 'Failed to remove cover');
-                                }
-                              }}
-                              className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition"
-                              title="Remove cover"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
                           </div>
                         </div>
                       )}
@@ -298,7 +278,7 @@ const VideoForAppDetails: React.FC = () => {
                             hlsUrl: video?.m3u8_path,
                             coverUrl: video?.s3_urls?.coverUrl,
                           }}
-                          poster={showCover ? video?.cover : undefined}
+                          poster={video?.cover}
                           className="w-full h-full"
                           isForApp={true}
                           autoPlay={true}

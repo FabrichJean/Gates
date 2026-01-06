@@ -50,6 +50,7 @@ const VideoForAppManagement = () => {
     subcategory: '',
     isActive: null as boolean | null,
     checking: null as CheckingStatus,
+    isBanned: null as boolean | null,
     modifyTags: false,
   });
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
@@ -197,6 +198,7 @@ const VideoForAppManagement = () => {
       subcategory: '',
       isActive: null,
       checking: null,
+      isBanned: null,
       modifyTags: false,
     });
     setBulkEditProgress({ current: 0, total: 0 });
@@ -223,6 +225,7 @@ const VideoForAppManagement = () => {
           if (bulkEditData.subcategory) updateData.subcategory = bulkEditData.subcategory;
           if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
           if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
+          if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
 
           if (Object.keys(updateData).length > 0) {
             await updateVideoForApp(videoId, updateData);
@@ -566,6 +569,24 @@ const VideoForAppManagement = () => {
                     <option value="">Ne pas modifier</option>
                     <option value="true">Activer</option>
                     <option value="false">Désactiver</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Statut Banned
+                  </label>
+                  <select
+                    value={bulkEditData.isBanned === null ? '' : String(bulkEditData.isBanned)}
+                    onChange={(e) => setBulkEditData(prev => ({
+                      ...prev,
+                      isBanned: e.target.value === '' ? null : e.target.value === 'true'
+                    }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Ne pas modifier</option>
+                    <option value="true">Bannir</option>
+                    <option value="false">Debannir</option>
                   </select>
                 </div>
 

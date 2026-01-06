@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { UsePost, useNextPost } from "../hooks/usePost";
 import PostChecking from "../components/PostChecking";
@@ -8,13 +9,17 @@ import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { togglePostBannedStatus, updatePostBannedStatus } from "../api/posts";
 import toast from "react-hot-toast";
+import { Eye, EyeOff, Trash2 } from "lucide-react";
+import axios from "axios";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 
 const PostDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error, reFetch } = UsePost(id);
   const { nextPost, prevPost, hasNext, hasPrev } = useNextPost(id);
-
+  const [showCover, setShowCover] = useState<boolean>(true);
   const handleBack = () => {
     navigate("/post");
   };
@@ -39,6 +44,8 @@ const PostDetails = () => {
       </div>
     );
   }
+
+  
 
   return (
     <div className="p-6">
@@ -196,11 +203,26 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
         </div>
       </div>
       <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 relative ${post.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
-        {post.isBanned && (
-          <div className="absolute inset-0 bg-red-500 bg-opacity-5 z-10 flex items-center justify-center pointer-events-none">
+        {post.isBanned && showCover && (
+          <div className="absolute inset-0 backdrop-blur-md bg-opacity-5 z-10 flex items-center justify-center pointer-events-none">
             <div className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-xl shadow-lg transform rotate-12">
               BANNED
             </div>
+          </div>
+        )}
+        {post.isBanned && (
+          <div className="absolute top-3 right-3 z-20 flex gap-2 pointer-events-auto">
+            <button
+              onClick={() => {
+                const next = !showCover;
+                setShowCover(next);
+                if (post?.id) localStorage.setItem(`post-show-cover-${post.id}`, String(next));
+              }}
+              className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
+              title={showCover ? "Hide cover" : "Show cover"}
+            >
+              {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </button>
           </div>
         )}
         <div className="grid grid-cols-2 gap-4">
@@ -335,16 +357,18 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
         </div>
 
         <GetPostTitles postTitles={post?.titles} />
-        <GetImagePost images={post?.images} reFetch={reFetch} />
-        {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
-        <GetVideoPost
-          idPost={post?.id}
-          videos={(post?.videos || []).map((v: any) => ({
-            ...v,
-            local_cover_path: v.local_cover_path || v.public_urls?.cover_url || v.s3_urls?.coverUrl || (post as any)?.local_cover_path || v.cover || "",
-          }))}
-          reFetch={reFetch}
-        />
+        <div className={`${post.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
+          <GetImagePost images={post?.images} reFetch={reFetch} />
+          {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
+          <GetVideoPost
+            idPost={post?.id}
+            videos={(post?.videos || []).map((v: any) => ({
+              ...v,
+              local_cover_path: v.local_cover_path || v.public_urls?.cover_url || v.s3_urls?.coverUrl || (post as any)?.local_cover_path || v.cover || "",
+            }))}
+            reFetch={reFetch}
+          />
+        </div>
       </div>
     </div>
   );
