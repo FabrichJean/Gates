@@ -407,6 +407,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={async () => {
+                              const should = window.confirm(
+                                video.isBanned ? "Are you sure you want to unban this video?" : "Are you sure you want to ban this video?"
+                              );
+                              if (!should) return;
                               try {
                                 await updateBannedStatus(video.id, !video.isBanned);
                                 toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
