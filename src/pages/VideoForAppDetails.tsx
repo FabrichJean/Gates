@@ -4,21 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UseAppVideo, useNextAppVideo } from "../hooks/app/useAppVideos";
 import { formatDateFR } from "../utils/date";
 import {
-  updateVideoForApp,
-  toggleVideoForAppBannedStatus,
-  updateVideoForAppBannedStatus,
-} from "../api/videoForApp";
-import CheckingSuperadmin from "../components/CheckingSuperadmin";
-import { useAuthMe } from "../hooks/useAuth";
-import RoleEnum from "../utils/roleEnum";
-import useSocketSend from "../hooks/useSocketSend";
-import AnimatedAlert from "../components/AnimatedAlert";
-import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
-import { usePlatformReactive } from "../hooks/usePlatform";
-import {
   Edit3,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  EyeOff,
+  Trash2,
 } from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
@@ -28,6 +19,14 @@ import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
 import VideoPlayer from "../components/VideoPlayer";
 import toast from "react-hot-toast";
+import { usePlatformReactive } from '../hooks/usePlatform';
+import { useAuthMe } from '../hooks/useAuth';
+import CheckingSuperadmin from "../components/CheckingSuperadmin";
+import AnimatedAlert from "../components/AnimatedAlert";
+import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
+import useSocketSend from "../hooks/useSocketSend";
+import RoleEnum from "../utils/roleEnum";
+import { updateVideoForApp, updateVideoForAppBannedStatus } from "../api/videoForApp";
 
 
 // Helper function to get category display name
@@ -59,6 +58,7 @@ const getPlatformDisplayName = (platform?: {id: number, name: string}): string =
   if (!platform) return 'No platform';
   return platform.name;
 };
+ 
 
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -69,6 +69,7 @@ const VideoForAppDetails: React.FC = () => {
   const [videoPlayed, setVideoPlayed] = useState(false);
 
   const [modifying, setModifying] = useState(false);
+  const [showCover, setShowCover] = useState<boolean>(true);
 
   // Platform data
   const { data: platforms } = usePlatformReactive();
@@ -86,6 +87,8 @@ const VideoForAppDetails: React.FC = () => {
       const videoPlatform = platforms.find(p => p.id === video.plateform_id);
       setPlatform(videoPlatform || null);
     }
+    const saved = localStorage.getItem(`app-video-show-cover-${routeId}`);
+    if (saved !== null) setShowCover(saved === 'true');
   }, [video?.plateform_id, platforms]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
@@ -254,22 +257,53 @@ const VideoForAppDetails: React.FC = () => {
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                     <div className={`aspect-video bg-black relative ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
                       {video.isBanned && (
-                        <div className="absolute inset-0 bg-red-500 bg-opacity-10 z-10 flex items-center justify-center">
-                          <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-lg shadow-lg">
-                            BANNED
+                        <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
+                          <div className="flex gap-2 pointer-events-auto">
+                            <button
+                              onClick={() => {
+                                const next = !showCover;
+                                setShowCover(next);
+                                localStorage.setItem(`app-video-show-cover-${routeId}`, String(next));
+                              }}
+                              className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
+                              title={showCover ? "Hide cover" : "Show cover"}
+                            >
+                              {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm('Remove cover from server? This action may be irreversible.')) return;
+                                try {
+                                  const form = new FormData();
+                                  form.append('remove_cover', '1');
+                                  await updateVideoForApp(video.id, form as any);
+                                  toast.success('Cover removed');
+                                  reFetch();
+                                } catch (err: any) {
+                                  toast.error(err?.response?.data?.message || 'Failed to remove cover');
+                                }
+                              }}
+                              className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition"
+                              title="Remove cover"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       )}
-                      <VideoPlayer
-                        videoUrls={{
-                          hlsUrl: video?.m3u8_path,
-                          coverUrl: video?.s3_urls?.coverUrl,
-                        }}
-                        poster={video?.cover}
-                        className="w-full h-full"
-                        isForApp={true}
-                        autoPlay={true}
-                      />
+
+                      <div className={`w-full h-full ${video.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
+                        <VideoPlayer
+                          videoUrls={{
+                            hlsUrl: video?.m3u8_path,
+                            coverUrl: video?.s3_urls?.coverUrl,
+                          }}
+                          poster={showCover ? video?.cover : undefined}
+                          className="w-full h-full"
+                          isForApp={true}
+                          autoPlay={true}
+                        />
+                      </div>
                     </div>
                   </div>
                 </motion.div>
