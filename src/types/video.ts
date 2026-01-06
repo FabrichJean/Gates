@@ -11,6 +11,7 @@ export type Video = {
   duration: number | null;
   sequence: number | null;
   isDeleted: boolean;
+  isBanned: boolean;
   ref: string;
   user?: { id: number; username: string };
   category?: { name: string };

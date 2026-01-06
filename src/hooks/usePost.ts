@@ -148,6 +148,7 @@ export type TPost = {
     plateform: Plateform;
     videos: Video[];
     images: Image[];
+    isBanned: boolean;
 };
 
 

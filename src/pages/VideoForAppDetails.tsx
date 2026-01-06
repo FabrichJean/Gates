@@ -5,6 +5,8 @@ import { UseAppVideo, useNextAppVideo } from "../hooks/app/useAppVideos";
 import { formatDateFR } from "../utils/date";
 import {
   updateVideoForApp,
+  toggleVideoForAppBannedStatus,
+  updateVideoForAppBannedStatus,
 } from "../api/videoForApp";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import { useAuthMe } from "../hooks/useAuth";
@@ -25,6 +27,7 @@ import { Link, useParams } from 'react-router-dom';
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
 import VideoPlayer from "../components/VideoPlayer";
+import toast from "react-hot-toast";
 
 
 // Helper function to get category display name
@@ -208,6 +211,26 @@ const VideoForAppDetails: React.FC = () => {
                       >
                         <Edit3 className="w-5 h-5" />
                       </Link>
+
+                      <button
+                        onClick={async () => {
+                          try {
+                            await updateVideoForAppBannedStatus(video.id, !video.isBanned);
+                            toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
+                            reFetch();
+                          } catch (error: any) {
+                            toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                          }
+                        }}
+                        className={`p-2 rounded-lg transition-colors flex items-center ${
+                          video.isBanned
+                            ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800"
+                            : "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800"
+                        }`}
+                        title={video.isBanned ? "Unban video" : "Ban video"}
+                      >
+                        {video.isBanned ? "🔓" : "🚫"}
+                      </button>
                     </div>
                   </motion.div>
                 </div>
@@ -225,7 +248,14 @@ const VideoForAppDetails: React.FC = () => {
                   className="lg:col-span-2"
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-                    <div className="aspect-video bg-black relative">
+                    <div className={`aspect-video bg-black relative ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+                      {video.isBanned && (
+                        <div className="absolute inset-0 bg-red-500 bg-opacity-10 z-10 flex items-center justify-center">
+                          <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-lg shadow-lg">
+                            BANNED
+                          </div>
+                        </div>
+                      )}
                       <VideoPlayer
                         videoUrls={{
                           hlsUrl: video?.m3u8_path,

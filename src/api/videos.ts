@@ -115,3 +115,23 @@ export async function cancelUpload(videoId: string | number): Promise<void> {
         }
     });
 }
+
+export async function toggleBannedStatus(videoId: string | number): Promise<void> {
+    return await axios.put(`${apiURL}/videos/${videoId}/toggle-banned`, null, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        }
+    });
+}
+
+export async function updateBannedStatus(videoId: string | number, isBanned: boolean): Promise<void> {
+    // Send as FormData so client can use multipart/form-data if needed
+    const formData = new FormData();
+    formData.append("isBanned", String(isBanned));
+    return await axios.put(`${apiURL}/videos/${videoId}`, formData, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+            "Content-Type": "multipart/form-data",
+        },
+    });
+}

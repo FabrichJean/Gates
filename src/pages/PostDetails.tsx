@@ -6,6 +6,8 @@ import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
+import { togglePostBannedStatus, updatePostBannedStatus } from "../api/posts";
+import toast from "react-hot-toast";
 
 const PostDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,6 +68,27 @@ const PostDetails = () => {
             <Edit size={16} />
           </button>
           <BtnTranscodeComponent post={post} reFetch={reFetch} />
+
+          <button
+            onClick={async () => {
+              try {
+                await updatePostBannedStatus(post.id, !post.isBanned);
+                toast.success(`Post ${!post.isBanned ? 'banned' : 'unbanned'} successfully`);
+                reFetch();
+              } catch (error: any) {
+                toast.error(error?.response?.data?.message || 'Failed to update banned status');
+              }
+            }}
+            className={`relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+font-medium text-sm rounded-md transition-all duration-300
+backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 ${
+              post.isBanned
+                ? "bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600"
+                : "bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600"
+            } flex-shrink-0`}
+          >
+            {post.isBanned ? "Unban Post" : "Ban Post"}
+          </button>
 
           {hasPrev ? (
             <Link
@@ -168,7 +191,14 @@ const PostDetails = () => {
           )}
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 relative ${post.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+        {post.isBanned && (
+          <div className="absolute inset-0 bg-red-500 bg-opacity-5 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-xl shadow-lg transform rotate-12">
+              BANNED
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Ref</p>

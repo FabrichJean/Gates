@@ -16,7 +16,7 @@ import {
   Send,
   Loader2
 } from "lucide-react";
-import { getMangaById, updateManga, uploadMangaToS3 } from "../api/mangas";
+import { getMangaById, updateManga, uploadMangaToS3, toggleMangaBannedStatus, updateMangaBannedStatus } from "../api/mangas";
 import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
@@ -39,6 +39,7 @@ interface Manga {
   total_chapters?: number;
   need_vip?: boolean;
   isDeleted?: boolean;
+  isBanned: boolean;
   checking?: string;
   comment?: string;
   processing?: string;
@@ -287,6 +288,27 @@ const MangasDetailsPage: React.FC = () => {
               >
                 {manga.isDeleted ? 'Activate' : 'Deactivate'}
               </button>
+
+              {/* Toggle Banned/Unbanned */}
+              <button
+                onClick={async () => {
+                  try {
+                    await updateMangaBannedStatus(manga.id, !manga.isBanned);
+                    toast.success(`Manga ${!manga.isBanned ? 'banned' : 'unbanned'} successfully`);
+                    fetchManga();
+                  } catch (error: any) {
+                    toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 border ${
+                  manga.isBanned
+                    ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                    : 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                }`}
+                title={manga.isBanned ? 'Unban manga' : 'Ban manga'}
+              >
+                {manga.isBanned ? 'Unban' : 'Ban'}
+              </button>
               <Link
                 to={`/mangas/${manga.id}/chapters`}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
@@ -375,7 +397,14 @@ const MangasDetailsPage: React.FC = () => {
             className="lg:col-span-1"
           >
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="aspect-[3/4] relative group">
+              <div className={`aspect-[3/4] relative group ${manga.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+                {manga.isBanned && (
+                  <div className="absolute inset-0 bg-red-500 bg-opacity-10 z-20 flex items-center justify-center">
+                    <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-lg shadow-lg">
+                      BANNED
+                    </div>
+                  </div>
+                )}
                 {manga.cover_url ? (
                   <motion.img
                     src={manga.s3_cover_url || manga.cover_url}

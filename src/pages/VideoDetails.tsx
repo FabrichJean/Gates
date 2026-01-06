@@ -14,6 +14,8 @@ import {
   cancelUpload,
   sendProcessing,
   updateVideo,
+  toggleBannedStatus,
+  updateBannedStatus,
 } from "../api/videos";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
@@ -245,8 +247,15 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${isPortrait
                         ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
                         : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
-                        }`}
+                        } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
                     >
+                      {video.isBanned && (
+                        <div className="absolute inset-0 bg-red-500 bg-opacity-10 z-10 flex items-center justify-center">
+                          <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-lg shadow-lg">
+                            BANNED
+                          </div>
+                        </div>
+                      )}
                       <VideoPlayer
                         videoUrls={{
                           hlsUrl: video?.s3_urls?.hlsUrl,
@@ -393,6 +402,27 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               Cancel
                             </motion.button>
                           )}
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={async () => {
+                              try {
+                                await updateBannedStatus(video.id, !video.isBanned);
+                                toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
+                                reFetch();
+                              } catch (error: any) {
+                                toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                              }
+                            }}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              video.isBanned
+                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
+                            }`}
+                          >
+                            {video.isBanned ? "Unban Video" : "Ban Video"}
+                          </motion.button>
                         </>
                       )}
 

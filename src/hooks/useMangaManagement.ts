@@ -32,6 +32,7 @@ export interface Manga {
   total_chapters?: number;
   need_vip?: boolean;
   isDeleted?: boolean;
+  isBanned: boolean;
   checking?: string;
   comment?: string;
   processing?: string;
