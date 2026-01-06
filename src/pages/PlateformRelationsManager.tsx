@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import Pagination from "../components/Pagination";
 import UsePlateform from "../hooks/usePlateform";
 import toast from "react-hot-toast";
 import {
@@ -35,6 +36,8 @@ import {
 import useTagVideoCategory from "../hooks/useTagVideoCategory";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
+import AnimatedAlert from "../components/AnimatedAlert";
+import RelationListItem from "../components/RelationListItem";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import UseCreators from "../hooks/useCreators";
@@ -87,6 +90,44 @@ export default function PlateformRelationsManager() {
   const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
   const [search, setSearch] = useState("");
+
+  // Pagination for the selection modals
+  const itemsPerPage = 4;
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [tagCatPage, setTagCatPage] = useState(1);
+  const [subcatPage, setSubcatPage] = useState(1);
+  const [creatorPage, setCreatorPage] = useState(1);
+  // modal-local filters and per-page controls
+  const [categoryModalFilter, setCategoryModalFilter] = useState("");
+  const [categoryModalPerPage, setCategoryModalPerPage] = useState(6);
+  const [subcatModalFilter, setSubcatModalFilter] = useState("");
+  const [subcatModalPerPage, setSubcatModalPerPage] = useState(6);
+  const [tagCatModalFilter, setTagCatModalFilter] = useState("");
+  const [tagCatModalPerPage, setTagCatModalPerPage] = useState(6);
+  // pagination for linked lists (visible in main panel)
+  const [linkedCatPage, setLinkedCatPage] = useState(1);
+  const [linkedSubcatPage, setLinkedSubcatPage] = useState(1);
+  const [linkedTagCatPage, setLinkedTagCatPage] = useState(1);
+  const [linkedCreatorPage, setLinkedCreatorPage] = useState(1);
+
+  // per-list quick filters & per-page controls for linked lists
+  const [linkedCatFilter, setLinkedCatFilter] = useState("");
+  const [linkedSubcatFilter, setLinkedSubcatFilter] = useState("");
+  const [linkedTagCatFilter, setLinkedTagCatFilter] = useState("");
+  const [linkedCreatorFilter, setLinkedCreatorFilter] = useState("");
+
+  const [linkedCatPerPage, setLinkedCatPerPage] = useState(5);
+  const [linkedSubcatPerPage, setLinkedSubcatPerPage] = useState(5);
+  const [linkedTagCatPerPage, setLinkedTagCatPerPage] = useState(5);
+  const [linkedCreatorPerPage, setLinkedCreatorPerPage] = useState(5);
+
+  // reset pagination when search changes to keep UI on first page
+  useEffect(() => {
+    setCategoryPage(1);
+    setTagCatPage(1);
+    setSubcatPage(1);
+    setCreatorPage(1);
+  }, [search]);
 
 
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
@@ -144,22 +185,29 @@ export default function PlateformRelationsManager() {
       toast.error("Error saving platform");
     }
   };
-
-  const handleDeletePlatform = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this platform?")) return;
-    try {
-      await deletePlateformApi(id);
-      toast.success("Platform deleted");
-      if (selectedPlateform === id) {
-        setSelectedPlateform(null);
-        setCatRelations([]);
-        setSubcatRelations([]);
-        setTagCatRelations([]);
-      }
-      fetchPlatforms();
-    } catch {
-      toast.error("Error deleting platform");
-    }
+  const handleDeletePlatform = (id: number) => {
+    openConfirm({
+      title: "Delete platform",
+      message: "Are you sure you want to delete this platform?",
+      type: "error",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      onConfirm: async () => {
+        try {
+          await deletePlateformApi(id);
+          toast.success("Platform deleted");
+          if (selectedPlateform === id) {
+            setSelectedPlateform(null);
+            setCatRelations([]);
+            setSubcatRelations([]);
+            setTagCatRelations([]);
+          }
+          fetchPlatforms();
+        } catch {
+          toast.error("Error deleting platform");
+        }
+      },
+    });
   };
 
   const fetchRelations = useCallback(
@@ -299,6 +347,14 @@ export default function PlateformRelationsManager() {
   useEffect(() => {
     fetchRelations(selectedPlateform);
   }, [selectedPlateform, fetchRelations]);
+
+  // Reset linked-list pages when platform changes
+  useEffect(() => {
+    setLinkedCatPage(1);
+    setLinkedSubcatPage(1);
+    setLinkedTagCatPage(1);
+    setLinkedCreatorPage(1);
+  }, [selectedPlateform]);
 
   // post hooks
   const { data: allPostCategories, reFetch: reFetchPostCategories } =
@@ -469,71 +525,127 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const handleClearCategories = async () => {
+  const handleClearCategories = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all categories from this platform?")) return;
-    try {
-      await clearCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All categories removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing categories");
-    }
+    openConfirm({
+      title: "Clear categories",
+      message: "Remove all categories from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await clearCategoriesFromPlateformApi(selectedPlateform);
+          toast.success("All categories removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing categories");
+        }
+      },
+    });
   };
 
-  const handleClearTagCategories = async () => {
+  const handleClearTagCategories = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all tag categories from this platform?")) return;
-    try {
-      await clearTagCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All tag categories removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing Tag categories");
-    }
+    openConfirm({
+      title: "Clear tag categories",
+      message: "Remove all tag categories from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await clearTagCategoriesFromPlateformApi(selectedPlateform);
+          toast.success("All tag categories removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing Tag categories");
+        }
+      },
+    });
   };
 
 
-  const handleClearSubCategories = async () => {
+  const handleClearSubCategories = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all categories from this platform?")) return;
-    try {
-      await clearSubCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All categories removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing categories");
-    }
+    openConfirm({
+      title: "Clear subcategories",
+      message: "Remove all subcategories from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await clearSubCategoriesFromPlateformApi(selectedPlateform);
+          toast.success("All categories removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing categories");
+        }
+      },
+    });
   };
 
 
-  const handleClearPostCategories = async () => {
+  const handleClearPostCategories = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all post categories from this platform?")) return;
-    try {
-      await clearPostCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All post categories removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing post categories");
-    }
+    openConfirm({
+      title: "Clear post categories",
+      message: "Remove all post categories from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await clearPostCategoriesFromPlateformApi(selectedPlateform);
+          toast.success("All post categories removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing post categories");
+        }
+      },
+    });
   };
 
-  const handleClearPostSubCategories = async () => {
+  const handleClearPostSubCategories = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all post subcategories from this platform?")) return;
-    try {
-      // new clear endpoint for post subcategories
-      await clearPostSubCategoriesFromPlateformApi(selectedPlateform);
-      toast.success("All post subcategories removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing post subcategories");
-    }
+    openConfirm({
+      title: "Clear post subcategories",
+      message: "Remove all post subcategories from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          // new clear endpoint for post subcategories
+          await clearPostSubCategoriesFromPlateformApi(selectedPlateform);
+          toast.success("All post subcategories removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing post subcategories");
+        }
+      },
+    });
   };
 
   // Creator linking handlers
   const [creatorModalOpen, setCreatorModalOpen] = useState(false);
+
+  // AnimatedAlert state (replacement for window.confirm)
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"error" | "warning" | "info" | "success">("warning");
+  const [alertOnConfirm, setAlertOnConfirm] = useState<(() => void) | undefined>(undefined);
+  const [alertConfirmText, setAlertConfirmText] = useState("OK");
+  const [alertCancelText, setAlertCancelText] = useState("Cancel");
+
+  const openConfirm = (opts: {
+    title?: string;
+    message: string;
+    type?: "error" | "warning" | "info" | "success";
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+  }) => {
+    setAlertTitle(opts.title ?? "Are you sure?");
+    setAlertMessage(opts.message);
+    setAlertType(opts.type ?? "warning");
+    setAlertOnConfirm(() => opts.onConfirm);
+    setAlertConfirmText(opts.confirmText ?? "OK");
+    setAlertCancelText(opts.cancelText ?? "Cancel");
+    setAlertOpen(true);
+  };
 
   const handleAddCreator = async (creatorId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -558,16 +670,22 @@ export default function PlateformRelationsManager() {
     }
   };
 
-  const handleClearCreators = async () => {
+  const handleClearCreators = () => {
     if (!selectedPlateform) return;
-    if (!confirm("Remove all creators from this platform?")) return;
-    try {
-      await clearCreatorsFromPlateformApi(selectedPlateform);
-      toast.success("All creators removed");
-      fetchRelations(selectedPlateform);
-    } catch {
-      toast.error("Error clearing creators");
-    }
+    openConfirm({
+      title: "Clear creators",
+      message: "Remove all creators from this platform?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await clearCreatorsFromPlateformApi(selectedPlateform);
+          toast.success("All creators removed");
+          fetchRelations(selectedPlateform);
+        } catch {
+          toast.error("Error clearing creators");
+        }
+      },
+    });
   };
 
   const videoFilteredCategories =
@@ -788,8 +906,11 @@ export default function PlateformRelationsManager() {
 
                   <div className="flex flex-wrap gap-2 justify-between">
                     <button
-                      onClick={() => setCategoryModalOpen(true)}
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
+                      onClick={() => {
+                        setCategoryModalOpen(true);
+                        setCategoryPage(1);
+                      }}
+                      className="font-medium rounded-md px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors shadow-sm"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -813,7 +934,7 @@ export default function PlateformRelationsManager() {
                           ? handleClearPostCategories
                           : handleClearCategories
                       }
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-pink-600 dark:text-white text-pink-600 border dark:border-pink-500"
+                      className="font-medium rounded-md px-3 py-1 bg-red-50 dark:bg-red-900/10 text-red-600 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors shadow-sm"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -834,47 +955,77 @@ export default function PlateformRelationsManager() {
                     </button>
                   </div>
 
+                  <div className="flex items-center gap-2 my-3">
+                    <input
+                      type="text"
+                      placeholder="Filter linked categories..."
+                      className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      value={linkedCatFilter}
+                      onChange={(e) => {
+                        setLinkedCatFilter(e.target.value);
+                        setLinkedCatPage(1);
+                      }}
+                    />
+
+                    <select
+                      value={linkedCatPerPage}
+                      onChange={(e) => {
+                        setLinkedCatPerPage(Number(e.target.value));
+                        setLinkedCatPage(1);
+                      }}
+                      className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value={5}>5 / page</option>
+                      <option value={10}>10 / page</option>
+                      <option value={20}>20 / page</option>
+                    </select>
+                  </div>
+
                   {catRelations.length === 0 ? (
                     <p className="text-gray-500 dark:text-gray-400">
                       No categories linked
                     </p>
                   ) : (
-                    catRelations.map((c) => (
-                      <div
-                        key={c.id}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                      >
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                          title="Theme: light/dark"
-                        ></span>
+                    (() => {
+                      const filtered = catRelations.filter((c) => (c.name ?? "").toLowerCase().includes(linkedCatFilter.toLowerCase()));
+                      const start = (linkedCatPage - 1) * linkedCatPerPage;
+                      const pageItems = filtered.slice(start, start + linkedCatPerPage);
+                      return (
+                        <>
+                          {pageItems.map((c) => (
+                                <RelationListItem
+                                  key={c.id}
+                                  id={c.id}
+                                  name={c.name ?? ""}
+                                  onRemove={() =>
+                                    openConfirm({
+                                      title: "Remove category",
+                                      message: `Remove category \"${c.name ?? ""}\" from this platform?`,
+                                      type: "warning",
+                                      confirmText: "Remove",
+                                      cancelText: "Cancel",
+                                      onConfirm: async () => {
+                                        if (relationMode === "post")
+                                          await handleRemovePostCategory(c.id);
+                                        else await handleRemoveCategory(c.id);
+                                      },
+                                    })
+                                  }
+                                  styleType="card"
+                                />
+                          ))}
 
-                        <span className="ml-5">{c.name}</span>
-
-                        <button
-                          onClick={() =>
-                            relationMode === "post"
-                              ? handleRemovePostCategory(c.id)
-                              : handleRemoveCategory(c.id)
-                          }
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="size-6 text-pink-600 dark:text-pink-500"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            <div className="mt-2">
+                            <Pagination
+                              totalItems={filtered.length}
+                              pageSize={linkedCatPerPage}
+                              currentPage={linkedCatPage}
+                              onPageChange={(p) => setLinkedCatPage(p)}
                             />
-                          </svg>
-                        </button>
-                      </div>
-                    ))
+                          </div>
+                        </>
+                      );
+                    })()
                   )}
                 </fieldset>
 
@@ -886,8 +1037,11 @@ export default function PlateformRelationsManager() {
 
                   <div className="flex gap-2 flex-wrap justify-between">
                     <button
-                      onClick={() => setSubCategoryModalOpen(true)}
-                      className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
+                      onClick={() => {
+                        setSubCategoryModalOpen(true);
+                        setSubcatPage(1);
+                      }}
+                      className="font-medium rounded-md px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors shadow-sm"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -940,49 +1094,49 @@ export default function PlateformRelationsManager() {
                   </div>
 
                   {subcatRelations?.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No subcategories linked
-                    </p>
+                    <p className="text-gray-500 dark:text-gray-400">No subcategories linked</p>
                   ) : (
-                    subcatRelations?.map((s) => (
-                      <div
-                        key={s.id}
-                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                      >
-                        {/* Theme indicator node (light/dark) */}
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                          title="Theme: light/dark"
-                        ></span>
-
-                        <span className="ml-5">{s.name}</span>
-
-                        <button
-                          onClick={() => {
-                            if (!s.relationId) return;
-                            if (relationMode === "post")
-                              return handleRemovePostSubcategory(s.relationId);
-                            return handleRemoveSubcategory(s.relationId);
-                          }}
-                          disabled={!s.relationId}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="size-6 text-pink-600 dark:text-pink-500"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    (() => {
+                      const filtered = (subcatRelations ?? []).filter((s) => (s.name ?? "").toLowerCase().includes(linkedSubcatFilter.toLowerCase()));
+                      const start = (linkedSubcatPage - 1) * linkedSubcatPerPage;
+                      const pageItems = filtered.slice(start, start + linkedSubcatPerPage);
+                      return (
+                        <>
+                          {pageItems.map((s) => (
+                            <RelationListItem
+                              key={s.id}
+                              id={s.id}
+                              name={s.name ?? ""}
+                              onRemove={() => {
+                                if (!s.relationId) return;
+                                openConfirm({
+                                  title: "Remove subcategory",
+                                  message: `Remove subcategory \"${s.name ?? ""}\" from this platform?`,
+                                  type: "warning",
+                                  confirmText: "Remove",
+                                  cancelText: "Cancel",
+                                  onConfirm: async () => {
+                                    if (relationMode === "post")
+                                      await handleRemovePostSubcategory(s.relationId!);
+                                    else await handleRemoveSubcategory(s.relationId!);
+                                  },
+                                });
+                              }}
+                              styleType="card"
                             />
-                          </svg>
-                        </button>
-                      </div>
-                    ))
+                          ))}
+
+                          <div className="mt-2">
+                            <Pagination
+                              totalItems={filtered.length}
+                              pageSize={linkedSubcatPerPage}
+                              currentPage={linkedSubcatPage}
+                              onPageChange={(p) => setLinkedSubcatPage(p)}
+                            />
+                          </div>
+                        </>
+                      );
+                    })()
                   )}
                 </fieldset>
 
@@ -997,7 +1151,10 @@ export default function PlateformRelationsManager() {
 
                       <div className="flex gap-2 flex-wrap justify-between">
                         <button
-                          onClick={() => setTagCatModalOpen(true)}
+                          onClick={() => {
+                            setTagCatModalOpen(true);
+                            setTagCatPage(1);
+                          }}
                           className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                         >
                           <svg
@@ -1037,40 +1194,71 @@ export default function PlateformRelationsManager() {
                         </button>
                       </div>
 
-                      {tagCatRelations?.map((tc) => (
-                        <div
-                          key={tc.id}
-                          className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                        >
-                          {/* Theme indicator node (light/dark) */}
-                          <span
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-yellow-500 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                            title="Theme: light/dark"
-                          ></span>
+                          <div className="flex items-center gap-2 my-3">
+                            <input
+                              type="text"
+                              placeholder="Filter linked tag categories..."
+                              className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              value={linkedTagCatFilter}
+                              onChange={(e) => {
+                                setLinkedTagCatFilter(e.target.value);
+                                setLinkedTagCatPage(1);
+                              }}
+                            />
 
-                          <span className="ml-5">{tc.name}</span>
-
-                          <button
-                            onClick={() => handleRemoveTagCategory(tc.id)}
-                            disabled={!selectedPlateform}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="size-6 text-pink-600 dark:text-pink-500"
+                            <select
+                              value={linkedTagCatPerPage}
+                              onChange={(e) => {
+                                setLinkedTagCatPerPage(Number(e.target.value));
+                                setLinkedTagCatPage(1);
+                              }}
+                              className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                              <option value={5}>5 / page</option>
+                              <option value={10}>10 / page</option>
+                              <option value={20}>20 / page</option>
+                            </select>
+                          </div>
+
+                          {(() => {
+                            const filtered = (tagCatRelations ?? []).filter((t) => (t.name ?? "").toLowerCase().includes(linkedTagCatFilter.toLowerCase()));
+                            const start = (linkedTagCatPage - 1) * linkedTagCatPerPage;
+                            const pageItems = filtered.slice(start, start + linkedTagCatPerPage);
+                            return (
+                              <>
+                                {pageItems.map((tc) => (
+                              <RelationListItem
+                                key={tc.id}
+                                id={tc.id}
+                                name={tc.name ?? ""}
+                                onRemove={() =>
+                                  openConfirm({
+                                    title: "Remove tag category",
+                                    message: `Remove tag category \"${tc.name ?? ""}\" from this platform?`,
+                                    type: "warning",
+                                    confirmText: "Remove",
+                                    cancelText: "Cancel",
+                                    onConfirm: async () => {
+                                      await handleRemoveTagCategory(tc.id);
+                                    },
+                                  })
+                                }
+                                disabled={!selectedPlateform}
+                                styleType="card"
                               />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
+                            ))}
+
+                            <div className="mt-2">
+                              <Pagination
+                                totalItems={tagCatRelations?.length ?? 0}
+                                pageSize={itemsPerPage}
+                                currentPage={linkedTagCatPage}
+                                onPageChange={(p) => setLinkedTagCatPage(p)}
+                              />
+                            </div>
+                          </>
+                        );
+                      })()}
                     </fieldset>
                   )
                 }
@@ -1083,7 +1271,10 @@ export default function PlateformRelationsManager() {
 
                 <div className="flex gap-2 flex-wrap mb-3 justify-between">
                   <button
-                    onClick={() => setCreatorModalOpen(true)}
+                    onClick={() => {
+                      setCreatorModalOpen(true);
+                      setCreatorPage(1);
+                    }}
                     className="font-light rounded-sm px-3 py-1 dark:bg-slate-700 bg-slate-100/20 border-teal-600 dark:text-white text-teal-600 border dark:border-teal-500"
                   >
                     <svg
@@ -1123,36 +1314,73 @@ export default function PlateformRelationsManager() {
                   </button>
                 </div>
 
-                {creatorRelations.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No creators linked
-                  </p>
-                ) : (
-                  creatorRelations.map((c) => (
-                    <div
-                      key={c.id}
-                      className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 relative text-gray-800 dark:text-gray-100"
-                    >
-                      <span className="ml-5">{c.name}</span>
+                <div className="flex items-center gap-2 my-3">
+                  <input
+                    type="text"
+                    placeholder="Filter linked creators..."
+                    className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    value={linkedCreatorFilter}
+                    onChange={(e) => {
+                      setLinkedCreatorFilter(e.target.value);
+                      setLinkedCreatorPage(1);
+                    }}
+                  />
 
-                      <button onClick={() => handleRemoveCreator(Number(c.id))}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6 text-pink-600 dark:text-pink-500"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  <select
+                    value={linkedCreatorPerPage}
+                    onChange={(e) => {
+                      setLinkedCreatorPerPage(Number(e.target.value));
+                      setLinkedCreatorPage(1);
+                    }}
+                    className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value={5}>5 / page</option>
+                    <option value={10}>10 / page</option>
+                    <option value={20}>20 / page</option>
+                  </select>
+                </div>
+
+                {creatorRelations.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
+                ) : (
+                  (() => {
+                    const filtered = creatorRelations.filter((c) => (c.name ?? "").toLowerCase().includes(linkedCreatorFilter.toLowerCase()));
+                    const start = (linkedCreatorPage - 1) * linkedCreatorPerPage;
+                    const pageItems = filtered.slice(start, start + linkedCreatorPerPage);
+                    return (
+                      <>
+                        {pageItems.map((c) => (
+                          <RelationListItem
+                            key={c.id}
+                            id={c.id}
+                            name={c.name ?? ""}
+                            onRemove={() =>
+                              openConfirm({
+                                title: "Remove creator",
+                                message: `Remove creator \"${c.name ?? ""}\" from this platform?`,
+                                type: "warning",
+                                confirmText: "Remove",
+                                cancelText: "Cancel",
+                                onConfirm: async () => {
+                                  await handleRemoveCreator(Number(c.id));
+                                },
+                              })
+                            }
+                            styleType="card"
                           />
-                        </svg>
-                      </button>
-                    </div>
-                  ))
+                        ))}
+
+                        <div className="mt-2">
+                          <Pagination
+                            totalItems={filtered.length}
+                            pageSize={linkedCreatorPerPage}
+                            currentPage={linkedCreatorPage}
+                            onPageChange={(p) => setLinkedCreatorPage(p)}
+                          />
+                        </div>
+                      </>
+                    );
+                  })()
                 )}
               </fieldset>
 
@@ -1179,59 +1407,79 @@ export default function PlateformRelationsManager() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          {/* keep search but clear modal-local filters when global search changes */}
+          <div style={{ display: "none" }} aria-hidden>
+            {search}
+          </div>
+          <div className="flex items-center gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Filter..."
+              className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              value={categoryModalFilter}
+              onChange={(e) => {
+                setCategoryModalFilter(e.target.value);
+                setCategoryPage(1);
+              }}
+            />
+            <select
+              value={categoryModalPerPage}
+              onChange={(e) => {
+                setCategoryModalPerPage(Number(e.target.value));
+                setCategoryPage(1);
+              }}
+              className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value={6}>6 / page</option>
+              <option value={12}>12 / page</option>
+              <option value={24}>24 / page</option>
+            </select>
+          </div>
+
           <div className="max-h-60 overflow-auto">
-            {filteredCategories?.length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new{" "}
-                  {relationMode === "post" ? "post category" : "category"} "
-                  {search}"
-                </span>
-                <button
-                  onClick={() =>
-                    relationMode === "post"
-                      ? handleCreateAndLinkPostCategory(search)
-                      : handleCreateAndLinkCategory(search)
-                  }
-                  className="btn btn-xs btn-success"
-                >
-                  Create & Link
-                </button>
-              </div>
-            ) : (
-              filteredCategories?.map((cat) => {
-                const isLinked = catRelations.some((rc) => rc.id === cat.id);
+            {(() => {
+              const base = filteredCategories ?? [];
+              const combined = base.filter((c: any) => (c.name ?? "").toLowerCase().includes(categoryModalFilter.toLowerCase()));
+              if (combined.length === 0 && search.trim() !== "") {
                 return (
-                  <div
-                    key={cat.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                  >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-5">{cat.name}</span>
-                    {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
-                        Linked
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          relationMode === "post"
-                            ? handleAddPostCategory(cat.id)
-                            : handleAddCategory(cat.id)
-                        }
-                        className="btn btn-xs btn-primary"
-                      >
-                        Add
-                      </button>
-                    )}
+                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                    <span className="italic text-gray-500 dark:text-gray-400">
+                      Create new {relationMode === "post" ? "post category" : "category"} "{search}"
+                    </span>
+                    <button
+                      onClick={() => (relationMode === "post" ? handleCreateAndLinkPostCategory(search) : handleCreateAndLinkCategory(search))}
+                      className="btn btn-xs btn-success"
+                    >
+                      Create & Link
+                    </button>
                   </div>
                 );
-              })
-            )}
+              }
+
+              const start = (categoryPage - 1) * categoryModalPerPage;
+              const pageItems = combined.slice(start, start + categoryModalPerPage);
+              return (
+                <>
+                  {pageItems.map((cat: any) => {
+                    const isLinked = catRelations.some((rc) => rc.id === cat.id);
+                    return (
+                      <RelationListItem
+                        key={cat.id}
+                        id={cat.id}
+                        name={cat.name ?? ""}
+                        linked={isLinked}
+                        onAdd={!isLinked ? () => (relationMode === "post" ? handleAddPostCategory(cat.id) : handleAddCategory(cat.id)) : undefined}
+                        styleType="card"
+                      />
+                    );
+                  })}
+
+                  <div className="mt-2">
+                    <Pagination totalItems={combined.length} pageSize={categoryModalPerPage} currentPage={categoryPage} onPageChange={(p) => setCategoryPage(p)} />
+                  </div>
+                </>
+              );
+            })()}
           </div>
           <div className="modal-action">
             <button
@@ -1258,49 +1506,74 @@ export default function PlateformRelationsManager() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <div className="flex items-center gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Filter..."
+              className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              value={categoryModalFilter}
+              onChange={(e) => {
+                setCategoryModalFilter(e.target.value);
+                setCreatorPage(1);
+              }}
+            />
+            <select
+              value={categoryModalPerPage}
+              onChange={(e) => {
+                setCategoryModalPerPage(Number(e.target.value));
+                setCreatorPage(1);
+              }}
+              className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value={6}>6 / page</option>
+              <option value={12}>12 / page</option>
+              <option value={24}>24 / page</option>
+            </select>
+          </div>
+
           <div className="max-h-60 overflow-auto">
-            {(allCreators || []).filter((c: any) =>
-              (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-            ).length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  No creator
-                </span>
-              </div>
-            ) : (
-              (allCreators || [])
-                .filter((c: any) =>
-                  (c.name ?? "").toLowerCase().includes(search.toLowerCase())
-                )
-                .map((creator: any) => {
-                  const isLinked = creatorRelations.some(
-                    (rc) => rc.id === creator.id
-                  );
-                  return (
-                    <div
-                      key={creator.id}
-                      className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                    >
-                      <span className="ml-5">{creator.name}</span>
-                      {isLinked ? (
-                        <button className="btn btn-xs btn-disabled">
-                          Linked
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            handleAddCreator(creator.id);
-                            setCreatorModalOpen(true);
-                          }}
-                          className="btn btn-xs btn-primary"
-                        >
-                          Add
-                        </button>
-                      )}
-                    </div>
-                  );
-                })
-            )}
+            {(() => {
+              const filtered = (allCreators || []).filter((c: any) =>
+                (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+              );
+              if (filtered.length === 0 && search.trim() !== "") {
+                return (
+                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                    <span className="italic text-gray-500 dark:text-gray-400">No creator</span>
+                  </div>
+                );
+              }
+
+              const start = (creatorPage - 1) * itemsPerPage;
+              const pageItems = filtered.slice(start, start + itemsPerPage);
+
+              return (
+                <>
+                  {pageItems.map((creator: any) => {
+                    const isLinked = creatorRelations.some((rc) => rc.id === creator.id);
+                    return (
+                      <RelationListItem
+                        key={creator.id}
+                        id={creator.id}
+                        name={creator.name ?? ""}
+                        linked={isLinked}
+                        onAdd={!isLinked ? () => handleAddCreator(creator.id) : undefined}
+                        styleType="card"
+                      />
+                    );
+                  })}
+
+                  <div className="mt-2">
+                    <Pagination
+                      totalItems={filtered.length}
+                      pageSize={itemsPerPage}
+                      currentPage={creatorPage}
+                      onPageChange={(p) => setCreatorPage(p)}
+                    />
+                  </div>
+                </>
+              );
+            })()}
           </div>
           <div className="modal-action">
             <button
@@ -1327,47 +1600,67 @@ export default function PlateformRelationsManager() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <div className="flex items-center gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Filter..."
+              className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              value={subcatModalFilter}
+              onChange={(e) => {
+                setSubcatModalFilter(e.target.value);
+                setSubcatPage(1);
+              }}
+            />
+            <select
+              value={subcatModalPerPage}
+              onChange={(e) => {
+                setSubcatModalPerPage(Number(e.target.value));
+                setSubcatPage(1);
+              }}
+              className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value={6}>6 / page</option>
+              <option value={12}>12 / page</option>
+              <option value={24}>24 / page</option>
+            </select>
+          </div>
+
           <div className="max-h-60 overflow-auto">
-            {filteredSubcategories?.length === 0 && search.trim() !== "" ? (
-              <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                <span className="italic text-gray-500 dark:text-gray-400">
-                  no subcategory
-                </span>
-              </div>
-            ) : (
-              filteredSubcategories?.map((sub) => {
-                const isLinked = subcatRelations.some((rs) => rs.id === sub.id);
+            {(() => {
+              const base = filteredSubcategories ?? [];
+              const combined = base.filter((s: any) => (s.name ?? "").toLowerCase().includes(subcatModalFilter.toLowerCase()));
+              if (combined.length === 0 && search.trim() !== "") {
                 return (
-                  <div
-                    key={sub.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                  >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-5">{sub.name}</span>
-                    {isLinked ? (
-                      <button className="btn btn-xs btn-disabled">
-                        Linked
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          relationMode === "post"
-                            ? handleAddPostSubcategory(sub.id)
-                            : handleAddSubcategory(sub.id)
-                        }
-                        className="btn btn-xs btn-secondary"
-                      >
-                        Add
-                      </button>
-                    )}
+                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+                    <span className="italic text-gray-500 dark:text-gray-400">no subcategory</span>
                   </div>
                 );
-              })
-            )}
+              }
+
+              const start = (subcatPage - 1) * subcatModalPerPage;
+              const pageItems = combined.slice(start, start + subcatModalPerPage);
+              return (
+                <>
+                  {pageItems.map((sub: any) => {
+                    const isLinked = subcatRelations.some((rs) => rs.id === sub.id);
+                    return (
+                      <RelationListItem
+                        key={sub.id}
+                        id={sub.id}
+                        name={sub.name ?? ""}
+                        linked={isLinked}
+                        onAdd={!isLinked ? () => (relationMode === "post" ? handleAddPostSubcategory(sub.id) : handleAddSubcategory(sub.id)) : undefined}
+                        styleType="card"
+                      />
+                    );
+                  })}
+
+                  <div className="mt-2">
+                    <Pagination totalItems={combined.length} pageSize={subcatModalPerPage} currentPage={subcatPage} onPageChange={(p) => setSubcatPage(p)} />
+                  </div>
+                </>
+              );
+            })()}
           </div>
           <div className="modal-action">
             <button
@@ -1398,9 +1691,7 @@ export default function PlateformRelationsManager() {
             {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new{" "}
-                  Tag category
-                  "{search}"
+                  Create new Tag category "{search}"
                 </span>
                 <button
                   onClick={() => handleCreateAndLinkTagCategory(search)}
@@ -1410,33 +1701,39 @@ export default function PlateformRelationsManager() {
                 </button>
               </div>
             ) : (
-              filteredTagCategories?.map((tagCat) => {
-                const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
+              <>
+                  {(() => {
+                    const start = (tagCatPage - 1) * itemsPerPage;
+                    const pageItems = (filteredTagCategories ?? []).slice(
+                      start,
+                      start + itemsPerPage
+                    );
+                    return pageItems.map((tagCat) => {
+                      const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
 
-                return (
-                  <div
-                    key={tagCat.id}
-                    className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 relative bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                  >
-                    {/* Theme indicator node (light/dark) */}
-                    <span
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-yellow-500 dark:border-gray-700 bg-yellow-400 dark:bg-gray-800 shadow-lg ring-2 ring-white dark:ring-gray-900"
-                      title="Theme: light/dark"
-                    ></span>
-                    <span className="ml-7">{tagCat.name}</span>
-                    {isLinked ? (
-                      <button className="disabled text-gray-200 dark:text-gray-700 border rounded-sm w-20 border-gray-200 dark:border-gray-700 px-3 py-1">Linked</button>
-                    ) : (
-                      <button
-                        onClick={() => handleAddTagCategory(tagCat.id)}
-                        className="text-purple-500 border w-20 bg-purple-100 dark:bg-purple-500 dark:hover:bg-purple-600 dark:text-white cursor-pointer rounded-sm border-purple-500 px-3 py-1"
-                      >
-                        Add
-                      </button>
-                    )}
-                  </div>
-                );
-              })
+                      return (
+                        <RelationListItem
+                          key={tagCat.id}
+                          id={tagCat.id}
+                          name={tagCat.name ?? ""}
+                          linked={isLinked}
+                          onAdd={!isLinked ? () => handleAddTagCategory(tagCat.id) : undefined}
+                          styleType="pill"
+                          variant="tag"
+                        />
+                      );
+                    });
+                  })()}
+
+                <div className="mt-2">
+                  <Pagination
+                    totalItems={filteredTagCategories?.length ?? 0}
+                    pageSize={itemsPerPage}
+                    currentPage={tagCatPage}
+                    onPageChange={(p) => setTagCatPage(p)}
+                  />
+                </div>
+              </>
             )}
           </div>
           <div className="modal-action">
@@ -1449,6 +1746,16 @@ export default function PlateformRelationsManager() {
           </div>
         </div>
       </dialog>
+      <AnimatedAlert
+        isOpen={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        title={alertTitle}
+        message={alertMessage}
+        type={alertType}
+        onConfirm={alertOnConfirm}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </div>
   );
 }
