@@ -109,7 +109,12 @@ export default function PlateformRelationsManager() {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [tagCatModalOpen, setTagCatModalOpen] = useState(false);
   const [subCategoryModalOpen, setSubCategoryModalOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  
+  // 🔧 States de recherche séparés pour chaque modal
+  const [categorySearch, setCategorySearch] = useState("");
+  const [subCategorySearch, setSubCategorySearch] = useState("");
+  const [tagCategorySearch, setTagCategorySearch] = useState("");
+  const [creatorSearch, setCreatorSearch] = useState("");
 
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
@@ -331,7 +336,7 @@ export default function PlateformRelationsManager() {
       if (!id) throw new Error("Invalid create response");
       await handleAddCategory(id);
       setCategoryModalOpen(false);
-      setSearch("");
+      setCategorySearch(""); // ✅ Réinitialise la recherche catégorie
     } catch (err) {
       toast.error(JSON.stringify(err));
     }
@@ -345,7 +350,7 @@ export default function PlateformRelationsManager() {
       const newTagCat = res.data;
       const id = newTagCat.tagCategory?.id ?? newTagCat.id ?? null;
       await handleAddTagCategory(id);
-      setSearch("");
+      setTagCategorySearch(""); // ✅ Réinitialise la recherche tag
     } catch (err) {
       toast.error(JSON.stringify(err));
     }
@@ -361,7 +366,7 @@ export default function PlateformRelationsManager() {
       if (!id) throw new Error("Invalid create response");
       await handleAddPostCategory(id);
       setCategoryModalOpen(false);
-      setSearch("");
+      setCategorySearch(""); // ✅ Réinitialise la recherche catégorie
     } catch (err) {
       toast.error(JSON.stringify(err));
     }
@@ -543,15 +548,15 @@ export default function PlateformRelationsManager() {
 
   // Filtrage des données
   const videoFilteredCategories = allCategories?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+    c.name.toLowerCase().includes(categorySearch.toLowerCase())
   ) || [];
 
   const videoFilteredTagCategories = allCategoriesTag?.items.filter((c) =>
-    (c.name ?? "").toLowerCase().includes(search.toLowerCase())
+    (c.name ?? "").toLowerCase().includes(tagCategorySearch.toLowerCase())
   ) || [];
 
   const videoFilteredSubcategories = allSubCategories?.SubCategorys?.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+    s.name.toLowerCase().includes(subCategorySearch.toLowerCase())
   ) || [];
 
   const postCategoriesList = allPostCategories?.categories || [];
@@ -559,12 +564,12 @@ export default function PlateformRelationsManager() {
     relationMode === "post" ? postCategoriesList : videoFilteredCategories
   ).filter((c: unknown) => {
     const cat = c as { name?: string };
-    return (cat.name ?? "").toLowerCase().includes(search.toLowerCase());
+    return (cat.name ?? "").toLowerCase().includes(categorySearch.toLowerCase());
   });
 
   const filteredTagCategories = videoFilteredTagCategories.filter((tc: unknown) => {
     const tagcat = tc as { name?: string };
-    return (tagcat.name ?? "").toLowerCase().includes(search.toLowerCase());
+    return (tagcat.name ?? "").toLowerCase().includes(tagCategorySearch.toLowerCase());
   });
 
   const postSubcategoriesList = allPostSubCategories?.subCategories || [];
@@ -572,7 +577,7 @@ export default function PlateformRelationsManager() {
     relationMode === "post" ? postSubcategoriesList : videoFilteredSubcategories
   ).filter((s: unknown) => {
     const sub = s as { name?: string };
-    return (sub.name ?? "").toLowerCase().includes(search.toLowerCase());
+    return (sub.name ?? "").toLowerCase().includes(subCategorySearch.toLowerCase());
   });
 
   // Composants UI réutilisables
@@ -656,7 +661,7 @@ export default function PlateformRelationsManager() {
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 bg-opacity-50 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden`}>
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
@@ -731,7 +736,7 @@ export default function PlateformRelationsManager() {
     title: string;
     count?: number;
     onAdd: () => void; 
-    onClear: () => void; 
+    onClean: () => void; 
     children: React.ReactNode;
     addLabel?: string;
     clearLabel?: string;
@@ -1070,28 +1075,31 @@ export default function PlateformRelationsManager() {
 
       <Modal
         isOpen={categoryModalOpen}
-        onClose={() => setCategoryModalOpen(false)}
+        onClose={() => {
+          setCategoryModalOpen(false);
+          setCategorySearch(""); // ✅ Réinitialise la recherche
+        }}
         title={`Add ${relationMode === "post" ? "Post Category" : "Category"}`}
       >
         <div className="space-y-4">
           <SearchInput
             placeholder={`Search ${relationMode === "post" ? "post category" : "category"}...`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={categorySearch}
+            onChange={(e) => setCategorySearch(e.target.value)}
           />
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {filteredCategories?.length === 0 && search.trim() !== "" ? (
+            {filteredCategories?.length === 0 && categorySearch.trim() !== "" ? (
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Create new {relationMode === "post" ? "post category" : "category"} "{search}"
+                  Create new {relationMode === "post" ? "post category" : "category"} "{categorySearch}"
                 </span>
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() =>
                     relationMode === "post"
-                      ? handleCreateAndLinkPostCategory(search)
-                      : handleCreateAndLinkCategory(search)
+                      ? handleCreateAndLinkPostCategory(categorySearch)
+                      : handleCreateAndLinkCategory(categorySearch)
                   }
                 >
                   Create & Link
@@ -1133,17 +1141,20 @@ export default function PlateformRelationsManager() {
 
       <Modal
         isOpen={subCategoryModalOpen}
-        onClose={() => setSubCategoryModalOpen(false)}
+        onClose={() => {
+          setSubCategoryModalOpen(false);
+          setSubCategorySearch(""); // ✅ Réinitialise la recherche
+        }}
         title={`Add ${relationMode === "post" ? "Post Subcategory" : "Subcategory"}`}
       >
         <div className="space-y-4">
           <SearchInput
             placeholder={`Search ${relationMode === "post" ? "post subcategory" : "subcategory"}...`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={subCategorySearch}
+            onChange={(e) => setSubCategorySearch(e.target.value)}
           />
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {filteredSubcategories?.length === 0 && search.trim() !== "" ? (
+            {filteredSubcategories?.length === 0 && subCategorySearch.trim() !== "" ? (
               <div className="p-3 text-center text-gray-500 dark:text-gray-400">
                 No {relationMode === "post" ? "post subcategory" : "subcategory"} found
               </div>
@@ -1183,25 +1194,28 @@ export default function PlateformRelationsManager() {
 
       <Modal
         isOpen={tagCatModalOpen}
-        onClose={() => setTagCatModalOpen(false)}
+        onClose={() => {
+          setTagCatModalOpen(false);
+          setTagCategorySearch(""); // ✅ Réinitialise la recherche
+        }}
         title="Add Tag Category"
       >
         <div className="space-y-4">
           <SearchInput
             placeholder="Search tag category..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={tagCategorySearch}
+            onChange={(e) => setTagCategorySearch(e.target.value)}
           />
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
+            {filteredTagCategories?.length === 0 && tagCategorySearch.trim() !== "" ? (
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Create new tag category "{search}"
+                  Create new tag category "{tagCategorySearch}"
                 </span>
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => handleCreateAndLinkTagCategory(search)}
+                  onClick={() => handleCreateAndLinkTagCategory(tagCategorySearch)}
                 >
                   Create & Link
                 </Button>
@@ -1238,25 +1252,28 @@ export default function PlateformRelationsManager() {
 
       <Modal
         isOpen={creatorModalOpen}
-        onClose={() => setCreatorModalOpen(false)}
+        onClose={() => {
+          setCreatorModalOpen(false);
+          setCreatorSearch(""); // ✅ Réinitialise la recherche
+        }}
         title="Link Creator"
       >
         <div className="space-y-4">
           <SearchInput
             placeholder="Search creator..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={creatorSearch}
+            onChange={(e) => setCreatorSearch(e.target.value)}
           />
           <div className="max-h-80 overflow-y-auto space-y-2">
             {(allCreators || [])
-              .filter((c: any) => (c.name ?? "").toLowerCase().includes(search.toLowerCase()))
-              .length === 0 && search.trim() !== "" ? (
+              .filter((c: any) => (c.name ?? "").toLowerCase().includes(creatorSearch.toLowerCase()))
+              .length === 0 && creatorSearch.trim() !== "" ? (
               <div className="p-3 text-center text-gray-500 dark:text-gray-400">
                 No creator found
               </div>
             ) : (
               (allCreators || [])
-                .filter((c: any) => (c.name ?? "").toLowerCase().includes(search.toLowerCase()))
+                .filter((c: any) => (c.name ?? "").toLowerCase().includes(creatorSearch.toLowerCase()))
                 .map((creator: any) => {
                   const isLinked = creatorRelations.some((rc) => rc.id === creator.id);
                   return (
