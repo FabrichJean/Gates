@@ -71,7 +71,7 @@ export default function CreatorList({
     setSingleSyncLoading(true);
     try {
       await singleSync({
-        entity: "creator",
+        entity: "creators",
         origin_id: selectedCreator.id,
         isForce,
       });
