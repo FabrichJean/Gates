@@ -109,3 +109,22 @@ export async function togglePostStatus(id: string | number): Promise<void> {
       }
   });
 }
+
+export async function togglePostBannedStatus(id: string | number): Promise<void> {
+  return await axios.put(`${apiURL}/posts/${id}/toggle-banned`, null, {
+      headers: {
+          Authorization: `Bearer ${getToken()}`,
+      }
+  });
+}
+
+export async function updatePostBannedStatus(id: string | number, isBanned: boolean): Promise<void> {
+  const formData = new FormData();
+  formData.append('isBanned', String(isBanned));
+  return await axios.put(`${apiURL}/posts/${id}`, formData, {
+      headers: {
+          Authorization: `Bearer ${getToken()}`,
+          'Content-Type': 'multipart/form-data',
+      }
+  });
+}

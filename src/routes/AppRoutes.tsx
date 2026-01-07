@@ -64,7 +64,6 @@ import UploadAudioAlbum from "../pages/UploadAudioAlbum";
 import AudioAlbumDetails from "../pages/AudioAlbumDetails";
 import AudioAlbumEdit from "../pages/AudioAlbumEdit";
 import { MangasProvider } from "../context/MangasContext";
-import { AppVideosProvider } from "../context/AppVideosContext";
 import VideoForAppManagement from "../pages/VideoForAppManagement";
 import VideoForAppDetails from "../pages/VideoForAppDetails";
 import VideoForAppEdit from "../pages/VideoForAppEdit";
@@ -241,6 +240,30 @@ const AppRoutes = () => {
                       <Route path="touch/:id" element={<TouchVideo />} />
                     </Routes>
                   </VideosProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppManagement />
+                  </VideoForAppProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppDetails />
+                  </VideoForAppProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -551,7 +574,16 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/touch/video/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <TouchVideo />
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/touch/post/:id"
             element={

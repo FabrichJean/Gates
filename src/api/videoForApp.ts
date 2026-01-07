@@ -30,6 +30,7 @@ export interface VideoForApp {
     need_vip?: boolean;
     m3u8_path?: string;
     type?: "1" | `2`;
+    isBanned: boolean;
     creatorObj?: {
         id: number;
         name: string;
@@ -110,6 +111,33 @@ export async function activateVideoForApp(videoId: number) {
   const response = await axios.put(
     `${apiURL}/videos-for-app/${videoId}/toggleStatus`,
     {},
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function toggleVideoForAppBannedStatus(videoId: number) {
+  const response = await axios.put(
+    `${apiURL}/videos-for-app/${videoId}/toggle-banned`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function updateVideoForAppBannedStatus(videoId: number, isBanned: boolean) {
+  const formData = {isBanned};
+  const response = await axios.put(
+    `${apiURL}/videos-for-app/${videoId}`,
+    formData,
     {
       headers: {
         Authorization: `Bearer ${token()}`,

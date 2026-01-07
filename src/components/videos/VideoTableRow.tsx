@@ -21,6 +21,9 @@ interface VideoTableRowProps {
   detailsPath?: string;
   convertToMp4Fn?: (videoId: number) => Promise<any>;
   hideSend?: boolean;
+  showSelection?: boolean;
+  isSelected?: boolean;
+  onToggleSelection?: (videoId: number) => void;
 }
 
 const VideoTableRow = ({
@@ -35,6 +38,9 @@ const VideoTableRow = ({
   detailsPath,
   convertToMp4Fn,
   hideSend,
+  showSelection = false,
+  isSelected = false,
+  onToggleSelection,
 }: VideoTableRowProps) => {
   const { user } = useAuth();
 
@@ -76,6 +82,17 @@ const VideoTableRow = ({
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="group border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200 cursor-pointer"
     >
+      {/* Selection Checkbox */}
+      {showSelection && (
+        <td className="py-4 px-6 text-center">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggleSelection?.(video.id)}
+            className="checkbox checkbox-primary border-2 border-gray-300 dark:border-gray-500 checked:border-blue-500 dark:checked:border-blue-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+          />
+        </td>
+      )}
       {/* Référence */}
       <td className="py-4 px-6">
         <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
