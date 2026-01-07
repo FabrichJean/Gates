@@ -36,12 +36,11 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
     else setQuery((value as Creator).name || '');
   }, [value]);
 
-  useEffect(() => {
-    const list = creators.creators || [];
-    // setFiltered(list)
+  const filtered = useMemo(() => {
+    const list = creators || [];
     const q = query?.trim().toLowerCase();
-    // if (!q) setFiltered(list.slice(0, 20));
-    setFiltered(list?.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30));
+    if (!q) return list.slice(0, 30);
+    return list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30);
   }, [creators, query]);
 
   useEffect(() => {

@@ -77,11 +77,11 @@ export default function PlateformRelationsManager() {
   );
 
   const { data: allCategories, reFetch: reFetchCategories } = UseCategory();
-  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory();
+  const { data: allCategoriesTag, reFetch: reFetchCategoriesTag } = useTagVideoCategory(); // ------------ TAG CATEGORIES
   const { data: allSubCategories } = UseSubCategory();
 
   const [catRelations, setCatRelations] = useState<RelationItem[]>([]);
-  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]);
+  const [tagCatRelations, setTagCatRelations] = useState<RelationItem[]>([]); //-------------TAG CATEGORIES
   const [subcatRelations, setSubcatRelations] = useState<RelationItem[]>([]);
   const [creatorRelations, setCreatorRelations] = useState<RelationItem[]>([]);
   const [relationMode, setRelationMode] = useState<"video" | "post">("video");
@@ -135,15 +135,6 @@ export default function PlateformRelationsManager() {
   const [platformName, setPlatformName] = useState("");
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
-
-
-  // post hooks
-  const { data: allPostCategories, reFetch: reFetchPostCategories } = useCategoryPost();
-  const { data: allPostSubCategories } = useSubCategoryPost();
-  const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
-
-  // Creator linking handlers
-  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
 
   const fetchPlatforms = async () => {
     reFetchPlateform();
@@ -357,8 +348,6 @@ export default function PlateformRelationsManager() {
     fetchRelations(selectedPlateform);
   }, [selectedPlateform, fetchRelations]);
 
-<<<<<<< HEAD
-=======
   // Reset linked-list pages when platform changes
   useEffect(() => {
     setLinkedCatPage(1);
@@ -372,7 +361,6 @@ export default function PlateformRelationsManager() {
     useCategoryPost();
   const { data: allPostSubCategories } = useSubCategoryPost();
   const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform) return toast.error("Select a platform first");
@@ -630,7 +618,8 @@ export default function PlateformRelationsManager() {
     });
   };
 
-
+  // Creator linking handlers
+  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
 
   // AnimatedAlert state (replacement for window.confirm)
   const [alertOpen, setAlertOpen] = useState(false);
@@ -747,9 +736,9 @@ export default function PlateformRelationsManager() {
         🧩 WebApp Relations Manager
       </h1>
 
-      <div className="flex flex-col gap-6 items-center justify-between sm:flex-row">
+      <div className="flex flex-col gap-6">
         {/* Sidebar - Platforms */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
+        <div className="w-full bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
             <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
               WebApps
@@ -780,58 +769,9 @@ export default function PlateformRelationsManager() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span>New</span>
+              <span>add</span>
             </button>
           </div>
-<<<<<<< HEAD
-          <div className="flex flex-col gap-2 max-h-[70vh] overflow-auto">
-            {plateforms?.map((p: Platform) => (
-              <div key={p.id} className="flex justify-between items-center">
-                {/* <div className="flex gap-1 mr-2">
-                  <button
-                    onClick={() => {
-                      setEditingPlatform(p);
-                      setPlatformName(p.name);
-                      setPlatformVideoSyncUrl(p.video_sync_url ?? "");
-                      setPlatformPostSyncUrl(p.post_sync_url ?? "");
-                      setPlatformModalOpen(true);
-                    }}
-                    aria-label="Edit platform"
-                    className="rounded-sm cursor-pointer border border-teal-500 dark:border-teal-400 px-3 py-2 text-sm font-medium bg-transparent"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-teal-500 dark:text-teal-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => handleDeletePlatform(p.id)}
-                    aria-label="Delete platform"
-                    className="rounded-sm cursor-pointer border border-pink-500 dark:border-pink-400 px-3 py-2 text-sm font-medium bg-transparent"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-pink-500 dark:text-pink-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
-                  </button>
-                </div> */}
-                <button
-                  onClick={() => setSelectedPlateform(p.id)}
-                  className={`text-success flex flex-1 items-center gap-3 bg-neutral-primary border border-info hover:bg-slate-200 cursor-pointer hover:text-white focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none
-                     ${selectedPlateform === p.id
-                      ? "bg-blue-200 dark:text-red-700 dark:bg-blue-950 border-blue-200 dark:dark:hover:bg-gray-700 dark:border-info"
-                      : "hover:bg-slate-200 dark:hover:bg-gray-700"
-                    }`}
-                >
-                  <span
-                    className={`w-3 h-3 rounded-full border border-gray-500 dark:border-gray-700  ${selectedPlateform === p.id ? "bg-green-600" : "bg-transparent"} ring-2 ring-white dark:ring-gray-900`}
-                    title="Theme: light/dark"
-                  ></span>
-                  <span className=" text-gray-800 dark:text-gray-100">
-                    {p.name}
-                  </span>
-                </button>
-              </div>
-            ))}
-=======
           <div className="flex flex-col gap-3 max-h-[70vh] overflow-auto">
             {plateforms?.map((p: Platform) => {
               const isSelected = selectedPlateform === p.id;
@@ -884,7 +824,6 @@ export default function PlateformRelationsManager() {
                 </div>
               );
             })}
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
           </div>
 
           {/* // Platform Modal */}
@@ -937,7 +876,7 @@ export default function PlateformRelationsManager() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white dark:bg-gray-800 shadow rounded-xl p-4 w-auto">
+        <div className="flex-1 bg-white dark:bg-gray-800 shadow rounded-xl p-4 w-full">
           {selectedPlateform ? (
             <>
               <div className="flex justify-center items-center mb-4 flex-wrap gap-3 w-full">

@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 import { useState } from "react";
 import { singleSync } from "../api/videos";
 import SingleSyncModal from "../components/SingleSyncModal";
 import { useAuth } from "../hooks/useAuth";
-=======
-import React, { useEffect, useState } from "react";
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { UsePost, useNextPost } from "../hooks/usePost";
 import PostChecking from "../components/PostChecking";
@@ -14,17 +10,14 @@ import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
-<<<<<<< HEAD
 import RoleEnum from "../utils/roleEnum";
 import { LiaSyncSolid } from "react-icons/lia";
-=======
 import { togglePostBannedStatus, updatePostBannedStatus } from "../api/posts";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 
 const PostDetails = () => {
     const { user } = useAuth();
@@ -105,7 +98,6 @@ const PostDetails = () => {
           </button>
           <BtnTranscodeComponent post={post} reFetch={reFetch} />
 
-<<<<<<< HEAD
 
           {/* bouton single sync */}
           {user?.role === RoleEnum.SUPERADMIN && (
@@ -127,7 +119,6 @@ const PostDetails = () => {
               />
             </>
           )}
-=======
           <button
             onClick={async () => {
               const should = window.confirm(
@@ -152,7 +143,6 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
           >
             {post.isBanned ? "Unban Post" : "Ban Post"}
           </button>
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 
           {hasPrev ? (
             <Link

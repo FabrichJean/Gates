@@ -14,12 +14,9 @@ import {
   cancelUpload,
   sendProcessing,
   updateVideo,
-<<<<<<< HEAD
   singleSync,
-=======
   toggleBannedStatus,
   updateBannedStatus,
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 } from "../api/videos";
 import SingleSyncModal from "../components/SingleSyncModal";
 import type { SubCategory } from "../hooks/useSubCategory";
@@ -441,7 +438,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             </motion.button>
                           )}
 
-<<<<<<< HEAD
                           {/* bouton single sync */}
                           <motion.button
                             whileHover={{ scale: 1.02 }}
@@ -456,7 +452,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             onSubmit={handleSingleSync}
                             title="Synchroniser cette vidéo"
                           />
-=======
                           <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
@@ -481,7 +476,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           >
                             {video.isBanned ? "Unban Video" : "Ban Video"}
                           </motion.button>
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
                         </>
                       )}
 
