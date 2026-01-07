@@ -1,3 +1,4 @@
+
 import axios, { type AxiosProgressEvent } from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
@@ -34,7 +35,7 @@ export async function uploadS3(videoId: string | number | undefined): Promise<vo
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function uploadVideo(formData: FormData, onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<any> {
     return await axios.post(apiURL + "/videos/upload", formData, {
-            headers: {
+        headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${getToken()}`,
         },
@@ -116,6 +117,19 @@ export async function cancelUpload(videoId: string | number): Promise<void> {
     });
 }
 
+<<<<<<< HEAD
+// Single Sync API
+export async function singleSync({ entity, origin_id, isForce }: { entity: string; origin_id: number | string; isForce: boolean }) {
+    return await axios.post(
+        `${apiURL}/synchronize/single?isForce=${isForce}`,
+        { entity, origin_id },
+        {
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+            },
+        }
+    );
+=======
 export async function toggleBannedStatus(videoId: string | number): Promise<void> {
     return await axios.put(`${apiURL}/videos/${videoId}/toggle-banned`, null, {
         headers: {
@@ -134,4 +148,5 @@ export async function updateBannedStatus(videoId: string | number, isBanned: boo
             "Content-Type": "multipart/form-data",
         },
     });
+>>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 }

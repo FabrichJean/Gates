@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import CreatorPost from "./Creator/CreatorPost";
@@ -6,6 +6,9 @@ import CreatorVideosCard from "../components/CardVideoCreator";
 import CardVideoBotCreator from "../components/videos/cardVideoBotCreator";
 import { UseOneCreator } from "../hooks/useCreators";
 import CreatorFormModal from "../components/creators/CreatorFormModal";
+import ConfirmAlert from "../components/ConfirmAlert";
+import { deleteCreator } from "../api/creators";
+import toast from "react-hot-toast";
 
 
 const Creatorr = () => {
@@ -14,6 +17,8 @@ const Creatorr = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const navigate = useNavigate();
 
   const closeModal = () => setIsModalOpen(false);
   const openEditModal = () => { setIsModalOpen(true); };
@@ -35,7 +40,7 @@ const Creatorr = () => {
             <button onClick={openEditModal.bind(null)} className="px-2 py-1 border border-info rounded-sm text-info hover:bg-info/20">
               Edit
             </button>
-            <button className="px-2 py-1 border border-error rounded-sm text-error hover:bg-error/20">
+            <button onClick={() => setConfirmOpen(true)} className="px-2 py-1 border border-error rounded-sm text-error hover:bg-error/20">
               Delete
             </button>
           </div>
@@ -108,6 +113,25 @@ const Creatorr = () => {
 
       </div>
       <CreatorFormModal open={isModalOpen} onClose={closeModal} creator={creator} onSaved={async () => { await reFetch(); }} setParentLoading={setIsLoading} />
+
+          <ConfirmAlert
+            open={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={async () => {
+              if (!id) return;
+              try {
+                setIsLoading(true);
+                await deleteCreator(Number(id));
+                toast.success("Créateur supprimé");
+                navigate('/creators');
+              } catch (err: any) {
+                toast.error(err?.response?.data?.message || err?.message || 'Erreur lors de la suppression');
+              } finally {
+                setIsLoading(false);
+                setConfirmOpen(false);
+              }
+            }}
+          />
     </>
   );
 };
