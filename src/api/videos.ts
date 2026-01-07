@@ -117,7 +117,6 @@ export async function cancelUpload(videoId: string | number): Promise<void> {
     });
 }
 
-<<<<<<< HEAD
 // Single Sync API
 export async function singleSync({ entity, origin_id, isForce }: { entity: string; origin_id: number | string; isForce: boolean }) {
     return await axios.post(
@@ -129,7 +128,8 @@ export async function singleSync({ entity, origin_id, isForce }: { entity: strin
             },
         }
     );
-=======
+}
+
 export async function toggleBannedStatus(videoId: string | number): Promise<void> {
     return await axios.put(`${apiURL}/videos/${videoId}/toggle-banned`, null, {
         headers: {
@@ -148,5 +148,4 @@ export async function updateBannedStatus(videoId: string | number, isBanned: boo
             "Content-Type": "multipart/form-data",
         },
     });
->>>>>>> a76bf2379bab6e279223f9de87d04a92f0493989
 }
