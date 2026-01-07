@@ -4,7 +4,7 @@ import { getToken } from '../utils/storage';
 import type { Creator } from '../components/creators/CreatorList';
 
 export default function UseCreators() {
-  return useFetch<Creator[]>(`${apiURL}/creators`, {
+  return useFetch<{creators: Creator[]}>(`${apiURL}/creators`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 }
