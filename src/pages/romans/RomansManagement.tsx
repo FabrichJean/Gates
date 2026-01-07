@@ -23,6 +23,7 @@ import { toggleIsDeleted, deepUploadRoman } from "../../api/romans";
 import RoleEnum from "../../utils/roleEnum";
 
 import { motion } from "framer-motion";
+import { LiaSyncSolid } from "react-icons/lia";
 
 const RomansManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -193,9 +194,9 @@ const RomansManagement = () => {
             {/* Title */}
             <h3
               className="font-bold text-lg text-gray-900 dark:text-white mb-2"
-              title={roman.ref}
+              title={roman.titles[0]?.title || roman.ref}
             >
-              {truncateText(roman.ref)}
+              {truncateText(roman.titles[0]?.title || roman.ref, 30)}
             </h3>
 
             {/* Creator Info */}
@@ -264,25 +265,35 @@ const RomansManagement = () => {
                 >
                   <Edit2 className="w-4 h-4" />
                 </Link>
-                <button
-                  className={`p-2 cursor-pointer rounded-lg transition-colors ${
-                    roman.processing === "done"
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
-                      : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                  onClick={() => handleSendRoman(roman.id)}
-                  disabled={
-                    roman.processing === "done" ||
-                    roman.processing === "working"
-                  }
-                  title={
-                    roman.processing === "done"
-                      ? "Déjà envoyé"
-                      : "Envoyer la couverture sur S3"
-                  }
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+
+                {user.role === RoleEnum.SUPERADMIN && (
+                  <>
+                    <button
+                    
+                      className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200">
+                      <LiaSyncSolid className="w-4 h-4" />
+                    </button>
+                    <button
+                      className={`p-2 cursor-pointer rounded-lg transition-colors ${
+                        roman.processing === "done"
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+                          : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                      onClick={() => handleSendRoman(roman.id)}
+                      disabled={
+                        roman.processing === "done" ||
+                        roman.processing === "working"
+                      }
+                      title={
+                        roman.processing === "done"
+                          ? "Déjà envoyé"
+                          : "Envoyer la couverture sur S3"
+                      }
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -354,7 +365,7 @@ const RomansManagement = () => {
                       className="font-medium text-gray-900 dark:text-white text-nowrap"
                       title={roman.ref}
                     >
-                      {truncateText(roman.ref, 20)}
+                      {truncateText(roman.titles[0]?.title || roman.ref, 20)}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       ID: {roman.id}
@@ -477,24 +488,36 @@ const RomansManagement = () => {
                       <Edit2 className="w-4 h-4" />
                     </Link>
                     {user.role === RoleEnum.SUPERADMIN && (
-                      <button
-                        className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
-                          roman.processing === "done"
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
-                            : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }`}
-                        onClick={() => handleSendRoman(roman.id)}
-                        disabled={roman.processing === "done"}
-                        title={
-                          roman.processing === "done"
-                            ? "Déjà envoyé"
-                            : roman.checking !== "checked"
-                            ? "Roman must be checked first"
-                            : "Envoyer"
-                        }
-                      >
-                        <Send className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => handleSendRoman(232323)}
+                          // disabled={roman.processing === "done"}
+                          title={"Envoyer un test"}
+                        >
+                          <LiaSyncSolid className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
+                            roman.processing === "done"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+                              : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => handleSendRoman(roman.id)}
+                          disabled={roman.processing === "done"}
+                          title={
+                            roman.processing === "done"
+                              ? "Déjà envoyé"
+                              : roman.checking !== "checked"
+                              ? "Roman must be checked first"
+                              : "Envoyer"
+                          }
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>
