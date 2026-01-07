@@ -1,7 +1,16 @@
-const VideoTableHeader = () => {
+interface VideoTableHeaderProps {
+  showSelection?: boolean;
+}
+
+const VideoTableHeader = ({ showSelection = false }: VideoTableHeaderProps) => {
   return (
     <thead className="bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-600 dark:text-gray-300 uppercase transition-colors duration-300">
       <tr>
+        {showSelection && (
+          <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
+            <span className="text-xs">Select</span>
+          </th>
+        )}
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
           Ref
         </th>

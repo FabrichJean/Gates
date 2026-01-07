@@ -269,69 +269,68 @@ const MangasCategoriesPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">Chargement...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                <FolderTree className="w-8 h-8 text-blue-600" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        {/* Header compact */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FolderTree className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Catégories de Mangas
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Gérer les catégories et sous-catégories
-              </p>
             </div>
+            <button
+              onClick={() => openCategoryModal()}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Nouvelle
+            </button>
+          </div>
+        </div>
 
-            <div className="flex items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => openCategoryModal()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
-              >
-                <Plus className="w-4 h-4" />
-                Nouvelle Catégorie
-              </motion.button>
+        {/* Search compact */}
+        <div className="mb-4">
+          <div className="max-w-md">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Rechercher..."
+                className="w-full pl-8 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Categories List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-3"
-        >
+        {/* Categories List compact */}
+        <div className="space-y-3">
           <AnimatePresence>
             {filteredCategories.map((category, index) => (
               <motion.div
                 key={category.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: index * 0.05 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ delay: index * 0.02 }}
                 className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
               >
-                {/* Category Header */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between gap-4">
+                {/* Category Header compact */}
+                <div className="p-3">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <button
                         onClick={() => toggleCategory(category.id)}
@@ -341,16 +340,16 @@ const MangasCategoriesPage: React.FC = () => {
                           animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
                         </motion.div>
                       </button>
 
-                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center flex-shrink-0">
+                        <Folder className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {category.name}
                         </h3>
                         {category.description && (
@@ -360,39 +359,39 @@ const MangasCategoriesPage: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Tag className="w-3.5 h-3.5" />
-                        <span>{category.subCategories?.length || 0} sous-catégories</span>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        <Tag className="w-3 h-3" />
+                        <span>{category.subCategories?.length || 0}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => openSubCategoryModal(category.id)}
-                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded transition-colors"
                         title="Ajouter une sous-catégorie"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => openCategoryModal(category)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
                         title="Modifier"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
                         title="Supprimer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* SubCategories */}
+                {/* SubCategories compact */}
                 <AnimatePresence>
                   {expandedCategories.has(category.id) && category.subCategories && (
                     <motion.div
@@ -400,55 +399,60 @@ const MangasCategoriesPage: React.FC = () => {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+                      className="border-t border-gray-200 dark:border-gray-600"
                     >
-                      <div className="p-4 space-y-2">
-                        {category.subCategories.length === 0 ? (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                            Aucune sous-catégorie
-                          </p>
-                        ) : (
-                          category.subCategories.map((sub) => (
-                            <motion.div
-                              key={sub.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="flex items-center justify-between gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
-                            >
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <Tag className="w-4 h-4 text-green-600 dark:text-green-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
-                                    {sub.name}
-                                  </h4>
-                                  {sub.description && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                      {sub.description}
-                                    </p>
-                                  )}
-                                </div>
+                      <div className="p-3 space-y-2">
+                        {category.subCategories.map((subCategory, subIndex) => (
+                          <motion.div
+                            key={subCategory.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ delay: subIndex * 0.02 }}
+                            className="flex items-center justify-between gap-3 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-md"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center flex-shrink-0">
+                                <Tag className="w-2.5 h-2.5 text-green-600 dark:text-green-400" />
                               </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {subCategory.name}
+                                </h4>
+                                {subCategory.description && (
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {subCategory.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
 
-                              <div className="flex items-center gap-1 flex-shrink-0">
-                                <button
-                                  onClick={() => openSubCategoryModal(category.id, sub)}
-                                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                  title="Modifier"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSubCategory(sub.id)}
-                                  className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </motion.div>
-                          ))
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => openSubCategoryModal(category.id, subCategory)}
+                                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
+                                title="Modifier"
+                              >
+                                <Edit className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSubCategory(subCategory.id)}
+                                className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+
+                        {(!category.subCategories || category.subCategories.length === 0) && (
+                          <div className="text-center py-4">
+                            <Tag className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Aucune sous-catégorie
+                            </p>
+                          </div>
                         )}
                       </div>
                     </motion.div>
@@ -459,14 +463,14 @@ const MangasCategoriesPage: React.FC = () => {
           </AnimatePresence>
 
           {filteredCategories.length === 0 && (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <FolderTree className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">
-                {searchTerm ? "Aucun résultat trouvé" : "Aucune catégorie"}
+            <div className="text-center py-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <FolderTree className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {searchTerm ? 'Aucune catégorie trouvée' : 'Aucune catégorie'}
               </p>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Category Modal */}

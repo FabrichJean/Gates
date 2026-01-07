@@ -2,6 +2,7 @@ import EditMangasChapterPage from "../pages/EditMangasChapterPage";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
+import { AudiosProvider } from "../context/AudiosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
 import VideoDetails from "../pages/VideoDetails";
@@ -28,6 +29,10 @@ import PlateformCategoryManager from "../pages/PlateformCategoryManager";
 import PlateformRelationsManager from "../pages/PlateformRelationsManager";
 import PostCategoryManager from "../pages/PostCategoryManager";
 import CreatorManager from "../pages/CreatorsManager";
+import Audios from "../pages/Audios";
+import UploadAudio from "../pages/UploadAudio";
+import AudioDetails from "../pages/AudioDetails";
+import AudioEdit from "../pages/AudioEdit";
 import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
@@ -54,190 +59,71 @@ import MangasEpisodesPage from "../pages/MangasEpisodesPage";
 import MangasEpisodeDetailsPage from "../pages/MangasEpisodeDetailsPage";
 import MangaChaptersRouteWrapper from "../components/MangaChaptersRouteWrapper";
 import MangasCategoriesPage from "../pages/MangasCategoriesPage";
-import RomanUpload from "../pages/romans/romanUpload";
-import RomansManagement from "../pages/romans/RomansManagement";
-import RomanDetails from "../pages/romans/romanDetails";
-import RomanEdit from "../pages/romans/romanEdit";
-import RomanCategoryPage from "../pages/romans/romanCategory";
-import RomanChapterManagement from "../pages/romans/romanChapterManagement";
-import RomanChaptersPage from "../pages/romans/romanChapters";
-
-
+import AudioAlbums from "../pages/AudioAlbums";
+import UploadAudioAlbum from "../pages/UploadAudioAlbum";
+import AudioAlbumDetails from "../pages/AudioAlbumDetails";
+import AudioAlbumEdit from "../pages/AudioAlbumEdit";
+import { MangasProvider } from "../context/MangasContext";
+import VideoForAppManagement from "../pages/VideoForAppManagement";
+import VideoForAppDetails from "../pages/VideoForAppDetails";
+import VideoForAppEdit from "../pages/VideoForAppEdit";
+import { VideoForAppProvider } from "../context/VideoForAppContext";
+import { MangaUploadSocketProvider } from "../context/MangaUploadSocketContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
 
   return (
     <BrowserRouter>
-      <VideosProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/videos" />} />
-          <Route path="/romans/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanUpload />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomansManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans/:id"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanDetails />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/romans/:id/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanEdit />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route path="/roman-category"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanCategoryPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="/romans/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanChapterManagement />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="/romans/:id/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <RomanChaptersPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-
           <Route
-            path="/mangas"
+            path="/mangas/*"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <Mangas />
+                  <MangasProvider>
+                    <MangaUploadSocketProvider>
+                      <Routes>
+                        <Route path="" element={<Mangas />} />
+                        <Route path="upload" element={<UploadMangas />} />
+                        <Route path=":mangaId" element={<MangasDetailsPage />} />
+                        <Route path=":mangaId/edit" element={<EditMangasPage />} />
+                        <Route path=":mangaId/chapters" element={<MangaChaptersRouteWrapper />} />
+                        <Route path=":mangaId/chapters/:chapterId/edit" element={<EditMangasChapterPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/upload" element={<UploadMangasEpisodePage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes" element={<MangasEpisodesPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId" element={<MangasEpisodeDetailsPage />} />
+                        <Route path=":mangaId/chapters/:chapterId/episodes/:episodeId/edit" element={<EditMangasEpisodePage />} />
+                      </Routes>
+                    </MangaUploadSocketProvider>
+                  </MangasProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
           />
           <Route
-            path="/mangas/upload"
+            path="/audios/*"
             element={
               <ProtectedRoute>
-                <InsideSidebar>
-                  <UploadMangas />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasDetailsPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangaChaptersRouteWrapper />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasChapterPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/upload"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <UploadMangasEpisodePage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasEpisodesPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <MangasEpisodeDetailsPage />
-                </InsideSidebar>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mangas/:mangaId/chapters/:chapterId/episodes/:episodeId/edit"
-            element={
-              <ProtectedRoute>
-                <InsideSidebar>
-                  <EditMangasEpisodePage />
-                </InsideSidebar>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudiosProvider>
+                      <Routes>
+                        <Route path="" element={<Audios />} />
+                        <Route path="upload" element={<UploadAudio />} />
+                        <Route path=":id" element={<AudioDetails />} />
+                        <Route path=":id/edit" element={<AudioEdit />} />
+                        <Route path="albums" element={<AudioAlbums />} />
+                        <Route path="albums/upload" element={<UploadAudioAlbum />} />
+                        <Route path="albums/:id" element={<AudioAlbumDetails />} />
+                        <Route path="albums/:id/edit" element={<AudioAlbumEdit />} />
+                      </Routes>
+                    </AudiosProvider>
+                  </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
@@ -266,21 +152,42 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="/videos"
+            path="/videos/*"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <VideosManagment />
+                  <VideosProvider>
+                    <Routes>
+                      <Route path="" element={<VideosManagment />} />
+                      <Route path="upload" element={<Upload />} />
+                      <Route path=":id" element={<VideoDetails />} />
+                      <Route path="touch/:id" element={<TouchVideo />} />
+                    </Routes>
+                  </VideosProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
           />
           <Route
-            path="/videos/upload"
+            path="/app-videos"
             element={
               <ProtectedRoute>
                 <InsideSidebar>
-                  <Upload />
+                  <VideoForAppProvider>
+                    <VideoForAppManagement />
+                  </VideoForAppProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppDetails />
+                  </VideoForAppProvider>
                 </InsideSidebar>
               </ProtectedRoute>
             }
@@ -584,20 +491,10 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SuperProtected>
-                  <InsideSidebar>
-                    <Settings />
-                  </InsideSidebar>
-                </SuperProtected>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/videos/:id"
-            element={
-              <ProtectedRoute>
                 <InsideSidebar>
-                  <VideoDetails />
+                  <Settings />
                 </InsideSidebar>
+                </SuperProtected>
               </ProtectedRoute>
             }
           />
@@ -633,10 +530,40 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/audio-albums/*"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudiosProvider>
+                      <Routes>
+                        <Route path="" element={<AudioAlbums />} />
+                        <Route path="upload" element={<UploadAudioAlbum />} />
+                        <Route path=":id" element={<AudioAlbumDetails />} />
+                        <Route path=":id/edit" element={<AudioAlbumEdit />} />
+                      </Routes>
+                    </AudiosProvider>
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app-videos/:id/edit"
+            element={
+              <ProtectedRoute>
+                <InsideSidebar>
+                  <VideoForAppProvider>
+                    <VideoForAppEdit />
+                  </VideoForAppProvider>
+                </InsideSidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
         {modalFloat && <CardFlottant />}
-      </VideosProvider>
     </BrowserRouter>
   );
 };

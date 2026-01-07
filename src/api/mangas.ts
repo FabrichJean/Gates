@@ -47,3 +47,24 @@ export const uploadMangaToS3 = async (id: number) => {
   });
   return response.data;
 };
+
+export const toggleMangaBannedStatus = async (id: number) => {
+  const response = await axios.put(`${apiURL}/mangas/${id}/toggle-banned`, {}, {
+    headers: {
+      Authorization: `Bearer ${token()}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateMangaBannedStatus = async (id: number, isBanned: boolean) => {
+  const formData = new FormData();
+  formData.append('isBanned', String(isBanned));
+  const response = await axios.put(`${apiURL}/mangas/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token()}`,
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};

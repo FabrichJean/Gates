@@ -16,7 +16,8 @@ import {
   Send,
   Loader2
 } from "lucide-react";
-import { getMangaById, updateManga, uploadMangaToS3 } from "../api/mangas";
+import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { getMangaById, updateManga, uploadMangaToS3, toggleMangaBannedStatus, updateMangaBannedStatus } from "../api/mangas";
 import toast from "react-hot-toast";
 import MangaChecking from "../components/MangaChecking";
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
@@ -39,6 +40,7 @@ interface Manga {
   total_chapters?: number;
   need_vip?: boolean;
   isDeleted?: boolean;
+  isBanned: boolean;
   checking?: string;
   comment?: string;
   processing?: string;
@@ -287,6 +289,31 @@ const MangasDetailsPage: React.FC = () => {
               >
                 {manga.isDeleted ? 'Activate' : 'Deactivate'}
               </button>
+
+              {/* Toggle Banned/Unbanned */}
+              <button
+                onClick={async () => {
+                  const should = window.confirm(
+                    manga.isBanned ? "Are you sure you want to unban this manga?" : "Are you sure you want to ban this manga?"
+                  );
+                  if (!should) return;
+                  try {
+                    await updateMangaBannedStatus(manga.id, !manga.isBanned);
+                    toast.success(`Manga ${!manga.isBanned ? 'banned' : 'unbanned'} successfully`);
+                    fetchManga();
+                  } catch (error: any) {
+                    toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-xs transition-all duration-200 border ${
+                  manga.isBanned
+                    ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                    : 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                }`}
+                title={manga.isBanned ? 'Unban manga' : 'Ban manga'}
+              >
+                {manga.isBanned ? 'Unban' : 'Ban'}
+              </button>
               <Link
                 to={`/mangas/${manga.id}/chapters`}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all duration-200 shadow-sm hover:shadow border border-blue-600"
@@ -375,29 +402,64 @@ const MangasDetailsPage: React.FC = () => {
             className="lg:col-span-1"
           >
             <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-              <div className="aspect-[3/4] relative group">
-                {manga.cover_url ? (
-                  <motion.img
-                    src={manga.s3_cover_url || manga.cover_url}
-                    alt={manga.ref}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
-                    <ImageIcon className="w-16 h-16 text-gray-400 dark:text-gray-600" />
-                  </div>
-                )}
-                
-                <motion.div
-                  whileHover={{ opacity: 1 }}
-                  className="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 flex items-center justify-center"
-                >
-                  <button className="p-3 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/30 transition-all duration-200">
-                    <ImageIcon className="w-6 h-6 text-white" />
-                  </button>
-                </motion.div>
+              <div className={`aspect-[3/4] relative group ${manga.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+                    {manga.isBanned && (
+                      <div className="absolute inset-0 z-30 flex items-start justify-end p-3 pointer-events-none">
+                        <div className="flex gap-2 pointer-events-auto">
+                          <button
+                            onClick={() => {
+                              const next = !Boolean(localStorage.getItem(`manga-show-cover-${manga.id}`) === 'true');
+                              localStorage.setItem(`manga-show-cover-${manga.id}`, String(next));
+                              // force rerender
+                              window.location.reload();
+                            }}
+                            className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
+                            title="Toggle cover visibility"
+                          >
+                            { (localStorage.getItem(`manga-show-cover-${manga.id}`) === 'true') ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" /> }
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm('Remove cover from server? This action may be irreversible.')) return;
+                              try {
+                                const form = new FormData();
+                                form.append('remove_cover', '1');
+                                await updateManga(manga.id, form as any);
+                                toast.success('Cover removed');
+                                // refetch by reloading page or calling fetchManga
+                                window.location.reload();
+                              } catch (err: any) {
+                                toast.error(err?.response?.data?.message || 'Failed to remove cover');
+                              }
+                            }}
+                            className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition"
+                            title="Remove cover"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    { (manga.isBanned && localStorage.getItem(`manga-show-cover-${manga.id}`) !== 'true') ? (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                        <ImageIcon className="w-16 h-16 text-gray-600" />
+                      </div>
+                    ) : (
+                      (manga.cover_url ? (
+                        <motion.img
+                          src={manga.s3_cover_url || manga.cover_url}
+                          alt={manga.ref}
+                          className={`w-full h-full object-cover ${manga.isBanned ? 'filter blur-sm brightness-75' : ''}`}
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+                          <ImageIcon className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                        </div>
+                      ))
+                    )}
               </div>
             </div>
           </motion.div>
@@ -566,7 +628,7 @@ const MangasDetailsPage: React.FC = () => {
                 <div className="p-4">
                   <div className="space-y-2">
                     <AnimatePresence>
-                      {manga.chapters.slice(0, 5).map((chapter, index) => (
+                      {manga.chapters.map((chapter, index) => (
                         <motion.div
                           key={chapter.id}
                           initial={{ opacity: 0, y: 10 }}

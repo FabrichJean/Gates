@@ -33,6 +33,7 @@ export type TVideo = {
   duration: number | null;
   hls_url: string | null;
   isDeleted: boolean;
+  isBanned: boolean;
   ref: string;
   sequence: number | null;
   temp_url: string;

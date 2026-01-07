@@ -7,9 +7,27 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        primary: '#4f46e5',      // indigo-600
+        primaryHover: '#4338ca', // indigo-700
+        danger: '#ef4444',       // red-500
+        dangerHover: '#dc2626',
+        success: '#10b981',      // emerald-500
+        muted: '#6b7280',        // gray-500
+        bgLight: '#f9fafb',      // gray-50
+        bgDark: '#111827',       // gray-900
+        cardLight: '#ffffff',
+        cardDark: '#1f2937',     // gray-800
+      },
       fontFamily: {
-        'sans': ['Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', 'sans-serif'],
+        'sans': ['Inter', 'system-ui', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', 'sans-serif'],
         'system': ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      animation: {
+        fadeIn: 'fadeIn .25s ease-out',
+      },
+      keyframes: {
+        fadeIn: { '0%': { opacity: 0, transform: 'translateY(4px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1.4' }],

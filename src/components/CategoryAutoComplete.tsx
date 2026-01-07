@@ -9,6 +9,7 @@ export type Category = {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+  subCategoryCount: number;
   subcategories?: Partial<Category>[];
 };
 
@@ -20,6 +21,12 @@ interface Props {
 const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState(defaultValue?.name || "");
+
+  useEffect(() => {
+    if (defaultValue?.name) {
+      setQuery(defaultValue.name);
+    }
+  }, [defaultValue]);
   const [filtered, setFiltered] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 

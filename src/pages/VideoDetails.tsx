@@ -14,6 +14,8 @@ import {
   cancelUpload,
   sendProcessing,
   updateVideo,
+  toggleBannedStatus,
+  updateBannedStatus,
 } from "../api/videos";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
@@ -46,8 +48,13 @@ import {
   Plus,
   Loader2,
   Save,
+  Eye,
+  EyeOff,
+  Trash2,
 } from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
+import { apiURL, token } from "../constant";
+import {VideoPlayer} from "../components/VideoPlayer";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { data: user } = useAuthMe();
@@ -59,6 +66,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   const [modifying, setModifying] = useState(false);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
+  const [showCover, setShowCover] = useState<boolean>(true);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
   const isPortrait = React.useMemo(() => {
@@ -243,69 +251,41 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${isPortrait
                         ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
                         : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
-                        }`}
+                        } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
                     >
-                      <AnimatePresence mode="wait">
-                        {videoPlayed ? (
-                          <motion.video
-                            key="video"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4, ease: "easeInOut" }}
-                            src={
-                              video.s3_urls.hlsUrl || video.public_urls.temp_url
-                            }
-                            className="w-full h-full object-cover"
-                            controls
-                            autoPlay
-                            playsInline
-                            onLoadedMetadata={(e) => {
-                              const el = e.currentTarget;
-                              el.style.objectFit = "cover";
-                              el.style.objectPosition = "center";
-                            }}
-                          />
-                        ) : (
-                          <>
-                            {/* Play Button */}
-                            <motion.div
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => setVideoPlayed(true)}
-                              className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+                      {video.isBanned && (
+                        <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
+                          <div className="flex gap-2 pointer-events-auto">
+                            <button
+                              onClick={() => {
+                                const next = !showCover;
+                                setShowCover(next);
+                              }}
+                              className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
+                              title={showCover ? "Hide cover" : "Show cover"}
                             >
-                              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200">
-                                <Play className="w-10 h-10 text-white ml-1" />
-                              </div>
-                            </motion.div>
+                              {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
-                            {/* VIP Badge */}
-                            {video?.need_vip && (
-                              <motion.div
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute right-2 top-2 z-20"
-                              >
-                                <div className="w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                  <RiVipCrown2Fill className="w-5 h-5 text-orange-400" />
-                                </div>
-                              </motion.div>
-                            )}
-
-                            {/* Cover Image */}
-                            <img
-                              src={
-                                currentCoverUrl ||
-                                video.s3_urls.coverUrl ||
-                                video.public_urls.cover_url
-                              }
-                              alt="cover"
-                              className="w-full h-full object-cover"
-                            />
-                          </>
-                        )}
-                      </AnimatePresence>
+                      <div className={`w-full h-full ${video.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
+                        <VideoPlayer
+                          videoUrls={{
+                            hlsUrl: video?.s3_urls?.hlsUrl,
+                            temp_url: video?.public_urls?.temp_url,
+                            coverUrl: video?.s3_urls?.coverUrl,
+                            cover_url: video?.public_urls?.cover_url
+                          }}
+                          poster={currentCoverUrl || video?.s3_urls?.coverUrl || video?.public_urls?.cover_url}
+                          isPlaying={videoPlayed}
+                          onPlay={() => setVideoPlayed(true)}
+                          className="w-full h-full"
+                          showVipBadge={video?.need_vip || false}
+                          autoPlay={true}
+                        />
+                      </div>
 
                     </div>
 
@@ -438,6 +418,31 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               Cancel
                             </motion.button>
                           )}
+
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={async () => {
+                              const should = window.confirm(
+                                video.isBanned ? "Are you sure you want to unban this video?" : "Are you sure you want to ban this video?"
+                              );
+                              if (!should) return;
+                              try {
+                                await updateBannedStatus(video.id, !video.isBanned);
+                                toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
+                                reFetch();
+                              } catch (error: any) {
+                                toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                              }
+                            }}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              video.isBanned
+                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
+                            }`}
+                          >
+                            {video.isBanned ? "Unban Video" : "Ban Video"}
+                          </motion.button>
                         </>
                       )}
 
@@ -804,7 +809,14 @@ function EditVideo({
                   }`}
               />
             </button>
+             <Link
+                to={`/touch/video/${video.id}`}
+                className="underline"
+              >
+                Edit with Video
+              </Link>
           </div>
+          
         </div>
 
         <div className="flex flex-col gap-8">
@@ -1027,7 +1039,7 @@ function EditVideo({
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl"
                       >
-                        {postTagSuggestions.slice(0, 8).map((s, index) => (
+                        {postTagSuggestions.map((s, index) => (
                           <motion.button
                             key={s.id ?? s.name}
                             initial={{ opacity: 0, x: -20 }}

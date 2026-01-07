@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { UsePost, useNextPost } from "../hooks/usePost";
 import PostChecking from "../components/PostChecking";
@@ -6,13 +7,19 @@ import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
+import { togglePostBannedStatus, updatePostBannedStatus } from "../api/posts";
+import toast from "react-hot-toast";
+import { Eye, EyeOff, Trash2 } from "lucide-react";
+import axios from "axios";
+import { apiURL } from "../constant";
+import { getToken } from "../utils/storage";
 
 const PostDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error, reFetch } = UsePost(id);
   const { nextPost, prevPost, hasNext, hasPrev } = useNextPost(id);
-
+  const [showCover, setShowCover] = useState<boolean>(true);
   const handleBack = () => {
     navigate("/post");
   };
@@ -37,6 +44,8 @@ const PostDetails = () => {
       </div>
     );
   }
+
+  
 
   return (
     <div className="p-6">
@@ -66,6 +75,31 @@ const PostDetails = () => {
             <Edit size={16} />
           </button>
           <BtnTranscodeComponent post={post} reFetch={reFetch} />
+
+          <button
+            onClick={async () => {
+              const should = window.confirm(
+                post.isBanned ? "Are you sure you want to unban this post?" : "Are you sure you want to ban this post?"
+              );
+              if (!should) return;
+              try {
+                await updatePostBannedStatus(post.id, !post.isBanned);
+                toast.success(`Post ${!post.isBanned ? 'banned' : 'unbanned'} successfully`);
+                reFetch();
+              } catch (error: any) {
+                toast.error(error?.response?.data?.message || 'Failed to update banned status');
+              }
+            }}
+            className={`relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
+font-medium text-sm rounded-md transition-all duration-300
+backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 ${
+              post.isBanned
+                ? "bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600"
+                : "bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600"
+            } flex-shrink-0`}
+          >
+            {post.isBanned ? "Unban Post" : "Ban Post"}
+          </button>
 
           {hasPrev ? (
             <Link
@@ -168,7 +202,29 @@ const PostDetails = () => {
           )}
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 relative ${post.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+        {post.isBanned && showCover && (
+          <div className="absolute inset-0 backdrop-blur-md bg-opacity-5 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-xl shadow-lg transform rotate-12">
+              BANNED
+            </div>
+          </div>
+        )}
+        {post.isBanned && (
+          <div className="absolute top-3 right-3 z-20 flex gap-2 pointer-events-auto">
+            <button
+              onClick={() => {
+                const next = !showCover;
+                setShowCover(next);
+                if (post?.id) localStorage.setItem(`post-show-cover-${post.id}`, String(next));
+              }}
+              className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
+              title={showCover ? "Hide cover" : "Show cover"}
+            >
+              {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Ref</p>
@@ -301,16 +357,18 @@ const PostDetails = () => {
         </div>
 
         <GetPostTitles postTitles={post?.titles} />
-        <GetImagePost images={post?.images} reFetch={reFetch} />
-        {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
-        <GetVideoPost
-          idPost={post?.id}
-          videos={(post?.videos || []).map((v: any) => ({
-            ...v,
-            local_cover_path: v.local_cover_path || v.public_urls?.cover_url || v.s3_urls?.coverUrl || (post as any)?.local_cover_path || v.cover || "",
-          }))}
-          reFetch={reFetch}
-        />
+        <div className={`${post.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
+          <GetImagePost images={post?.images} reFetch={reFetch} />
+          {/* ensure each video has a local_cover_path fallback to post.local_cover_path */}
+          <GetVideoPost
+            idPost={post?.id}
+            videos={(post?.videos || []).map((v: any) => ({
+              ...v,
+              local_cover_path: v.local_cover_path || v.public_urls?.cover_url || v.s3_urls?.coverUrl || (post as any)?.local_cover_path || v.cover || "",
+            }))}
+            reFetch={reFetch}
+          />
+        </div>
       </div>
     </div>
   );

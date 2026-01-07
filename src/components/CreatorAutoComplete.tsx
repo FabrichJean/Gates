@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import UseCreators from '../hooks/useCreators';
 import type { Creator } from './creators/CreatorList';
+import { Shuffle } from 'lucide-react';
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
@@ -10,19 +11,29 @@ interface Props {
   onSelect: (creator: Creator | null) => void;
   placeholder?: string;
   disabled?: boolean;
+  /** whether the current creator is a default/auto-selected one */
+  isDefault?: boolean;
+  /** whether to automatically suggest a random creator when value is null/undefined */
+  autoSuggest?: boolean;
 }
 
-const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled }: Props) => {
+const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled, isDefault, autoSuggest }: Props) => {
   const { data: creators } = UseCreators();
   const [query, setQuery] = useState<string>(value ?? '');
   const [filtered, setFiltered] = useState<Creator[]>([]);
   const [open, setOpen] = useState(false);
+  const [isSuggested, setIsSuggested] = useState(false);
+  const hasAutoSuggested = useRef(false);
+  const userCleared = useRef(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
   // keep query in sync when parent passes a new value (string or Creator)
   useEffect(() => {
-    if (!value) setQuery('');
-    else if (typeof value === 'string') setQuery(value);
+    if (!value) {
+      setQuery('');
+      hasAutoSuggested.current = false; // Reset when value becomes null
+      userCleared.current = false; // Reset when parent sets to null
+    } else if (typeof value === 'string') setQuery(value);
     else setQuery((value as Creator).name || '');
   }, [value]);
 
@@ -48,6 +59,16 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
     onChange?.(c.name);
     onSelect?.(c);
     setOpen(false);
+    setIsSuggested(false); // Reset suggested flag on manual selection
+  };
+
+  const handleSuggestRandom = () => {
+    const list = creators || [];
+    if (list.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * list.length);
+    const randomCreator = list[randomIndex];
+    handleSelect(randomCreator);
+    setIsSuggested(true); // Mark as suggested
   };
 
   // when query is cleared, notify that no creator is selected
@@ -59,15 +80,49 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled 
 
   return (
     <div ref={ref} className="relative w-full">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => { setQuery(e.target.value); setOpen(true); onChange?.(e.target.value); }}
-        onFocus={() => setOpen(true)}
-        placeholder={placeholder || 'Creator name (optional)'}
-        disabled={disabled}
-        className={`w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-200 ${disabled ? 'opacity-60' : ''}`}
-      />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => { 
+              const newValue = e.target.value;
+              setQuery(newValue); 
+              setOpen(true); 
+              onChange?.(newValue); 
+              setIsSuggested(false);
+              if (newValue === '' || newValue === null || newValue === undefined) {
+                userCleared.current = true;
+              }
+            }}
+            onFocus={() => {
+              setOpen(true);
+              // Auto-suggest when focusing on empty input
+              if (!query && autoSuggest && creators && creators.length > 0 && !hasAutoSuggested.current && !userCleared.current) {
+                handleSuggestRandom();
+                hasAutoSuggested.current = true;
+              }
+            }}
+            placeholder={placeholder || 'Creator name (optional)'}
+            disabled={disabled}
+            className={`w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-200 ${disabled ? 'opacity-60' : ''}`}
+          />
+          { (isDefault || isSuggested) && (
+            <span className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+              {isDefault ? 'Par défaut' : 'Suggéré'}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleSuggestRandom}
+          disabled={disabled}
+          className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Suggest random creator"
+        >
+          <Shuffle className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
+      </div>
 
       {open && filtered.length > 0 && (
         <ul className="absolute z-40 w-full text-black dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md mt-1 max-h-56 overflow-y-auto shadow-lg">
