@@ -38,15 +38,21 @@ export function PostCard({ post }: PostCardProps) {
       }
     >
       {cover && (
-        <img
-          src={cover}
-          alt={mainTitle}
-          className="w-full h-48 object-cover rounded-xl"
-        />
+        <div className="relative">
+          <img
+            src={cover}
+            alt={mainTitle}
+            className="w-full h-48 object-cover rounded-xl"
+          />
+          <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-3 py-2 rounded-full backdrop-blur-sm animate-pulse">
+            {post.video_count} {post.video_count > 1 ? 'videos' : 'video'}
+          </div>
+        </div>
       )}
 
       <div className="mt-3 flex flex-col gap-2">
         <h2 className="text-lg font-semibold line-clamp-2">{mainTitle}</h2>
+
 
         {/* Catégorie */}
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">

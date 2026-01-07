@@ -22,7 +22,7 @@ export default function TagCategory() {
 
     // Pagination states for video tags
     const [currentVideoPage, setCurrentVideoPage] = useState(1);
-    const itemsPerPage = 3;
+    const itemsPerPage = 6;
 
     // Search states
     const [videoSearchTerm, setVideoSearchTerm] = useState("");

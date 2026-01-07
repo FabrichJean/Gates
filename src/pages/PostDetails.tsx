@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { singleSync } from "../api/videos";
+import SingleSyncModal from "../components/SingleSyncModal";
+import { useAuth } from "../hooks/useAuth";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { UsePost, useNextPost } from "../hooks/usePost";
 import PostChecking from "../components/PostChecking";
@@ -7,6 +10,8 @@ import GetImagePost from "./posts/getImagePost";
 import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
+import RoleEnum from "../utils/roleEnum";
+import { LiaSyncSolid } from "react-icons/lia";
 import { togglePostBannedStatus, updatePostBannedStatus } from "../api/posts";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Trash2 } from "lucide-react";
@@ -15,6 +20,23 @@ import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 
 const PostDetails = () => {
+    const { user } = useAuth();
+    const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+    const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+
+    const handleSingleSync = async (isForce: boolean) => {
+      if (!post) return;
+      setSingleSyncLoading(true);
+      try {
+        await singleSync({ entity: "post", origin_id: post.id, isForce });
+        setSingleSyncOpen(false);
+        reFetch();
+      } catch (err: any) {
+        // Optionally: toast.error(err?.response?.data?.message || "❌ Erreur sync single !");
+      } finally {
+        setSingleSyncLoading(false);
+      }
+    };
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error, reFetch } = UsePost(id);
@@ -76,6 +98,27 @@ const PostDetails = () => {
           </button>
           <BtnTranscodeComponent post={post} reFetch={reFetch} />
 
+
+          {/* bouton single sync */}
+          {user?.role === RoleEnum.SUPERADMIN && (
+            <>
+              <button
+                type="button"
+                onClick={() => setSingleSyncOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-xs font-medium transition-all duration-200"
+                disabled={singleSyncLoading}
+              >
+                <LiaSyncSolid className="w-4 h-4" />
+                Sync
+              </button>
+              <SingleSyncModal
+                open={singleSyncOpen}
+                onClose={() => setSingleSyncOpen(false)}
+                onSubmit={handleSingleSync}
+                title={`Synchroniser le post #${post.id}`}
+              />
+            </>
+          )}
           <button
             onClick={async () => {
               const should = window.confirm(
@@ -256,7 +299,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
                     }}
                   />
                   <div>
-                    <Link className="hover:text-blue-500" to={`/creators/`+post?.creatorObj?.id}>{(post)?.creatorObj?.name ?? post.creator ?? '-'}</Link>
+                    <Link className="hover:text-blue-500" to={`/creators/` + post?.creatorObj?.id}>{(post)?.creatorObj?.name ?? post.creator ?? '-'}</Link>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {(post as any)?.creatorObj.gender || ""}
                     </p>
