@@ -94,7 +94,7 @@ const Synchronisation = () => {
                     setProcessedCount((c) => c + 1);
                   }
                 }
-                
+
                 setProcessingAll(false);
                 setCurrentItem(null);
                 reFetch();

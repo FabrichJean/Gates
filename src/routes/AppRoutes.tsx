@@ -69,6 +69,13 @@ import VideoForAppDetails from "../pages/VideoForAppDetails";
 import VideoForAppEdit from "../pages/VideoForAppEdit";
 import { VideoForAppProvider } from "../context/VideoForAppContext";
 import { MangaUploadSocketProvider } from "../context/MangaUploadSocketContext";
+import RomanEdit from "../pages/romans/romanEdit";
+import RomanCategoryPage from "../pages/romans/romanCategory";
+import RomanChapterManagement from "../pages/romans/romanChapterManagement";
+import RomanChaptersPage from "../pages/romans/romanChapters";
+import RomanDetails from "../pages/romans/romanDetails";
+import RomansManagement from "../pages/romans/RomansManagement";
+import RomanUpload from "../pages/romans/romanUpload";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -151,6 +158,75 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+
+          <Route path="/romans/upload"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanUpload />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomansManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanDetails />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/romans/:id/edit"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanEdit />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/roman-category"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanCategoryPage />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/romans/chapters"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanChapterManagement />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="/romans/:id/chapters"
+                  element={
+                    <ProtectedRoute>
+                      <InsideSidebar>
+                        <RomanChaptersPage />
+                      </InsideSidebar>
+                    </ProtectedRoute>
+                  }
+                />
+
           <Route
             path="/videos/*"
             element={

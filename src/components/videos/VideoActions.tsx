@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import RoleEnum from "../../utils/roleEnum";
 import type { TVideo } from "../../hooks/useVideos";
 import type { User } from "../../hooks/useVideos";
-import { cancelUpload } from "../../api/videos";
+import { cancelUpload, singleSync } from "../../api/videos";
+import SingleSyncModal from "../SingleSyncModal";
 import toast from "react-hot-toast";
 import {
   useAnimatedAlert,
@@ -12,6 +13,8 @@ import { useProcessingCount } from "../useProcessingCount";
 import { useState } from "react";
 import { useVideosContext } from "../../context/VideosContext";
 import { useProgressStore } from "../../hooks/useProgressStore";
+
+import { LiaSyncSolid } from "react-icons/lia";
 
 interface VideoActionsProps {
   video: TVideo;
@@ -34,7 +37,7 @@ const VideoActions = ({
   detailsPath = "/videos",
   convertToMp4Fn,
 }: VideoActionsProps) => {
-  const {uploads} = useProgressStore()
+  const { uploads } = useProgressStore()
   const { showAlert } = useAnimatedAlert();
   const alert = createQuickAlert(showAlert);
   const { count: processingCount } = useProcessingCount();
@@ -44,6 +47,12 @@ const VideoActions = ({
 
   const [resending, setResending] = useState(false);
   const [converting, setConverting] = useState(false);
+
+  // SingleSync modal state
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+
+
 
   const extractErrorMessage = (err: unknown) => {
     try {
@@ -59,6 +68,19 @@ const VideoActions = ({
       return String(err);
     } catch {
       return "Error";
+    }
+  };
+
+  const handleSingleSync = async (isForce: boolean) => {
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({ entity: "video", origin_id: video.id, isForce });
+      toast.success("✅ Sync single exécuté");
+      refetch?.(500);
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
     }
   };
 
@@ -138,10 +160,9 @@ const VideoActions = ({
               className={`
                 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
                 text-sm font-medium transition-all duration-200
-                ${
-                  isDone
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
-                    : isDisabled
+                ${isDone
+                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                  : isDisabled
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                     : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
                 }
@@ -285,6 +306,29 @@ const VideoActions = ({
           )}
         </>
       )}
+
+
+      {/* bouton single sync */}
+      {user?.role === RoleEnum.SUPERADMIN && (
+        <>
+          <button
+            type="button"
+            onClick={() => setSingleSyncOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-medium transition-all duration-200"
+            disabled={singleSyncLoading}
+          >
+            <LiaSyncSolid className="w-4 h-4" />
+            Sync
+          </button>
+          <SingleSyncModal
+            open={singleSyncOpen}
+            onClose={() => setSingleSyncOpen(false)}
+            onSubmit={handleSingleSync}
+            title="Synchroniser cette vidéo"
+          />
+        </>
+      )}
+
 
       {/* Details Link */}
       {!hidetails && (
