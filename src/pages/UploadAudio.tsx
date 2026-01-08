@@ -67,7 +67,7 @@ const UploadAudio: React.FC = () => {
 
   useEffect(() => {
     Promise.all([
-      getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
+      getCreators().then((res) => setCreators(res.data.creators || res)).catch(() => setCreators([])),
       getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
       getTagCategoriesApi().then((res) => {
         const tags = res.data?.data || res.data || res;
@@ -236,6 +236,15 @@ const UploadAudio: React.FC = () => {
     }
     return tag.name;
   };
+
+  // Helper to resolve possible avatar fields on creator objects
+  const getCreatorAvatar = (c: any) => {
+    return (
+      c?.avatar || c?.avatar_url || c?.image || c?.picture || c?.photo || c?.profile_picture || c?.avatarPath || null
+    );
+  };
+
+  const selectedCreator = form.creator_id ? creators.find((c) => c.id === parseInt(form.creator_id)) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
@@ -441,10 +450,21 @@ const UploadAudio: React.FC = () => {
                       onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-left flex items-center justify-between"
                     >
-                      <span>
-                        {form.creator_id
-                          ? creators.find((c) => c.id === parseInt(form.creator_id))?.name || "Sélectionnez un créateur"
-                          : "Sélectionnez un créateur"}
+                      <span className="flex items-center gap-3 truncate">
+                        {selectedCreator ? (
+                          <>
+                            {getCreatorAvatar(selectedCreator) ? (
+                              <img src={getCreatorAvatar(selectedCreator)!} alt={selectedCreator.name} className="w-6 h-6 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
+                              </div>
+                            )}
+                            <span className="truncate">{selectedCreator.name}</span>
+                          </>
+                        ) : (
+                          "Sélectionnez un créateur"
+                        )}
                       </span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
@@ -467,7 +487,16 @@ const UploadAudio: React.FC = () => {
                               }}
                               className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
                             >
-                              {creator.name}
+                              <div className="flex items-center gap-3">
+                                {getCreatorAvatar(creator) ? (
+                                  <img src={getCreatorAvatar(creator)!} alt={creator.name} className="w-6 h-6 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                    <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
+                                  </div>
+                                )}
+                                <span className="truncate">{creator.name}</span>
+                              </div>
                             </button>
                           ))}
                         </motion.div>
