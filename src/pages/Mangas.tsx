@@ -26,6 +26,10 @@ import Pagination from "../components/Pagination";
 import { PAGE_SIZE } from "../constant";
 import { useMangasContext } from "../context/MangasContext";
 import { useState } from "react";
+import { LiaSyncSolid } from "react-icons/lia";
+import toast from "react-hot-toast";
+import { singleSync } from "../api/videos";
+import SingleSyncModal from "../components/SingleSyncModal";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -50,7 +54,7 @@ const SexyLoader = () => (
 const Mangas: React.FC = () => {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
-  
+
   // Use context for manga management
   const ctx = useMangasContext();
   if (!ctx) return null;
@@ -65,9 +69,49 @@ const Mangas: React.FC = () => {
     toggleDeleted,
     sendManga,
   } = ctx;
+  const [selectedManga, setSelectedManga] = useState<any | null>(null);
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
   const filteredMangas = mangas;
-  const isLoading = loading?.type === "fetch";
+  // const isLoading = loading?.type === "fetch";
+
+  const extractErrorMessage = (err: unknown) => {
+    try {
+      if (!err) return "Error";
+      if (typeof err === "string") return err;
+      if (typeof err === "object" && err !== null) {
+        return (
+          (err as any)?.response?.data?.message ??
+          (err as any)?.message ??
+          "Error"
+        );
+      }
+      return String(err);
+    } catch {
+      return "Error";
+    }
+  };
+
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!selectedManga) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({
+        entity: "mangas",
+        origin_id: selectedManga.id,
+        isForce,
+      });
+      toast.success("Sync single exécuté");
+      reFetch?.(500);
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+      setSingleSyncOpen(false);
+      setSelectedManga(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
@@ -219,13 +263,23 @@ const Mangas: React.FC = () => {
 
                         {/* Processing Status Badge */}
                         {manga.processing && (
-                          <div className="absolute top-2 left-2" style={{ top: manga.isDeleted !== undefined ? '32px' : '8px' }}>
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium text-nowrap ${
-                              manga.processing === "done"
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                            }`}>
-                              {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
+                          <div
+                            className="absolute top-2 left-2"
+                            style={{
+                              top:
+                                manga.isDeleted !== undefined ? "32px" : "8px",
+                            }}
+                          >
+                            <span
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium text-nowrap ${
+                                manga.processing === "done"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                              }`}
+                            >
+                              {manga.processing === "done"
+                                ? "✓ Uploaded"
+                                : "Pending"}
                             </span>
                           </div>
                         )}
@@ -247,28 +301,49 @@ const Mangas: React.FC = () => {
                             Éditer
                           </Link>
                           {user?.role === RoleEnum.SUPERADMIN && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                sendManga(manga.id);
-                              }}
-                              disabled={manga.processing === "done" || manga.processing === "working"}
-                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
-                                (manga.processing === "done" || manga.processing === "working")
-                                  ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
-                                  : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
-                              }`}
-                              title={
-                                (manga.processing === "done" || manga.processing === "working")
-                                  ? "Déjà envoyé" 
-                                  : manga.checking !== "checked"
-                                  ? "Manga must be checked first"
-                                  : "Envoyer"
-                              }
-                            >
-                              <Send className="w-3.5 h-3.5" />
-                              {manga.processing === "done" ? "Uploaded" : "Send"}
-                            </button>
+                            <>
+                              <button // btn single sync
+                                type="button"
+                                title="Synchroniser"
+                                onClick={() => {
+                                  setSelectedManga(manga);
+                                  setSingleSyncOpen(true);
+                                }}
+                                className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-all duration-200"
+                              >
+                                <LiaSyncSolid className="w-4 h-4" />
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  sendManga(manga.id);
+                                }}
+                                disabled={
+                                  manga.processing === "done" ||
+                                  manga.processing === "working"
+                                }
+                                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
+                                  manga.processing === "done" ||
+                                  manga.processing === "working"
+                                    ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
+                                    : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
+                                }`}
+                                title={
+                                  manga.processing === "done" ||
+                                  manga.processing === "working"
+                                    ? "Déjà envoyé"
+                                    : manga.checking !== "checked"
+                                    ? "Manga must be checked first"
+                                    : "Envoyer"
+                                }
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                {manga.processing === "done"
+                                  ? "Uploaded"
+                                  : "Send"}
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -337,7 +412,11 @@ const Mangas: React.FC = () => {
                         </div>
 
                         {/* Upload Progress */}
-                        <MangaUploadProgress mangaId={manga.id} variant="inline" className="mb-2" />
+                        <MangaUploadProgress
+                          mangaId={manga.id}
+                          variant="inline"
+                          className="mb-2"
+                        />
 
                         {/* Stats & Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -347,7 +426,7 @@ const Mangas: React.FC = () => {
                           </div>
 
                           {/* Toggle Status */}
-                           <motion.input
+                          <motion.input
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             type="checkbox"
@@ -355,10 +434,11 @@ const Mangas: React.FC = () => {
                             className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
-                                ? () => toggleDeleted(
-                                manga.id,
-                                manga.isDeleted || false
-                              )
+                                ? () =>
+                                    toggleDeleted(
+                                      manga.id,
+                                      manga.isDeleted || false
+                                    )
                                 : undefined
                             }
                           />
@@ -461,7 +541,7 @@ const Mangas: React.FC = () => {
                                 ) : (
                                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
                                     <span className="text-white text-xs font-bold">
-                                      {manga.creatorObj?.name?.charAt(0) || 'U'}
+                                      {manga.creatorObj?.name?.charAt(0) || "U"}
                                     </span>
                                   </div>
                                 )}
@@ -469,7 +549,9 @@ const Mangas: React.FC = () => {
                                   to={`/creators/${manga?.creatorObj?.id}`}
                                   className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                                 >
-                                  {manga?.creatorObj?.name ?? manga.creator ?? 'Unknown'}
+                                  {manga?.creatorObj?.name ??
+                                    manga.creator ??
+                                    "Unknown"}
                                 </Link>
                               </div>
                             </td>
@@ -506,40 +588,50 @@ const Mangas: React.FC = () => {
                             <td className="px-6 py-4 text-center">
                               <div className="flex flex-col items-center gap-2">
                                 {/* Upload Progress Badge */}
-                                <MangaUploadProgress mangaId={manga.id} variant="badge" />
-                                
+                                <MangaUploadProgress
+                                  mangaId={manga.id}
+                                  variant="badge"
+                                />
+
                                 {/* Processing Status */}
                                 {manga.processing !== "working" ? (
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
-                                    manga.processing === "done"
-                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                                  }`}>
-                                    {manga.processing === "done" ? "✓ Uploaded" : "Pending"}
+                                  <span
+                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
+                                      manga.processing === "done"
+                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                    }`}
+                                  >
+                                    {manga.processing === "done"
+                                      ? "✓ Uploaded"
+                                      : "Pending"}
                                   </span>
                                 ) : (
-                                  <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                                    -
+                                  </span>
                                 )}
                               </div>
                             </td>
 
                             {/* Activate */}
                             <td className="px-6 py-4 text-center">
-                            <motion.input
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              type="checkbox"
-                              checked={!manga.isDeleted}
-                              className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
-                              onChange={
-                                user?.role === RoleEnum.SUPERADMIN
-                                  ? () => toggleDeleted(
-                                  manga.id,
-                                  manga.isDeleted || false
-                                )
-                                  : undefined
-                              }
-                            />
+                              <motion.input
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                type="checkbox"
+                                checked={!manga.isDeleted}
+                                className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
+                                onChange={
+                                  user?.role === RoleEnum.SUPERADMIN
+                                    ? () =>
+                                        toggleDeleted(
+                                          manga.id,
+                                          manga.isDeleted || false
+                                        )
+                                    : undefined
+                                }
+                              />
                             </td>
 
                             {/* Actions */}
@@ -560,24 +652,43 @@ const Mangas: React.FC = () => {
                                   <Edit className="w-4 h-4" />
                                 </Link>
                                 {user?.role === RoleEnum.SUPERADMIN && (
-                                  <button
-                                    onClick={() => sendManga(manga.id)}
-                                    disabled={manga.processing === "done" || manga.processing === "working"}
-                                    className={`p-1.5 rounded-lg transition-all duration-200 ${
-                                     ( manga.processing === "done" || manga.processing === "working")
-                                        ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
-                                        : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
-                                    }`}
-                                    title={
-                                      (manga.processing === "done" || manga.processing === "working")
-                                        ? "Not to send" 
-                                        : manga.checking !== "checked"
-                                        ? "Manga must be checked first"
-                                        : "Envoyer"
-                                    }
-                                  >
-                                    <Send className="w-4 h-4" />
-                                  </button>
+                                  <>
+                                    <button // btn single sync
+                                      type="button"
+                                      title="Synchroniser"
+                                      onClick={() => {
+                                        setSelectedManga(manga);
+                                        setSingleSyncOpen(true);
+                                      }}
+                                      className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-all duration-200"
+                                    >
+                                      <LiaSyncSolid className="w-4 h-4" />
+                                    </button>
+
+                                    <button
+                                      onClick={() => sendManga(manga.id)}
+                                      disabled={
+                                        manga.processing === "done" ||
+                                        manga.processing === "working"
+                                      }
+                                      className={`p-1.5 rounded-lg transition-all duration-200 ${
+                                        manga.processing === "done" ||
+                                        manga.processing === "working"
+                                          ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
+                                          : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                                      }`}
+                                      title={
+                                        manga.processing === "done" ||
+                                        manga.processing === "working"
+                                          ? "Not to send"
+                                          : manga.checking !== "checked"
+                                          ? "Manga must be checked first"
+                                          : "Envoyer"
+                                      }
+                                    >
+                                      <Send className="w-4 h-4" />
+                                    </button>
+                                  </>
                                 )}
                               </div>
                             </td>
@@ -592,23 +703,36 @@ const Mangas: React.FC = () => {
 
             {/* Pagination */}
             {/* {total > PAGE_SIZE && ( */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="mt-8"
-              >
-                <Pagination
-                  totalItems={total}
-                  pageSize={PAGE_SIZE}
-                  currentPage={page}
-                  onPageChange={setPage}
-                />
-              </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-8"
+            >
+              <Pagination
+                totalItems={total}
+                pageSize={PAGE_SIZE}
+                currentPage={page}
+                onPageChange={setPage}
+              />
+            </motion.div>
             {/* )} */}
           </>
         )}
       </motion.div>
+      <SingleSyncModal
+        open={singleSyncOpen}
+        onClose={() => {
+          setSingleSyncOpen(false);
+          setSelectedManga(null);
+        }}
+        onSubmit={handleSingleSync}
+        title={
+          selectedManga
+            ? `Synchroniser ${selectedManga.title || selectedManga.ref}`
+            : "Synchroniser"
+        }
+      />
     </div>
   );
 };

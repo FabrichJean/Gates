@@ -20,6 +20,8 @@ import { useAuth } from "../../hooks/useAuth";
 import useSocketCheckRomans from "../../hooks/romans/useSocketRomans";
 import toast from "react-hot-toast";
 import { toggleIsDeleted, deepUploadRoman } from "../../api/romans";
+import { singleSync } from "../../api/videos";
+import SingleSyncModal from "../../components/SingleSyncModal";
 import RoleEnum from "../../utils/roleEnum";
 
 import { motion } from "framer-motion";
@@ -31,6 +33,9 @@ const RomansManagement = () => {
   const [page] = useState(1);
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const { user } = useAuth();
+  const [selectedRoman, setSelectedRoman] = useState<TRoman | null>(null);
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
   /* ===================== API ===================== */
   const { data, loading, reFetch } = UseRomans("all", page, searchTerm);
@@ -141,6 +146,39 @@ const RomansManagement = () => {
       toast.error(err?.response?.data?.message || "Erreur lors de l'envoi S3", {
         id: "send-roman",
       });
+    }
+  };
+
+  const extractErrorMessage = (err: unknown) => {
+    try {
+      if (!err) return "Error";
+      if (typeof err === "string") return err;
+      if (typeof err === "object" && err !== null) {
+        return (
+          (err as any)?.response?.data?.message ??
+          (err as any)?.message ??
+          "Error"
+        );
+      }
+      return String(err);
+    } catch {
+      return "Error";
+    }
+  };
+
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!selectedRoman) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({ entity: "romans", origin_id: selectedRoman.id, isForce });
+      toast.success("✅ Sync single exécuté");
+      reFetch?.();
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+      setSingleSyncOpen(false);
+      setSelectedRoman(null);
     }
   };
 
@@ -269,8 +307,14 @@ const RomansManagement = () => {
                 {user.role === RoleEnum.SUPERADMIN && (
                   <>
                     <button
-                    
-                      className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200">
+                      type="button"
+                      title="Synchroniser"
+                      onClick={() => {
+                        setSelectedRoman(roman);
+                        setSingleSyncOpen(true);
+                      }}
+                      className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
+                    >
                       <LiaSyncSolid className="w-4 h-4" />
                     </button>
                     <button
@@ -489,15 +533,17 @@ const RomansManagement = () => {
                     </Link>
                     {user.role === RoleEnum.SUPERADMIN && (
                       <>
-                        <button
-                          className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-gray-700"
-                          }`}
-                          onClick={() => handleSendRoman(232323)}
-                          // disabled={roman.processing === "done"}
-                          title={"Envoyer un test"}
-                        >
-                          <LiaSyncSolid className="w-4 h-4" />
-                        </button>
+                            <button
+                              type="button"
+                              title="Synchroniser"
+                              onClick={() => {
+                                setSelectedRoman(roman);
+                                setSingleSyncOpen(true);
+                              }}
+                              className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
+                            >
+                              <LiaSyncSolid className="w-4 h-4" />
+                            </button>
 
                         <button
                           className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
@@ -615,6 +661,19 @@ const RomansManagement = () => {
             </p>
           </div>
         )}
+        <SingleSyncModal
+          open={singleSyncOpen}
+          onClose={() => {
+            setSingleSyncOpen(false);
+            setSelectedRoman(null);
+          }}
+          onSubmit={handleSingleSync}
+          title={
+            selectedRoman
+              ? `Synchroniser ${selectedRoman.titles?.[0]?.title || selectedRoman.ref}`
+              : "Synchroniser"
+          }
+        />
       </div>
     </div>
   );
