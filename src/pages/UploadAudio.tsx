@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Plus, 
-  Upload, 
+import {
+  Plus,
+  Upload,
   Image as ImageIcon,
   User,
   Globe,
@@ -14,7 +14,7 @@ import {
   Loader2,
   ChevronDown,
   Check,
-  Volume2
+  Volume2,
 } from "lucide-react";
 import { createAudioApi } from "../api/audios";
 import { getCreators } from "../api/creators";
@@ -25,6 +25,7 @@ import { getAudioSubCategoriesApi } from "../api/audioSubCategory";
 import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 
 interface AudioTitle {
   i18_language: string;
@@ -65,18 +66,29 @@ const UploadAudio: React.FC = () => {
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
+  const [creator, setCreator] = useState<string | null>(null);
+  const [creatorId, setCreatorId] = useState<number | null>(null);
+
   useEffect(() => {
     Promise.all([
-      getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
-      getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
-      getTagCategoriesApi().then((res) => {
-        const tags = res.data?.data || res.data || res;
-        setTagCategories(Array.isArray(tags) ? tags : []);
-      }).catch(() => setTagCategories([])),
-      getAudioCategoriesApi().then((res) => {
-        const cats = res.data || res;
-        setAudioCategories(Array.isArray(cats) ? cats : []);
-      }).catch(() => setAudioCategories([])),
+      getCreators()
+        .then((res) => setCreators(res.data || res))
+        .catch(() => setCreators([])),
+      getAllPlateformsApi()
+        .then((res) => setPlateforms(res.data || res))
+        .catch(() => setPlateforms([])),
+      getTagCategoriesApi()
+        .then((res) => {
+          const tags = res.data?.data || res.data || res;
+          setTagCategories(Array.isArray(tags) ? tags : []);
+        })
+        .catch(() => setTagCategories([])),
+      getAudioCategoriesApi()
+        .then((res) => {
+          const cats = res.data || res;
+          setAudioCategories(Array.isArray(cats) ? cats : []);
+        })
+        .catch(() => setAudioCategories([])),
     ]);
   }, []);
 
@@ -98,7 +110,10 @@ const UploadAudio: React.FC = () => {
   // Close creator dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
+      if (
+        creatorDropdownRef.current &&
+        !creatorDropdownRef.current.contains(event.target as Node)
+      ) {
         setShowCreatorDropdown(false);
       }
     };
@@ -120,11 +135,14 @@ const UploadAudio: React.FC = () => {
     if (file) {
       setForm((prev) => ({ ...prev, audio: file }));
       setAudioPreview(URL.createObjectURL(file));
-      
+
       // Auto-detect duration
       const audio = new Audio(URL.createObjectURL(file));
       audio.onloadedmetadata = () => {
-        setForm((prev) => ({ ...prev, duration: Math.floor(audio.duration).toString() }));
+        setForm((prev) => ({
+          ...prev,
+          duration: Math.floor(audio.duration).toString(),
+        }));
       };
     }
   };
@@ -143,7 +161,11 @@ const UploadAudio: React.FC = () => {
   };
 
   const addTag = (tag: any) => {
-    if (!form.tagCategories.some((t) => typeof t === "number" ? t === tag.id : t.name === tag.name)) {
+    if (
+      !form.tagCategories.some((t) =>
+        typeof t === "number" ? t === tag.id : t.name === tag.name
+      )
+    ) {
       setForm((prev) => ({
         ...prev,
         tagCategories: [...prev.tagCategories, tag.id],
@@ -154,7 +176,12 @@ const UploadAudio: React.FC = () => {
   };
 
   const addCustomTag = () => {
-    if (tagInput.trim() && !form.tagCategories.some((t) => typeof t !== "number" && t.name === tagInput.trim())) {
+    if (
+      tagInput.trim() &&
+      !form.tagCategories.some(
+        (t) => typeof t !== "number" && t.name === tagInput.trim()
+      )
+    ) {
       setForm((prev) => ({
         ...prev,
         tagCategories: [...prev.tagCategories, { name: tagInput.trim() }],
@@ -181,7 +208,7 @@ const UploadAudio: React.FC = () => {
       formData.append("ref", form.ref);
       formData.append("title", form.title);
       formData.append("description", form.description);
-      
+
       if (form.audio_category_id) {
         formData.append("audio_category_id", form.audio_category_id);
       }
@@ -197,20 +224,20 @@ const UploadAudio: React.FC = () => {
       if (form.duration) {
         formData.append("duration", form.duration);
       }
-      
+
       formData.append("need_vip", form.need_vip.toString());
-      
+
       // Tags - ensure new tags have {name: "tagname"} structure
       const processedTags = form.tagCategories.map((tag) =>
         typeof tag === "object" && tag.name ? { name: tag.name } : tag
       );
       formData.append("tagCategories", JSON.stringify(processedTags));
-      
+
       // Titles (i18n)
       if (form.titles.length > 0) {
         formData.append("titles", JSON.stringify(form.titles));
       }
-      
+
       // Files
       if (form.cover) {
         formData.append("cover", form.cover);
@@ -224,7 +251,7 @@ const UploadAudio: React.FC = () => {
       nav(`/audios/${result.id}`);
     } catch (error) {
       console.error("Error creating audio:", error);
-      toast.error("Erreur lors de la création de l'audio");
+      toast.error(error?.response?.data?.message || "Erreur lors de la création de l'audio.");
     } finally {
       setLoading(false);
     }
@@ -281,10 +308,7 @@ const UploadAudio: React.FC = () => {
                     className="hidden"
                     id="cover-input"
                   />
-                  <label
-                    htmlFor="cover-input"
-                    className="block cursor-pointer"
-                  >
+                  <label htmlFor="cover-input" className="block cursor-pointer">
                     {coverPreview ? (
                       <div className="relative aspect-square rounded-xl overflow-hidden group">
                         <img
@@ -322,10 +346,7 @@ const UploadAudio: React.FC = () => {
                     className="hidden"
                     id="audio-input"
                   />
-                  <label
-                    htmlFor="audio-input"
-                    className="block cursor-pointer"
-                  >
+                  <label htmlFor="audio-input" className="block cursor-pointer">
                     {audioPreview ? (
                       <div className="rounded-xl border-2 border-green-500 dark:border-green-400 p-4 bg-green-50 dark:bg-green-900/20">
                         <audio controls className="w-full mb-2">
@@ -368,7 +389,9 @@ const UploadAudio: React.FC = () => {
                   <input
                     type="text"
                     value={form.ref}
-                    onChange={(e) => setForm((prev) => ({ ...prev, ref: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, ref: e.target.value }))
+                    }
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     placeholder="REF-001"
                   />
@@ -381,7 +404,12 @@ const UploadAudio: React.FC = () => {
                   </label>
                   <select
                     value={form.audio_category_id}
-                    onChange={(e) => setForm((prev) => ({ ...prev, audio_category_id: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        audio_category_id: e.target.value,
+                      }))
+                    }
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   >
                     <option value="">Sélectionnez une catégorie</option>
@@ -401,7 +429,12 @@ const UploadAudio: React.FC = () => {
                     </label>
                     <select
                       value={form.audio_sub_category_id}
-                      onChange={(e) => setForm((prev) => ({ ...prev, audio_sub_category_id: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          audio_sub_category_id: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     >
                       <option value="">Sélectionnez une sous-catégorie</option>
@@ -423,7 +456,9 @@ const UploadAudio: React.FC = () => {
                   <input
                     type="number"
                     value={form.duration}
-                    onChange={(e) => setForm((prev) => ({ ...prev, duration: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, duration: e.target.value }))
+                    }
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     placeholder="Détecté automatiquement"
                   />
@@ -435,45 +470,17 @@ const UploadAudio: React.FC = () => {
                     <User className="w-4 h-4" />
                     Créateur
                   </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-left flex items-center justify-between"
-                    >
-                      <span>
-                        {form.creator_id
-                          ? creators.find((c) => c.id === parseInt(form.creator_id))?.name || "Sélectionnez un créateur"
-                          : "Sélectionnez un créateur"}
-                      </span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-
-                    <AnimatePresence>
-                      {showCreatorDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-xl max-h-60 overflow-y-auto"
-                        >
-                          {creators.map((creator) => (
-                            <button
-                              key={creator.id}
-                              type="button"
-                              onClick={() => {
-                                setForm((prev) => ({ ...prev, creator_id: creator.id.toString() }));
-                                setShowCreatorDropdown(false);
-                              }}
-                              className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                            >
-                              {creator.name}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <CreatorAutoComplete
+                    value={creator}
+                    onChange={(v: string | null) => {
+                      setCreator(v);
+                      setCreatorId(null);
+                    }}
+                    onSelect={(c) => {
+                      setCreator(c?.name ?? null);
+                      setCreatorId(c?.id ?? null);
+                    }}
+                  />
                 </div>
 
                 {/* Plateform */}
@@ -484,7 +491,12 @@ const UploadAudio: React.FC = () => {
                   </label>
                   <select
                     value={form.plateform_id}
-                    onChange={(e) => setForm((prev) => ({ ...prev, plateform_id: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        plateform_id: e.target.value,
+                      }))
+                    }
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   >
                     <option value="">Sélectionnez une plateforme</option>
@@ -521,7 +533,7 @@ const UploadAudio: React.FC = () => {
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         placeholder="Rechercher ou créer un tag..."
                       />
-                      
+
                       <AnimatePresence>
                         {showTagDropdown && filteredTags.length > 0 && (
                           <motion.div
@@ -575,7 +587,9 @@ const UploadAudio: React.FC = () => {
                 {/* Multilingual Titles */}
                 <AudioTitlesField
                   value={form.titles}
-                  onChange={(titles) => setForm((prev) => ({ ...prev, titles }))}
+                  onChange={(titles) =>
+                    setForm((prev) => ({ ...prev, titles }))
+                  }
                   label="Titres multilingues (optionnel)"
                   required={false}
                 />
@@ -586,10 +600,18 @@ const UploadAudio: React.FC = () => {
                     type="checkbox"
                     id="need_vip"
                     checked={form.need_vip}
-                    onChange={(e) => setForm((prev) => ({ ...prev, need_vip: e.target.checked }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        need_vip: e.target.checked,
+                      }))
+                    }
                     className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <label htmlFor="need_vip" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
+                  <label
+                    htmlFor="need_vip"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2"
+                  >
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
                       VIP
                     </span>
@@ -609,12 +631,12 @@ const UploadAudio: React.FC = () => {
                 {loading ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    Création en cours...
+                    Uploading Audio...
                   </>
                 ) : (
                   <>
                     <Save className="w-6 h-6" />
-                    Créer l'audio
+                    Upload Audio
                   </>
                 )}
               </motion.button>
