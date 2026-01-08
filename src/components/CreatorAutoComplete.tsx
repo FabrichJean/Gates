@@ -61,7 +61,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
   };
 
   const handleSuggestRandom = () => {
-    const list = creators || [];
+    const list = creators.creators || [];
     if (list.length === 0) return;
     const randomIndex = Math.floor(Math.random() * list.length);
     const randomCreator = list[randomIndex];
@@ -96,7 +96,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
             onFocus={() => {
               setOpen(true);
               // Auto-suggest when focusing on empty input
-              if (!query && autoSuggest && creators && creators.length > 0 && !hasAutoSuggested.current && !userCleared.current) {
+              if (!query && autoSuggest && creators && creators.creators.length > 0 && !hasAutoSuggested.current && !userCleared.current) {
                 handleSuggestRandom();
                 hasAutoSuggested.current = true;
               }

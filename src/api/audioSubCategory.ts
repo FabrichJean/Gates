@@ -1,3 +1,4 @@
+import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 
@@ -15,6 +16,8 @@ export interface AudioSubCategoriesResponse {
   total?: number;
 }
 
+const headers = () => ({ Authorization: `Bearer ${getToken()}` });
+
 /**
  * Get all audio sub-categories
  */
@@ -22,58 +25,29 @@ export const getAudioSubCategoriesApi = async (
   categoryId?: number
 ): Promise<AudioSubCategoriesResponse> => {
   const params = categoryId ? `?audio_category_id=${categoryId}` : "";
-  const response = await fetch(`${apiURL}/audio-subcategories${params}`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch audio sub-categories: ${response.statusText}`);
-  }
-
-  return response.json();
+  return await axios.get(`${apiURL}/audio-subcategories${params}`, { headers: headers() });
 };
 
 /**
  * Get a single audio sub-category by ID
  */
 export const getAudioSubCategoryByIdApi = async (id: number): Promise<AudioSubCategory> => {
-  const response = await fetch(`${apiURL}/audio-sub-categories/${id}`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch audio sub-category: ${response.statusText}`);
-  }
-
-  return response.json();
+  const { data } = await axios.get(`${apiURL}/audio-subcategories/${id}`, { headers: headers() });
+  return data;
 };
 
 /**
  * Create a new audio sub-category
  */
-export const createAudioSubCategoryApi = async (data: {
+export const createAudioSubCategoryApi = async (payload: {
   name: string;
   audio_category_id: number;
   description?: string;
 }): Promise<AudioSubCategory> => {
-  const response = await fetch(`${apiURL}/audio-sub-categories`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+  const { data } = await axios.post(`${apiURL}/audio-subcategories`, payload, {
+    headers: { ...headers(), "Content-Type": "application/json" },
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create audio sub-category: ${response.statusText}`);
-  }
-
-  return response.json();
+  return data;
 };
 
 /**
@@ -81,36 +55,17 @@ export const createAudioSubCategoryApi = async (data: {
  */
 export const updateAudioSubCategoryApi = async (
   id: number,
-  data: Partial<AudioSubCategory>
+  payload: Partial<AudioSubCategory>
 ): Promise<AudioSubCategory> => {
-  const response = await fetch(`${apiURL}/audio-sub-categories/${id}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+  const { data } = await axios.put(`${apiURL}/audio-subcategories/${id}`, payload, {
+    headers: { ...headers(), "Content-Type": "application/json" },
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to update audio sub-category: ${response.statusText}`);
-  }
-
-  return response.json();
+  return data;
 };
 
 /**
  * Delete an audio sub-category
  */
 export const deleteAudioSubCategoryApi = async (id: number): Promise<void> => {
-  const response = await fetch(`${apiURL}/audio-sub-categories/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to delete audio sub-category: ${response.statusText}`);
-  }
+  await axios.delete(`${apiURL}/audio-subcategories/${id}`, { headers: headers() });
 };
