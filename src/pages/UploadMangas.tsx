@@ -59,7 +59,7 @@ const UploadMangas: React.FC = () => {
 
   useEffect(() => {
     Promise.all([
-      getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
+      getCreators().then((res) => setCreators(res.data.creators || res)).catch(() => setCreators([])),
       getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
       getTagCategoriesApi().then((res) => {
         const tags = res.data?.data || res.data || res;
