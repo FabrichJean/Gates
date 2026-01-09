@@ -25,6 +25,7 @@ import { getAudioSubCategoriesApi } from "../api/audioSubCategory";
 import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 
 import type { AudioTitle } from "../components/AudioTitlesField";
 import { getAudioTagCategoriesApi } from "../api/audioTagCategory";
@@ -41,19 +42,19 @@ const AudioEdit: React.FC = () => {
   const nav = useNavigate();
   const [form, setForm] = useState({
     ref: "",
-    title: "",
-    description: "",
     titles: [] as AudioTitle[],
     audio_category_id: "",
     audio_sub_category_id: "",
     plateform_id: "",
     tagCategories: [] as Array<number | { name: string }>,
-    creator_id: "",
     duration: "",
     need_vip: false,
     cover: null as File | null,
     audio: null as File | null,
   });
+
+  const [creator, setCreator] = useState<string | null>(null);
+  const [creatorId, setCreatorId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,12 +66,10 @@ const AudioEdit: React.FC = () => {
   const [tagInput, setTagInput] = useState("");
   const [filteredTags, setFilteredTags] = useState<any[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [showCreatorDropdown, setShowCreatorDropdown] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(null);
   const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null);
-  const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   // Load audio data
   useEffect(() => {
@@ -83,24 +82,30 @@ const AudioEdit: React.FC = () => {
         
         setForm({
           ref: audio.ref || "",
-          title: audio.title || "",
-          description: audio.description || "",
           titles: (audio.titles || []).map((t: any) => ({
             i18_language: t.i18_language,
             language_code: t.language_code ?? t.i18_language ?? "",
             title: t.title,
-            description: t.description,
+            description: t.description || "",
           })),
           audio_category_id: audio.audio_category_id?.toString() || "",
           audio_sub_category_id: audio.audio_sub_category_id?.toString() || "",
           plateform_id: audio.plateform_id?.toString() || "",
           tagCategories: audio.tagCategories?.map((tag: any) => tag.id || tag) || [],
-          creator_id: audio.creator_id?.toString() || "",
           duration: audio.duration?.toString() || "",
           need_vip: audio.need_vip || false,
           cover: null,
           audio: null,
         });
+
+        // Gérer le creator
+        if (audio.creator_id) {
+          setCreatorId(audio.creator_id);
+          setCreator(audio.creatorObj?.name || audio.creator || null);
+        } else if (audio.creator) {
+          setCreator(audio.creator);
+          setCreatorId(null);
+        }
 
         setExistingCoverUrl(audio.cover_url || audio.s3_cover_url);
         setExistingAudioUrl(audio.audio_url || audio.s3_audio_url);
@@ -146,17 +151,6 @@ const AudioEdit: React.FC = () => {
       setForm((prev) => ({ ...prev, audio_sub_category_id: "" }));
     }
   }, [form.audio_category_id]);
-
-  // Close creator dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
-        setShowCreatorDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -233,14 +227,18 @@ const AudioEdit: React.FC = () => {
     setSaving(true);
     try {
       const formData = new FormData();
-      formData.append("title", form.title);
       
       if (form.ref) formData.append("ref", form.ref);
-      if (form.description) formData.append("description", form.description);
       if (form.audio_category_id) formData.append("audio_category_id", form.audio_category_id);
       if (form.audio_sub_category_id) formData.append("audio_sub_category_id", form.audio_sub_category_id);
       if (form.plateform_id) formData.append("plateform_id", form.plateform_id);
-      if (form.creator_id) formData.append("creator_id", form.creator_id);
+      
+      if (creatorId) {
+        formData.append("creator_id", String(creatorId));
+      } else if (creator) {
+        formData.append("creator", String(creator));
+      }
+      
       if (form.duration) formData.append("duration", form.duration);
       formData.append("need_vip", form.need_vip ? "1" : "0");
 
@@ -489,46 +487,22 @@ const AudioEdit: React.FC = () => {
                 </div>
 
                 {/* Creator */}
-                <div ref={creatorDropdownRef}>
+                <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Créateur
                   </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-left flex items-center justify-between text-gray-900 dark:text-gray-100"
-                    >
-                      <span>
-                        {form.creator_id
-                          ? creators.find((c) => c.id === parseInt(form.creator_id))?.name || "Sélectionner"
-                          : "Sélectionnez un créateur"}
-                      </span>
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    </button>
-
-                    {showCreatorDropdown && (
-                      <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
-                        {creators.map((creator) => (
-                          <button
-                            key={creator.id}
-                            type="button"
-                            onClick={() => {
-                              setForm({ ...form, creator_id: creator.id.toString() });
-                              setShowCreatorDropdown(false);
-                            }}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between text-gray-900 dark:text-gray-100"
-                          >
-                            <span>{creator.name}</span>
-                            {form.creator_id === creator.id.toString() && (
-                              <Check className="w-5 h-5 text-indigo-500" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <CreatorAutoComplete
+                    value={creator}
+                    onChange={(v: string | null) => {
+                      setCreator(v);
+                      setCreatorId(null);
+                    }}
+                    onSelect={(c) => {
+                      setCreator(c?.name ?? null);
+                      setCreatorId(c?.id ?? null);
+                    }}
+                  />
                 </div>
 
                 {/* Platform */}

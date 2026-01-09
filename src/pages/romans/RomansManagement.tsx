@@ -170,7 +170,11 @@ const RomansManagement = () => {
     if (!selectedRoman) return;
     setSingleSyncLoading(true);
     try {
-      await singleSync({ entity: "romans", origin_id: selectedRoman.id, isForce });
+      await singleSync({
+        entity: "romans",
+        origin_id: selectedRoman.id,
+        isForce,
+      });
       toast.success("✅ Sync single exécuté");
       reFetch?.();
     } catch (err) {
@@ -533,17 +537,17 @@ const RomansManagement = () => {
                     </Link>
                     {user.role === RoleEnum.SUPERADMIN && (
                       <>
-                            <button
-                              type="button"
-                              title="Synchroniser"
-                              onClick={() => {
-                                setSelectedRoman(roman);
-                                setSingleSyncOpen(true);
-                              }}
-                              className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
-                            >
-                              <LiaSyncSolid className="w-4 h-4" />
-                            </button>
+                        <button
+                          type="button"
+                          title="Synchroniser"
+                          onClick={() => {
+                            setSelectedRoman(roman);
+                            setSingleSyncOpen(true);
+                          }}
+                          className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
+                        >
+                          <LiaSyncSolid className="w-4 h-4" />
+                        </button>
 
                         <button
                           className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
@@ -652,7 +656,7 @@ const RomansManagement = () => {
         {/* Content */}
         {viewMode === "card" ? renderCardView() : renderTableView()}
 
-        {filteredRomans.length === 0 && (
+        {viewMode === "card" && filteredRomans.length === 0 && (
           <div className="p-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
             <p className="text-xl font-medium mb-2">No novels found</p>
@@ -670,7 +674,9 @@ const RomansManagement = () => {
           onSubmit={handleSingleSync}
           title={
             selectedRoman
-              ? `Synchroniser ${selectedRoman.titles?.[0]?.title || selectedRoman.ref}`
+              ? `Synchroniser ${
+                  selectedRoman.titles?.[0]?.title || selectedRoman.ref
+                }`
               : "Synchroniser"
           }
         />

@@ -35,6 +35,7 @@ export interface Plateform {
 export interface Creator {
   id: number;
   name: string;
+  gender: string;
   avatar?: string;
   bio?: string;
 }
