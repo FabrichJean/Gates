@@ -4,12 +4,14 @@ import useVideoTagCategories from "../hooks/useVideoTagCategories";
 import usePostTagCategories from "../hooks/usePostTagCategories";
 import useMangaTagCategories from "../hooks/useMangaTagCategories";
 import useAudioTagCategories from "../hooks/useAudioTagCategories";
+import useRomanTagCategories from "../hooks/useRomanTagCategories";
 
 export default function TagCategory() {
     const video = useVideoTagCategories();
     const post = usePostTagCategories();
     const manga = useMangaTagCategories();
     const audio = useAudioTagCategories();
+    const roman = useRomanTagCategories();
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -38,6 +40,10 @@ export default function TagCategory() {
                                         <div className="text-lg font-medium text-yellow-600 dark:text-yellow-400">{audio.items.length}</div>
                                         <div className="text-xs text-gray-500 dark:text-gray-400">Audio</div>
                                     </div>
+                                        <div className="text-center">
+                                            <div className="text-lg font-medium text-rose-600 dark:text-rose-400">{roman.items.length}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Roman</div>
+                                        </div>
                         </div>
                     </div>
                 </div>
@@ -81,6 +87,16 @@ export default function TagCategory() {
                         onCreate={audio.createItem}
                         onUpdate={audio.updateItem}
                         onDelete={audio.removeItem}
+                    />
+
+                    <TagListPanel
+                        title="Roman Tags"
+                        icon={<TagIcon className="w-4 h-4 text-rose-500" />}
+                        items={roman.items}
+                        loading={roman.loading}
+                        onCreate={roman.createItem}
+                        onUpdate={roman.updateItem}
+                        onDelete={roman.removeItem}
                     />
                 </div>
             </div>
