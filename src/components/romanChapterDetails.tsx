@@ -194,7 +194,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                 {/* information d'un chapitre */}
                 <div className="p-6 space-y-6">
                     {/* Metadata */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
                         <div>
                             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chapter</p>
                             <p className="text-sm font-semibold dark:text-gray-100">#{chapter.chapter_number}</p>
@@ -203,12 +203,6 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Mots</p>
                             <p className="text-sm font-semibold dark:text-gray-100">
                                 {getChapterWordCount(chapter, selectedLang).toLocaleString()}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Statut</p>
-                            <p className="text-sm font-semibold dark:text-gray-100">
-                                {chapter.isPublished ? "Publié" : "Brouillon"}
                             </p>
                         </div>
                         <div>
@@ -276,7 +270,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                     {/* Content */}
                     <div>
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contenu</h4>
-                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-6 rounded-sm max-h-60 overflow-auto">
+                        <div className="prose prose-sm max-w-none bg-gray-50 dark:bg-gray-900/50 p-2 rounded-sm max-h-60 overflow-auto">
                             <p className="whitespace-pre-wrap break-words max-w-full text-gray-700 dark:text-gray-300 leading-relaxed">
                                 <MarkdownPreview source={getChapterContent(chapter)} style={{ padding: 16 }} />
                             </p>
@@ -307,7 +301,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Créateur</p>
-                                        <div className="flex items-center gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                                        <div className="flex items-center gap-3 pb-3">
                                             {chapter.roman?.creatorObj?.avatar ? (
                                                 <img
                                                     src={

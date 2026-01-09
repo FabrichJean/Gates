@@ -44,7 +44,7 @@ const EditMangasPage: React.FC = () => {
   const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    getCreators().then((res) => setCreators(res.data || res)).catch(() => {});
+    getCreators().then((res) => setCreators(res.data.creators || res)).catch(() => {});
     getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => {});
     getTagCategoriesApi()
       .then((res) => {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
-import { LogOut, X, ChevronRight } from "lucide-react";
+import { LogOut, X, ChevronRight, Music } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useParticles from "../hooks/useParticles";
 import { MdOutlineCategory, MdDynamicFeed, MdVerified } from "react-icons/md";
@@ -384,6 +384,13 @@ function Sidebar({
               name="tag-category"
               label="Tag Category"
               icon={MdOutlineCategory}
+            />
+
+            <NavLink
+              to="/audio-categories"
+              name="audio-categories"
+              label="Audio Categories"
+              iconComponent={<Music className="w-5 h-5" />}
             />
 
             <NavLink
