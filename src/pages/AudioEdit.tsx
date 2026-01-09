@@ -311,7 +311,7 @@ const AudioEdit: React.FC = () => {
                 transition={{ delay: 0.1 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl"
               >
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-indigo-500" />
                   Image de couverture
                 </label>
@@ -358,7 +358,7 @@ const AudioEdit: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl"
               >
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                   <Volume2 className="w-5 h-5 text-indigo-500" />
                   Fichier audio
                 </label>
@@ -431,7 +431,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Tag className="w-4 h-4" />
                     Catégorie
                   </label>
@@ -473,7 +473,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Duration */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Durée (en secondes)
                   </label>
@@ -488,7 +488,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Creator */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Créateur
                   </label>
@@ -507,7 +507,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Platform */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Plateforme
                   </label>
@@ -527,7 +527,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Tag className="w-4 h-4" />
                     Tags
                   </label>
