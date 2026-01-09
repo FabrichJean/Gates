@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -51,39 +51,73 @@ const UploadMangas: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [filteredTags, setFilteredTags] = useState<any[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [showCreatorDropdown, setShowCreatorDropdown] = useState(false);
+  const [creatorInput, setCreatorInput] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const creatorDropdownRef = useRef<HTMLDivElement>(null);
+  const coverUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      getCreators().then((res) => setCreators(res.data || res)).catch(() => setCreators([])),
-      getAllPlateformsApi().then((res) => setPlateforms(res.data || res)).catch(() => setPlateforms([])),
-      getTagCategoriesApi().then((res) => {
-        const tags = res.data?.data || res.data || res;
+    let mounted = true;
+
+    const loadInitial = async () => {
+      try {
+        const [creatorsRes, plateformsRes, tagRes, catsRes] = await Promise.all([
+          getCreators({isAll: true}),
+          getAllPlateformsApi(),
+          getTagCategoriesApi(),
+          getMangasCategoriesApi(),
+        ]);
+
+        if (!mounted) return;
+
+        setCreators(creatorsRes?.data?.creators || creatorsRes || []);
+        setPlateforms(plateformsRes?.data || plateformsRes || []);
+
+        const tags = tagRes?.data?.data || tagRes?.data || tagRes;
         setTagCategories(Array.isArray(tags) ? tags : []);
-      }).catch(() => setTagCategories([])),
-      getMangasCategoriesApi().then((res) => {
-        const cats = res.data?.data || res.data || res;
+
+        const cats = catsRes?.data?.data || catsRes?.data || catsRes;
         setCategories(Array.isArray(cats) ? cats : []);
-      }).catch(() => setCategories([])),
-    ]);
+      } catch (err) {
+        if (!mounted) return;
+        setCreators([]);
+        setPlateforms([]);
+        setTagCategories([]);
+        setCategories([]);
+      }
+    };
+
+    loadInitial();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Charger les sous-catégories quand la catégorie change
   useEffect(() => {
-    if (form.mangas_category_id) {
-      getMangasSubCategoriesApi()
-        .then((res) => {
-          const subs = res.data?.data || res.data || res;
-          setSubCategories(Array.isArray(subs) ? subs : []);
-        })
-        .catch(() => setSubCategories([]));
-    } else {
-      setSubCategories([]);
-    }
+    let mounted = true;
+    const loadSubs = async () => {
+      if (!form.mangas_category_id) {
+        setSubCategories([]);
+        return;
+      }
+      try {
+        const res = await getMangasSubCategoriesApi();
+        if (!mounted) return;
+        const subs = res.data?.data || res.data || res;
+        setSubCategories(Array.isArray(subs) ? subs : []);
+      } catch (err) {
+        if (!mounted) return;
+        setSubCategories([]);
+      }
+    };
+
+    loadSubs();
+    return () => {
+      mounted = false;
+    };
   }, [form.mangas_category_id]);
 
   // Close creator dropdown when clicking outside
@@ -98,80 +132,94 @@ const UploadMangas: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // derived selected creator
+  const selectedCreator = useMemo(() => {
+    return creators.find((c) => String(c.id) === String(form.creator_id));
+  }, [creators, form.creator_id]);
+
+  // sync creatorInput when selection changes
+  useEffect(() => {
+    if (selectedCreator) setCreatorInput(selectedCreator.name || "");
+    if (!selectedCreator) setCreatorInput("");
+  }, [selectedCreator]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const isCheckbox = type === "checkbox";
     const checked = isCheckbox ? (e.target as HTMLInputElement).checked : undefined;
     
-    setForm((prev) => ({
-      ...prev,
-      [name]: isCheckbox ? checked : value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: isCheckbox ? checked : value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setForm((prev) => ({ ...prev, cover: file }));
-      setCoverPreview(URL.createObjectURL(file));
+      // Revoke previous object URL if any
+      if (coverUrlRef.current) {
+        URL.revokeObjectURL(coverUrlRef.current);
+      }
+      const url = URL.createObjectURL(file);
+      coverUrlRef.current = url;
+      setCoverPreview(url);
     }
   };
 
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setTagInput(value);
-    
-    if (value.trim()) {
-      const filtered = tagCategories.filter((tag: any) =>
-        tag.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredTags(filtered);
-      setShowTagDropdown(true);
-    } else {
-      setFilteredTags([]);
-      setShowTagDropdown(false);
-    }
+    setShowTagDropdown(Boolean(value.trim()));
   };
 
+  // compute filtered tags from tagCategories + tagInput to avoid sync issues
+  const filteredTags = useMemo(() => {
+    const v = tagInput.trim();
+    if (!v) return [];
+    return tagCategories.filter((tag: any) => tag.name.toLowerCase().includes(v.toLowerCase()));
+  }, [tagInput, tagCategories]);
+
   const addTag = (tag: any) => {
-    const alreadyExists = form.tagCategories.some((t) => 
-      typeof t === "number" ? t === tag.id : false
-    );
-    
-    if (!alreadyExists) {
-      setForm((prev) => ({
-        ...prev,
-        tagCategories: [...prev.tagCategories, tag.id],
-      }));
-    }
+    setForm((prev) => {
+      const alreadyExists = prev.tagCategories.some((t) => (typeof t === "number" ? t === tag.id : false));
+      if (alreadyExists) return prev;
+      return { ...prev, tagCategories: [...prev.tagCategories, tag.id] };
+    });
     setTagInput("");
-    setFilteredTags([]);
     setShowTagDropdown(false);
   };
 
   const addCustomTag = () => {
-    if (tagInput.trim()) {
-      const alreadyExists = form.tagCategories.some((t) =>
-        typeof t === "object" && "name" in t ? t.name === tagInput.trim() : false
-      );
-      
-      if (!alreadyExists) {
-        setForm((prev) => ({
-          ...prev,
-          tagCategories: [...prev.tagCategories, { name: tagInput.trim() }],
-        }));
-      }
-      setTagInput("");
-      setFilteredTags([]);
-      setShowTagDropdown(false);
-    }
+    const value = tagInput.trim();
+    if (!value) return;
+    setForm((prev) => {
+      const alreadyExists = prev.tagCategories.some((t) => (typeof t === "object" && "name" in t ? t.name === value : false));
+      if (alreadyExists) return prev;
+      return { ...prev, tagCategories: [...prev.tagCategories, { name: value }] };
+    });
+    setTagInput("");
+    setShowTagDropdown(false);
+  };
+
+  // creator autocomplete handlers
+  const filteredCreators = useMemo(() => {
+    const v = creatorInput.trim();
+    if (!v) return creators;
+    return creators.filter((cr: any) => cr.name.toLowerCase().includes(v.toLowerCase()));
+  }, [creatorInput, creators]);
+
+  const handleCreatorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCreatorInput(e.target.value);
+    setShowCreatorDropdown(true);
+  };
+
+  const selectCreator = (creator: any) => {
+    setForm((prev) => ({ ...prev, creator_id: String(creator.id) }));
+    setCreatorInput(creator.name || "");
+    setShowCreatorDropdown(false);
   };
 
   const removeTag = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      tagCategories: prev.tagCategories.filter((_, i) => i !== index),
-    }));
+    setForm((prev) => ({ ...prev, tagCategories: prev.tagCategories.filter((_, i) => i !== index) }));
   };
 
   const getTagDisplay = (tag: number | { name: string }) => {
@@ -221,6 +269,10 @@ const UploadMangas: React.FC = () => {
         cover: null,
       });
       setCoverPreview(null);
+      if (coverUrlRef.current) {
+        URL.revokeObjectURL(coverUrlRef.current);
+        coverUrlRef.current = null;
+      }
       
     } catch (err: any) {
       toast.error("Erreur lors de la création du manga");
@@ -228,6 +280,16 @@ const UploadMangas: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (coverUrlRef.current) {
+        URL.revokeObjectURL(coverUrlRef.current);
+        coverUrlRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
@@ -375,34 +437,47 @@ const UploadMangas: React.FC = () => {
                 Créateur
               </label>
               <div className="relative" ref={creatorDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-                  className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 text-left flex items-center gap-3"
-                >
-                  {form.creator_id ? (
-                    <>
-                      {creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
-                        <img
-                          src={creators.find((c) => c.id === Number(form.creator_id))?.avatar}
-                          alt="Creator"
-                          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                        />
-                      )}
-                      {!creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                          <User className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                      <span className="flex-1">
-                        {creators.find((c) => c.id === Number(form.creator_id))?.name || "Créateur sélectionné"}
-                      </span>
-                    </>
+                <div className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all duration-300 flex items-center gap-3">
+                  {selectedCreator?.avatar ? (
+                    <img src={selectedCreator.avatar} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
                   ) : (
-                    <span className="text-gray-500 dark:text-gray-400">Sélectionner un créateur</span>
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                      <User className="w-3 h-3 text-white" />
+                    </div>
                   )}
-                  <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 transition-transform duration-200 ${showCreatorDropdown ? "rotate-180" : ""}`} />
-                </button>
+                  <input
+                    type="text"
+                    value={creatorInput}
+                    onChange={handleCreatorInputChange}
+                    onFocus={() => setShowCreatorDropdown(true)}
+                    placeholder="Sélectionner ou rechercher un créateur..."
+                    className="flex-1 bg-transparent outline-none text-sm"
+                  />
+                  <div className="flex items-center gap-2">
+                    {form.creator_id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForm((prev) => ({ ...prev, creator_id: "" }));
+                          setCreatorInput("");
+                          setShowCreatorDropdown(false);
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                        aria-label="Clear creator"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatorDropdown((s) => !s)}
+                      className="text-gray-400 hover:text-gray-600"
+                      aria-label="Toggle creators"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCreatorDropdown ? "rotate-180" : ""}`} />
+                    </button>
+                  </div>
+                </div>
 
                 <AnimatePresence>
                   {showCreatorDropdown && (
@@ -416,7 +491,8 @@ const UploadMangas: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setForm({ ...form, creator_id: "" });
+                          setForm((prev) => ({ ...prev, creator_id: "" }));
+                          setCreatorInput("");
                           setShowCreatorDropdown(false);
                         }}
                         className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700"
@@ -427,17 +503,14 @@ const UploadMangas: React.FC = () => {
                         <span className="text-gray-500 dark:text-gray-400 text-sm">Aucun créateur</span>
                       </button>
 
-                      {creators.map((creator: any, index) => (
+                      {filteredCreators.map((creator: any, index) => (
                         <motion.button
                           key={creator.id}
                           type="button"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.03 }}
-                          onClick={() => {
-                            setForm({ ...form, creator_id: String(creator.id) });
-                            setShowCreatorDropdown(false);
-                          }}
+                          onClick={() => selectCreator(creator)}
                           className={`w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200 flex items-center gap-3 group ${
                             form.creator_id === String(creator.id) ? "bg-blue-50 dark:bg-blue-900/20" : ""
                           }`}
@@ -480,7 +553,7 @@ const UploadMangas: React.FC = () => {
                   type="text"
                   value={tagInput}
                   onChange={handleTagInputChange}
-                  onFocus={() => setShowTagDropdown(true)}
+                  onFocus={() => setShowTagDropdown(Boolean(tagInput.trim()))}
                   placeholder="Rechercher ou créer un tag..."
                   className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300"
                 />

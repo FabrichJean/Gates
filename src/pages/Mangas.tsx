@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Edit,
@@ -72,6 +72,12 @@ const Mangas: React.FC = () => {
   const [selectedManga, setSelectedManga] = useState<any | null>(null);
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+
+  // Fetch mangas when the page mounts
+  useEffect(() => {
+    if (typeof reFetch === "function") reFetch();
+    // only run on mount (reFetch is stable from context)
+  }, [reFetch]);
 
   const filteredMangas = mangas;
   // const isLoading = loading?.type === "fetch";
