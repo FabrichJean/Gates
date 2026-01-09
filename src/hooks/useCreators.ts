@@ -10,11 +10,14 @@ type PaginatedCreators = {
   creators: Creator[];
 };
 
-export default function UseCreators(opts?: { page?: number; limit?: number; q?: string }) {
+export default function UseCreators(opts?: { page?: number; limit?: number; q?: string, isAll?: boolean }) {
   const page = opts?.page;
   const limit = opts?.limit;
   const q = opts?.q ?? '';
-  const url = `${apiURL}/creators?page=${page}&limit=${limit}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+  const isAll = opts?.isAll || false;
+  
+  const url = isAll ? `${apiURL}/creators/all` : `${apiURL}/creators?page=${page}&limit=${limit}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+  console.log("opts", opts);
 
   const res = useFetch<PaginatedCreators>(url, {
     headers: { Authorization: `Bearer ${getToken()}` },

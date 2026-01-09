@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getMangaById, updateManga } from "../api/mangas";
 import { getCreators } from "../api/creators";
@@ -41,6 +41,7 @@ const EditMangasPage: React.FC = () => {
   const [tagInput, setTagInput] = useState("");
   const [filteredTags, setFilteredTags] = useState<any[]>([]);
   const [showCreatorDropdown, setShowCreatorDropdown] = useState(false);
+  const [creatorInput, setCreatorInput] = useState("");
   const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,6 +84,39 @@ const EditMangasPage: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // derived selected creator
+  const selectedCreator = useMemo(() => {
+    return creators.find((c) => String(c.id) === String(form.creator_id));
+  }, [creators, form.creator_id]);
+
+  // sync creatorInput when selection changes or when form has a fallback creator name
+  useEffect(() => {
+    if (selectedCreator) {
+      setCreatorInput(selectedCreator.name || "");
+    } else if (form.creator) {
+      setCreatorInput(form.creator || "");
+    } else {
+      setCreatorInput("");
+    }
+  }, [selectedCreator, form.creator]);
+
+  const filteredCreators = useMemo(() => {
+    const v = creatorInput.trim();
+    if (!v) return creators;
+    return creators.filter((cr: any) => cr.name.toLowerCase().includes(v.toLowerCase()));
+  }, [creatorInput, creators]);
+
+  const handleCreatorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCreatorInput(e.target.value);
+    setShowCreatorDropdown(true);
+  };
+
+  const selectCreator = (creator: any) => {
+    setForm((prev) => ({ ...prev, creator_id: String(creator.id) }));
+    setCreatorInput(creator.name || "");
+    setShowCreatorDropdown(false);
+  };
 
   const fetchManga = async () => {
     setLoading(true);
@@ -285,34 +319,49 @@ const EditMangasPage: React.FC = () => {
         <div>
           <label className="block font-medium mb-1">Créateur</label>
           <div className="relative" ref={creatorDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-              className="input input-bordered w-full text-left flex items-center gap-3 cursor-pointer hover:border-primary transition-colors"
-            >
-              {form.creator_id ? (
-                <>
-                  {creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
-                    <img
-                      src={creators.find((c) => c.id === Number(form.creator_id))?.avatar}
-                      alt="Creator"
-                      className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                    />
-                  )}
-                  {!creators.find((c) => c.id === Number(form.creator_id))?.avatar && (
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                      <User className="w-3 h-3 text-white" />
-                    </div>
-                  )}
-                  <span className="flex-1">
-                    {creators.find((c) => c.id === Number(form.creator_id))?.name || "Créateur sélectionné"}
-                  </span>
-                </>
+            <div className="input input-bordered w-full text-left flex items-center gap-3 focus-within:ring-2 focus-within:ring-primary transition-colors">
+              {selectedCreator?.avatar ? (
+                <img src={selectedCreator.avatar} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
               ) : (
-                <span className="text-gray-500">Sélectionner un créateur</span>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                  <User className="w-3 h-3 text-white" />
+                </div>
               )}
-              <ChevronDown className={`ml-auto w-4 h-4 transition-transform duration-200 ${showCreatorDropdown ? "rotate-180" : ""}`} />
-            </button>
+
+              <input
+                type="text"
+                value={creatorInput}
+                onChange={handleCreatorInputChange}
+                onFocus={() => setShowCreatorDropdown(true)}
+                placeholder="Sélectionner ou rechercher un créateur..."
+                className="flex-1 bg-transparent outline-none"
+              />
+
+              <div className="flex items-center gap-2">
+                {form.creator_id && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm((prev) => ({ ...prev, creator_id: "" }));
+                      setCreatorInput("");
+                      setShowCreatorDropdown(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                    aria-label="Clear creator"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowCreatorDropdown((s) => !s)}
+                  className="text-gray-400 hover:text-gray-600"
+                  aria-label="Toggle creators"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showCreatorDropdown ? "rotate-180" : ""}`} />
+                </button>
+              </div>
+            </div>
 
             <AnimatePresence>
               {showCreatorDropdown && (
@@ -326,7 +375,8 @@ const EditMangasPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setForm({ ...form, creator_id: "" });
+                      setForm((prev) => ({ ...prev, creator_id: "" }));
+                      setCreatorInput("");
                       setShowCreatorDropdown(false);
                     }}
                     className="w-full px-4 py-3 text-left hover:bg-base-200 transition-colors duration-200 flex items-center gap-3 border-b border-base-300"
@@ -337,17 +387,14 @@ const EditMangasPage: React.FC = () => {
                     <span className="text-base-content/50 text-sm">Aucun créateur</span>
                   </button>
 
-                  {creators.map((creator: any, index) => (
+                  {filteredCreators.map((creator: any, index) => (
                     <motion.button
                       key={creator.id}
                       type="button"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      onClick={() => {
-                        setForm({ ...form, creator_id: String(creator.id) });
-                        setShowCreatorDropdown(false);
-                      }}
+                      onClick={() => selectCreator(creator)}
                       className={`w-full px-4 py-3 text-left hover:bg-primary/10 transition-colors duration-200 flex items-center gap-3 group ${
                         form.creator_id === String(creator.id) ? "bg-primary/10" : ""
                       }`}

@@ -2,8 +2,8 @@ import axios from 'axios';
 import { apiURL } from '../constant';
 import { getToken } from '../utils/storage';
 
-export async function getCreators() {
-  return await axios.get(`${apiURL}/creators`, {
+export async function getCreators({isAll} : {isAll?: boolean} = {}) {
+  return await axios.get(isAll ? `${apiURL}/creators/all` : `${apiURL}/creators`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 }

@@ -18,7 +18,7 @@ interface Props {
 }
 
 const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled, isDefault, autoSuggest }: Props) => {
-  const { data: creators } = UseCreators({ page: 1, limit: 1000 });
+  const { data: creators } = UseCreators({ isAll: true });
   const [query, setQuery] = useState<string>(value ?? '');
   const [open, setOpen] = useState(false);
   const [isSuggested, setIsSuggested] = useState(false);
@@ -39,8 +39,8 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
   const filtered = useMemo(() => {
     const list = creators || [];
     const q = query?.trim().toLowerCase();
-    if (!q) return list.slice(0, 30);
-    return list.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 30);
+    if (!q) return list;
+    return list.filter((c) => c.name.toLowerCase().includes(q));
   }, [creators, query]);
 
   useEffect(() => {

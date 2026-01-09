@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Plus, Edit, Trash2, X, Save, Search } from "lucide-react";
 import Pagination from "../components/Pagination";
+import AnimatedAlert from "./AnimatedAlert";
 
 interface Props {
   title: string;
@@ -20,6 +21,8 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
   const [currentPage, setCurrentPage] = useState(1);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
 
   const filtered = useMemo(() => items.filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase())), [items, searchTerm]);
 
@@ -117,7 +120,7 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
                       ) : (
                         <>
                           <button onClick={() => startEdit(category)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors" title="Edit"><Edit className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => onDelete(category.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => { setDeleteTarget({ id: category.id, name: category.name }); setAlertOpen(true); }} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                         </>
                       )}
                     </div>
@@ -134,6 +137,23 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
           </>
         )}
       </div>
+
+      {/* Confirmation modal for deletes */}
+      <AnimatedAlert
+        isOpen={alertOpen}
+        onClose={() => { setAlertOpen(false); setDeleteTarget(null); }}
+        title="Confirm deletion"
+        message={deleteTarget ? `Êtes-vous sûr de vouloir supprimer "${deleteTarget.name}" ? Cette action est irréversible.` : "Are you sure?"}
+        type="warning"
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          // fire and forget; hook will refetch
+          onDelete(deleteTarget.id).catch((err) => console.error(err));
+          setDeleteTarget(null);
+        }}
+      />
     </div>
   );
 }
