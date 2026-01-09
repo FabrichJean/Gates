@@ -43,6 +43,7 @@ import Synchronisation from "../pages/Synchronisation";
 import CardFlottant from "../components/CardFlottant";
 import useCardFlottant from "../hooks/useCardFlottant";
 import TagCategory from "../pages/TagCategory";
+import AudioCategory from "../pages/AudioCategory";
 import PostBotManagement from "../pages/PostBotManagement";
 import PostBotDetails from "../pages/PostBotDetails";
 import PostBotEdit from "../pages/PostBotEdit";
@@ -509,6 +510,18 @@ const AppRoutes = () => {
                 <SuperProtected>
                   <InsideSidebar>
                     <TagCategory />
+                  </InsideSidebar>
+                </SuperProtected>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/audio-categories"
+            element={
+              <ProtectedRoute>
+                <SuperProtected>
+                  <InsideSidebar>
+                    <AudioCategory />
                   </InsideSidebar>
                 </SuperProtected>
               </ProtectedRoute>

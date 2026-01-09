@@ -775,16 +775,17 @@ export default function PlateformRelationsManager() {
               return (
                 <div key={p.id} className={`w-full`}> 
                   <div
-                    className={`flex items-center justify-between p-3 rounded-lg transition-shadow border ${isSelected ? 'border-indigo-300 bg-indigo-50 shadow-md' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'} hover:shadow-sm`}>
+                  onClick={() => setSelectedPlateform(p.id)}
+                    className={`flex items-center justify-between p-3 rounded-lg transition-shadow border cursor-pointer ${isSelected ? 'border-indigo-300 bg-indigo-50 shadow-md' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'} hover:shadow-sm`}>
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 flex items-center justify-center text-indigo-700 dark:text-indigo-200 font-semibold">
                         {p.name?.charAt(0)?.toUpperCase() ?? "#"}
                       </div>
 
-                      <div className="min-w-0">
+                      <div className="min-w-0" >
                         <button
                           onClick={() => setSelectedPlateform(p.id)}
-                          className="text-left w-full"
+                          className="text-left w-full cursor-pointer"
                           aria-label={`Select ${p.name}`}>
                           <div className={`text-sm font-medium truncate ${isSelected ? 'text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}>{p.name}</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.video_sync_url || p.post_sync_url ? 'sync configured' : 'no sync configured'}</div>

@@ -185,8 +185,8 @@ const AddChapterModal: React.FC<AddChapterModalProps> = ({
                                 </div>
                             </div>
 
-                            {/* Published Status */}
-                            <div className="flex items-center gap-3">
+                            {/* Published Status (hidden) */}
+                            <div className="hidden" aria-hidden="true">
                                 <input
                                     type="checkbox"
                                     id="isPublished"
