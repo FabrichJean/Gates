@@ -26,20 +26,19 @@ export function useNextAppVideo(currentId?: string) {
   
 
   const currentVideoIndex = data?.videos?.findIndex(
-    (vd) => vd.id === Number(currentId)
+    (vd) => String(vd.id) === String(currentId)
   );
+  
+  const validIndex = currentVideoIndex !== undefined && currentVideoIndex !== -1;
   const hasNext =
-    currentVideoIndex !== undefined &&
+    validIndex &&
     currentVideoIndex < (data?.videos?.length || 0) - 1;
-  const hasPrev = currentVideoIndex !== undefined && currentVideoIndex > 0;
+  const hasPrev = validIndex && currentVideoIndex > 0;
 
   return {
     loading: ctx?.loading,
-    nextVideo: data?.videos?.at(currentVideoIndex + 1) || null,
-    prevVideo:
-      currentVideoIndex > 0
-        ? data?.videos?.at(currentVideoIndex - 1)
-        : null,
+    nextVideo: validIndex && hasNext ? data?.videos?.[currentVideoIndex + 1] || null : null,
+    prevVideo: validIndex && hasPrev ? data?.videos?.[currentVideoIndex - 1] || null : null,
     hasNext,
     hasPrev,
   };
