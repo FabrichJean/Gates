@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
-} from "lucide-react";
+} from "lucide-react"; 
 import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
 import { apiURL } from '../constant';
@@ -186,22 +186,32 @@ const VideoForAppDetails: React.FC = () => {
                   >
                     {/* Navigation */}
                     <div className="flex items-center gap-2">
-                      {hasPrev && (
+                      <motion.div whileHover={{ scale: hasPrev ? 1.05 : 1 }}>
                         <Link
-                          to={`/app-videos/${prevVideo?.id}`}
-                          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                          to={hasPrev ? `/app-videos/${prevVideo?.id}` : '#'}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
+                            hasPrev
+                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                          }`}
+                          onClick={(e) => !hasPrev && e.preventDefault()}
                         >
                           <ChevronLeft className="w-5 h-5" />
                         </Link>
-                      )}
-                      {hasNext && (
+                      </motion.div>
+                      <motion.div whileHover={{ scale: hasNext ? 1.05 : 1 }}>
                         <Link
-                          to={`/app-videos/${nextVideo?.id}`}
-                          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                          to={hasNext ? `/app-videos/${nextVideo?.id}` : '#'}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
+                            hasNext
+                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                          }`}
+                          onClick={(e) => !hasNext && e.preventDefault()}
                         >
                           <ChevronRight className="w-5 h-5" />
                         </Link>
-                      )}
+                      </motion.div>
                     </div>
 
                     {/* Actions */}
