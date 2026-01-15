@@ -11,6 +11,7 @@ export type TAppFilter = {
   categorySearch?: string;
   subcategory_id?: string;
   subcategorySearch?: string;
+  type?: string;
 };
 
 export default function VideoForAppFilter({
@@ -73,6 +74,7 @@ export default function VideoForAppFilter({
         subcategorySearch: filters.subcategorySearch,
         isDeleted: filters.isDeleted,
         checking: filters.checking,
+        type: filters.type,
       };
       localStorage.setItem(storageKey, JSON.stringify(filtersToSave));
     } catch (error) {
@@ -119,6 +121,7 @@ export default function VideoForAppFilter({
       subcategory_id: filters.subcategory_id || undefined,
       isDeleted: isDeletedValue,
       checking: checkingValue,
+      type: filters.type ? parseInt(filters.type) : undefined,
       category: filters.categorySearch || undefined,
       subcategory: filters.subcategorySearch || undefined,
     };
@@ -195,6 +198,32 @@ export default function VideoForAppFilter({
                         : filters.checking === option.value
                     }
                     onChange={() => handleChange('checking', option.value)}
+                  />
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {/* Video Type filter */}
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Type</p>
+            <div className="flex gap-3">
+              {[
+                { value: '', label: 'all' },
+                { value: '1', label: 'Short' },
+                { value: '2', label: 'Long' },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="type"
+                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                    checked={
+                      option.value === ''
+                        ? (filters.type === '' || !filters.type)
+                        : filters.type === option.value
+                    }
+                    onChange={() => handleChange('type', option.value)}
                   />
                   <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{option.label}</span>
                 </label>
@@ -325,7 +354,7 @@ export default function VideoForAppFilter({
 
           {/* Subcategory searchable */}
           <div ref={subcategoryRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Subcategory</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Subcategory F</label>
             <input
               type="text"
               placeholder="Search subcategory..."
@@ -391,6 +420,7 @@ export default function VideoForAppFilter({
                 creatorSearch: "",
                 isDeleted: "all",
                 checking: "all",
+                type: "",
                 category_id: "",
                 categorySearch: "",
                 subcategory_id: "",
