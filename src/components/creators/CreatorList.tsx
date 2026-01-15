@@ -145,17 +145,17 @@ export default function CreatorList({
                 </div>
 
                 {/* btn single sync (positioned top-right) */}
-                <button
+                {/* <button
                   type="button"
                   title="Synchroniser"
                   onClick={() => {
                     setSelectedCreator(creator);
                     setSingleSyncOpen(true);
                   }}
-                  className="absolute top-1 right-1 inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-medium transition-all duration-200"
+                  className="absolute top-1 right-1 inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-medium transition-all duration-200"
                 >
                   <LiaSyncSolid className="w-4 h-4" />
-                </button>
+                </button> */}
               </div>
 
               <div className="flex flex-col w-full mt-2 gap-2 items-start">
@@ -191,15 +191,29 @@ export default function CreatorList({
                     </span>
                   )}
                 </p>
-                {/* btn suprimer */}
-                <button
-                  type="button"
-                  title="Delete"
-                  onClick={() => setConfirmTarget(creator)}
-                  className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-500 text-sm font-medium transition-all duration-200"
-                >
-                  <MdDeleteOutline className="w-4 h-4 text-gray-500 dark:text-white" />
-                </button>
+                <div className="flex items-center gap-2 justify-content">
+                  {/* btn suprimer */}
+                  <button
+                    type="button"
+                    title="Delete"
+                    onClick={() => setConfirmTarget(creator)}
+                    className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-500 text-sm font-medium transition-all duration-200"
+                  >
+                    <MdDeleteOutline className="w-4 h-4 text-gray-500 dark:text-white" />
+                  </button>
+                  {/* btn single sync */}
+                  <button
+                    type="button"
+                    title="Synchroniser"
+                    onClick={() => {
+                      setSelectedCreator(creator);
+                      setSingleSyncOpen(true);
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-500 text-sm font-medium transition-all duration-200"
+                  >
+                    <LiaSyncSolid className="w-4 h-4 text-blue-400 dark:text-white" />
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 text-sm text-gray-700">
