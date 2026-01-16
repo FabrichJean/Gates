@@ -268,7 +268,7 @@ const VideoForAppDetails: React.FC = () => {
                 >
                   <div className="bg-white dark:bg-black rounded-sm shadow-lg overflow-hidden">
                     <div
-                      className={`relative overflow-hidden rounded shadow-2xl transition-all duration-300 ${
+                      className={`relative overflow-hidden rounded-sm shadow-2xl transition-all duration-300 ${
                         isPortrait
                           ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
                           : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal

@@ -307,7 +307,7 @@ const VideoForAppManagement = () => {
 
         {/* Selection Controls */}
         <div className="flex items-center gap-2 mb-2">
-          <CheckClassFButton batchSize={100} />
+          {/* <CheckClassFButton batchSize={100} /> */}
           <button
             className="btn btn-outline btn-sm"
             onClick={selectAllPage}
