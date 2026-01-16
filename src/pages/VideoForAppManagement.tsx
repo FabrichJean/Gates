@@ -13,6 +13,7 @@ import VideoForAppFilter from "../components/VideoForAppFilter";
 import { toast } from "react-hot-toast";
 import { Edit, CheckSquare, Square, Users, X } from "lucide-react";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
+import CheckClassFButton from "../components/CheckClassFButton";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
 
@@ -306,6 +307,7 @@ const VideoForAppManagement = () => {
 
         {/* Selection Controls */}
         <div className="flex items-center gap-2 mb-2">
+          <CheckClassFButton batchSize={100} />
           <button
             className="btn btn-outline btn-sm"
             onClick={selectAllPage}
