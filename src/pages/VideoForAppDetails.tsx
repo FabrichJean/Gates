@@ -71,6 +71,10 @@ const VideoForAppDetails: React.FC = () => {
   const [modifying, setModifying] = useState(false);
   const [showCover, setShowCover] = useState<boolean>(true);
 
+  const isPortrait = React.useMemo(() => {
+    return video?.type === "1";
+  }, [video]);
+
   // Platform data
   const { data: platforms } = usePlatformReactive();
   const [platform, setPlatform] = useState<{ id: number; name: string } | null>(null);
@@ -262,8 +266,14 @@ const VideoForAppDetails: React.FC = () => {
                   transition={{ delay: 0.3 }}
                   className="lg:col-span-2"
                 >
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-                    <div className={`aspect-video bg-black relative ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+                  <div className="bg-white dark:bg-black rounded-sm shadow-lg overflow-hidden">
+                    <div
+                      className={`relative overflow-hidden rounded shadow-2xl transition-all duration-300 ${
+                        isPortrait
+                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                      } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
+                    >
                       {video.isBanned && (
                         <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
                           <div className="flex gap-2 pointer-events-auto">
