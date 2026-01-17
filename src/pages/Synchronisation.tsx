@@ -41,6 +41,9 @@ const Synchronisation = () => {
   });
   const [bulkSyncResources, setBulkSyncResources] = useState<BulkSyncResource[]>([]);
   const [bulkSyncAbortController, setBulkSyncAbortController] = useState<AbortController | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(10);
+  const [currentEntity, setCurrentEntity] = useState<SyncEntity>("video");
 
   const { show } = useCardFlottant();
 
@@ -76,29 +79,31 @@ const Synchronisation = () => {
   };
 
   // Bulk sync functions
-  const fetchResources = async (entity: SyncEntity): Promise<BulkSyncResource[]> => {
+  const fetchResources = async (entity: SyncEntity, page: number = 1, limit: number = 10): Promise<BulkSyncResource[]> => {
     try {
       let resources: BulkSyncResource[] = [];
       
       if (entity === "video" || entity === "all") {
-        const videoResponse = await getVideosForBulkSync(1, 50);
-        const videos = videoResponse.data.videos || videoResponse.data;
+        const videoResponse = await getVideosForBulkSync(page, limit);
+        // Handle different response formats
+        const videos = videoResponse.data.data || videoResponse.data.videos || videoResponse.data;
         if (Array.isArray(videos)) {
           resources.push(...videos.map((v: any) => ({
             id: v.id,
-            title: v.title,
+            title: v.title || v.name || `Video #${v.id}`,
             status: v.status,
           })));
         }
       }
       
       if (entity === "post" || entity === "all") {
-        const postResponse = await getPostsForBulkSync(1, 50);
-        const posts = postResponse.data.posts || postResponse.data;
+        const postResponse = await getPostsForBulkSync(page, limit);
+        // Handle different response formats
+        const posts = postResponse.data.data || postResponse.data.posts || postResponse.data;
         if (Array.isArray(posts)) {
           resources.push(...posts.map((p: any) => ({
             id: p.id,
-            title: p.title,
+            title: p.title || p.name || `Post #${p.id}`,
             status: p.status,
           })));
         }
@@ -111,9 +116,14 @@ const Synchronisation = () => {
     }
   };
 
-  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean) => {
+  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean, page: number = 1, limit: number = 10) => {
     try {
-      const resources = await fetchResources(entity);
+      // Store current pagination info
+      setCurrentPage(page);
+      setCurrentLimit(limit);
+      setCurrentEntity(entity);
+      
+      const resources = await fetchResources(entity, page, limit);
       setBulkSyncResources(resources);
       
       setBulkSyncProgress({
@@ -387,6 +397,38 @@ const Synchronisation = () => {
                         {bulkSyncProgress.failed}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Failed</div>
+                    </div>
+                  </div>
+
+                  {/* Current Batch Info */}
+                  <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="font-medium text-gray-800 dark:text-gray-200">
+                          Current Batch: {currentEntity.toUpperCase()}
+                        </h5>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Page {currentPage} • {currentLimit} items per page
+                        </div>
+                      </div>
+                      {!bulkSyncProgress.isRunning && bulkSyncProgress.total > 0 && (
+                        <div className="flex items-center gap-2">
+                          {currentPage > 1 && (
+                            <button
+                              onClick={() => handleStartBulkSync(currentEntity, false, currentPage - 1, currentLimit)}
+                              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors"
+                            >
+                              ← Prev
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleStartBulkSync(currentEntity, false, currentPage + 1, currentLimit)}
+                            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+                          >
+                            Next →
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

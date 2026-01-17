@@ -27,7 +27,7 @@ export interface BulkSyncProgress {
 interface BulkSyncTrackingModalProps {
   open: boolean;
   onClose: () => void;
-  onStartSync: (entity: SyncEntity, isForce: boolean) => void;
+  onStartSync: (entity: SyncEntity, isForce: boolean, page: number, limit: number) => void;
   progress: BulkSyncProgress;
   onPause: () => void;
   onResume: () => void;
@@ -46,11 +46,13 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   const [selectedEntity, setSelectedEntity] = useState<SyncEntity>("video");
   const [isForce, setIsForce] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
   
   const handleStart = () => {
-    onStartSync(selectedEntity, isForce);
+    onStartSync(selectedEntity, isForce, currentPage, limit);
   };
 
   if (!open) return null;
@@ -148,6 +150,47 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         <div className="text-sm text-gray-500">Update all existing items</div>
                       </div>
                     </label>
+                  </div>
+                </div>
+
+                {/* Pagination Options */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Pagination Settings
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                        Page Number
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={currentPage}
+                        onChange={(e) => setCurrentPage(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                        Items per page
+                      </label>
+                      <select
+                        value={limit}
+                        onChange={(e) => setLimit(parseInt(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Will fetch page {currentPage} with {limit} items per page
                   </div>
                 </div>
 
@@ -302,6 +345,48 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                   }
                 </div>
               </div>
+
+              {/* Pagination Controls for Next Batch */}
+              {(progress.processed === progress.total && progress.total > 0) && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-3">
+                    Load Next Batch
+                  </h5>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Current: Page {currentPage} ({limit} items)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const newPage = currentPage + 1;
+                          setCurrentPage(newPage);
+                          onStartSync(selectedEntity, isForce, newPage, limit);
+                        }}
+                        disabled={progress.isRunning}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors"
+                      >
+                        Next Page
+                      </button>
+                      {currentPage > 1 && (
+                        <button
+                          onClick={() => {
+                            const newPage = currentPage - 1;
+                            setCurrentPage(newPage);
+                            onStartSync(selectedEntity, isForce, newPage, limit);
+                          }}
+                          disabled={progress.isRunning}
+                          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors"
+                        >
+                          Prev Page
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
