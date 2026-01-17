@@ -10,6 +10,7 @@ import type { SyncEntity, BulkSyncProgress, BulkSyncResource } from "../componen
 import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
+import { getVideoForAppForBulkSync } from "../api/videoForApp";
 import { singleSync } from "../api/videos";
 
 const Synchronisation = () => {
@@ -45,6 +46,7 @@ const Synchronisation = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentEntity, setCurrentEntity] = useState<SyncEntity>("video");
+  const [autoSwitchEnabled, setAutoSwitchEnabled] = useState(false);
 
   const { show } = useCardFlottant();
 
@@ -93,6 +95,7 @@ const Synchronisation = () => {
             id: v.id,
             title: v.title || v.name || `Video #${v.id}`,
             status: v.status,
+            source: "video" as SyncEntity,
           })));
         }
       }
@@ -106,6 +109,21 @@ const Synchronisation = () => {
             id: p.id,
             title: p.title || p.name || `Post #${p.id}`,
             status: p.status,
+            source: "post" as SyncEntity,
+          })));
+        }
+      }
+      
+      if (entity === "video_for_app" || entity === "all") {
+        const videoForAppResponse = await getVideoForAppForBulkSync(page, limit);
+        // Handle different response formats
+        const videosForApp = videoForAppResponse.data.videos || videoForAppResponse.data.videosForApp || videoForAppResponse.data;
+        if (Array.isArray(videosForApp)) {
+          resources.push(...videosForApp.map((v: any) => ({
+            id: v.id,
+            title: v.cn_title || v.en_title || v.title || `VideoForApp #${v.id}`,
+            status: v.status,
+            source: "video_for_app" as SyncEntity,
           })));
         }
       }
@@ -117,12 +135,15 @@ const Synchronisation = () => {
     }
   };
 
-  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean, page: number = 1, limit: number = 10) => {
+  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false) => {
     try {
+      console.log(`handleStartBulkSync called with: entity=${entity}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}`);
+
       // Store current pagination info
       setCurrentPage(page);
       setCurrentLimit(limit);
       setCurrentEntity(entity);
+      setAutoSwitchEnabled(autoSwitch);
       
       const resources = await fetchResources(entity, page, limit);
       setBulkSyncResources(resources);
@@ -154,7 +175,7 @@ const Synchronisation = () => {
       setBulkSyncAbortController(abortController);
 
       // Start processing resources
-      processBulkSync(resources, entity, isForce, abortController.signal, page);
+      processBulkSync(resources, entity, isForce, abortController.signal, page, autoSwitch);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
     }
@@ -165,7 +186,8 @@ const Synchronisation = () => {
     entity: SyncEntity,
     isForce: boolean,
     signal: AbortSignal,
-    page: number
+    page: number,
+    autoSwitch: boolean = false
   ) => {
     let processed = 0;
     let succeeded = 0;
@@ -188,7 +210,15 @@ const Synchronisation = () => {
       }));
 
       try {
-        const entityType = entity === "all" ? (resource.title ? "video" : "post") : entity;
+        // Determine entity type for sync API call
+        let entityType: string;
+        if (entity === "all") {
+          // Use the source field to determine the correct entity type
+          entityType = resource.source || "video"; // Fallback to video if source is not set
+        } else {
+          entityType = entity;
+        }
+        
         await singleSync({
           entity: entityType,
           origin_id: resource.id,
@@ -243,6 +273,45 @@ const Synchronisation = () => {
       )
     }));
     setBulkSyncAbortController(null);
+
+    // Auto-switch to next page if enabled and we processed items successfully
+    console.log(`Auto-switch check: autoSwitch=${autoSwitch}, autoSwitchEnabled=${autoSwitchEnabled}, processed=${processed}, aborted=${signal.aborted}`);
+    if (autoSwitch && processed > 0 && !signal.aborted) {
+      // Small delay before switching to next page
+      setTimeout(async () => {
+        // Double-check that auto-switch is still enabled before proceeding
+        if (!autoSwitchEnabled) {
+          console.log("Auto-switch was disabled during delay. Stopping auto-pagination.");
+          return;
+        }
+        
+        try {
+          const nextPage = page + 1;
+          console.log(`Auto-switching to page ${nextPage}...`);
+          
+          // Try to fetch next page to see if it has data
+          const nextResources = await fetchResources(entity, nextPage, currentLimit);
+          
+          if (nextResources.length > 0) {
+            // Final check before starting next page sync
+            if (!autoSwitchEnabled) {
+              console.log("Auto-switch was disabled during fetch. Stopping auto-pagination.");
+              return;
+            }
+            
+            // Start sync for next page with same settings
+            console.log(`Found ${nextResources.length} resources on page ${nextPage}. Starting auto-sync...`);
+            await handleStartBulkSync(entity, isForce, nextPage, currentLimit, true);
+          } else {
+            console.log("No more resources found. Auto-pagination stopped.");
+            setAutoSwitchEnabled(false);
+          }
+        } catch (error) {
+          console.error("Auto-pagination failed:", error);
+          setAutoSwitchEnabled(false);
+        }
+      }, 2000); // 2 second delay
+    }
   };
 
   const handlePauseBulkSync = () => {
@@ -259,6 +328,11 @@ const Synchronisation = () => {
     }));
   };
 
+  const handleDisableAutoSwitch = () => {
+    console.log("handleDisableAutoSwitch called - disabling auto-switch");
+    setAutoSwitchEnabled(false);
+  };
+
   const handleStopBulkSync = () => {
     if (bulkSyncAbortController) {
       bulkSyncAbortController.abort();
@@ -269,6 +343,7 @@ const Synchronisation = () => {
       isPaused: false
     }));
     setBulkSyncAbortController(null);
+    setAutoSwitchEnabled(false); // Disable auto-switch when manually stopping
   };
 
   return (
@@ -629,6 +704,8 @@ const Synchronisation = () => {
                                     ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                                     : stat.entity === 'post'
                                     ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                                    : stat.entity === 'video_for_app'
+                                    ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                     : 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                                 }`}>
                                   {stat.entity.toUpperCase()}
@@ -850,6 +927,7 @@ const Synchronisation = () => {
           onPause={handlePauseBulkSync}
           onResume={handleResumeBulkSync}
           onStop={handleStopBulkSync}
+          onDisableAutoSwitch={handleDisableAutoSwitch}
         />
       </div>
     </div>

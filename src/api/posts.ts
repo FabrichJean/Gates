@@ -138,7 +138,8 @@ export async function getPostsForBulkSync(page: number = 1, limit: number = 50) 
     params: {
       page,
       limit,
-      select: 'id,title,status' // Only get essential fields
+      select: 'id,title,status', // Only get essential fields
+      progressing: 'done'
     }
   });
 }

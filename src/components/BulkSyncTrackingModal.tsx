@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
-export type SyncEntity = "video" | "post" | "all";
+export type SyncEntity = "video" | "post" | "video_for_app" | "all";
 
 export interface BulkSyncResource {
   id: number;
   title?: string;
   name?: string;
   status?: string;
+  source?: SyncEntity; // Track the source entity type
 }
 
 export interface BulkSyncProgress {
@@ -38,11 +39,12 @@ export interface BulkSyncProgress {
 interface BulkSyncTrackingModalProps {
   open: boolean;
   onClose: () => void;
-  onStartSync: (entity: SyncEntity, isForce: boolean, page: number, limit: number) => void;
+  onStartSync: (entity: SyncEntity, isForce: boolean, page: number, limit: number, autoSwitch?: boolean) => void;
   progress: BulkSyncProgress;
   onPause: () => void;
   onResume: () => void;
   onStop: () => void;
+  onDisableAutoSwitch?: () => void;
 }
 
 const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
@@ -53,17 +55,32 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   onPause,
   onResume,
   onStop,
+  onDisableAutoSwitch,
 }) => {
   const [selectedEntity, setSelectedEntity] = useState<SyncEntity>("video");
-  const [isForce, setIsForce] = useState(false);
+  const [isForce, setIsForce] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [autoSwitchPage, setAutoSwitchPage] = useState(false);
+  const [autoSwitchDisabled, setAutoSwitchDisabled] = useState(false);
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
-  
+
+  // Reset local state when modal opens
+  useEffect(() => {
+    if (open && progress.processed === 0 && progress.total === 0) {
+      setAutoSwitchPage(false);
+      setAutoSwitchDisabled(false);
+      setShowDetails(false);
+    }
+  }, [open, progress.processed, progress.total]);
+
   const handleStart = () => {
-    onStartSync(selectedEntity, isForce, currentPage, limit);
+    console.log(`Starting sync with auto-switch: ${autoSwitchPage}`);
+    console.log(autoSwitchPage);
+
+    onStartSync(selectedEntity, isForce, currentPage, limit, autoSwitchPage);
   };
 
   if (!open) return null;
@@ -108,10 +125,11 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Select Entity Type
                   </label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
                       { value: "video" as SyncEntity, label: "Videos" },
                       { value: "post" as SyncEntity, label: "Posts" },
+                      { value: "video_for_app" as SyncEntity, label: "Videos For App" },
                       { value: "all" as SyncEntity, label: "All" },
                     ].map((entity) => (
                       <button
@@ -130,7 +148,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                 </div>
 
                 {/* Force Option */}
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Synchronization Mode
                   </label>
@@ -162,7 +180,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       </div>
                     </label>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Pagination Options */}
                 <div className="space-y-3">
@@ -200,8 +218,33 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       </select>
                     </div>
                   </div>
+                  
+                  {/* Auto Switch Page Option */}
+                  <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="autoSwitchPage"
+                      checked={autoSwitchPage}
+                      onChange={(e) => setAutoSwitchPage(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="autoSwitchPage" className="flex-1">
+                      <div className="font-medium text-blue-800 dark:text-blue-200">
+                        Auto Switch to Next Page
+                      </div>
+                      <div className="text-sm text-blue-600 dark:text-blue-300">
+                        Automatically move to the next page when current page completes
+                      </div>
+                    </label>
+                  </div>
+                  
                   <div className="text-xs text-gray-500">
                     Will fetch page {currentPage} with {limit} items per page
+                    {autoSwitchPage && (
+                      <span className="text-blue-600 dark:text-blue-400">
+                        {" "}• Auto-pagination enabled
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -250,6 +293,25 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       <FaStop className="w-3 h-3" />
                       Stop
                     </button>
+                    {autoSwitchPage && !autoSwitchDisabled && (
+                      <button
+                        onClick={() => {
+                          console.log("Disable Auto-Switch button clicked");
+                          setAutoSwitchPage(false);
+                          setAutoSwitchDisabled(true);
+                          if (onDisableAutoSwitch) {
+                            console.log("Calling onDisableAutoSwitch callback");
+                            onDisableAutoSwitch();
+                          } else {
+                            console.warn("onDisableAutoSwitch callback not provided");
+                          }
+                        }}
+                        className="flex items-center gap-1 px-3 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-md text-sm hover:bg-orange-200 dark:hover:bg-orange-900/30"
+                        title="Disable auto-pagination for future pages"
+                      >
+                        Disable Auto-Switch
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -355,6 +417,22 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       : "Stopped"
                   }
                 </div>
+                {autoSwitchPage && !autoSwitchDisabled && (progress.processed === progress.total && progress.total > 0) && (
+                  <div className="mt-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-xs">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      Preparing to switch to next page...
+                    </div>
+                  </div>
+                )}
+                {autoSwitchDisabled && (progress.processed === progress.total && progress.total > 0) && (
+                  <div className="mt-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400 rounded-full text-xs">
+                      <FaStop className="w-2 h-2" />
+                      Auto-switch disabled
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Pagination Controls for Next Batch */}
@@ -374,7 +452,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         onClick={() => {
                           const newPage = currentPage + 1;
                           setCurrentPage(newPage);
-                          onStartSync(selectedEntity, isForce, newPage, limit);
+                          onStartSync(selectedEntity, isForce, newPage, limit, autoSwitchPage);
                         }}
                         disabled={progress.isRunning}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
@@ -387,7 +465,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           onClick={() => {
                             const newPage = currentPage - 1;
                             setCurrentPage(newPage);
-                            onStartSync(selectedEntity, isForce, newPage, limit);
+                            onStartSync(selectedEntity, isForce, newPage, limit, autoSwitchPage);
                           }}
                           disabled={progress.isRunning}
                           className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
@@ -457,6 +535,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                                       ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                                       : stat.entity === 'post'
                                       ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                                      : stat.entity === 'video_for_app'
+                                      ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                       : 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                                   }`}>
                                     {stat.entity.toUpperCase()}

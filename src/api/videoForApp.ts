@@ -174,3 +174,17 @@ export async function deleteTagCategoryVideoForAppApi(id: number) {
     headers: { Authorization: `Bearer ${token()}` },
   });
 }
+
+export async function getVideoForAppForBulkSync(page: number = 1, limit: number = 10) {
+    return await axios.get(`${apiURL}/videos-for-app`, {
+        headers: {
+            Authorization: `Bearer ${token()}`,
+        },
+        params: {
+            page,
+            limit,
+            select: 'id,cn_title,en_title,status', // Only get essential fields
+            checking: 'checked'
+        }
+    });
+}
