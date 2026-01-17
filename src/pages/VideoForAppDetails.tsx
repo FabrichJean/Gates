@@ -86,7 +86,7 @@ const VideoForAppDetails: React.FC = () => {
     if (video?.plateform_id && platforms) {
       const videoPlatform = platforms.find(p => p.id === video.plateform_id);
       setPlatform(videoPlatform || null);
-    }
+    } 
   }, [video?.plateform_id, platforms]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
