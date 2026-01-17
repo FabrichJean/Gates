@@ -37,7 +37,8 @@ const Synchronisation = () => {
     currentItem: null,
     isRunning: false,
     isPaused: false,
-    errors: []
+    errors: [],
+    pageStats: []
   });
   const [bulkSyncResources, setBulkSyncResources] = useState<BulkSyncResource[]>([]);
   const [bulkSyncAbortController, setBulkSyncAbortController] = useState<AbortController | null>(null);
@@ -126,7 +127,18 @@ const Synchronisation = () => {
       const resources = await fetchResources(entity, page, limit);
       setBulkSyncResources(resources);
       
-      setBulkSyncProgress({
+      // Create page stat entry
+      const pageStatEntry = {
+        page,
+        entity,
+        limit,
+        processed: 0,
+        succeeded: 0,
+        failed: 0,
+        startTime: new Date()
+      };
+      
+      setBulkSyncProgress(prev => ({
         processed: 0,
         total: resources.length,
         failed: 0,
@@ -134,14 +146,15 @@ const Synchronisation = () => {
         currentItem: null,
         isRunning: true,
         isPaused: false,
-        errors: []
-      });
+        errors: [],
+        pageStats: [...prev.pageStats, pageStatEntry]
+      }));
 
       const abortController = new AbortController();
       setBulkSyncAbortController(abortController);
 
       // Start processing resources
-      processBulkSync(resources, entity, isForce, abortController.signal);
+      processBulkSync(resources, entity, isForce, abortController.signal, page);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
     }
@@ -151,7 +164,8 @@ const Synchronisation = () => {
     resources: BulkSyncResource[],
     entity: SyncEntity,
     isForce: boolean,
-    signal: AbortSignal
+    signal: AbortSignal,
+    page: number
   ) => {
     let processed = 0;
     let succeeded = 0;
@@ -194,7 +208,17 @@ const Synchronisation = () => {
           processed,
           succeeded,
           failed,
-          errors: [...errors]
+          errors: [...errors],
+          pageStats: prev.pageStats.map((stat, index) => 
+            index === prev.pageStats.length - 1 // Update the last (current) page stat
+              ? {
+                  ...stat,
+                  processed,
+                  succeeded,
+                  failed
+                }
+              : stat
+          )
         }));
       }
 
@@ -202,10 +226,21 @@ const Synchronisation = () => {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
+    // Mark page as completed with end time and duration
+    const endTime = new Date();
     setBulkSyncProgress(prev => ({
       ...prev,
       isRunning: false,
-      currentItem: null
+      currentItem: null,
+      pageStats: prev.pageStats.map((stat, index) => 
+        index === prev.pageStats.length - 1 // Update the last (current) page stat
+          ? {
+              ...stat,
+              endTime,
+              duration: endTime.getTime() - stat.startTime.getTime()
+            }
+          : stat
+      )
     }));
     setBulkSyncAbortController(null);
   };
@@ -523,7 +558,8 @@ const Synchronisation = () => {
                           currentItem: null,
                           isRunning: false,
                           isPaused: false,
-                          errors: []
+                          errors: [],
+                          pageStats: []
                         })}
                         className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
                       >
@@ -531,6 +567,121 @@ const Synchronisation = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Page Statistics Summary */}
+                  {bulkSyncProgress.pageStats.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h5 className="font-medium text-gray-800 dark:text-gray-200">
+                          Session Statistics
+                        </h5>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {bulkSyncProgress.pageStats.length} pages processed
+                        </div>
+                      </div>
+                      
+                      {/* Overall Session Stats */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                            {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Items</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                            {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0)}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Success</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-red-600 dark:text-red-400">
+                            {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.failed, 0)}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Failed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                            {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.processed, 0) > 0
+                              ? Math.round((bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0) / bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)) * 100)
+                              : 0}%
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Success Rate</div>
+                        </div>
+                      </div>
+
+                      {/* Individual Page Stats */}
+                      <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                        Pages Breakdown
+                      </h6>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {bulkSyncProgress.pageStats.map((stat, index) => (
+                          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                  Page {stat.page}
+                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  stat.entity === 'video' 
+                                    ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                    : stat.entity === 'post'
+                                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                                    : 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                                }`}>
+                                  {stat.entity.toUpperCase()}
+                                </span>
+                              </div>
+                              <div className={`w-3 h-3 rounded-full ${
+                                stat.endTime ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
+                              }`}></div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                              <div className="text-center">
+                                <div className="font-medium text-blue-600 dark:text-blue-400">
+                                  {stat.processed}
+                                </div>
+                                <div className="text-xs text-gray-500">Items</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-medium text-green-600 dark:text-green-400">
+                                  {stat.succeeded}
+                                </div>
+                                <div className="text-xs text-gray-500">Success</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-medium text-red-600 dark:text-red-400">
+                                  {stat.failed}
+                                </div>
+                                <div className="text-xs text-gray-500">Failed</div>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-xs text-center text-gray-500">
+                              {stat.duration 
+                                ? `Duration: ${(stat.duration / 1000).toFixed(1)}s`
+                                : stat.endTime 
+                                  ? 'Completed' 
+                                  : 'Processing...'
+                              }
+                            </div>
+                            {stat.processed > 0 && (
+                              <div className="mt-2">
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                  <div 
+                                    className="bg-gradient-to-r from-green-500 to-blue-500 h-1.5 rounded-full transition-all duration-300" 
+                                    style={{ width: `${Math.round((stat.succeeded / stat.processed) * 100)}%` }}
+                                  />
+                                </div>
+                                <div className="text-xs text-center mt-1 text-gray-500">
+                                  {Math.round((stat.succeeded / stat.processed) * 100)}% success rate
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
