@@ -19,12 +19,14 @@ export default function VideoForAppFilter({
   params,
   filters,
   setFilters,
+  setPage,
   scope = "videoForApp",
 }: {
   params: any;
   filters: any;
   setFilters: any;
   onSubmit: (d: any) => void;
+  setPage?: (p: number) => void;
   scope?: "videoForApp";
 }) {
   const selectedCategory = useMemo(() => {
@@ -130,7 +132,9 @@ export default function VideoForAppFilter({
     try {
       const { fetchVideoForAppList } = await import("../api/videoForApp");
       const fetched = await fetchVideoForAppList(finalQuery);
-      onSubmit(fetched.videos);
+      // reset parent page and pass the full response so parent can update pagination/total
+      setPage?.(1);
+      onSubmit(fetched);
     } catch (error) {
       console.error("Erreur lors du filtrage :", error);
     }
@@ -430,6 +434,8 @@ export default function VideoForAppFilter({
               setCreatorOpen(false);
               setCategoryOpen(false);
               setSubcategoryOpen(false);
+              // reset pagination to page 1 when filters are reset
+              setPage?.(1);
               await submit();
             }}
           >
