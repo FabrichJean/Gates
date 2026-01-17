@@ -147,49 +147,162 @@ const Synchronisation = () => {
         ? ["video", "post", "video_for_app"] 
         : (Array.isArray(entities) ? entities : [entities]);
       
-      // For now, process the first entity (we can expand this later)
-      const currentEntity = entitiesToProcess[0];
-      
       // Store current pagination info
       setCurrentPage(page);
       setCurrentLimit(limit);
-      setCurrentEntity(currentEntity);
       setAutoSwitchEnabled(autoSwitch);
       
-      // Fetch resources from the current entity
-      const resources = await fetchResources(currentEntity, page, limit);
-      setBulkSyncResources(resources);
-      
-      // Create page stat entry
-      const pageStatEntry = {
-        page,
-        entity: currentEntity,
-        limit,
-        processed: 0,
-        succeeded: 0,
-        failed: 0,
-        startTime: new Date()
-      };
-      
+      // Initialize progress state for multi-entity processing
       setBulkSyncProgress(prev => ({
         processed: 0,
-        total: resources.length,
+        total: 0, // Will be updated as we fetch resources
         failed: 0,
         succeeded: 0,
         currentItem: null,
         isRunning: true,
         isPaused: false,
         errors: [],
-        pageStats: [...prev.pageStats, pageStatEntry]
+        pageStats: []
       }));
 
       const abortController = new AbortController();
       setBulkSyncAbortController(abortController);
 
-      // Start processing resources
-      processBulkSync(resources, currentEntity, isForce, abortController.signal, page, autoSwitch);
+      // Process all entities sequentially
+      await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
+    }
+  };
+
+  const processMultipleEntities = async (
+    entitiesToProcess: SyncEntity[], 
+    isForce: boolean, 
+    page: number, 
+    limit: number, 
+    autoSwitch: boolean, 
+    signal: AbortSignal
+  ) => {
+    for (let entityIndex = 0; entityIndex < entitiesToProcess.length; entityIndex++) {
+      if (signal.aborted) break;
+
+      const currentEntity = entitiesToProcess[entityIndex];
+      const isLastEntity = entityIndex === entitiesToProcess.length - 1;
+      setCurrentEntity(currentEntity);
+      
+      console.log(`Processing entity ${entityIndex + 1}/${entitiesToProcess.length}: ${currentEntity}`);
+
+      try {
+        // Fetch resources from the current entity
+        const resources = await fetchResources(currentEntity, page, limit);
+        setBulkSyncResources(prev => [...prev, ...resources]); // Accumulate all resources
+        
+        if (resources.length === 0) {
+          console.log(`No resources found for entity: ${currentEntity}`);
+          continue;
+        }
+
+        // Create page stat entry for this entity
+        const pageStatEntry = {
+          page,
+          entity: currentEntity,
+          limit,
+          processed: 0,
+          succeeded: 0,
+          failed: 0,
+          startTime: new Date()
+        };
+        
+        // Update progress with new entity resources
+        setBulkSyncProgress(prev => ({
+          ...prev,
+          total: prev.total + resources.length,
+          pageStats: [...prev.pageStats, pageStatEntry]
+        }));
+
+        // Process resources for this entity
+        await processBulkSync(
+          resources, 
+          currentEntity, 
+          isForce, 
+          signal, 
+          page, 
+          autoSwitch && isLastEntity, // Only enable autoSwitch for the last entity
+          isLastEntity
+        );
+        
+        if (signal.aborted) break;
+        
+      } catch (error) {
+        console.error(`Failed to process entity ${currentEntity}:`, error);
+        // Continue with next entity even if this one fails
+      }
+    }
+
+    // Handle completion and auto-switching after all entities are processed
+    if (!signal.aborted) {
+      // Mark as completed if no auto-switch or if this is not an auto-switch operation
+      if (!autoSwitch) {
+        setBulkSyncProgress(prev => ({
+          ...prev,
+          isRunning: false,
+          currentItem: null
+        }));
+        setBulkSyncAbortController(null);
+      }
+    }
+
+    // If auto-switch is enabled and we've processed all entities, try next page
+    if (autoSwitch && !signal.aborted && autoSwitchEnabled) {
+      setTimeout(async () => {
+        if (!autoSwitchEnabled) {
+          console.log("Auto-switch was disabled during delay. Stopping auto-pagination.");
+          return;
+        }
+        
+        try {
+          const nextPage = page + 1;
+          console.log(`Auto-switching to page ${nextPage} for all selected entities...`);
+          
+          // Check if any entity has resources on the next page
+          let hasNextPageResources = false;
+          for (const entity of entitiesToProcess) {
+            const nextResources = await fetchResources(entity, nextPage, currentLimit);
+            if (nextResources.length > 0) {
+              hasNextPageResources = true;
+              break;
+            }
+          }
+          
+          if (hasNextPageResources) {
+            if (!autoSwitchEnabled) {
+              console.log("Auto-switch was disabled during fetch. Stopping auto-pagination.");
+              return;
+            }
+            
+            console.log(`Found resources on page ${nextPage}. Starting auto-sync...`);
+            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true);
+          } else {
+            console.log("No more resources found on any entity. Auto-pagination stopped.");
+            setAutoSwitchEnabled(false);
+            setBulkSyncProgress(prev => ({
+              ...prev,
+              isRunning: false,
+              currentItem: null
+            }));
+            setBulkSyncAbortController(null);
+          }
+        } catch (error) {
+          console.error("Auto-pagination failed:", error);
+          setAutoSwitchEnabled(false);
+          setBulkSyncProgress(prev => ({
+            ...prev,
+            isRunning: false,
+            currentItem: null
+          }));
+          setBulkSyncAbortController(null);
+        }
+      }, 2000); // 2 second delay
     }
   };
 
@@ -199,7 +312,8 @@ const Synchronisation = () => {
     isForce: boolean,
     signal: AbortSignal,
     page: number,
-    autoSwitch: boolean = false
+    autoSwitch: boolean = false,
+    isLastEntity: boolean = true // New parameter to know if this is the last entity being processed
   ) => {
     let processed = 0;
     let succeeded = 0;
@@ -243,10 +357,10 @@ const Synchronisation = () => {
         processed++;
         setBulkSyncProgress(prev => ({
           ...prev,
-          processed,
-          succeeded,
-          failed,
-          errors: [...errors],
+          processed: prev.processed + 1, // Increment global processed count
+          succeeded: prev.succeeded + (succeeded > prev.succeeded ? 1 : 0),
+          failed: prev.failed + (failed > prev.failed ? 1 : 0),
+          errors: [...prev.errors, ...errors.slice(prev.errors.length)],
           pageStats: prev.pageStats.map((stat, index) => 
             index === prev.pageStats.length - 1 // Update the last (current) page stat
               ? {
@@ -264,12 +378,13 @@ const Synchronisation = () => {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // Mark page as completed with end time and duration
+    // Mark current entity page as completed with end time and duration
     const endTime = new Date();
     setBulkSyncProgress(prev => ({
       ...prev,
-      isRunning: false,
-      currentItem: null,
+      // Only set isRunning to false if this is the last entity and no auto-switch
+      isRunning: isLastEntity && !autoSwitch,
+      currentItem: isLastEntity ? null : prev.currentItem,
       pageStats: prev.pageStats.map((stat, index) => 
         index === prev.pageStats.length - 1 // Update the last (current) page stat
           ? {
@@ -280,46 +395,13 @@ const Synchronisation = () => {
           : stat
       )
     }));
-    setBulkSyncAbortController(null);
 
-    // Auto-switch to next page if enabled and we processed items successfully
-    console.log(`Auto-switch check: autoSwitch=${autoSwitch}, autoSwitchEnabled=${autoSwitchEnabled}, processed=${processed}, aborted=${signal.aborted}`);
-    if (autoSwitch && processed > 0 && !signal.aborted) {
-      // Small delay before switching to next page
-      setTimeout(async () => {
-        // Double-check that auto-switch is still enabled before proceeding
-        if (!autoSwitchEnabled) {
-          console.log("Auto-switch was disabled during delay. Stopping auto-pagination.");
-          return;
-        }
-        
-        try {
-          const nextPage = page + 1;
-          console.log(`Auto-switching to page ${nextPage}...`);
-          
-          // Try to fetch next page to see if it has data
-          const nextResources = await fetchResources(entity, nextPage, currentLimit);
-          
-          if (nextResources.length > 0) {
-            // Final check before starting next page sync
-            if (!autoSwitchEnabled) {
-              console.log("Auto-switch was disabled during fetch. Stopping auto-pagination.");
-              return;
-            }
-            
-            // Start sync for next page with same settings
-            console.log(`Found ${nextResources.length} resources on page ${nextPage}. Starting auto-sync...`);
-            await handleStartBulkSync([entity], isForce, nextPage, currentLimit, true);
-          } else {
-            console.log("No more resources found. Auto-pagination stopped.");
-            setAutoSwitchEnabled(false);
-          }
-        } catch (error) {
-          console.error("Auto-pagination failed:", error);
-          setAutoSwitchEnabled(false);
-        }
-      }, 2000); // 2 second delay
+    // Only clear abort controller if this is the last entity and no auto-switch
+    if (isLastEntity && !autoSwitch) {
+      setBulkSyncAbortController(null);
     }
+
+    // Note: Auto-switch logic is now handled in processMultipleEntities
   };
 
   const handlePauseBulkSync = () => {
