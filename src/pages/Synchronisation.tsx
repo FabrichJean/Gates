@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import WaterProgressModal from "../components/WaterProgressModal";
 import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
 import type { SyncEntity, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
-import { FaSyncAlt, FaTasks } from "react-icons/fa";
+import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock } from "react-icons/fa";
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { singleSync } from "../api/videos";

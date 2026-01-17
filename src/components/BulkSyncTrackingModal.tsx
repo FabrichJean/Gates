@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSyncAlt, FaPlay, FaPause, FaStop } from "react-icons/fa";
+import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock } from "react-icons/fa";
 
 export type SyncEntity = "video" | "post" | "all";
 
@@ -423,9 +423,24 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                               <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Page</th>
                               <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Entity</th>
                               <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">Items</th>
-                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">✅ Success</th>
-                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">❌ Failed</th>
-                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">⏱️ Duration</th>
+                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">
+                                <div className="flex items-center justify-center gap-1">
+                                  <FaCheck className="w-3 h-3 text-green-600" />
+                                  Success
+                                </div>
+                              </th>
+                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">
+                                <div className="flex items-center justify-center gap-1">
+                                  <FaTimes className="w-3 h-3 text-red-600" />
+                                  Failed
+                                </div>
+                              </th>
+                              <th className="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300">
+                                <div className="flex items-center justify-center gap-1">
+                                  <FaClock className="w-3 h-3 text-gray-600" />
+                                  Duration
+                                </div>
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
