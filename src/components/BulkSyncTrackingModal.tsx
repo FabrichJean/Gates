@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock } from "react-icons/fa";
+import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 export type SyncEntity = "video" | "post" | "all";
 
@@ -377,9 +377,10 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           onStartSync(selectedEntity, isForce, newPage, limit);
                         }}
                         disabled={progress.isRunning}
-                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors"
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
                       >
                         Next Page
+                        <FaArrowRight className="w-3 h-3" />
                       </button>
                       {currentPage > 1 && (
                         <button
@@ -389,8 +390,9 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                             onStartSync(selectedEntity, isForce, newPage, limit);
                           }}
                           disabled={progress.isRunning}
-                          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors"
+                          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
                         >
+                          <FaArrowLeft className="w-3 h-3" />
                           Prev Page
                         </button>
                       )}

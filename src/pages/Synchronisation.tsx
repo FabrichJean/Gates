@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import WaterProgressModal from "../components/WaterProgressModal";
 import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
 import type { SyncEntity, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
-import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock } from "react-icons/fa";
+import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { singleSync } from "../api/videos";
@@ -451,16 +451,18 @@ const Synchronisation = () => {
                           {currentPage > 1 && (
                             <button
                               onClick={() => handleStartBulkSync(currentEntity, false, currentPage - 1, currentLimit)}
-                              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors"
+                              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                             >
-                              ← Prev
+                              <FaArrowLeft className="w-3 h-3" />
+                              Prev
                             </button>
                           )}
                           <button
                             onClick={() => handleStartBulkSync(currentEntity, false, currentPage + 1, currentLimit)}
-                            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+                            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                           >
-                            Next →
+                            Next
+                            <FaArrowRight className="w-3 h-3" />
                           </button>
                         </div>
                       )}
