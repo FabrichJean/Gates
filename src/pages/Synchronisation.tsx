@@ -6,7 +6,7 @@ import useCardFlottant from "../hooks/useCardFlottant";
 import { Link } from "react-router-dom";
 import WaterProgressModal from "../components/WaterProgressModal";
 import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
-import type { SyncEntity, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
+import type { SyncEntity, SyncEntitySelection, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
 import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
@@ -86,7 +86,7 @@ const Synchronisation = () => {
     try {
       let resources: BulkSyncResource[] = [];
       
-      if (entity === "video" || entity === "all") {
+      if (entity === "video") {
         const videoResponse = await getVideosForBulkSync(page, limit);
         // Handle different response formats
         const videos = videoResponse.data.data || videoResponse.data.videos || videoResponse.data;
@@ -101,7 +101,7 @@ const Synchronisation = () => {
         }
       }
       
-      if (entity === "post" || entity === "all") {
+      if (entity === "post") {
         const postResponse = await getPostsForBulkSync(page, limit);
         // Handle different response formats
         const posts = postResponse.data.data || postResponse.data.posts || postResponse.data;
@@ -116,7 +116,7 @@ const Synchronisation = () => {
         }
       }
       
-      if (entity === "video_for_app" || entity === "all") {
+      if (entity === "video_for_app") {
         const videoForAppResponse = await getVideoForAppForBulkSync(page, limit);
         // Handle different response formats
         const videosForApp = videoForAppResponse.data.videos || videoForAppResponse.data.videosForApp || videoForAppResponse.data;
@@ -138,23 +138,32 @@ const Synchronisation = () => {
     }
   };
 
-  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false) => {
+  const handleStartBulkSync = async (entities: SyncEntitySelection, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false) => {
     try {
-      console.log(`handleStartBulkSync called with: entity=${entity}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}`);
+      console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}`);
 
+      // Determine which entities to process
+      const entitiesToProcess: SyncEntity[] = entities === "all" 
+        ? ["video", "post", "video_for_app"] 
+        : (Array.isArray(entities) ? entities : [entities]);
+      
+      // For now, process the first entity (we can expand this later)
+      const currentEntity = entitiesToProcess[0];
+      
       // Store current pagination info
       setCurrentPage(page);
       setCurrentLimit(limit);
-      setCurrentEntity(entity);
+      setCurrentEntity(currentEntity);
       setAutoSwitchEnabled(autoSwitch);
       
-      const resources = await fetchResources(entity, page, limit);
+      // Fetch resources from the current entity
+      const resources = await fetchResources(currentEntity, page, limit);
       setBulkSyncResources(resources);
       
       // Create page stat entry
       const pageStatEntry = {
         page,
-        entity,
+        entity: currentEntity,
         limit,
         processed: 0,
         succeeded: 0,
@@ -178,7 +187,7 @@ const Synchronisation = () => {
       setBulkSyncAbortController(abortController);
 
       // Start processing resources
-      processBulkSync(resources, entity, isForce, abortController.signal, page, autoSwitch);
+      processBulkSync(resources, currentEntity, isForce, abortController.signal, page, autoSwitch);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
     }
@@ -215,12 +224,8 @@ const Synchronisation = () => {
       try {
         // Determine entity type for sync API call
         let entityType: string;
-        if (entity === "all") {
-          // Use the source field to determine the correct entity type
-          entityType = resource.source || "video"; // Fallback to video if source is not set
-        } else {
-          entityType = entity;
-        }
+        // Use the source field to determine the correct entity type, or use the current entity
+        entityType = resource.source || entity;
         
         await singleSync({
           entity: entityType,
@@ -304,7 +309,7 @@ const Synchronisation = () => {
             
             // Start sync for next page with same settings
             console.log(`Found ${nextResources.length} resources on page ${nextPage}. Starting auto-sync...`);
-            await handleStartBulkSync(entity, isForce, nextPage, currentLimit, true);
+            await handleStartBulkSync([entity], isForce, nextPage, currentLimit, true);
           } else {
             console.log("No more resources found. Auto-pagination stopped.");
             setAutoSwitchEnabled(false);
@@ -528,7 +533,7 @@ const Synchronisation = () => {
                         <div className="flex items-center gap-2">
                           {currentPage > 1 && (
                             <button
-                              onClick={() => handleStartBulkSync(currentEntity, false, currentPage - 1, currentLimit)}
+                              onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit)}
                               className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                             >
                               <FaArrowLeft className="w-3 h-3" />
@@ -536,7 +541,7 @@ const Synchronisation = () => {
                             </button>
                           )}
                           <button
-                            onClick={() => handleStartBulkSync(currentEntity, false, currentPage + 1, currentLimit)}
+                            onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit)}
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                           >
                             Next

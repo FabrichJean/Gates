@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
-export type SyncEntity = "video" | "post" | "video_for_app" | "all";
+export type SyncEntity = "video" | "post" | "video_for_app";
+export type SyncEntitySelection = SyncEntity[] | "all";
 
 export interface BulkSyncResource {
   id: number;
@@ -40,7 +41,7 @@ export interface BulkSyncProgress {
 interface BulkSyncTrackingModalProps {
   open: boolean;
   onClose: () => void;
-  onStartSync: (entity: SyncEntity, isForce: boolean, page: number, limit: number, autoSwitch?: boolean) => void;
+  onStartSync: (entities: SyncEntitySelection, isForce: boolean, page: number, limit: number, autoSwitch?: boolean) => void;
   progress: BulkSyncProgress;
   onPause: () => void;
   onResume: () => void;
@@ -58,7 +59,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   onStop,
   onDisableAutoSwitch,
 }) => {
-  const [selectedEntity, setSelectedEntity] = useState<SyncEntity>("video");
+  const [selectedEntities, setSelectedEntities] = useState<SyncEntity[]>(["video"]);
   const [isForce, setIsForce] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,7 +82,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
     console.log(`Starting sync with auto-switch: ${autoSwitchPage}`);
     console.log(autoSwitchPage);
 
-    onStartSync(selectedEntity, isForce, currentPage, limit, autoSwitchPage);
+    const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
+    onStartSync(entities, isForce, currentPage, limit, autoSwitchPage);
   };
 
   if (!open) return null;
@@ -126,25 +128,61 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Select Entity Type
                   </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {[
                       { value: "video" as SyncEntity, label: "Videos" },
                       { value: "post" as SyncEntity, label: "Posts" },
                       { value: "video_for_app" as SyncEntity, label: "Videos For App" },
-                      { value: "all" as SyncEntity, label: "All" },
                     ].map((entity) => (
-                      <button
-                        key={entity.value}
-                        onClick={() => setSelectedEntity(entity.value)}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          selectedEntity === entity.value
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
-                            : "border-gray-300 dark:border-gray-600 hover:border-gray-400 text-gray-700 dark:text-gray-300"
-                        }`}
-                      >
-                        {entity.label}
-                      </button>
+                      <label key={entity.value} className="flex items-center p-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 cursor-pointer transition-all">
+                        <input
+                          type="checkbox"
+                          checked={selectedEntities.includes(entity.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedEntities([...selectedEntities, entity.value]);
+                            } else {
+                              setSelectedEntities(selectedEntities.filter(e => e !== entity.value));
+                            }
+                          }}
+                          className="checkbox checkbox-primary mr-3"
+                        />
+                        <span className="text-gray-700 dark:text-gray-300">{entity.label}</span>
+                      </label>
                     ))}
+                    
+                    <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <label className="flex items-center justify-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedEntities.length === 3}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedEntities(["video", "post", "video_for_app"]);
+                            } else {
+                              setSelectedEntities([]);
+                            }
+                          }}
+                          className="checkbox checkbox-secondary mr-3"
+                        />
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Select All</span>
+                      </label>
+                    </div>
+                    
+                    {selectedEntities.length > 0 && (
+                      <div className="md:col-span-2 mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-1">
+                          Selected: {selectedEntities.length} entity{selectedEntities.length !== 1 ? 'ies' : 'y'}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedEntities.map(entity => (
+                            <span key={entity} className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded text-xs">
+                              {entity === "video_for_app" ? "Videos For App" : entity === "video" ? "Videos" : "Posts"}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -252,10 +290,16 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                 {/* Start Button */}
                 <button
                   onClick={handleStart}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  disabled={selectedEntities.length === 0}
+                  className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                    selectedEntities.length === 0
+                      ? "bg-gray-400 cursor-not-allowed text-gray-200"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
                 >
                   <FaPlay className="w-4 h-4" />
                   Start Synchronization
+                  {selectedEntities.length === 0 && " (Select at least one entity)"}
                 </button>
               </div>
             </div>
@@ -486,7 +530,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         onClick={() => {
                           const newPage = currentPage + 1;
                           setCurrentPage(newPage);
-                          onStartSync(selectedEntity, isForce, newPage, limit, autoSwitchPage);
+                          const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
+                          onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
                         }}
                         disabled={progress.isRunning}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
@@ -499,7 +544,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           onClick={() => {
                             const newPage = currentPage - 1;
                             setCurrentPage(newPage);
-                            onStartSync(selectedEntity, isForce, newPage, limit, autoSwitchPage);
+                            const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
+                            onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
                           }}
                           disabled={progress.isRunning}
                           className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
