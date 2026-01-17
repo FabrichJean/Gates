@@ -128,3 +128,17 @@ export async function updatePostBannedStatus(id: string | number, isBanned: bool
       }
   });
 }
+
+// Get posts for bulk sync (page 1 with limited results)
+export async function getPostsForBulkSync(page: number = 1, limit: number = 50) {
+  return await axios.get(`${apiURL}/posts`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    params: {
+      page,
+      limit,
+      select: 'id,title,status' // Only get essential fields
+    }
+  });
+}

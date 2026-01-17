@@ -5,12 +5,17 @@ import useSyncErrors from "../hooks/useSyncErrors";
 import useCardFlottant from "../hooks/useCardFlottant";
 import { Link } from "react-router-dom";
 import WaterProgressModal from "../components/WaterProgressModal";
-import { FaSyncAlt } from "react-icons/fa";
+import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
+import type { SyncEntity, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
+import { FaSyncAlt, FaTasks } from "react-icons/fa";
+import { getVideosForBulkSync } from "../api/videos";
+import { getPostsForBulkSync } from "../api/posts";
+import { singleSync } from "../api/videos";
 
 const Synchronisation = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"firstTab" | "errorList">(
+  const [activeTab, setActiveTab] = useState<"firstTab" | "errorList" | "bulkSync">(
     "errorList"
   );
 
@@ -21,6 +26,21 @@ const Synchronisation = () => {
   const [totalToProcess, setTotalToProcess] = useState(0);
   const [currentItem, setCurrentItem] = useState<number | null>(null);
   const [onlyUnresolved, setOnlyUnresolved] = useState(false);
+
+  // Bulk sync state
+  const [bulkSyncOpen, setBulkSyncOpen] = useState(false);
+  const [bulkSyncProgress, setBulkSyncProgress] = useState<BulkSyncProgress>({
+    processed: 0,
+    total: 0,
+    failed: 0,
+    succeeded: 0,
+    currentItem: null,
+    isRunning: false,
+    isPaused: false,
+    errors: []
+  });
+  const [bulkSyncResources, setBulkSyncResources] = useState<BulkSyncResource[]>([]);
+  const [bulkSyncAbortController, setBulkSyncAbortController] = useState<AbortController | null>(null);
 
   const { show } = useCardFlottant();
 
@@ -55,6 +75,157 @@ const Synchronisation = () => {
     }
   };
 
+  // Bulk sync functions
+  const fetchResources = async (entity: SyncEntity): Promise<BulkSyncResource[]> => {
+    try {
+      let resources: BulkSyncResource[] = [];
+      
+      if (entity === "video" || entity === "all") {
+        const videoResponse = await getVideosForBulkSync(1, 50);
+        const videos = videoResponse.data.videos || videoResponse.data;
+        if (Array.isArray(videos)) {
+          resources.push(...videos.map((v: any) => ({
+            id: v.id,
+            title: v.title,
+            status: v.status,
+          })));
+        }
+      }
+      
+      if (entity === "post" || entity === "all") {
+        const postResponse = await getPostsForBulkSync(1, 50);
+        const posts = postResponse.data.posts || postResponse.data;
+        if (Array.isArray(posts)) {
+          resources.push(...posts.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            status: p.status,
+          })));
+        }
+      }
+      
+      return resources;
+    } catch (error) {
+      console.error("Failed to fetch resources:", error);
+      return [];
+    }
+  };
+
+  const handleStartBulkSync = async (entity: SyncEntity, isForce: boolean) => {
+    try {
+      const resources = await fetchResources(entity);
+      setBulkSyncResources(resources);
+      
+      setBulkSyncProgress({
+        processed: 0,
+        total: resources.length,
+        failed: 0,
+        succeeded: 0,
+        currentItem: null,
+        isRunning: true,
+        isPaused: false,
+        errors: []
+      });
+
+      const abortController = new AbortController();
+      setBulkSyncAbortController(abortController);
+
+      // Start processing resources
+      processBulkSync(resources, entity, isForce, abortController.signal);
+    } catch (error) {
+      console.error("Failed to start bulk sync:", error);
+    }
+  };
+
+  const processBulkSync = async (
+    resources: BulkSyncResource[],
+    entity: SyncEntity,
+    isForce: boolean,
+    signal: AbortSignal
+  ) => {
+    let processed = 0;
+    let succeeded = 0;
+    let failed = 0;
+    const errors: Array<{ resourceId: number; error: string }> = [];
+
+    for (const resource of resources) {
+      if (signal.aborted) break;
+
+      // Check if paused
+      while (bulkSyncProgress.isPaused && !signal.aborted) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      if (signal.aborted) break;
+
+      setBulkSyncProgress(prev => ({
+        ...prev,
+        currentItem: resource
+      }));
+
+      try {
+        const entityType = entity === "all" ? (resource.title ? "video" : "post") : entity;
+        await singleSync({
+          entity: entityType,
+          origin_id: resource.id,
+          isForce
+        });
+        succeeded++;
+      } catch (error: any) {
+        failed++;
+        errors.push({
+          resourceId: resource.id,
+          error: error?.response?.data?.message || error?.message || "Unknown error"
+        });
+      } finally {
+        processed++;
+        setBulkSyncProgress(prev => ({
+          ...prev,
+          processed,
+          succeeded,
+          failed,
+          errors: [...errors]
+        }));
+      }
+
+      // Small delay to prevent overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    setBulkSyncProgress(prev => ({
+      ...prev,
+      isRunning: false,
+      currentItem: null
+    }));
+    setBulkSyncAbortController(null);
+  };
+
+  const handlePauseBulkSync = () => {
+    setBulkSyncProgress(prev => ({
+      ...prev,
+      isPaused: true
+    }));
+  };
+
+  const handleResumeBulkSync = () => {
+    setBulkSyncProgress(prev => ({
+      ...prev,
+      isPaused: false
+    }));
+  };
+
+  const handleStopBulkSync = () => {
+    if (bulkSyncAbortController) {
+      bulkSyncAbortController.abort();
+    }
+    setBulkSyncProgress(prev => ({
+      ...prev,
+      isRunning: false,
+      isPaused: false
+    }));
+    setBulkSyncAbortController(null);
+  };
+
   return (
     <div className="h-screen w-full flex p-2">
       <div className="w-full h-full flex flex-col">
@@ -62,6 +233,15 @@ const Synchronisation = () => {
         <div className="w-full flex justify-between gap-2 items-center">
           <h2 className="text-xl md:text-2xl font-semibold mb-4">Synchronisation</h2>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setBulkSyncOpen(true)}
+              className="rounded-lg cursor-pointer flex items-center justify-center gap-2 px-2 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 text-green-800 dark:text-green-300 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-100 dark:hover:bg-green-800 transition-all"
+            >
+              <FaTasks />
+              <span className="md:inline hidden text-green-600 dark:text-green-400">
+                Bulk Sync Tracking
+              </span>
+            </button>
             <button
               onClick={handleOpenFor.bind(null, undefined)}
               className=" rounded-lg cursor-pointer flex items-center justify-center gap-2 px-2 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
@@ -122,6 +302,13 @@ const Synchronisation = () => {
             >
               Error List
             </button>
+            <button
+              className={`tab tab-bordered ${activeTab === "bulkSync" ? "tab-active" : ""
+                }`}
+              onClick={() => setActiveTab("bulkSync")}
+            >
+              Bulk Sync Status
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -151,6 +338,159 @@ const Synchronisation = () => {
                   here.
                 </p>
               </div>
+            </div>
+          </div>
+        ) : activeTab === "bulkSync" ? (
+          <div className="w-full flex flex-col mt-6">
+            <h2 className="font-bold pb-2 text-green-400">Bulk Sync Status</h2>
+            <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default p-6">
+              {bulkSyncProgress.total === 0 ? (
+                <div className="text-center text-gray-500">
+                  <h3 className="text-lg font-medium mb-2">
+                    No Bulk Sync in Progress
+                  </h3>
+                  <p className="mb-4">
+                    Start a bulk synchronization to track progress here.
+                  </p>
+                  <button
+                    onClick={() => setBulkSyncOpen(true)}
+                    className="flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    <FaTasks className="w-4 h-4" />
+                    Start Bulk Sync
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Progress Overview */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {bulkSyncProgress.processed}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Processed</div>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                        {bulkSyncProgress.total}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {bulkSyncProgress.succeeded}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Succeeded</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {bulkSyncProgress.failed}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Failed</div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden mb-2">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300" 
+                        style={{ width: `${bulkSyncProgress.total > 0 ? (bulkSyncProgress.processed / bulkSyncProgress.total) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                      {Math.round(bulkSyncProgress.total > 0 ? (bulkSyncProgress.processed / bulkSyncProgress.total) * 100 : 0)}% Complete
+                    </div>
+                  </div>
+
+                  {/* Current Item */}
+                  {bulkSyncProgress.currentItem && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                      <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                        Currently Processing:
+                      </h5>
+                      <div className="text-sm text-blue-700 dark:text-blue-300">
+                        ID: {bulkSyncProgress.currentItem.id} - {bulkSyncProgress.currentItem.title || "Untitled"}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Status */}
+                  <div className="text-center">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+                      bulkSyncProgress.isRunning 
+                        ? bulkSyncProgress.isPaused
+                          ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300"
+                          : "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                        : bulkSyncProgress.processed === bulkSyncProgress.total && bulkSyncProgress.total > 0
+                          ? "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                          : "bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300"
+                    }`}>
+                      {bulkSyncProgress.isRunning 
+                        ? bulkSyncProgress.isPaused 
+                          ? "Paused" 
+                          : "Running..."
+                        : bulkSyncProgress.processed === bulkSyncProgress.total && bulkSyncProgress.total > 0
+                          ? "Completed"
+                          : "Stopped"
+                      }
+                    </div>
+                  </div>
+
+                  {/* Errors */}
+                  {bulkSyncProgress.errors.length > 0 && (
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                      <h5 className="font-medium text-red-600 dark:text-red-400 mb-3">
+                        Recent Errors ({bulkSyncProgress.errors.length})
+                      </h5>
+                      <div className="max-h-32 overflow-y-auto space-y-2">
+                        {bulkSyncProgress.errors.slice(-5).map((error, index) => (
+                          <div key={index} className="text-sm border-l-2 border-red-400 pl-2">
+                            <div className="font-medium text-red-700 dark:text-red-300">
+                              Resource ID: {error.resourceId}
+                            </div>
+                            <div className="text-red-600 dark:text-red-400 text-xs">
+                              {error.error}
+                            </div>
+                          </div>
+                        ))}
+                        {bulkSyncProgress.errors.length > 5 && (
+                          <div className="text-xs text-gray-500 text-center">
+                            ... and {bulkSyncProgress.errors.length - 5} more errors
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => setBulkSyncOpen(true)}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      View Details
+                    </button>
+                    {!bulkSyncProgress.isRunning && bulkSyncProgress.processed > 0 && (
+                      <button
+                        onClick={() => setBulkSyncProgress({
+                          processed: 0,
+                          total: 0,
+                          failed: 0,
+                          succeeded: 0,
+                          currentItem: null,
+                          isRunning: false,
+                          isPaused: false,
+                          errors: []
+                        })}
+                        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                      >
+                        Clear Status
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -306,6 +646,15 @@ const Synchronisation = () => {
           onClose={() => {
             setProcessingAll(false);
           }}
+        />
+        <BulkSyncTrackingModal
+          open={bulkSyncOpen}
+          onClose={() => setBulkSyncOpen(false)}
+          onStartSync={handleStartBulkSync}
+          progress={bulkSyncProgress}
+          onPause={handlePauseBulkSync}
+          onResume={handleResumeBulkSync}
+          onStop={handleStopBulkSync}
         />
       </div>
     </div>

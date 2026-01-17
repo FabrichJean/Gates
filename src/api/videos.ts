@@ -149,3 +149,17 @@ export async function updateBannedStatus(videoId: string | number, isBanned: boo
         },
     });
 }
+
+// Get videos for bulk sync (page 1 with limited results)
+export async function getVideosForBulkSync(page: number = 1, limit: number = 50) {
+    return await axios.get(`${apiURL}/videos`, {
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+        },
+        params: {
+            page,
+            limit,
+            select: 'id,title,status' // Only get essential fields
+        }
+    });
+}
