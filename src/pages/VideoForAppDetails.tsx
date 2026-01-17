@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
-} from "lucide-react";
+} from "lucide-react"; 
 import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
 import { apiURL } from '../constant';
@@ -70,6 +70,10 @@ const VideoForAppDetails: React.FC = () => {
 
   const [modifying, setModifying] = useState(false);
   const [showCover, setShowCover] = useState<boolean>(true);
+
+  const isPortrait = React.useMemo(() => {
+    return video?.type === "1";
+  }, [video]);
 
   // Platform data
   const { data: platforms } = usePlatformReactive();
@@ -186,22 +190,32 @@ const VideoForAppDetails: React.FC = () => {
                   >
                     {/* Navigation */}
                     <div className="flex items-center gap-2">
-                      {hasPrev && (
+                      <motion.div whileHover={{ scale: hasPrev ? 1.05 : 1 }}>
                         <Link
-                          to={`/app-videos/${prevVideo?.id}`}
-                          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                          to={hasPrev ? `/app-videos/${prevVideo?.id}` : '#'}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
+                            hasPrev
+                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                          }`}
+                          onClick={(e) => !hasPrev && e.preventDefault()}
                         >
                           <ChevronLeft className="w-5 h-5" />
                         </Link>
-                      )}
-                      {hasNext && (
+                      </motion.div>
+                      <motion.div whileHover={{ scale: hasNext ? 1.05 : 1 }}>
                         <Link
-                          to={`/app-videos/${nextVideo?.id}`}
-                          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                          to={hasNext ? `/app-videos/${nextVideo?.id}` : '#'}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
+                            hasNext
+                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                          }`}
+                          onClick={(e) => !hasNext && e.preventDefault()}
                         >
                           <ChevronRight className="w-5 h-5" />
                         </Link>
-                      )}
+                      </motion.div>
                     </div>
 
                     {/* Actions */}
@@ -252,8 +266,14 @@ const VideoForAppDetails: React.FC = () => {
                   transition={{ delay: 0.3 }}
                   className="lg:col-span-2"
                 >
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-                    <div className={`aspect-video bg-black relative ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}>
+                  <div className="bg-white dark:bg-black rounded-sm shadow-lg overflow-hidden">
+                    <div
+                      className={`relative overflow-hidden rounded-sm shadow-2xl transition-all duration-300 ${
+                        isPortrait
+                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                      } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
+                    >
                       {video.isBanned && (
                         <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
                           <div className="flex gap-2 pointer-events-auto">
