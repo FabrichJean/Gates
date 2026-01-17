@@ -183,7 +183,7 @@ export async function getVideoForAppForBulkSync(page: number = 1, limit: number 
         params: {
             page,
             limit,
-            select: 'id,cn_title,en_title,status', // Only get essential fields
+            select: 'id,cn_title,en_title,status,cover', // Include cover field
             checking: 'checked'
         }
     });

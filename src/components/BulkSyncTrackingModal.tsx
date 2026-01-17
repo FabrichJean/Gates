@@ -9,6 +9,7 @@ export interface BulkSyncResource {
   name?: string;
   status?: string;
   source?: SyncEntity; // Track the source entity type
+  cover?: string; // Cover image URL
 }
 
 export interface BulkSyncProgress {
@@ -356,11 +357,44 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
               {/* Current Item */}
               {progress.currentItem && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                  <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                  <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-3">
                     Currently Processing:
                   </h5>
-                  <div className="text-sm text-blue-700 dark:text-blue-300">
-                    ID: {progress.currentItem.id} - {progress.currentItem.title || progress.currentItem.name || "Untitled"}
+                  <div className="flex items-center gap-4">
+                    {progress.currentItem.cover && (
+                      <div className="flex-shrink-0">
+                        <img
+                          src={progress.currentItem.cover}
+                          alt={progress.currentItem.title || "Cover"}
+                          className="w-16 h-16 object-cover rounded-lg border border-blue-200 dark:border-blue-700"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        {progress.currentItem.title || progress.currentItem.name || "Untitled"}
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                        ID: {progress.currentItem.id}
+                        {progress.currentItem.source && (
+                          <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                            progress.currentItem.source === 'video' 
+                              ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
+                              : progress.currentItem.source === 'post'
+                              ? 'bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300'
+                              : progress.currentItem.source === 'video_for_app'
+                              ? 'bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300'
+                              : 'bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'
+                          }`}>
+                            {progress.currentItem.source.toUpperCase().replace('_', ' ')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

@@ -96,6 +96,7 @@ const Synchronisation = () => {
             title: v.title || v.name || `Video #${v.id}`,
             status: v.status,
             source: "video" as SyncEntity,
+            cover: v.cover,
           })));
         }
       }
@@ -110,6 +111,7 @@ const Synchronisation = () => {
             title: p.title || p.name || `Post #${p.id}`,
             status: p.status,
             source: "post" as SyncEntity,
+            cover: p.cover,
           })));
         }
       }
@@ -124,6 +126,7 @@ const Synchronisation = () => {
             title: v.cn_title || v.en_title || v.title || `VideoForApp #${v.id}`,
             status: v.status,
             source: "video_for_app" as SyncEntity,
+            cover: v.cover,
           })));
         }
       }
@@ -560,11 +563,44 @@ const Synchronisation = () => {
                   {/* Current Item */}
                   {bulkSyncProgress.currentItem && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                      <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                      <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-3">
                         Currently Processing:
                       </h5>
-                      <div className="text-sm text-blue-700 dark:text-blue-300">
-                        ID: {bulkSyncProgress.currentItem.id} - {bulkSyncProgress.currentItem.title || "Untitled"}
+                      <div className="flex items-center gap-4">
+                        {bulkSyncProgress.currentItem.cover && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={bulkSyncProgress.currentItem.cover}
+                              alt={bulkSyncProgress.currentItem.title || "Cover"}
+                              className="w-12 h-12 object-cover rounded-lg border border-blue-200 dark:border-blue-700"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                            {bulkSyncProgress.currentItem.title || "Untitled"}
+                          </div>
+                          <div className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                            ID: {bulkSyncProgress.currentItem.id}
+                            {bulkSyncProgress.currentItem.source && (
+                              <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                                bulkSyncProgress.currentItem.source === 'video' 
+                                  ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
+                                  : bulkSyncProgress.currentItem.source === 'post'
+                                  ? 'bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300'
+                                  : bulkSyncProgress.currentItem.source === 'video_for_app'
+                                  ? 'bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300'
+                                  : 'bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'
+                              }`}>
+                                {bulkSyncProgress.currentItem.source.toUpperCase().replace('_', ' ')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

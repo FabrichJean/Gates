@@ -159,7 +159,7 @@ export async function getVideosForBulkSync(page: number = 1, limit: number = 50)
         params: {
             page,
             limit,
-            select: 'id,title,status', // Only get essential fields,
+            select: 'id,title,status,cover', // Include cover field
             processing: 'done'
         }
     });
