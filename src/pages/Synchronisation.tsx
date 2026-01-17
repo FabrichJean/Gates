@@ -36,7 +36,8 @@ const Synchronisation = () => {
   const handleSubmit = async (
     optionId: string | null,
     label: number | null,
-    platformId?: number | null
+    platformId?: number | null,
+    isMode?: boolean | null
   ) => {
 
     try {
@@ -45,6 +46,7 @@ const Synchronisation = () => {
         isForce: optionId === "true",
         label: label,
         platformId: platformId,
+        isAll: typeof isMode !== "undefined" ? isMode : null,
       });
 
       reFetch();
