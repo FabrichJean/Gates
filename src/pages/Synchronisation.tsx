@@ -281,6 +281,10 @@ const Synchronisation = () => {
             }
             
             console.log(`Found resources on page ${nextPage}. Starting auto-sync...`);
+            
+            // Update current page and entity immediately for UI feedback
+            setCurrentPage(nextPage);
+            
             await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true);
           } else {
             console.log("No more resources found on any entity. Auto-pagination stopped.");
@@ -600,19 +604,61 @@ const Synchronisation = () => {
                     </div>
                   </div>
 
-                  {/* Current Batch Info */}
+                  {/* Current Status Info */}
                   <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h5 className="font-medium text-gray-800 dark:text-gray-200">
-                          Current Batch: {currentEntity.toUpperCase()}
-                        </h5>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Page {currentPage} • {currentLimit} items per page
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h5 className="font-medium text-gray-800 dark:text-gray-200">
+                            Current Status
+                          </h5>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            bulkSyncProgress.isRunning 
+                              ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                              : "bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300"
+                          }`}>
+                            {bulkSyncProgress.isRunning ? (
+                              <>
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                Processing
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                                Idle
+                              </>
+                            )}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                          <div>
+                            <span className="font-medium">Current Entity:</span>
+                            <div className={`inline-flex items-center gap-1 ml-2 px-2 py-1 rounded text-xs font-medium ${
+                              currentEntity === "video" 
+                                ? "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                                : currentEntity === "post"
+                                ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                                : "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300"
+                            }`}>
+                              {currentEntity === "video_for_app" ? "Videos For App" : currentEntity.charAt(0).toUpperCase() + currentEntity.slice(1)}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="font-medium">Current Page:</span>
+                            <span className="ml-2 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs">
+                              {currentPage}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Items per Page:</span>
+                            <span className="ml-2 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs">
+                              {currentLimit}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       {!bulkSyncProgress.isRunning && bulkSyncProgress.total > 0 && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 ml-4">
                           {currentPage > 1 && (
                             <button
                               onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit)}
@@ -1051,6 +1097,9 @@ const Synchronisation = () => {
           onResume={handleResumeBulkSync}
           onStop={handleStopBulkSync}
           onDisableAutoSwitch={handleDisableAutoSwitch}
+          currentPage={currentPage}
+          currentEntity={currentEntity}
+          currentLimit={currentLimit}
         />
       </div>
     </div>

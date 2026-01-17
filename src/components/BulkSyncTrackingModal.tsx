@@ -47,6 +47,9 @@ interface BulkSyncTrackingModalProps {
   onResume: () => void;
   onStop: () => void;
   onDisableAutoSwitch?: () => void;
+  currentPage?: number;
+  currentEntity?: SyncEntity;
+  currentLimit?: number;
 }
 
 const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
@@ -58,6 +61,9 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   onResume,
   onStop,
   onDisableAutoSwitch,
+  currentPage: externalCurrentPage,
+  currentEntity: externalCurrentEntity,
+  currentLimit: externalCurrentLimit,
 }) => {
   const [selectedEntities, setSelectedEntities] = useState<SyncEntity[]>(["video"]);
   const [isForce, setIsForce] = useState(true);
@@ -472,6 +478,59 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Current Sync Info */}
+              {progress.total > 0 && (
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-3">
+                    Current Sync Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-600 dark:text-gray-400">Page:</span>
+                      <span className="ml-2 font-mono bg-white dark:bg-gray-700 px-2 py-1 rounded text-xs">
+                        {externalCurrentPage || currentPage}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600 dark:text-gray-400">Items per page:</span>
+                      <span className="ml-2 font-mono bg-white dark:bg-gray-700 px-2 py-1 rounded text-xs">
+                        {externalCurrentLimit || limit}
+                      </span>
+                    </div>
+                    {externalCurrentEntity && (
+                      <div>
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Current entity:</span>
+                        <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                          externalCurrentEntity === "video" 
+                            ? "bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300"
+                            : externalCurrentEntity === "post"
+                            ? "bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300"
+                            : "bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300"
+                        }`}>
+                          {externalCurrentEntity === "video_for_app" ? "Videos For App" : externalCurrentEntity === "video" ? "Videos" : "Posts"}
+                        </span>
+                      </div>
+                    )}
+                    <div className={externalCurrentEntity ? "md:col-span-3" : "md:col-span-2"}>
+                      <span className="font-medium text-gray-600 dark:text-gray-400">Selected entities:</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {selectedEntities.map(entity => (
+                          <span key={entity} className={`px-2 py-1 rounded text-xs font-medium ${
+                            entity === "video" 
+                              ? "bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300"
+                              : entity === "post"
+                              ? "bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300"
+                              : "bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300"
+                          }`}>
+                            {entity === "video_for_app" ? "Videos For App" : entity === "video" ? "Videos" : "Posts"}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
