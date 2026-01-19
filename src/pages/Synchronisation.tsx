@@ -149,10 +149,15 @@ const Synchronisation = () => {
         ? ["video", "post", "video_for_app"] 
         : (Array.isArray(entities) ? entities : [entities]);
       
-      // Store current pagination info
+      // Store current pagination info and ensure auto-switch state is set immediately
       setCurrentPage(page);
       setCurrentLimit(limit);
+      
+      // Set autoSwitchEnabled state and wait a bit to ensure it takes effect
       setAutoSwitchEnabled(autoSwitch);
+      
+      // Log the auto-switch state for debugging
+      console.log(`Auto-switch enabled: ${autoSwitch}, current autoSwitchEnabled state will be updated`);
       
       // Initialize progress state for multi-entity processing
       setBulkSyncProgress(prev => ({
@@ -170,6 +175,9 @@ const Synchronisation = () => {
       const abortController = new AbortController();
       setBulkSyncAbortController(abortController);
 
+      // Small delay to ensure state updates are applied
+      await new Promise(resolve => setTimeout(resolve, 10));
+
       // Process all entities sequentially
       await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal);
     } catch (error) {
@@ -185,6 +193,8 @@ const Synchronisation = () => {
     autoSwitch: boolean, 
     signal: AbortSignal
   ) => {
+    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}`);
+    
     for (let entityIndex = 0; entityIndex < entitiesToProcess.length; entityIndex++) {
       if (signal.aborted) break;
 
@@ -192,7 +202,7 @@ const Synchronisation = () => {
       const isLastEntity = entityIndex === entitiesToProcess.length - 1;
       setCurrentEntity(currentEntity);
       
-      console.log(`Processing entity ${entityIndex + 1}/${entitiesToProcess.length}: ${currentEntity}`);
+      console.log(`Processing entity ${entityIndex + 1}/${entitiesToProcess.length}: ${currentEntity} (isLastEntity: ${isLastEntity})`);
 
       try {
         // Fetch resources from the current entity
@@ -255,12 +265,10 @@ const Synchronisation = () => {
     }
 
     // If auto-switch is enabled and we've processed all entities, try next page
-    if (autoSwitch && !signal.aborted && autoSwitchEnabled) {
+    if (autoSwitch && !signal.aborted) {
+      console.log(`Auto-switch triggered: autoSwitch=${autoSwitch}, page=${page}`);
       setTimeout(async () => {
-        if (!autoSwitchEnabled) {
-          console.log("Auto-switch was disabled during delay. Stopping auto-pagination.");
-          return;
-        }
+        console.log(`Auto-switch delay completed. Processing next page...`);
         
         try {
           const nextPage = page + 1;
@@ -277,11 +285,6 @@ const Synchronisation = () => {
           }
           
           if (hasNextPageResources) {
-            if (!autoSwitchEnabled) {
-              console.log("Auto-switch was disabled during fetch. Stopping auto-pagination.");
-              return;
-            }
-            
             console.log(`Found resources on page ${nextPage}. Starting auto-sync...`);
             
             // Update current page and entity immediately for UI feedback
@@ -308,7 +311,7 @@ const Synchronisation = () => {
           }));
           setBulkSyncAbortController(null);
         }
-      }, 2000); // 2 second delay
+      }, 1000); // Reduced delay from 2000ms to 1000ms for faster auto-switch
     }
   };
 

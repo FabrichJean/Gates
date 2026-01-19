@@ -85,9 +85,6 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   }, [open, progress.processed, progress.total]);
 
   const handleStart = () => {
-    console.log(`Starting sync with auto-switch: ${autoSwitchPage}`);
-    console.log(autoSwitchPage);
-
     const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
     onStartSync(entities, isForce, currentPage, limit, autoSwitchPage);
   };
