@@ -230,7 +230,7 @@ const Synchronisation = () => {
 
       try {
         // Fetch resources from the current entity
-        const resources = await fetchResources(currentEntity, page, limit);
+        const resources = await fetchResources(currentEntity, page, limit, platformFilter);
         setBulkSyncResources(prev => [...prev, ...resources]); // Accumulate all resources
         
         if (resources.length === 0) {
@@ -302,7 +302,7 @@ const Synchronisation = () => {
           // Check if any entity has resources on the next page
           let hasNextPageResources = false;
           for (const entity of entitiesToProcess) {
-            const nextResources = await fetchResources(entity, nextPage, currentLimit);
+            const nextResources = await fetchResources(entity, nextPage, currentLimit, platformFilter);
             if (nextResources.length > 0) {
               hasNextPageResources = true;
               break;
@@ -315,7 +315,7 @@ const Synchronisation = () => {
             // Update current page and entity immediately for UI feedback
             setCurrentPage(nextPage);
             
-            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true, plateformId);
+            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true, plateformId, platformFilter);
           } else {
             console.log("No more resources found on any entity. Auto-pagination stopped.");
             setAutoSwitchEnabled(false);
@@ -693,7 +693,7 @@ const Synchronisation = () => {
                         <div className="flex items-center gap-2 ml-4">
                           {currentPage > 1 && (
                             <button
-                              onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit, false, undefined)}
+                              onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit, false, undefined, undefined)}
                               className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                             >
                               <FaArrowLeft className="w-3 h-3" />
@@ -701,7 +701,7 @@ const Synchronisation = () => {
                             </button>
                           )}
                           <button
-                            onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit, false, undefined)}
+                            onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit, false, undefined, undefined)}
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                           >
                             Next
