@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import type { Plateform } from "../types/post";
 
 export type SyncEntity = "video" | "post" | "video_for_app";
 export type SyncEntitySelection = SyncEntity[] | "all";
@@ -41,7 +42,7 @@ export interface BulkSyncProgress {
 interface BulkSyncTrackingModalProps {
   open: boolean;
   onClose: () => void;
-  onStartSync: (entities: SyncEntitySelection, isForce: boolean, page: number, limit: number, autoSwitch?: boolean) => void;
+  onStartSync: (entities: SyncEntitySelection, isForce: boolean, page: number, limit: number, autoSwitch?: boolean, plateformId?: number) => void;
   progress: BulkSyncProgress;
   onPause: () => void;
   onResume: () => void;
@@ -50,6 +51,7 @@ interface BulkSyncTrackingModalProps {
   currentPage?: number;
   currentEntity?: SyncEntity;
   currentLimit?: number;
+  availablePlateforms?: Plateform[];
 }
 
 const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
@@ -64,6 +66,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   currentPage: externalCurrentPage,
   currentEntity: externalCurrentEntity,
   currentLimit: externalCurrentLimit,
+  availablePlateforms = [],
 }) => {
   const [selectedEntities, setSelectedEntities] = useState<SyncEntity[]>(["video"]);
   const [isForce, setIsForce] = useState(true);
@@ -71,6 +74,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [autoSwitchPage, setAutoSwitchPage] = useState(false);
+  const [selectedPlateformId, setSelectedPlateformId] = useState<number | undefined>(undefined);
   const [autoSwitchDisabled, setAutoSwitchDisabled] = useState(false);
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
@@ -86,7 +90,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
 
   const handleStart = () => {
     const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-    onStartSync(entities, isForce, currentPage, limit, autoSwitchPage);
+    onStartSync(entities, isForce, currentPage, limit, autoSwitchPage, selectedPlateformId);
   };
 
   if (!open) return null;
@@ -258,6 +262,28 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         <option value={50}>50</option>
                         <option value={100}>100</option>
                       </select>
+                    </div>
+                  </div>
+                  
+                  {/* Platform Selection */}
+                  <div className="space-y-2">
+                    <label className="block text-xs text-gray-600 dark:text-gray-400">
+                      Platform (Optional)
+                    </label>
+                    <select
+                      value={selectedPlateformId || ""}
+                      onChange={(e) => setSelectedPlateformId(e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">All Platforms</option>
+                      {availablePlateforms.map((platform) => (
+                        <option key={platform.id} value={platform.id}>
+                          {platform.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="text-xs text-gray-500">
+                      Select a specific platform to sync to, or leave empty to sync to all platforms
                     </div>
                   </div>
                   
@@ -587,7 +613,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           const newPage = currentPage + 1;
                           setCurrentPage(newPage);
                           const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-                          onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
+                          onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId);
                         }}
                         disabled={progress.isRunning}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
@@ -601,7 +627,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                             const newPage = currentPage - 1;
                             setCurrentPage(newPage);
                             const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-                            onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
+                            onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId);
                           }}
                           disabled={progress.isRunning}
                           className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"

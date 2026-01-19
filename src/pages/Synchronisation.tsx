@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SelectModal from "../components/SelectModal";
 import useSyncOption from "../hooks/useSyncOption";
 import useSyncErrors from "../hooks/useSyncErrors";
@@ -12,6 +12,8 @@ import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { getVideoForAppForBulkSync } from "../api/videoForApp";
 import { singleSync } from "../api/videos";
+import { getAllPlateformsApi } from "../api/plateforms";
+import type { Plateform } from "../types/post";
 
 const Synchronisation = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -47,6 +49,23 @@ const Synchronisation = () => {
   const [currentLimit, setCurrentLimit] = useState(10);
   const [currentEntity, setCurrentEntity] = useState<SyncEntity>("video");
   const [autoSwitchEnabled, setAutoSwitchEnabled] = useState(false);
+
+  // Platforms state
+  const [availablePlateforms, setAvailablePlateforms] = useState<Plateform[]>([]);
+
+  // Fetch available platforms on component mount
+  useEffect(() => {
+    const fetchPlateforms = async () => {
+      try {
+        const response = await getAllPlateformsApi();
+        setAvailablePlateforms(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch platforms:", error);
+      }
+    };
+    
+    fetchPlateforms();
+  }, []);
 
   const { show } = useCardFlottant();
 
@@ -140,9 +159,9 @@ const Synchronisation = () => {
     }
   };
 
-  const handleStartBulkSync = async (entities: SyncEntitySelection, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false) => {
+  const handleStartBulkSync = async (entities: SyncEntitySelection, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false, plateformId?: number) => {
     try {
-      console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}`);
+      console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}, plateformId=${plateformId}`);
 
       // Determine which entities to process
       const entitiesToProcess: SyncEntity[] = entities === "all" 
@@ -179,7 +198,7 @@ const Synchronisation = () => {
       await new Promise(resolve => setTimeout(resolve, 10));
 
       // Process all entities sequentially
-      await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal);
+      await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal, plateformId);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
     }
@@ -191,9 +210,10 @@ const Synchronisation = () => {
     page: number, 
     limit: number, 
     autoSwitch: boolean, 
-    signal: AbortSignal
+    signal: AbortSignal,
+    plateformId?: number
   ) => {
-    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}`);
+    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}, plateformId: ${plateformId}`);
     
     for (let entityIndex = 0; entityIndex < entitiesToProcess.length; entityIndex++) {
       if (signal.aborted) break;
@@ -240,7 +260,8 @@ const Synchronisation = () => {
           signal, 
           page, 
           autoSwitch && isLastEntity, // Only enable autoSwitch for the last entity
-          isLastEntity
+          isLastEntity,
+          plateformId
         );
         
         if (signal.aborted) break;
@@ -290,7 +311,7 @@ const Synchronisation = () => {
             // Update current page and entity immediately for UI feedback
             setCurrentPage(nextPage);
             
-            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true);
+            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true, plateformId);
           } else {
             console.log("No more resources found on any entity. Auto-pagination stopped.");
             setAutoSwitchEnabled(false);
@@ -322,7 +343,8 @@ const Synchronisation = () => {
     signal: AbortSignal,
     page: number,
     autoSwitch: boolean = false,
-    isLastEntity: boolean = true // New parameter to know if this is the last entity being processed
+    isLastEntity: boolean = true, // New parameter to know if this is the last entity being processed
+    plateformId?: number
   ) => {
     let processed = 0;
     let succeeded = 0;
@@ -353,7 +375,8 @@ const Synchronisation = () => {
         await singleSync({
           entity: entityType,
           origin_id: resource.id,
-          isForce
+          isForce,
+          plateformId
         });
         succeeded++;
       } catch (error: any) {
@@ -666,7 +689,7 @@ const Synchronisation = () => {
                         <div className="flex items-center gap-2 ml-4">
                           {currentPage > 1 && (
                             <button
-                              onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit)}
+                              onClick={() => handleStartBulkSync([currentEntity], false, currentPage - 1, currentLimit, false, undefined)}
                               className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                             >
                               <FaArrowLeft className="w-3 h-3" />
@@ -674,7 +697,7 @@ const Synchronisation = () => {
                             </button>
                           )}
                           <button
-                            onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit)}
+                            onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit, false, undefined)}
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                           >
                             Next
@@ -1105,6 +1128,7 @@ const Synchronisation = () => {
           currentPage={currentPage}
           currentEntity={currentEntity}
           currentLimit={currentLimit}
+          availablePlateforms={availablePlateforms}
         />
       </div>
     </div>

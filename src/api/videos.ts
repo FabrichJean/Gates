@@ -118,10 +118,17 @@ export async function cancelUpload(videoId: string | number): Promise<void> {
 }
 
 // Single Sync API
-export async function singleSync({ entity, origin_id, isForce }: { entity: string; origin_id: number | string; isForce: boolean }) {
+export async function singleSync({ entity, origin_id, isForce, plateformId }: { entity: string; origin_id: number | string; isForce: boolean; plateformId?: number }) {
+    const requestBody: any = { entity, origin_id };
+    
+    // Add plateformId to request body if provided
+    if (plateformId !== undefined && plateformId !== null) {
+        requestBody.plateformId = plateformId;
+    }
+    
     return await axios.post(
         `${apiURL}/synchronize/single?isForce=${isForce}`,
-        { entity, origin_id },
+        requestBody,
         {
             headers: {
                 Authorization: `Bearer ${getToken()}`,
