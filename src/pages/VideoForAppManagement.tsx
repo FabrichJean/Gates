@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { VideoForApp } from "../api/videoForApp";
 import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
@@ -9,6 +9,7 @@ import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 import { updateVideoForApp, fetchVideoForAppList } from "../api/videoForApp";
+import { getCreators } from "../api/creators";
 import VideoForAppFilter from "../components/VideoForAppFilter";
 import { toast } from "react-hot-toast";
 import { Edit, CheckSquare, Square, Users, X } from "lucide-react";
@@ -52,6 +53,7 @@ const VideoForAppManagement = () => {
     isActive: null as boolean | null,
     checking: null as CheckingStatus,
     isBanned: null as boolean | null,
+    creator_id: '',
     modifyTags: false,
   });
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
@@ -65,6 +67,25 @@ const VideoForAppManagement = () => {
   });
   const [rangeLoading, setRangeLoading] = useState(false);
   const [rangeProgress, setRangeProgress] = useState({ current: 0, total: 0 });
+
+  const [creators, setCreators] = useState<any[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    getCreators()
+      .then((res) => {
+        if (!mounted) return;
+        const list = res?.data?.creators || res;
+        setCreators(Array.isArray(list) ? list : []);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setCreators([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Selection handlers
   const toggleVideoSelection = (videoId: number) => {
@@ -200,6 +221,7 @@ const VideoForAppManagement = () => {
       isActive: null,
       checking: null,
       isBanned: null,
+      creator_id: '',
       modifyTags: false,
     });
     setBulkEditProgress({ current: 0, total: 0 });
@@ -571,6 +593,20 @@ const VideoForAppManagement = () => {
                     />
                   </div>
                 )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Créer / Assign Creator</label>
+                    <select
+                      value={bulkEditData.creator_id}
+                      onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Ne pas modifier</option>
+                      {creators.map((c) => (
+                        <option key={c.id} value={String(c.id)}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
