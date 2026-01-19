@@ -11,6 +11,7 @@ import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRigh
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { getVideoForAppForBulkSync } from "../api/videoForApp";
+import { getCreatorsForBulkSync } from "../api/creators";
 import { singleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import type { Plateform } from "../types/post";
@@ -155,6 +156,22 @@ const Synchronisation = () => {
         }
       }
       
+      if (entity === "creators") {
+        const creatorsResponse = await getCreatorsForBulkSync(page, limit);
+        // Handle different response formats
+        const creators = creatorsResponse.data.data || creatorsResponse.data.creators || creatorsResponse.data;
+        if (Array.isArray(creators)) {
+          resources.push(...creators.map((c: any) => ({
+            id: c.id,
+            title: c.name || `Creator #${c.id}`,
+            status: c.status,
+            source: "creators" as SyncEntity,
+            cover: c.avatar,
+            plateform_id: c.plateform_id,
+          })));
+        }
+      }
+      
       return resources;
     } catch (error) {
       console.error("Failed to fetch resources:", error);
@@ -167,9 +184,21 @@ const Synchronisation = () => {
       console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}, plateformId=${plateformId}, platformFilter=${platformFilter}`);
 
       // Determine which entities to process
-      const entitiesToProcess: SyncEntity[] = entities === "all" 
-        ? ["video", "post", "video_for_app"] 
+      let entitiesToProcess: SyncEntity[] = entities === "all" 
+        ? [ "creators", "video", "post", "video_for_app"] 
         : (Array.isArray(entities) ? entities : [entities]);
+      
+      // Sort entities to prioritize creators first when selected
+      entitiesToProcess = entitiesToProcess.sort((a, b) => {
+        if (a === "creators" && b !== "creators") return -1;
+        if (a !== "creators" && b === "creators") return 1;
+        return 0;
+      });
+      
+      console.log(`Entities processing order: ${JSON.stringify(entitiesToProcess)}`);
+      if (entitiesToProcess.includes("creators")) {
+        console.log("Creators will be processed first in the queue");
+      }
       
       // Store current pagination info and ensure auto-switch state is set immediately
       setCurrentPage(page);
