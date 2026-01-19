@@ -9,13 +9,14 @@ interface VideoForAppContextType {
   filters: Record<string, any>;
   setFilters: (f: Record<string, any>) => void;
   params: Record<string, any>;
-  data: { videos: VideoForApp[]; total: number; limit: number } | null;
+  data: { videos: VideoForApp[]; total: number; limit: number; page?: number } | null;
   loading: boolean;
   mutate: () => void;
   toWebapp: () => void;
   activate: (videoId: number) => Promise<void>;
   send: () => void;
   reFetch: () => void;
+  setData?: (d: { videos: VideoForApp[]; total: number; limit: number; page?: number } | null) => void;
 }
 
 const VideoForAppContext = createContext<VideoForAppContextType | undefined>(undefined);
@@ -26,13 +27,13 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [params] = useState<Record<string, any>>({});
-  const [data, setData] = useState<{ videos: VideoForApp[]; total: number; limit: number } | null>(null);
+  const [data, setData] = useState<{ videos: VideoForApp[]; total: number; limit: number; page?: number } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(() => {
     setLoading(true);
     fetchVideoForAppList({ page, ...filters })
-      .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit }))
+      .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit, page: res.page ?? page }))
       .finally(() => setLoading(false));    
   }, [page, filters]);
 
@@ -58,7 +59,7 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   return (
     <VideoForAppContext.Provider
-      value={{ page, setPage, filters, setFilters, params, data, loading, mutate, toWebapp, activate, send, reFetch }}
+      value={{ page, setPage, filters, setFilters, params, data, loading, mutate, toWebapp, activate, send, reFetch, setData }}
     >
       {children}
     </VideoForAppContext.Provider>

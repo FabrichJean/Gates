@@ -226,11 +226,11 @@ const Breadcrumb: React.FC = () => {
   const { sync } = useSyncOption();
   const { reFetch } = useSyncErrors();
 
-
   const handleSubmit = async (
     optionId: string | null,
     label: number | null,
-    platformId?: number | null
+    platformId?: number | null,
+    isMode?: boolean | null
   ) => {
     const force = optionId === "true";
     try {
@@ -239,6 +239,7 @@ const Breadcrumb: React.FC = () => {
         isForce: force,
         label: label!,
         platformId: platformId,
+        isAll: typeof isMode !== "undefined" ? isMode : null,
       });
 
       reFetch();
@@ -260,15 +261,15 @@ const Breadcrumb: React.FC = () => {
   return (
     <>
       <nav className="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 relative min-h-[48px]">
-
         <div className="flex items-center">
           <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
-            className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
-              ? "text-gray-900 dark:text-white font-medium cursor-default"
-              : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-              }`}
+            className={`text-sm transition-colors duration-200 ${
+              breadcrumbs.length === 1
+                ? "text-gray-900 dark:text-white font-medium cursor-default"
+                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+            }`}
             disabled={breadcrumbs.length === 1}
           >
             {breadcrumbs[0].name}
@@ -279,10 +280,11 @@ const Breadcrumb: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
             <button
               onClick={() => navigate(breadcrumb.path)}
-              className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
-                ? "text-gray-900 dark:text-white font-medium cursor-default"
-                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-                }`}
+              className={`text-sm transition-colors duration-200 ${
+                index === breadcrumbs.length - 2
+                  ? "text-gray-900 dark:text-white font-medium cursor-default"
+                  : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+              }`}
               disabled={index === breadcrumbs.length - 2}
             >
               {breadcrumb.name}
@@ -341,7 +343,7 @@ const Breadcrumb: React.FC = () => {
 };
 
 function InsideSidebar({ children }: React.PropsWithChildren) {
-  useSocketProgress()
+  useSocketProgress();
   const initialIsCollapsed =
     typeof window !== "undefined" &&
     localStorage.getItem("is-collapsed") === "true";
@@ -353,7 +355,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
   const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
   const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
-
 
   const openLogoutModal = () => dialogRef.current?.showModal();
   const closeLogoutModal = () => dialogRef.current?.close();
@@ -400,7 +401,6 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
     }
   };
 
-
   return (
     <div className="w-dvw h-dvh  from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 flex overflow-hidden relative bg-[url('https://res.cloudinary.com/dkt1t22qc/image/upload/v1742357451/Prestataires_Documents/cynbxx4vxvgv2wrpakiq.jpg')]">
       <Toaster />
@@ -425,12 +425,13 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
       <div
         className={`
                     flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
-                    ${isMobile
-            ? "w-full"
-            : isCollapsed
-              ? "w-[calc(100%-5rem)]"
-              : "w-[calc(100%-16rem)]"
-          }
+                    ${
+                      isMobile
+                        ? "w-full"
+                        : isCollapsed
+                          ? "w-[calc(100%-5rem)]"
+                          : "w-[calc(100%-16rem)]"
+                    }
                 `}
       >
         {/* Header */}
