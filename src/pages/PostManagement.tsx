@@ -336,22 +336,27 @@ const PostManagementInner = () => {
                       <>
                         <BtnTranscodeComponent post={post as any} reFetch={reFetch} />
 
-                        {/* bouton single sync */}
-                        <button
-                          type="button"
-                          onClick={() => setSingleSyncOpenId(post.id)}
-                          className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
-                          disabled={singleSyncLoading && singleSyncOpenId === post.id}
-                        >
-                          <LiaSyncSolid className="w-3 h-3" />
-                          Sync
-                        </button>
-                        <SingleSyncModal
-                          open={singleSyncOpenId === post.id}
-                          onClose={() => setSingleSyncOpenId(null)}
-                          onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
-                          title={`Synchroniser le post #${post.id}`}
-                        />
+                        {/* bouton single sync (affiché seulement si post.processing === "done") */}
+                        {post.processing === "done" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setSingleSyncOpenId(post.id)}
+                              className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
+                              disabled={singleSyncLoading && singleSyncOpenId === post.id}
+                            >
+                              <LiaSyncSolid className="w-3 h-3" />
+                              Sync
+                            </button>
+
+                            <SingleSyncModal
+                              open={singleSyncOpenId === post.id}
+                              onClose={() => setSingleSyncOpenId(null)}
+                              onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
+                              title={`Synchroniser le post #${post.id}`}
+                            />
+                          </>
+                        )}
                       </>
                     ) : null}
                     <Link
