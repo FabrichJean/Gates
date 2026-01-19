@@ -103,12 +103,12 @@ const Synchronisation = () => {
   };
 
   // Bulk sync functions
-  const fetchResources = async (entity: SyncEntity, page: number = 1, limit: number = 10): Promise<BulkSyncResource[]> => {
+  const fetchResources = async (entity: SyncEntity, page: number = 1, limit: number = 10, platformFilter?: number): Promise<BulkSyncResource[]> => {
     try {
       let resources: BulkSyncResource[] = [];
       
       if (entity === "video") {
-        const videoResponse = await getVideosForBulkSync(page, limit);
+        const videoResponse = await getVideosForBulkSync(page, limit, platformFilter);
         // Handle different response formats
         const videos = videoResponse.data.data || videoResponse.data.videos || videoResponse.data;
         if (Array.isArray(videos)) {
@@ -118,12 +118,13 @@ const Synchronisation = () => {
             status: v.status,
             source: "video" as SyncEntity,
             cover: v.cover,
+            plateform_id: v.plateform_id,
           })));
         }
       }
       
       if (entity === "post") {
-        const postResponse = await getPostsForBulkSync(page, limit);
+        const postResponse = await getPostsForBulkSync(page, limit, platformFilter);
         // Handle different response formats
         const posts = postResponse.data.data || postResponse.data.posts || postResponse.data;
         if (Array.isArray(posts)) {
@@ -133,12 +134,13 @@ const Synchronisation = () => {
             status: p.status,
             source: "post" as SyncEntity,
             cover: p.cover,
+            plateform_id: p.plateform_id,
           })));
         }
       }
       
       if (entity === "video_for_app") {
-        const videoForAppResponse = await getVideoForAppForBulkSync(page, limit);
+        const videoForAppResponse = await getVideoForAppForBulkSync(page, limit, platformFilter);
         // Handle different response formats
         const videosForApp = videoForAppResponse.data.videos || videoForAppResponse.data.videosForApp || videoForAppResponse.data;
         if (Array.isArray(videosForApp)) {
@@ -148,6 +150,7 @@ const Synchronisation = () => {
             status: v.status,
             source: "video_for_app" as SyncEntity,
             cover: v.cover,
+            plateform_id: v.plateform_id,
           })));
         }
       }
@@ -159,9 +162,9 @@ const Synchronisation = () => {
     }
   };
 
-  const handleStartBulkSync = async (entities: SyncEntitySelection, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false, plateformId?: number) => {
+  const handleStartBulkSync = async (entities: SyncEntitySelection, isForce: boolean, page: number = 1, limit: number = 10, autoSwitch: boolean = false, plateformId?: number, platformFilter?: number) => {
     try {
-      console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}, plateformId=${plateformId}`);
+      console.log(`handleStartBulkSync called with: entities=${JSON.stringify(entities)}, isForce=${isForce}, page=${page}, limit=${limit}, autoSwitch=${autoSwitch}, plateformId=${plateformId}, platformFilter=${platformFilter}`);
 
       // Determine which entities to process
       const entitiesToProcess: SyncEntity[] = entities === "all" 
@@ -198,7 +201,7 @@ const Synchronisation = () => {
       await new Promise(resolve => setTimeout(resolve, 10));
 
       // Process all entities sequentially
-      await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal, plateformId);
+      await processMultipleEntities(entitiesToProcess, isForce, page, limit, autoSwitch, abortController.signal, plateformId, platformFilter);
     } catch (error) {
       console.error("Failed to start bulk sync:", error);
     }
@@ -211,9 +214,10 @@ const Synchronisation = () => {
     limit: number, 
     autoSwitch: boolean, 
     signal: AbortSignal,
-    plateformId?: number
+    plateformId?: number,
+    platformFilter?: number
   ) => {
-    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}, plateformId: ${plateformId}`);
+    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}, plateformId: ${plateformId}, platformFilter: ${platformFilter}`);
     
     for (let entityIndex = 0; entityIndex < entitiesToProcess.length; entityIndex++) {
       if (signal.aborted) break;
