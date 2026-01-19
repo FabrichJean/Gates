@@ -175,16 +175,23 @@ export async function deleteTagCategoryVideoForAppApi(id: number) {
   });
 }
 
-export async function getVideoForAppForBulkSync(page: number = 1, limit: number = 10) {
+export async function getVideoForAppForBulkSync(page: number = 1, limit: number = 10, plateformId?: number) {
+    const params: any = {
+        page,
+        limit,
+        select: 'id,cn_title,en_title,status,cover,plateform_id', // Include plateform_id field
+        checking: 'checked'
+    };
+    
+    // Add plateformId filter if provided
+    if (plateformId !== undefined && plateformId !== null) {
+        params.plateform_id = plateformId;
+    }
+    
     return await axios.get(`${apiURL}/videos-for-app`, {
         headers: {
             Authorization: `Bearer ${token()}`,
         },
-        params: {
-            page,
-            limit,
-            select: 'id,cn_title,en_title,status,cover', // Include cover field
-            checking: 'checked'
-        }
+        params
     });
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import type { Plateform } from "../types/post";
 
 export type SyncEntity = "video" | "post" | "video_for_app";
 export type SyncEntitySelection = SyncEntity[] | "all";
@@ -11,6 +12,7 @@ export interface BulkSyncResource {
   status?: string;
   source?: SyncEntity; // Track the source entity type
   cover?: string; // Cover image URL
+  plateform_id?: number; // Platform ID of the resource
 }
 
 export interface BulkSyncProgress {
@@ -41,7 +43,7 @@ export interface BulkSyncProgress {
 interface BulkSyncTrackingModalProps {
   open: boolean;
   onClose: () => void;
-  onStartSync: (entities: SyncEntitySelection, isForce: boolean, page: number, limit: number, autoSwitch?: boolean) => void;
+  onStartSync: (entities: SyncEntitySelection, isForce: boolean, page: number, limit: number, autoSwitch?: boolean, plateformId?: number, platformFilter?: number) => void;
   progress: BulkSyncProgress;
   onPause: () => void;
   onResume: () => void;
@@ -50,6 +52,7 @@ interface BulkSyncTrackingModalProps {
   currentPage?: number;
   currentEntity?: SyncEntity;
   currentLimit?: number;
+  availablePlateforms?: Plateform[];
 }
 
 const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
@@ -64,13 +67,16 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   currentPage: externalCurrentPage,
   currentEntity: externalCurrentEntity,
   currentLimit: externalCurrentLimit,
+  availablePlateforms = [],
 }) => {
   const [selectedEntities, setSelectedEntities] = useState<SyncEntity[]>(["video"]);
   const [isForce, setIsForce] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [autoSwitchPage, setAutoSwitchPage] = useState(false);
+  const [autoSwitchPage, setAutoSwitchPage] = useState(true);
+  const [selectedPlateformId, setSelectedPlateformId] = useState<number | undefined>(undefined);
+  const [platformFilter, setPlatformFilter] = useState<number | undefined>(undefined);
   const [autoSwitchDisabled, setAutoSwitchDisabled] = useState(false);
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
@@ -78,18 +84,15 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   // Reset local state when modal opens
   useEffect(() => {
     if (open && progress.processed === 0 && progress.total === 0) {
-      setAutoSwitchPage(false);
+      setAutoSwitchPage(true);
       setAutoSwitchDisabled(false);
       setShowDetails(false);
     }
   }, [open, progress.processed, progress.total]);
 
   const handleStart = () => {
-    console.log(`Starting sync with auto-switch: ${autoSwitchPage}`);
-    console.log(autoSwitchPage);
-
     const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-    onStartSync(entities, isForce, currentPage, limit, autoSwitchPage);
+    onStartSync(entities, isForce, currentPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
   };
 
   if (!open) return null;
@@ -193,39 +196,33 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                 </div>
 
                 {/* Force Option */}
-                {/* <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Synchronization Mode
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="syncMode"
-                        checked={!isForce}
-                        onChange={() => setIsForce(false)}
-                        className="w-4 h-4 text-blue-600"
-                      />
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Normal Sync</div>
-                        <div className="text-sm text-gray-500">Only sync new items</div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Force Sync
+                      </label>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Update all existing items instead of only syncing new ones
                       </div>
-                    </label>
-                    <label className="flex items-center space-x-3">
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
                       <input
-                        type="radio"
-                        name="syncMode"
+                        type="checkbox"
                         checked={isForce}
-                        onChange={() => setIsForce(true)}
-                        className="w-4 h-4 text-blue-600"
+                        onChange={(e) => setIsForce(e.target.checked)}
+                        className="sr-only"
                       />
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Force Sync</div>
-                        <div className="text-sm text-gray-500">Update all existing items</div>
+                      <div className={`w-11 h-6 rounded-full transition-colors ${
+                        isForce ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}>
+                        <div className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform ${
+                          isForce ? 'translate-x-6' : 'translate-x-1'
+                        } mt-1`}></div>
                       </div>
                     </label>
                   </div>
-                </div> */}
+                </div>
 
                 {/* Pagination Options */}
                 <div className="space-y-3">
@@ -261,6 +258,50 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         <option value={50}>50</option>
                         <option value={100}>100</option>
                       </select>
+                    </div>
+                  </div>
+                  
+                  {/* Platform Filter (which platform's resources to sync FROM) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs text-gray-600 dark:text-gray-400">
+                      Filter resources by platform
+                    </label>
+                    <select
+                      value={platformFilter || ""}
+                      onChange={(e) => setPlatformFilter(e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">All platforms</option>
+                      {availablePlateforms.map((platform) => (
+                        <option key={platform.id} value={platform.id}>
+                          {platform.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="text-xs text-gray-500">
+                      Only sync resources that belong to the selected platform, or leave empty for all platforms
+                    </div>
+                  </div>
+                  
+                  {/* Platform Selection */}
+                  <div className="space-y-2">
+                    <label className="block text-xs text-gray-600 dark:text-gray-400">
+                      Sync to (webapp)
+                    </label>
+                    <select
+                      value={selectedPlateformId || ""}
+                      onChange={(e) => setSelectedPlateformId(e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">default</option>
+                      {availablePlateforms.map((platform) => (
+                        <option key={platform.id} value={platform.id}>
+                          {platform.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="text-xs text-gray-500">
+                      Select a specific platform to sync to, or leave empty to sync to all platforms
                     </div>
                   </div>
                   
@@ -590,7 +631,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           const newPage = currentPage + 1;
                           setCurrentPage(newPage);
                           const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-                          onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
+                          onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
                         }}
                         disabled={progress.isRunning}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
@@ -604,7 +645,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                             const newPage = currentPage - 1;
                             setCurrentPage(newPage);
                             const entities: SyncEntitySelection = selectedEntities.length === 3 ? "all" : selectedEntities;
-                            onStartSync(entities, isForce, newPage, limit, autoSwitchPage);
+                            onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
                           }}
                           disabled={progress.isRunning}
                           className="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded text-sm transition-colors flex items-center gap-1"
