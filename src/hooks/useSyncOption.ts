@@ -6,6 +6,7 @@ type SyncPayload = {
   isForce: boolean;
   label?: number | null;
   platformId?: number | null;
+  isAll?: boolean | null;
 };
 
 type SyncResult = {
@@ -51,13 +52,26 @@ export default function useSyncOption() {
   const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<SyncResult | null>(null);
 
-  const sync = async ({ isForce, label, platformId }: SyncPayload) => {
+  const sync = async ({
+    isForce,
+    label,
+    platformId,
+    isAll,
+  }: SyncPayload) => {
     setLoading(true);
     setError(null);
     try {
-      const url = label
-        ? `${apiURL}/synchronize/retry/${label}?isForce=${isForce}`
-        : `${apiURL}/synchronize/?isForce=${isForce}`;
+      const base = label
+        ? `${apiURL}/synchronize/retry/${label}`
+        : `${apiURL}/synchronize/`;
+
+      const params = new URLSearchParams();
+      params.set("isForce", String(isForce));
+      if (typeof isAll !== "undefined" && isAll !== null) {
+        params.set("isAll", String(isAll));
+      }
+
+      const url = params.toString() ? `${base}?${params.toString()}` : base;
 
       const option: any = {
         headers: {

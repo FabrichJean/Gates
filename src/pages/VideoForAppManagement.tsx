@@ -320,7 +320,23 @@ const VideoForAppManagement = () => {
             filters={filters}
             setFilters={setFilters}
             params={params}
-            onSubmit={mutate}
+            setPage={setPage}
+            onSubmit={(response: any) => {
+              // response should contain { videos, total, limit, page }
+              const respPage = response?.page ? Number(response.page) : 1;
+              setPage(respPage);
+              if ((ctx as any).setData) {
+                (ctx as any).setData({
+                  videos: response.videos,
+                  total: response.total,
+                  limit: response.limit,
+                  page: respPage,
+                });
+              } else {
+                // fallback: trigger a refetch
+                reFetch();
+              }
+            }}
           />
           {checkObjectContent(filters).hasContent ? (
             <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* app videos filters</span>
