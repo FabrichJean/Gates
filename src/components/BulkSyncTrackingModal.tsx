@@ -73,7 +73,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [autoSwitchPage, setAutoSwitchPage] = useState(false);
+  const [autoSwitchPage, setAutoSwitchPage] = useState(true);
   const [selectedPlateformId, setSelectedPlateformId] = useState<number | undefined>(undefined);
   const [autoSwitchDisabled, setAutoSwitchDisabled] = useState(false);
 
@@ -82,7 +82,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   // Reset local state when modal opens
   useEffect(() => {
     if (open && progress.processed === 0 && progress.total === 0) {
-      setAutoSwitchPage(false);
+      setAutoSwitchPage(true);
       setAutoSwitchDisabled(false);
       setShowDetails(false);
     }
@@ -268,14 +268,14 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                   {/* Platform Selection */}
                   <div className="space-y-2">
                     <label className="block text-xs text-gray-600 dark:text-gray-400">
-                      Platform (Optional)
+                      Sync to (webapp)
                     </label>
                     <select
                       value={selectedPlateformId || ""}
                       onChange={(e) => setSelectedPlateformId(e.target.value ? parseInt(e.target.value) : undefined)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="">All Platforms</option>
+                      <option value="">default</option>
                       {availablePlateforms.map((platform) => (
                         <option key={platform.id} value={platform.id}>
                           {platform.name}
