@@ -196,39 +196,33 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                 </div>
 
                 {/* Force Option */}
-                {/* <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Synchronization Mode
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        name="syncMode"
-                        checked={!isForce}
-                        onChange={() => setIsForce(false)}
-                        className="w-4 h-4 text-blue-600"
-                      />
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Normal Sync</div>
-                        <div className="text-sm text-gray-500">Only sync new items</div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Force Sync
+                      </label>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Update all existing items instead of only syncing new ones
                       </div>
-                    </label>
-                    <label className="flex items-center space-x-3">
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
                       <input
-                        type="radio"
-                        name="syncMode"
+                        type="checkbox"
                         checked={isForce}
-                        onChange={() => setIsForce(true)}
-                        className="w-4 h-4 text-blue-600"
+                        onChange={(e) => setIsForce(e.target.checked)}
+                        className="sr-only"
                       />
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">Force Sync</div>
-                        <div className="text-sm text-gray-500">Update all existing items</div>
+                      <div className={`w-11 h-6 rounded-full transition-colors ${
+                        isForce ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}>
+                        <div className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform ${
+                          isForce ? 'translate-x-6' : 'translate-x-1'
+                        } mt-1`}></div>
                       </div>
                     </label>
                   </div>
-                </div> */}
+                </div>
 
                 {/* Pagination Options */}
                 <div className="space-y-3">
