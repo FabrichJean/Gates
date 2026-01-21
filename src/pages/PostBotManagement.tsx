@@ -48,7 +48,7 @@ const PostManagementInner = () => {
     new Date(dateString).toLocaleDateString("fr-FR");
   const filteredPosts = posts.filter(
     (post: any) =>
-      post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post?.postCategory?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.postSubCategory.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
@@ -194,7 +194,7 @@ const PostManagementInner = () => {
                   </th>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post_bot.postCategory.name} / {post_bot.postSubCategory.name}
+                      {post_bot?.postCategory?.name} / {post_bot?.postSubCategory?.name}
                     </span>
                   </td>
                   <td className="px-6 py-4">

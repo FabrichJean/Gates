@@ -98,7 +98,7 @@ const PostEdit = () => {
   useEffect(() => {
     if (post) {
       const matchingCategory = categoriesResponse?.categories.find(
-        (cat) => cat.id === post.postCategory.id
+        (cat) => cat.id === post?.postCategory?.id
       );
       // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
       if (matchingCategory) {
@@ -439,7 +439,7 @@ const PostEdit = () => {
               subCategoryDropdownRef={subCategoryDropdownRef}
               availableSubCategories={availableSubCategories}
               setSelectedOptions={setSelectedOptions}
-              postCategoryName={post.postCategory.name}
+              postCategoryName={post?.postCategory?.name}
               postSubCategoryName={post.postSubCategory?.name}
             />
 
