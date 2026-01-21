@@ -329,7 +329,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
             <p className="font-medium text-gray-900 dark:text-white">
-              {post?.postCategory.name}
+              {post?.postCategory?.name}
             </p>
           </div>
           <div>
@@ -337,7 +337,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
               Sub Category
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
-              {post?.postSubCategory.name}
+              {post?.postSubCategory?.name}
             </p>
           </div>
           <div>

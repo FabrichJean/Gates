@@ -6,6 +6,7 @@ import type { Video as VideoType } from "../../hooks/usePost";
 import { getToken } from "../../utils/storage";
 import { apiURL } from "../../constant";
 import VideoPlayer from "../../components/VideoPlayer";
+import { cdnS3 } from "../../utils/cdn";
 
 interface GetVideoPostProps {
   videos: VideoType[];
@@ -123,7 +124,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
           {videos.slice(0, 3).map((video, index) => {
             const videoUrl = video.s3_urls?.hlsUrl || video.public_urls?.local_mp4_url || video.cdn_url;
             const coverUrl =
-              video?.s3_urls?.coverUrl ||
+              cdnS3(video?.s3_urls?.coverUrl) ||
               video?.public_urls?.local_cover_path ||
               "";
 
@@ -179,7 +180,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
                 video.s3_urls.hlsUrl || video.public_urls?.local_mp4_url || video.cdn_url;
               const coverUrl =
                 video.local_cover_path ||
-                (video as any)?.s3_urls?.coverUrl ||
+                cdnS3(video?.s3_urls?.coverUrl) ||
                 (video as any)?.public_urls?.cover_url ||
                 (video as any)?.cover ||
                 "";

@@ -3,6 +3,7 @@ import { Images, X, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { deletePostImage } from "../../api/posts";
 import type { Image } from "../../hooks/usePost";
+import { cdnS3 } from "../../utils/cdn";
 
 interface GetImagePostProps {
   images: Image[];
@@ -33,7 +34,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
         </div>
         <div className="flex flex-wrap gap-4">
           {images.slice(0, 3).map((image, index) => {
-            const imageUrl = image.s3_urls?.imageUrl || image.public_urls.local_image_url;
+            const imageUrl = cdnS3(image.s3_urls?.imageUrl) || image.public_urls.local_image_url;
             return (
               <img
                 key={index}

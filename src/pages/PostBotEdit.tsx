@@ -861,7 +861,7 @@ const PostBotEdit = () => {
                             subCategoryDropdownRef={subCategoryDropdownRef}
                             availableSubCategories={availableSubCategories}
                             setSelectedOptions={setSelectedOptions}
-                            postCategoryName={post_bot.postCategory.name}
+                            postCategoryName={post_bot?.postCategory?.name}
                             postSubCategoryName={post_bot.postSubCategory?.name}
                         />
 
