@@ -12,6 +12,7 @@ import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import { TitlesForm } from "./Upload";
 import { getTagCategoriesApi } from "../api/tagCategory";
+import { cdnS3 } from "../utils/cdn";
 
 function TouchVideo() {
   const { id: videoId } = useParams<{ id: string }>();
@@ -24,7 +25,7 @@ function TouchVideo() {
   const [uploading, setUploading] = useState(false);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(
-    video?.public_urls.cover_url || video?.cover
+    cdnS3(video?.s3_urls.coverUrl) || video?.public_urls.cover_url || video?.cover
   );
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,7 +42,7 @@ function TouchVideo() {
       video?.local_mp4_path
     );
     setCoverPreview(
-      video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover
+      cdnS3(video?.s3_urls?.coverUrl) || video?.public_urls.cover_url || video?.cover
     );
     setVideoType(video?.type === "1" ? "short" : "long");
     // initialize form fields from loaded video

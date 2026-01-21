@@ -27,6 +27,7 @@ import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
 import useSocketSend from "../hooks/useSocketSend";
 import RoleEnum from "../utils/roleEnum";
 import { updateVideoForApp, updateVideoForAppBannedStatus } from "../api/videoForApp";
+import { cdnS3 } from '../utils/cdn';
 
 
 // Helper function to get category display name
@@ -332,7 +333,7 @@ const VideoForAppDetails: React.FC = () => {
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
                     <h3 className="text-lg font-semibold mb-4">Cover</h3>
                     <img
-                      src={video?.public_urls.coverUrl || video?.s3_urls.coverUrl || 'https://placehold.co/300x200'}
+                      src={cdnS3(video?.s3_urls.coverUrl) || video?.public_urls.coverUrl || 'https://placehold.co/300x200'}
                       alt="Cover"
                       className="w-full rounded-lg"
                     />

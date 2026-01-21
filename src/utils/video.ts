@@ -1,5 +1,6 @@
 import type { VideoCoverCouple } from "../components/MediaPost";
 import type { Video } from "../hooks/usePost";
+import { cdnS3 } from "./cdn";
 
 export function videoToVideoCoverCouple(video: Video): VideoCoverCouple {
   return {
@@ -15,7 +16,7 @@ export function videoToVideoCoverCouple(video: Video): VideoCoverCouple {
       "",
 
     coverPreview:
-      video.s3_urls?.cdnUrl ??
+      cdnS3(video.s3_urls?.coverUrl) ??
       video.thumbnail_url ??
       video.public_urls?.local_cover_path ??
       "",
