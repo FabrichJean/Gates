@@ -616,7 +616,7 @@ function EditVideo({
   const [uploading, setUploading] = useState(false);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(
-    video.public_urls.cover_url
+    cdnS3(video.s3_urls.coverUrl) || video.public_urls.cover_url
   );
   const coverInputRef = useRef<HTMLInputElement>(null);
 

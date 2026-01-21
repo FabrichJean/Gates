@@ -231,8 +231,6 @@ function VideoForAppEdit() {
       setProgress(0);
     }
   };
-
-  console.log(creatorSuggested);
   
 
   return (
