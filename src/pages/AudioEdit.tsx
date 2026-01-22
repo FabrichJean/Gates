@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { 
-  Upload, 
+import {
+  Upload,
   Image as ImageIcon,
   User,
   Globe,
@@ -14,7 +14,7 @@ import {
   ChevronDown,
   Check,
   Volume2,
-  ChevronLeft
+  ChevronLeft,
 } from "lucide-react";
 import { getAudioByIdApi, updateAudio } from "../api/audios";
 import { getCreators } from "../api/creators";
@@ -25,6 +25,7 @@ import { getAudioSubCategoriesApi } from "../api/audioSubCategory";
 import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
 
 import type { AudioTitle } from "../components/AudioTitlesField";
 import { getAudioTagCategoriesApi } from "../api/audioTagCategory";
@@ -41,19 +42,19 @@ const AudioEdit: React.FC = () => {
   const nav = useNavigate();
   const [form, setForm] = useState({
     ref: "",
-    title: "",
-    description: "",
     titles: [] as AudioTitle[],
     audio_category_id: "",
     audio_sub_category_id: "",
     plateform_id: "",
     tagCategories: [] as Array<number | { name: string }>,
-    creator_id: "",
     duration: "",
     need_vip: false,
     cover: null as File | null,
     audio: null as File | null,
   });
+
+  const [creator, setCreator] = useState<string | null>(null);
+  const [creatorId, setCreatorId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,42 +66,47 @@ const AudioEdit: React.FC = () => {
   const [tagInput, setTagInput] = useState("");
   const [filteredTags, setFilteredTags] = useState<any[]>([]);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [showCreatorDropdown, setShowCreatorDropdown] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(null);
   const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null);
-  const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   // Load audio data
   useEffect(() => {
     const fetchAudio = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         const audio = await getAudioByIdApi(id);
-        
+
         setForm({
           ref: audio.ref || "",
-          title: audio.title || "",
-          description: audio.description || "",
           titles: (audio.titles || []).map((t: any) => ({
             i18_language: t.i18_language,
             language_code: t.language_code ?? t.i18_language ?? "",
             title: t.title,
-            description: t.description,
+            description: t.description || "",
           })),
           audio_category_id: audio.audio_category_id?.toString() || "",
           audio_sub_category_id: audio.audio_sub_category_id?.toString() || "",
           plateform_id: audio.plateform_id?.toString() || "",
-          tagCategories: audio.tagCategories?.map((tag: any) => tag.id || tag) || [],
-          creator_id: audio.creator_id?.toString() || "",
+          tagCategories:
+            audio.tagCategories?.map((tag: any) => tag.id || tag) || [],
           duration: audio.duration?.toString() || "",
           need_vip: audio.need_vip || false,
           cover: null,
           audio: null,
         });
+
+        // Gérer le creator
+        if (audio.creator_id) {
+          setCreatorId(audio.creator_id);
+          setCreator(audio.creatorObj?.name || audio.creator || null);
+        } else if (audio.creator) {
+          setCreator(audio.creator);
+          setCreatorId(null);
+        }
 
         setExistingCoverUrl(audio.cover_url || audio.s3_cover_url);
         setExistingAudioUrl(audio.audio_url || audio.s3_audio_url);
@@ -147,17 +153,6 @@ const AudioEdit: React.FC = () => {
     }
   }, [form.audio_category_id]);
 
-  // Close creator dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (creatorDropdownRef.current && !creatorDropdownRef.current.contains(event.target as Node)) {
-        setShowCreatorDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -181,7 +176,10 @@ const AudioEdit: React.FC = () => {
       audioElement.src = URL.createObjectURL(file);
       audioElement.addEventListener("loadedmetadata", () => {
         const durationInSeconds = Math.floor(audioElement.duration);
-        setForm((prev) => ({ ...prev, duration: durationInSeconds.toString() }));
+        setForm((prev) => ({
+          ...prev,
+          duration: durationInSeconds.toString(),
+        }));
         URL.revokeObjectURL(audioElement.src);
       });
     }
@@ -202,7 +200,11 @@ const AudioEdit: React.FC = () => {
   };
 
   const addTag = (tag: any) => {
-    if (!form.tagCategories.some((t) => (typeof t === "object" ? t.name === tag.name : t === tag.id))) {
+    if (
+      !form.tagCategories.some((t) =>
+        typeof t === "object" ? t.name === tag.name : t === tag.id
+      )
+    ) {
       setForm({ ...form, tagCategories: [...form.tagCategories, tag.id] });
     }
     setTagInput("");
@@ -210,15 +212,26 @@ const AudioEdit: React.FC = () => {
   };
 
   const addCustomTag = () => {
-    if (tagInput.trim() && !form.tagCategories.some((t) => typeof t === "object" && t.name === tagInput)) {
-      setForm({ ...form, tagCategories: [...form.tagCategories, { name: tagInput.trim() }] });
+    if (
+      tagInput.trim() &&
+      !form.tagCategories.some(
+        (t) => typeof t === "object" && t.name === tagInput
+      )
+    ) {
+      setForm({
+        ...form,
+        tagCategories: [...form.tagCategories, { name: tagInput.trim() }],
+      });
       setTagInput("");
       setShowTagDropdown(false);
     }
   };
 
   const removeTag = (index: number) => {
-    setForm({ ...form, tagCategories: form.tagCategories.filter((_, i) => i !== index) });
+    setForm({
+      ...form,
+      tagCategories: form.tagCategories.filter((_, i) => i !== index),
+    });
   };
 
   const getTagDisplay = (tag: number | { name: string }) => {
@@ -242,14 +255,20 @@ const AudioEdit: React.FC = () => {
     setSaving(true);
     try {
       const formData = new FormData();
-      formData.append("title", form.title);
-      
+
       if (form.ref) formData.append("ref", form.ref);
-      if (form.description) formData.append("description", form.description);
-      if (form.audio_category_id) formData.append("audio_category_id", form.audio_category_id);
-      if (form.audio_sub_category_id) formData.append("audio_sub_category_id", form.audio_sub_category_id);
+      if (form.audio_category_id)
+        formData.append("audio_category_id", form.audio_category_id);
+      if (form.audio_sub_category_id)
+        formData.append("audio_sub_category_id", form.audio_sub_category_id);
       if (form.plateform_id) formData.append("plateform_id", form.plateform_id);
-      if (form.creator_id) formData.append("creator_id", form.creator_id);
+
+      if (creatorId) {
+        formData.append("creator_id", String(creatorId));
+      } else if (creator) {
+        formData.append("creator", String(creator));
+      }
+
       if (form.duration) formData.append("duration", form.duration);
       formData.append("need_vip", form.need_vip ? "1" : "0");
 
@@ -270,7 +289,9 @@ const AudioEdit: React.FC = () => {
       nav(`/audios/${id}`);
     } catch (error: any) {
       console.error("Error updating audio:", error);
-      toast.error(error.response?.data?.message || "Erreur lors de la mise à jour");
+      toast.error(
+        error.response?.data?.message || "Erreur lors de la mise à jour"
+      );
     } finally {
       setSaving(false);
     }
@@ -322,11 +343,11 @@ const AudioEdit: React.FC = () => {
                 transition={{ delay: 0.1 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl"
               >
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-indigo-500" />
                   Image de couverture
                 </label>
-                
+
                 <div className="relative group">
                   <input
                     type="file"
@@ -354,7 +375,8 @@ const AudioEdit: React.FC = () => {
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <ImageIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-3" />
                         <span className="text-sm text-gray-500 dark:text-gray-400">
-                          Cliquez pour {existingCoverUrl ? "changer" : "ajouter"}
+                          Cliquez pour{" "}
+                          {existingCoverUrl ? "changer" : "ajouter"}
                         </span>
                       </div>
                     )}
@@ -369,7 +391,7 @@ const AudioEdit: React.FC = () => {
                 transition={{ delay: 0.2 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl"
               >
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                   <Volume2 className="w-5 h-5 text-indigo-500" />
                   Fichier audio
                 </label>
@@ -412,7 +434,9 @@ const AudioEdit: React.FC = () => {
                     className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors cursor-pointer font-medium"
                   >
                     <Upload className="w-5 h-5" />
-                    {existingAudioUrl || audioPreview ? "Remplacer l'audio" : "Téléverser un audio"}
+                    {existingAudioUrl || audioPreview
+                      ? "Remplacer l'audio"
+                      : "Téléverser un audio"}
                   </label>
                 </div>
               </motion.div>
@@ -442,13 +466,15 @@ const AudioEdit: React.FC = () => {
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Tag className="w-4 h-4" />
                     Catégorie
                   </label>
                   <select
                     value={form.audio_category_id}
-                    onChange={(e) => setForm({ ...form, audio_category_id: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, audio_category_id: e.target.value })
+                    }
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Sélectionnez une catégorie</option>
@@ -469,7 +495,12 @@ const AudioEdit: React.FC = () => {
                     </label>
                     <select
                       value={form.audio_sub_category_id}
-                      onChange={(e) => setForm({ ...form, audio_sub_category_id: e.target.value })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          audio_sub_category_id: e.target.value,
+                        })
+                      }
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
                     >
                       <option value="">Sélectionnez une sous-catégorie</option>
@@ -484,22 +515,24 @@ const AudioEdit: React.FC = () => {
 
                 {/* Duration */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Durée (en secondes)
                   </label>
                   <input
                     type="number"
                     value={form.duration}
-                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, duration: e.target.value })
+                    }
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
                     placeholder="Auto-détecté depuis le fichier audio"
                   />
                 </div>
 
                 {/* Creator */}
-                <div ref={creatorDropdownRef}>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Créateur
                   </label>
@@ -562,13 +595,15 @@ const AudioEdit: React.FC = () => {
 
                 {/* Platform */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Plateforme
                   </label>
                   <select
                     value={form.plateform_id}
-                    onChange={(e) => setForm({ ...form, plateform_id: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, plateform_id: e.target.value })
+                    }
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Sélectionnez une plateforme</option>
@@ -582,7 +617,7 @@ const AudioEdit: React.FC = () => {
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <Tag className="w-4 h-4" />
                     Tags
                   </label>
@@ -667,10 +702,15 @@ const AudioEdit: React.FC = () => {
                     type="checkbox"
                     id="need_vip"
                     checked={form.need_vip}
-                    onChange={(e) => setForm({ ...form, need_vip: e.target.checked })}
+                    onChange={(e) =>
+                      setForm({ ...form, need_vip: e.target.checked })
+                    }
                     className="w-5 h-5 text-indigo-500 border-gray-300 rounded focus:ring-indigo-500"
                   />
-                  <label htmlFor="need_vip" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  <label
+                    htmlFor="need_vip"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                  >
                     Réservé aux utilisateurs VIP
                   </label>
                 </div>
