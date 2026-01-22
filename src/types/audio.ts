@@ -52,6 +52,7 @@ export interface Audio {
   duration?: number;
   need_vip: boolean;
   plateform_id?: number;
+  type_audio: string;
   user_id: number;
   hash?: string;
   sys_code?: string;

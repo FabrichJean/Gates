@@ -93,7 +93,7 @@ const AudioDetails: React.FC = () => {
     const confirmed = window.confirm(
       audio.isDeleted
         ? "Voulez-vous restaurer cet audio ?"
-        : "Voulez-vous supprimer cet audio ?"
+        : "Voulez-vous supprimer cet audio ?",
     );
 
     if (!confirmed) return;
@@ -459,17 +459,29 @@ const AudioDetails: React.FC = () => {
               </div>
             )}
             {/* Si aucun album, proposer aussi le bouton */}
-            {audioAlbums.length === 0 && (
+            {audio.type_audio === "album" && audioAlbums.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-md p-3 shadow flex items-center gap-2">
                 <Music className="w-4 h-4" />
-                <span className="font-medium">Aucun album pour cet audio</span>
+                <span className="font-medium">Effectif des pistes</span>
                 <a
                   href={`/audio-albums/upload?audio_id=${audio?.id}`}
                   className="ml-auto px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs font-semibold"
                 >
-                  + Add Album
+                  + New piste
                 </a>
               </div>
+            ) : (
+              <>
+                <div className="bg-white dark:bg-gray-800 rounded-md p-3 shadow flex items-center gap-2">
+                  <Music className="w-4 h-4" />
+                  <a
+                    href={`/audio-albums/upload?audio_id=${audio?.id}`}
+                    className="ml-auto px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs font-semibold"
+                  >
+                    + New piste
+                  </a>
+                </div>
+              </>
             )}
           </motion.div>
         </div>

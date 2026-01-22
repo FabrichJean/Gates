@@ -26,6 +26,8 @@ import { AudioTitlesField } from "../components/AudioTitlesField";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
+import AnimatedAlert from "../components/AnimatedAlert";
+import { useAudiosContext } from "../context/AudiosContext";
 import { IoIosAlbums } from "react-icons/io";
 
 interface AudioTitle {
@@ -37,6 +39,7 @@ interface AudioTitle {
 
 const UploadAudio: React.FC = () => {
   const nav = useNavigate();
+  const { reFetch } = useAudiosContext();
   const [form, setForm] = useState({
     ref: "",
     title: "",
@@ -67,6 +70,8 @@ const UploadAudio: React.FC = () => {
   const creatorDropdownRef = useRef<HTMLDivElement>(null);
 
   const [isPistUnique, setIsPistUnique] = useState(true);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [audioResult, setAudioResult] = useState<any>(null);
 
   const [creator, setCreator] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<number | null>(null);
@@ -153,7 +158,7 @@ const UploadAudio: React.FC = () => {
     setTagInput(value);
     if (value.trim()) {
       const filtered = tagCategories.filter((tag) =>
-        tag.name.toLowerCase().includes(value.toLowerCase())
+        tag.name.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredTags(filtered);
       setShowTagDropdown(true);
@@ -165,7 +170,7 @@ const UploadAudio: React.FC = () => {
   const addTag = (tag: any) => {
     if (
       !form.tagCategories.some((t) =>
-        typeof t === "number" ? t === tag.id : t.name === tag.name
+        typeof t === "number" ? t === tag.id : t.name === tag.name,
       )
     ) {
       setForm((prev) => ({
@@ -181,7 +186,7 @@ const UploadAudio: React.FC = () => {
     if (
       tagInput.trim() &&
       !form.tagCategories.some(
-        (t) => typeof t !== "number" && t.name === tagInput.trim()
+        (t) => typeof t !== "number" && t.name === tagInput.trim(),
       )
     ) {
       setForm((prev) => ({
@@ -207,8 +212,7 @@ const UploadAudio: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append("ref", form.ref);
-      // formData.append("title", form.title);
-      // formData.append("description", form.description);
+      formData.append("type_audio", isPistUnique ? "piste" : "album");
 
       if (form.audio_category_id) {
         formData.append("audio_category_id", form.audio_category_id);
@@ -232,7 +236,7 @@ const UploadAudio: React.FC = () => {
 
       // Tags - ensure new tags have {name: "tagname"} structure
       const processedTags = form.tagCategories.map((tag) =>
-        typeof tag === "object" && tag.name ? { name: tag.name } : tag
+        typeof tag === "object" && tag.name ? { name: tag.name } : tag,
       );
       formData.append("tagCategories", JSON.stringify(processedTags));
 
@@ -251,12 +255,22 @@ const UploadAudio: React.FC = () => {
 
       const result = await createAudioApi(formData);
       toast.success("Audio créé avec succès!");
-      nav(`/audios/${result.id}`);
+      
+      // Rafraîchir la liste des audios
+      await reFetch();
+
+      // Check if type_audio is album
+      if (result.type_audio === "album") {
+        setAudioResult(result);
+        setIsAlertOpen(true);
+      } else {
+        nav(`/audios/${result.id}`);
+      }
     } catch (error) {
       console.error("Error creating audio:", error);
       toast.error(
         error?.response?.data?.message ||
-          "Erreur lors de la création de l'audio."
+          "Erreur lors de la création de l'audio.",
       );
     } finally {
       setLoading(false);
@@ -269,15 +283,6 @@ const UploadAudio: React.FC = () => {
     }
     return tag.name;
   };
-
-  // Helper to resolve possible avatar fields on creator objects
-  const getCreatorAvatar = (c: any) => {
-    return (
-      c?.avatar || c?.avatar_url || c?.image || c?.picture || c?.photo || c?.profile_picture || c?.avatarPath || null
-    );
-  };
-
-  const selectedCreator = form.creator_id ? creators.find((c) => c.id === parseInt(form.creator_id)) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
@@ -431,7 +436,7 @@ const UploadAudio: React.FC = () => {
                   </>
                 ) : (
                   <div>
-                    <div className="rounded-xl  border-2 border-dashed border-gray-300 dark:border-gray-600 transition-colors flex flex-col items-center justify-center gap-3 bg-gray-50 dark:bg-gray-900/50 py-8">
+                    <div className="rounded-xl  border border-gray-300 dark:border-gray-600 transition-colors flex flex-col items-center justify-center gap-3 bg-gray-50 dark:bg-gray-900/50 py-8">
                       <IoIosAlbums className="w-12 h-12 text-gray-400" />
                     </div>
                   </div>
@@ -547,65 +552,6 @@ const UploadAudio: React.FC = () => {
                       setCreatorId(c?.id ?? null);
                     }}
                   />
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-left flex items-center justify-between"
-                    >
-                      <span className="flex items-center gap-3 truncate">
-                        {selectedCreator ? (
-                          <>
-                            {getCreatorAvatar(selectedCreator) ? (
-                              <img src={getCreatorAvatar(selectedCreator)!} alt={selectedCreator.name} className="w-6 h-6 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
-                              </div>
-                            )}
-                            <span className="truncate">{selectedCreator.name}</span>
-                          </>
-                        ) : (
-                          "Sélectionnez un créateur"
-                        )}
-                      </span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-
-                    <AnimatePresence>
-                      {showCreatorDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-xl max-h-60 overflow-y-auto"
-                        >
-                          {creators.map((creator) => (
-                            <button
-                              key={creator.id}
-                              type="button"
-                              onClick={() => {
-                                setForm((prev) => ({ ...prev, creator_id: creator.id.toString() }));
-                                setShowCreatorDropdown(false);
-                              }}
-                              className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                            >
-                              <div className="flex items-center gap-3">
-                                {getCreatorAvatar(creator) ? (
-                                  <img src={getCreatorAvatar(creator)!} alt={creator.name} className="w-6 h-6 rounded-full object-cover" />
-                                ) : (
-                                  <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                    <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
-                                  </div>
-                                )}
-                                <span className="truncate">{creator.name}</span>
-                              </div>
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
                 </div>
 
                 {/* Plateform */}
@@ -769,6 +715,30 @@ const UploadAudio: React.FC = () => {
           </div>
         </form>
       </motion.div>
+
+      {/* Alert de confirmation pour album */}
+      <AnimatedAlert
+        page="audio-management"
+        isOpen={isAlertOpen}
+        onClose={() => {
+          setIsAlertOpen(false);
+        }}
+        title="Album créé avec succès"
+        message="Voulez-vous ajouter des pistes à cet album maintenant ?"
+        type="success"
+        onConfirm={() => {
+          if (audioResult) {
+            nav(`/audio-albums/upload?audio_id=${audioResult.id}`);
+          }
+        }}
+        onConfirme2={() => {
+          if (audioResult) {
+            nav(`/audios/${audioResult.id}`);
+          }
+        }}
+        confirmText="Oui, ajouter des pistes"
+        cancelText="Plus tard"
+      />
     </div>
   );
 };
