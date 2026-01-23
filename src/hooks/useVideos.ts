@@ -108,7 +108,7 @@ export type User = {
 export default function UseVideos(
   status?: "all" | "0" | "1",
   page?: number,
-  search?: string
+  search?: string,
 ) {
   return useFetch<{
     total: number;
@@ -146,7 +146,7 @@ export function useNextVideo(currentId: string | number | undefined) {
   const { data, loading } = UseVideosWithParams(params);
 
   const currentVideoIndex = data?.videos?.findIndex(
-    (vd) => vd.id === Number(currentId)
+    (vd) => vd.id === Number(currentId),
   );
   const hasNext =
     currentVideoIndex !== undefined &&

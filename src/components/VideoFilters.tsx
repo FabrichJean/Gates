@@ -50,7 +50,7 @@ export default function VideoFilters({
             const _ = {
                 ...savedFilter,
                 isDeleted: reverseStatus(savedFilter.isDeleted),
-                processing: mapStatusProcessing(savedFilter.processing),
+                processing: savedFilter.processing,
                 startedAt: savedFilter.startedAt || "",
                 endAt: savedFilter.endAt || "",
                 // restore creatorSearch if present
@@ -85,8 +85,10 @@ export default function VideoFilters({
         const data = {
             ...filters,
             isDeleted: mapStatus(filters.isDeleted),
-            processing: mapStatusProcessing(filters.processing),
+            processing: filters.processing,
         };
+
+        console.log(filters.processing, data.processing)
 
         localStorage.setItem("videos_filtered", JSON.stringify(data));
 
@@ -94,7 +96,7 @@ export default function VideoFilters({
         const finalQuery = { ...safeParams, ...data, page: '1' };
 
         try {
-            let fetched;
+            let fetched: any;
             if (scope === "bot") {
                 // lazy import the bot api to avoid cycles
                 const { getFilteredBotVideos } = await import("../api/videoBot");
@@ -254,32 +256,79 @@ export default function VideoFilters({
 
                 {/* Filtres booléens */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                        { key: "isDeleted", label: "Deleted" },
-                        { key: "processing", label: "Video Uploaded" },
-                    ].map(({ key, label }) => (
-                        <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-                            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
-                            <div className="flex gap-3">
-                                {["all", "yes", "no"].map((option) => (
-                                    <label key={option} className="flex items-center gap-1 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name={key}
-                                            className="radio radio-sm accent-blue-500 dark:accent-blue-400"
-                                            checked={
-                                                option === "all"
-                                                    ? (filters[key as keyof typeof filters] === "all" || filters[key as keyof typeof filters] === "")
-                                                    : filters[key as keyof typeof filters] === option
-                                            }
-                                            onChange={() => handleChange(key, option)}
-                                        />
-                                        <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{option}</span>
-                                    </label>
-                                ))}
-                            </div>
+                    {/* Filtre Deleted */}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Deleted</p>
+                        <div className="flex gap-3">
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="isDeleted"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.isDeleted === "all" || filters.isDeleted === ""}
+                                    onChange={() => handleChange("isDeleted", "all")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">all</span>
+                            </label>
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="isDeleted"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.isDeleted === "yes"}
+                                    onChange={() => handleChange("isDeleted", "yes")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">yes</span>
+                            </label>
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="isDeleted"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.isDeleted === "no"}
+                                    onChange={() => handleChange("isDeleted", "no")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">no</span>
+                            </label>
                         </div>
-                    ))}
+                    </div>
+
+                    {/* Filtre Video Uploaded */}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Video Uploaded</p>
+                        <div className="flex gap-3">
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="processing"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.processing === "all" || filters.processing === ""}
+                                    onChange={() => handleChange("processing", "all")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">all</span>
+                            </label>
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="processing"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.processing === "done"}
+                                    onChange={() => handleChange("processing", "done")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">yes</span>
+                            </label>
+                            <label className="flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="processing"
+                                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                    checked={filters.processing === "null"}
+                                    onChange={() => handleChange("processing", "null")}
+                                />
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">no</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <form method="dialog" className="pt-3 flex justify-end gap-3">

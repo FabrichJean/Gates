@@ -15,6 +15,7 @@ import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
 import PostFilter, { type TPostFilter } from "../components/Post/PostFilter";
 import { LiaSyncSolid } from "react-icons/lia";
+import { cdnS3 } from "../utils/cdn";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
@@ -70,8 +71,8 @@ const PostManagementInner = () => {
     new Date(dateString).toLocaleDateString("fr-FR");
   const filteredPosts = posts.filter(
     (post: any) =>
-      post.postCategory.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.postSubCategory.name
+      post?.postCategory?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post?.postSubCategory?.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       post.plateform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -216,7 +217,7 @@ const PostManagementInner = () => {
                   </th>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post.postCategory.name} / {post.postSubCategory.name}
+                      {post?.postCategory?.name} / {post?.postSubCategory?.name}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -303,7 +304,7 @@ const PostManagementInner = () => {
                       {post.images?.slice(0, 2).map((image: any, index: number) => (
                         <div key={image.id} className="relative group">
                           <img
-                            src={image.s3_urls?.imageUrl || image.public_urls.local_image_url}
+                            src={cdnS3(image.s3_urls?.imageUrl) || image.public_urls.local_image_url}
                             alt={`Image ${index + 1}`}
                             className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
                             onError={(e) => {
@@ -336,22 +337,27 @@ const PostManagementInner = () => {
                       <>
                         <BtnTranscodeComponent post={post as any} reFetch={reFetch} />
 
-                        {/* bouton single sync */}
-                        <button
-                          type="button"
-                          onClick={() => setSingleSyncOpenId(post.id)}
-                          className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
-                          disabled={singleSyncLoading && singleSyncOpenId === post.id}
-                        >
-                          <LiaSyncSolid className="w-3 h-3" />
-                          Sync
-                        </button>
-                        <SingleSyncModal
-                          open={singleSyncOpenId === post.id}
-                          onClose={() => setSingleSyncOpenId(null)}
-                          onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
-                          title={`Synchroniser le post #${post.id}`}
-                        />
+                        {/* bouton single sync (affiché seulement si post.processing === "done") */}
+                        {post.processing === "done" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setSingleSyncOpenId(post.id)}
+                              className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
+                              disabled={singleSyncLoading && singleSyncOpenId === post.id}
+                            >
+                              <LiaSyncSolid className="w-3 h-3" />
+                              Sync
+                            </button>
+
+                            <SingleSyncModal
+                              open={singleSyncOpenId === post.id}
+                              onClose={() => setSingleSyncOpenId(null)}
+                              onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
+                              title={`Synchroniser le post #${post.id}`}
+                            />
+                          </>
+                        )}
                       </>
                     ) : null}
                     <Link

@@ -76,7 +76,7 @@ export const useVideoManagement = () => {
   const computedParams = useMemo(() => ({
     ...filters,
     isDeleted: mapStatus(filters.isDeleted),
-    processing: mapStatus(filters.processing),
+    processing: filters.processing,
     status: "all",
     page,
   }), [filters, page]);

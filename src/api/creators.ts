@@ -25,3 +25,24 @@ export async function deleteCreator(id: number) {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 }
+
+// Get creators for bulk sync
+export async function getCreatorsForBulkSync(page: number = 1, limit: number = 50, plateformId?: number) {
+  const params: any = {
+    page,
+    limit,
+    select: 'id,name,status,avatar,plateform_id', // Include plateform_id field
+  };
+  
+  // Add plateformId filter if provided
+  if (plateformId !== undefined && plateformId !== null) {
+    params.plateform_id = plateformId;
+  }
+  
+  return await axios.get(`${apiURL}/creators`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    params
+  });
+}

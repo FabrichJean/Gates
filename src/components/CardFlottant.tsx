@@ -38,19 +38,36 @@ const CardFlottant: React.FC = () => {
 
     // If you want to fully hide the card from UI, AppRoutes controls mounting via visible flag.
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 right-6 z-60">
             {/* Expanded card */}
             {!collapsed ? (
                 <div className="w-80 max-w-full rounded-xl shadow-lg p-4 inset-0 backdrop-blur-sm border border-gray-200 dark:border-gray-700 transform transition-all duration-200">
-                    {/* close/minimize button */}
-                    <div className="absolute top-0 right-0 m-3 flex items-center space-x-2 bg-white">
+                    {/* close modal */}
+                    <button className="p-1 rounded-full bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm focus:outline-none text-gray-700 dark:text-gray-200" title="close">
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            onClick={hide}
+                            aria-label="Close"
+                            className="hover:text-red-500"
+                        >
+                            <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>  
+                    </button>
+
+                    {/* minimize button */}
+                    <div className="absolute top-0 right-0 m-3 flex items-center space-x-2">
                         <button
                             aria-label="Minimize"
                             title="Minimize"
                             onClick={collapse}
-                            className="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm focus:outline-none text-gray-700 dark:text-gray-200"
+                            className="p-1 rounded-full bg-gray-300 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm focus:outline-none text-gray-700 dark:text-gray-200"
                         >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="hover:text-green-500">
                                 <rect x="4" y="11" width="16" height="2" rx="1" fill="currentColor" />
                             </svg>
                         </button>

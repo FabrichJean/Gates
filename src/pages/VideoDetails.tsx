@@ -57,6 +57,7 @@ import {
 import SexyShortLoader from "../components/SexyShortLoader";
 import { apiURL, token } from "../constant";
 import {VideoPlayer} from "../components/VideoPlayer";
+import { cdnS3 } from "../utils/cdn";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
@@ -85,7 +86,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
 
   useEffect(() => {
     setCurrentCoverUrl(
-      (video?.s3_urls?.coverUrl ||
+      (cdnS3(video?.s3_urls?.coverUrl) ||
         video?.public_urls.local_cover_url ||
         video?.cover) +
       "?t=" +
@@ -294,10 +295,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           videoUrls={{
                             hlsUrl: video?.s3_urls?.hlsUrl,
                             temp_url: video?.public_urls?.temp_url,
-                            coverUrl: video?.s3_urls?.coverUrl,
+                            coverUrl: cdnS3(video?.s3_urls?.coverUrl),
                             cover_url: video?.public_urls?.cover_url
                           }}
-                          poster={currentCoverUrl || video?.s3_urls?.coverUrl || video?.public_urls?.cover_url}
+                          poster={currentCoverUrl || cdnS3(video?.s3_urls?.coverUrl) || video?.public_urls?.cover_url}
                           isPlaying={videoPlayed}
                           onPlay={() => setVideoPlayed(true)}
                           className="w-full h-full"
@@ -615,7 +616,7 @@ function EditVideo({
   const [uploading, setUploading] = useState(false);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(
-    video.public_urls.cover_url
+    cdnS3(video.s3_urls.coverUrl) || video.public_urls.cover_url
   );
   const coverInputRef = useRef<HTMLInputElement>(null);
 

@@ -5,9 +5,15 @@ export const mapStatus = (value: string) => {
 };
 
 export const mapStatusProcessing = (value: string) => {
-    if (value === 'yes') return 'done';
-    if (value === 'no') return 'null';
+    if (value === 'yes' || value === '1') return 'done';
+    if (value === 'no' || value === '0') return 'null';
     return undefined;
+};
+
+export const reverseStatusProcessing = (value: string | undefined) => {
+    if (value === 'done') return 'yes';
+    if (value === 'null') return 'no';
+    return 'all';
 };
 
 export const reverseStatus = (value: string | undefined) => {

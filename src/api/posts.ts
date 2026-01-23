@@ -128,3 +128,25 @@ export async function updatePostBannedStatus(id: string | number, isBanned: bool
       }
   });
 }
+
+// Get posts for bulk sync (page 1 with limited results)
+export async function getPostsForBulkSync(page: number = 1, limit: number = 50, plateformId?: number) {
+  const params: any = {
+    page,
+    limit,
+    select: 'id,title,status,cover,plateform_id', // Include plateform_id field
+    progressing: 'done'
+  };
+  
+  // Add plateformId filter if provided
+  if (plateformId !== undefined && plateformId !== null) {
+    params.plateform_id = plateformId;
+  }
+  
+  return await axios.get(`${apiURL}/posts`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+    params
+  });
+}

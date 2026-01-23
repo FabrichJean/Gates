@@ -56,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
 
         {/* Catégorie */}
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <span>{post.postCategory?.name}</span>
+          <span>{post?.postCategory?.name}</span>
           <span className="text-gray-500">•</span>
           <span>{post.postSubCategory?.name}</span>
         </div>
