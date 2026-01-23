@@ -36,7 +36,7 @@ export const AudioTitlesField: React.FC<AudioTitlesFieldProps> = ({
       .filter(entry => entry.title.trim() !== '' || entry.description.trim() !== '')
       .map(entry => entry.i18_language);
     
-    return languages.length > 0 ? languages : ['en'];
+    return languages.length > 0 ? languages : [];
   });
   
   // Mettre à jour les langues sélectionnées quand les titres initiaux sont chargés
@@ -45,7 +45,7 @@ export const AudioTitlesField: React.FC<AudioTitlesFieldProps> = ({
       .filter(entry => entry.title.trim() !== '' || entry.description.trim() !== '')
       .map(entry => entry.i18_language);
     
-    if (languages.length > 0 && selectedLanguages.length === 1 && selectedLanguages[0] === 'en') {
+    if (languages.length > 0 && selectedLanguages.length === 0) {
       setSelectedLanguages(languages);
     }
   }, [value]);
@@ -112,12 +112,10 @@ export const AudioTitlesField: React.FC<AudioTitlesFieldProps> = ({
       }
     });
     
-    // Filtrer les langues non sélectionnées (optionnel - garder les données même si désélectionnées)
-    // Pour garder les données: ne pas filtrer
-    // Pour supprimer: décommenter la ligne suivante
-    // const filteredTitles = updatedTitles.filter(t => languages.includes(t.i18_language));
+    // Filtrer les langues non sélectionnées pour les supprimer du formulaire
+    const filteredTitles = updatedTitles.filter(t => languages.includes(t.i18_language));
     
-    onChange(updatedTitles);
+    onChange(filteredTitles);
   };
 
   return (
@@ -134,16 +132,18 @@ export const AudioTitlesField: React.FC<AudioTitlesFieldProps> = ({
         />
       </div>
       
-      <I18nContentFields
-        title={i18nContent.titles}
-        description={i18nContent.descriptions}
-        onTitleChange={handleTitleChange}
-        onDescriptionChange={handleDescriptionChange}
-        titleRequired={required}
-        descriptionRequired={false}
-        supportedLanguages={selectedLanguages}
-        showAutoFill={true}
-      />
+      {selectedLanguages.length > 0 && (
+        <I18nContentFields
+          title={i18nContent.titles}
+          description={i18nContent.descriptions}
+          onTitleChange={handleTitleChange}
+          onDescriptionChange={handleDescriptionChange}
+          titleRequired={required}
+          descriptionRequired={false}
+          supportedLanguages={selectedLanguages}
+          showAutoFill={true}
+        />
+      )}
     </div>
   );
 };

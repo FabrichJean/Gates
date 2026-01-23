@@ -35,6 +35,7 @@ export interface Plateform {
 export interface Creator {
   id: number;
   name: string;
+  gender: string;
   avatar?: string;
   bio?: string;
 }
@@ -51,6 +52,7 @@ export interface Audio {
   duration?: number;
   need_vip: boolean;
   plateform_id?: number;
+  type_audio: string;
   user_id: number;
   hash?: string;
   sys_code?: string;

@@ -121,7 +121,7 @@ export default function AudioCategory() {
       fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la création");
+      toast.error(err.response.data.message);
     } finally {
       setSubmitting(false);
     }
@@ -190,7 +190,7 @@ export default function AudioCategory() {
       await loadSubcategories(subCategoryForm.audio_category_id, true);
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la création");
+      toast.error(err.response.data.message);
     } finally {
       setSubmitting(false);
     }

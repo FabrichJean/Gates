@@ -20,9 +20,12 @@ import { useAuth } from "../../hooks/useAuth";
 import useSocketCheckRomans from "../../hooks/romans/useSocketRomans";
 import toast from "react-hot-toast";
 import { toggleIsDeleted, deepUploadRoman } from "../../api/romans";
+import { singleSync } from "../../api/videos";
+import SingleSyncModal from "../../components/SingleSyncModal";
 import RoleEnum from "../../utils/roleEnum";
 
 import { motion } from "framer-motion";
+import { LiaSyncSolid } from "react-icons/lia";
 
 const RomansManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,6 +33,9 @@ const RomansManagement = () => {
   const [page] = useState(1);
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const { user } = useAuth();
+  const [selectedRoman, setSelectedRoman] = useState<TRoman | null>(null);
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
   /* ===================== API ===================== */
   const { data, loading, reFetch } = UseRomans("all", page, searchTerm);
@@ -143,6 +149,43 @@ const RomansManagement = () => {
     }
   };
 
+  const extractErrorMessage = (err: unknown) => {
+    try {
+      if (!err) return "Error";
+      if (typeof err === "string") return err;
+      if (typeof err === "object" && err !== null) {
+        return (
+          (err as any)?.response?.data?.message ??
+          (err as any)?.message ??
+          "Error"
+        );
+      }
+      return String(err);
+    } catch {
+      return "Error";
+    }
+  };
+
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!selectedRoman) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({
+        entity: "romans",
+        origin_id: selectedRoman.id,
+        isForce,
+      });
+      toast.success("✅ Sync single exécuté");
+      reFetch?.();
+    } catch (err) {
+      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+      setSingleSyncOpen(false);
+      setSelectedRoman(null);
+    }
+  };
+
   /* ===================== RENDER CARD ===================== */
   const renderCardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -193,9 +236,9 @@ const RomansManagement = () => {
             {/* Title */}
             <h3
               className="font-bold text-lg text-gray-900 dark:text-white mb-2"
-              title={roman.ref}
+              title={roman.titles[0]?.title || roman.ref}
             >
-              {truncateText(roman.ref)}
+              {truncateText(roman.titles[0]?.title || roman.ref, 30)}
             </h3>
 
             {/* Creator Info */}
@@ -264,25 +307,41 @@ const RomansManagement = () => {
                 >
                   <Edit2 className="w-4 h-4" />
                 </Link>
-                <button
-                  className={`p-2 cursor-pointer rounded-lg transition-colors ${
-                    roman.processing === "done"
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
-                      : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                  onClick={() => handleSendRoman(roman.id)}
-                  disabled={
-                    roman.processing === "done" ||
-                    roman.processing === "working"
-                  }
-                  title={
-                    roman.processing === "done"
-                      ? "Déjà envoyé"
-                      : "Envoyer la couverture sur S3"
-                  }
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+
+                {user.role === RoleEnum.SUPERADMIN && (
+                  <>
+                    <button
+                      type="button"
+                      title="Synchroniser"
+                      onClick={() => {
+                        setSelectedRoman(roman);
+                        setSingleSyncOpen(true);
+                      }}
+                      className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
+                    >
+                      <LiaSyncSolid className="w-4 h-4" />
+                    </button>
+                    <button
+                      className={`p-2 cursor-pointer rounded-lg transition-colors ${
+                        roman.processing === "done"
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+                          : "text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                      onClick={() => handleSendRoman(roman.id)}
+                      disabled={
+                        roman.processing === "done" ||
+                        roman.processing === "working"
+                      }
+                      title={
+                        roman.processing === "done"
+                          ? "Déjà envoyé"
+                          : "Envoyer la couverture sur S3"
+                      }
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -354,7 +413,7 @@ const RomansManagement = () => {
                       className="font-medium text-gray-900 dark:text-white text-nowrap"
                       title={roman.ref}
                     >
-                      {truncateText(roman.ref, 20)}
+                      {truncateText(roman.titles[0]?.title || roman.ref, 20)}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       ID: {roman.id}
@@ -477,24 +536,38 @@ const RomansManagement = () => {
                       <Edit2 className="w-4 h-4" />
                     </Link>
                     {user.role === RoleEnum.SUPERADMIN && (
-                      <button
-                        className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
-                          roman.processing === "done"
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
-                            : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }`}
-                        onClick={() => handleSendRoman(roman.id)}
-                        disabled={roman.processing === "done"}
-                        title={
-                          roman.processing === "done"
-                            ? "Déjà envoyé"
-                            : roman.checking !== "checked"
-                            ? "Roman must be checked first"
-                            : "Envoyer"
-                        }
-                      >
-                        <Send className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          title="Synchroniser"
+                          onClick={() => {
+                            setSelectedRoman(roman);
+                            setSingleSyncOpen(true);
+                          }}
+                          className="p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:dark:bg-slate-600 hover:bg-slate-200"
+                        >
+                          <LiaSyncSolid className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          className={`p-2 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700 cursor-pointer ${
+                            roman.processing === "done"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+                              : "text-gray-600 dark:text-gray-300 hover:text-teal-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => handleSendRoman(roman.id)}
+                          disabled={roman.processing === "done"}
+                          title={
+                            roman.processing === "done"
+                              ? "Déjà envoyé"
+                              : roman.checking !== "checked"
+                              ? "Roman must be checked first"
+                              : "Envoyer"
+                          }
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>
@@ -583,7 +656,7 @@ const RomansManagement = () => {
         {/* Content */}
         {viewMode === "card" ? renderCardView() : renderTableView()}
 
-        {filteredRomans.length === 0 && (
+        {viewMode === "card" && filteredRomans.length === 0 && (
           <div className="p-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
             <p className="text-xl font-medium mb-2">No novels found</p>
@@ -592,6 +665,21 @@ const RomansManagement = () => {
             </p>
           </div>
         )}
+        <SingleSyncModal
+          open={singleSyncOpen}
+          onClose={() => {
+            setSingleSyncOpen(false);
+            setSelectedRoman(null);
+          }}
+          onSubmit={handleSingleSync}
+          title={
+            selectedRoman
+              ? `Synchroniser ${
+                  selectedRoman.titles?.[0]?.title || selectedRoman.ref
+                }`
+              : "Synchroniser"
+          }
+        />
       </div>
     </div>
   );

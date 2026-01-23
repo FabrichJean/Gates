@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
-import UseCreators from '../hooks/useCreators';
-import type { Creator } from './creators/CreatorList';
-import { Shuffle } from 'lucide-react';
+import { useEffect, useRef, useState, useMemo } from "react";
+import UseCreators from "../hooks/useCreators";
+import type { Creator } from "./creators/CreatorList";
+import { Shuffle } from "lucide-react";
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
@@ -17,11 +17,20 @@ interface Props {
   autoSuggest?: boolean;
 }
 
-const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled, isDefault, autoSuggest }: Props) => {
+const CreatorAutoComplete = ({
+  value,
+  onChange,
+  onSelect,
+  placeholder,
+  disabled,
+  isDefault,
+  autoSuggest,
+}: Props) => {
   const { data: creators } = UseCreators({ isAll: true });
-  const [query, setQuery] = useState<string>(value ?? '');
+  const [query, setQuery] = useState<string>(value ?? "");
   const [open, setOpen] = useState(false);
   const [isSuggested, setIsSuggested] = useState(false);
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const hasAutoSuggested = useRef(false);
   const userCleared = useRef(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -29,11 +38,11 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
   // keep query in sync when parent passes a new value (string or Creator)
   useEffect(() => {
     if (!value) {
-      setQuery('');
+      setQuery("");
       hasAutoSuggested.current = false; // Reset when value becomes null
       userCleared.current = false; // Reset when parent sets to null
-    } else if (typeof value === 'string') setQuery(value);
-    else setQuery((value as Creator).name || '');
+    } else if (typeof value === "string") setQuery(value);
+    else setQuery((value as Creator).name || "");
   }, [value]);
 
   const filtered = useMemo(() => {
@@ -45,14 +54,16 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
   const handleSelect = (c: Creator) => {
     setQuery(c.name);
+    setSelectedCreator(c);
     // when a creator is selected, notify both callbacks: string value and object selection
     onChange?.(c.name);
     onSelect?.(c);
@@ -72,6 +83,7 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
   // when query is cleared, notify that no creator is selected
   useEffect(() => {
     if (!query) {
+      setSelectedCreator(null);
       onSelect?.(null);
     }
   }, [query, onSelect]);
@@ -80,36 +92,64 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
     <div ref={ref} className="relative w-full">
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => { 
-              const newValue = e.target.value;
-              setQuery(newValue); 
-              setOpen(true); 
-              onChange?.(newValue); 
-              setIsSuggested(false);
-              if (newValue === '' || newValue === null || newValue === undefined) {
-                userCleared.current = true;
-              }
-            }}
-            onFocus={() => {
-              setOpen(true);
-              // Auto-suggest when focusing on empty input
-              if (!query && autoSuggest && creators && creators.creators.length > 0 && !hasAutoSuggested.current && !userCleared.current) {
-                handleSuggestRandom();
-                hasAutoSuggested.current = true;
-              }
-            }}
-            placeholder={placeholder || 'Creator name (optional)'}
-            disabled={disabled}
-            className={`w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-200 ${disabled ? 'opacity-60' : ''}`}
-          />
-          { (isDefault || isSuggested) && (
-            <span className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-              {isDefault ? 'Par défaut' : 'Suggéré'}
-            </span>
-          )}
+          <div className="flex items-center gap-2 w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2 focus-within:ring-2 focus-within:ring-blue-400 dark:focus-within:ring-blue-500 transition-all duration-200">
+            {selectedCreator && (
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                {selectedCreator.avatar ? (
+                  <img
+                    src={selectedCreator.avatar}
+                    alt={selectedCreator.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                    No
+                  </div>
+                )}
+              </div>
+            )}
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setQuery(newValue);
+                setOpen(true);
+                onChange?.(newValue);
+                setIsSuggested(false);
+                if (
+                  newValue === "" ||
+                  newValue === null ||
+                  newValue === undefined
+                ) {
+                  userCleared.current = true;
+                }
+              }}
+              onFocus={() => {
+                setOpen(true);
+                // Auto-suggest when focusing on empty input
+                if (
+                  !query &&
+                  autoSuggest &&
+                  creators &&
+                  creators.creators.length > 0 &&
+                  !hasAutoSuggested.current &&
+                  !userCleared.current
+                ) {
+                  handleSuggestRandom();
+                  hasAutoSuggested.current = true;
+                }
+              }}
+              placeholder={placeholder || "Creator name (optional)"}
+              disabled={disabled}
+              className={`flex-1 bg-transparent text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none ${disabled ? "opacity-60" : ""}`}
+            />
+            {(isDefault || isSuggested) && (
+              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800 whitespace-nowrap">
+                {isDefault ? "Par défaut" : "Suggéré"}
+              </span>
+            )}
+          </div>
         </div>
         <button
           type="button"
@@ -131,11 +171,23 @@ const CreatorAutoComplete = ({ value, onChange, onSelect, placeholder, disabled,
               className="px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer flex items-center gap-3"
             >
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                {c.avatar ? <img src={c.avatar} alt={c.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">No</div>}
+                {c.avatar ? (
+                  <img
+                    src={c.avatar}
+                    alt={c.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+                    No
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium">{c.name}</div>
-                {c.gender && <div className="text-xs text-gray-500">{c.gender}</div>}
+                {c.gender && (
+                  <div className="text-xs text-gray-500">{c.gender}</div>
+                )}
               </div>
             </li>
           ))}

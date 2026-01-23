@@ -103,13 +103,15 @@ export function TitlesForm({
     Array<{ code: string; name: string }>
   >([]);
 
-
   const applyAuto = async () => {
     setLoading(true);
     const i18ns = await axios.post<Couple[]>(server, {
       title: autoTitle,
       description: autoDesc,
-      i18n: selectedLanguages.length === 0 ? null : selectedLanguages.map((l) => l.code),
+      i18n:
+        selectedLanguages.length === 0
+          ? null
+          : selectedLanguages.map((l) => l.code),
     });
 
     setCoupleTitles(i18ns.data);
@@ -242,10 +244,11 @@ export function TitlesForm({
         whileTap={{ scale: 0.98 }}
         onClick={submit}
         disabled={uploading}
-        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${uploading
-          ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-          : "rounded-lg border shadow-lg hover:shadow-xl"
-          }`}
+        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+          uploading
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            : "rounded-lg border shadow-lg hover:shadow-xl"
+        }`}
       >
         {uploading ? (
           <>
@@ -280,7 +283,9 @@ export function TitlesForm({
             <div className="flex space-x-1.5 items-center">
               <label className="label">
                 <span className="label-text">
-                  {selectedLanguages.length === 0 ? 'All' : `(${selectedLanguages.length}) lang selected`}
+                  {selectedLanguages.length === 0
+                    ? "All"
+                    : `(${selectedLanguages.length}) lang selected`}
                 </span>
               </label>
             </div>
@@ -324,7 +329,6 @@ export function TitlesForm({
               ))}
             </div>
           </div>
-
 
           <div className="form-control w-full mb-4">
             <label className="label">
@@ -415,7 +419,6 @@ const Upload = () => {
   const { videoFile, coverFile, videoPreview, coverPreview } = state;
 
   const [needVip, setNeedVip] = useState<boolean>(false);
-
 
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -574,7 +577,6 @@ const Upload = () => {
     fd.append("isShort", String(videoType === "short"));
     fd.append("need_vip", String(needVip));
 
-
     if (selectedTagCategories.length > 0) {
       const ids: number[] = [];
       const named: Array<{ name: string; meta?: any }> = [];
@@ -669,20 +671,21 @@ const Upload = () => {
             <button
               type="button"
               onClick={() => setNeedVip((v) => !v)}
-              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
-                }`}
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                  needVip ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
 
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {needVip ? 'true' : 'false'}
+              {needVip ? "true" : "false"}
             </span>
           </div>
-
         </div>
 
         {/* Reference */}
