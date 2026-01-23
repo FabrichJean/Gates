@@ -197,7 +197,7 @@ const AnimatedAlert: React.FC<AnimatedAlertProps> = ({
               >
                 {onConfirm ? (
                   <>
-                    {page === "audio-management" ? (
+                    {page === "audio-management" || page === "audio-album-management" ? (
                       <button
                         onClick={() => {
                           onConfirme2();

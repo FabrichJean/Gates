@@ -269,7 +269,7 @@ const UploadAudio: React.FC = () => {
     } catch (error) {
       console.error("Error creating audio:", error);
       toast.error(
-        error?.response?.data?.message ||
+        error?.response?.message ||
           "Erreur lors de la création de l'audio.",
       );
     } finally {
@@ -723,8 +723,8 @@ const UploadAudio: React.FC = () => {
         onClose={() => {
           setIsAlertOpen(false);
         }}
-        title="Album créé avec succès"
-        message="Voulez-vous ajouter des pistes à cet album maintenant ?"
+        title="Audio de type album créé avec succès"
+        message="Voulez-vous ajouter des albums à cet audio maintenant ?"
         type="success"
         onConfirm={() => {
           if (audioResult) {
@@ -736,7 +736,7 @@ const UploadAudio: React.FC = () => {
             nav(`/audios/${audioResult.id}`);
           }
         }}
-        confirmText="Oui, ajouter des pistes"
+        confirmText="Oui, ajouter des albums"
         cancelText="Plus tard"
       />
     </div>

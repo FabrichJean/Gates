@@ -22,7 +22,7 @@ import {
   Download,
   Pause,
 } from "lucide-react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { getAudioAlbumByIdApi, deleteAudioAlbumApi, getAudioAlbumTracksApi, createAudioAlbumTrackApi, updateAudioAlbumTrackApi, deleteAudioAlbumTrackApi } from "../api/audioAlbum";
 import type { AudioAlbum, AudioAlbumTrack } from "../types/audio";
 import toast from "react-hot-toast";
@@ -40,6 +40,7 @@ const AudioAlbumDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: user } = useAuthMe();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [album, setAlbum] = useState<AudioAlbum | null>(null);
   const [loading, setLoading] = useState(true);
@@ -168,6 +169,17 @@ const AudioAlbumDetails: React.FC = () => {
     fetchAlbum();
     fetchTracks();
   }, [id]);
+
+  // Check if we should open the add track modal from URL param
+  useEffect(() => {
+    const openAddTrack = searchParams.get('openAddTrack');
+    if (openAddTrack === 'true' && !loading) {
+      setShowAddTrack(true);
+      // Remove the param from URL
+      searchParams.delete('openAddTrack');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, loading, setSearchParams]);
 
   const handleDelete = async () => {
     if (!album) return;
@@ -299,11 +311,11 @@ const AudioAlbumDetails: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 rounded-lg">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-3 py-6">
         {/* Back Button */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-4">
-          <Link to="/audio-albums" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900">
+          <Link to="/audio-albums" className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:dark:text-gray-400">
             <ChevronLeft className="w-4 h-4" />
             Retour aux albums
           </Link>
@@ -337,24 +349,27 @@ const AudioAlbumDetails: React.FC = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col gap-2">
-                <Link
+              <div className="flex justify-between gap-2">
+                <div></div>
+                <div className="flex gap-2">
+                  <Link
                   to={`/audio-albums/${album.id}/edit`}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 border border-blue-600 hover:border-blue-700 text-white rounded text-sm font-medium transition-colors"
+                  hidden={album.isDeleted}
                 >
                   <Edit3 className="w-4 h-4" />
-                  Modifier
                 </Link>
 
                 {user?.role === RoleEnum.SUPERADMIN && (
                   <button
                     onClick={handleDelete}
-                    className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+                    hidden={album.isDeleted}
+                    className="inline-flex items-center justify-center gap-2 px-3 py-2 border border-red-600 hover:border-red-700 text-white rounded text-sm font-medium transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Supprimer
                   </button>
                 )}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -660,7 +675,7 @@ const AudioAlbumDetails: React.FC = () => {
 
       {/* Track Form Modal */}
       {showAddTrack && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

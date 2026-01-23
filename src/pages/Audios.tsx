@@ -91,8 +91,14 @@ const Audios: React.FC = () => {
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ">
               {/* View toggle */}
+              <Link
+                to="/audios/upload"
+                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <FilePlus className="h-4 w-4" />
+              </Link>
               <div className="flex rounded-full bg-gray-100 dark:bg-gray-800 p-1">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -119,13 +125,6 @@ const Audios: React.FC = () => {
                   <List className="w-4 h-4" />
                 </button>
               </div>
-
-              <Link
-                to="/audios/upload"
-                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <FilePlus className="h-4 w-4" />
-              </Link>
             </div>
           </div>
         </div>

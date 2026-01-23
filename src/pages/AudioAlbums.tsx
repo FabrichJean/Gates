@@ -11,7 +11,7 @@ import {
   Hash,
   User,
   Calendar,
-  Filter
+  Filter,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAudioAlbumsApi, deleteAudioAlbumApi } from "../api/audioAlbum";
@@ -66,7 +66,7 @@ const AudioAlbums: React.FC = () => {
 
   // Filter albums based on search and deleted status
   const filteredAlbums = useMemo(() => {
-    return albums.filter(album => {
+    return albums.filter((album) => {
       const matchesSearch =
         !searchTerm ||
         album.ref?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,7 +118,9 @@ const AudioAlbums: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Chargement des albums...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Chargement des albums...
+          </p>
         </div>
       </div>
     );
@@ -185,7 +187,8 @@ const AudioAlbums: React.FC = () => {
                   onChange={(e) => setShowDeleted(e.target.checked)}
                   className="rounded border-gray-300 dark:border-gray-700"
                 />
-                Afficher supprimés
+                {/* si l'album supprimé est afficher afficher cacher supprimés sinon Afficher supprimés */}
+                {showDeleted ? "Cacher supprimés" : "Afficher supprimés"}
               </label>
             </div>
           </div>
@@ -205,7 +208,9 @@ const AudioAlbums: React.FC = () => {
                 {searchTerm ? "Aucun album trouvé" : "Aucun album"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {searchTerm ? "Essayez de modifier vos critères de recherche" : "Commencez par créer votre premier album"}
+                {searchTerm
+                  ? "Essayez de modifier vos critères de recherche"
+                  : "Commencez par créer votre premier album"}
               </p>
               {!searchTerm && (
                 <Link
@@ -229,8 +234,8 @@ const AudioAlbums: React.FC = () => {
                     transition={{ delay: index * 0.05 }}
                     className={`bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 ${
                       album.isDeleted
-                        ? 'border-red-200 dark:border-red-800 opacity-75'
-                        : 'border-gray-200 dark:border-gray-700'
+                        ? "border-red-200 dark:border-red-800 opacity-75"
+                        : "border-gray-200 dark:border-gray-700"
                     }`}
                   >
                     <div className="p-4">
@@ -265,13 +270,20 @@ const AudioAlbums: React.FC = () => {
                         {album.total_tracks && (
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Music className="w-4 h-4" />
-                            <span>{album.total_tracks} piste{album.total_tracks > 1 ? 's' : ''}</span>
+                            <span>
+                              {album.total_tracks} piste
+                              {album.total_tracks > 1 ? "s" : ""}
+                            </span>
                           </div>
                         )}
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                           <Calendar className="w-4 h-4" />
-                          <span>{new Date(album.createdAt).toLocaleDateString('fr-FR')}</span>
+                          <span>
+                            {new Date(album.createdAt).toLocaleDateString(
+                              "fr-FR",
+                            )}
+                          </span>
                         </div>
                       </div>
 
@@ -286,15 +298,17 @@ const AudioAlbums: React.FC = () => {
                         </Link>
 
                         <Link
-                          to={`/audio-albums/${album.id}/edit`}
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          to={`${album.isDeleted ? "#" : `/audio-albums/edit/${album.id}`}`}
+                          className={`inline-flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 ${album.isDeleted ? `cursor-not-allowed` : `cursor-pointer`} dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                        `}
                         >
                           <Edit className="w-4 h-4" />
                         </Link>
 
                         <button
                           onClick={() => handleDelete(album.id)}
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                          disabled={album.isDeleted}
+                          className={`inline-flex items-center gap-2 px-3 py-2 bg-red-100 dark:bg-red-900/30  text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors ${album.isDeleted ? `cursor-not-allowed` : `cursor-default`}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -331,7 +345,8 @@ const AudioAlbums: React.FC = () => {
           transition={{ delay: 0.4 }}
           className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400"
         >
-          {filteredAlbums.length} album{filteredAlbums.length > 1 ? 's' : ''} trouvé{filteredAlbums.length > 1 ? 's' : ''}
+          {filteredAlbums.length} album{filteredAlbums.length > 1 ? "s" : ""}{" "}
+          trouvé{filteredAlbums.length > 1 ? "s" : ""}
           {searchTerm && ` pour "${searchTerm}"`}
         </motion.div>
       </div>

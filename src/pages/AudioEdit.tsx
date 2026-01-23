@@ -247,8 +247,6 @@ const AudioEdit: React.FC = () => {
     );
   };
 
-  const selectedCreator = form.creator_id ? creators.find((c) => c.id === parseInt(form.creator_id)) : null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -536,61 +534,17 @@ const AudioEdit: React.FC = () => {
                     <User className="w-4 h-4" />
                     Créateur
                   </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreatorDropdown(!showCreatorDropdown)}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-left flex items-center justify-between text-gray-900 dark:text-gray-100"
-                    >
-                      <span className="flex items-center gap-3 truncate">
-                        {selectedCreator ? (
-                          <>
-                            {getCreatorAvatar(selectedCreator) ? (
-                              <img src={getCreatorAvatar(selectedCreator)!} alt={selectedCreator.name} className="w-6 h-6 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
-                              </div>
-                            )}
-                            <span className="truncate">{selectedCreator.name}</span>
-                          </>
-                        ) : (
-                          "Sélectionnez un créateur"
-                        )}
-                      </span>
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    </button>
-
-                    {showCreatorDropdown && (
-                      <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
-                        {creators.map((creator) => (
-                          <button
-                            key={creator.id}
-                            type="button"
-                            onClick={() => {
-                              setForm({ ...form, creator_id: creator.id.toString() });
-                              setShowCreatorDropdown(false);
-                            }}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between text-gray-900 dark:text-gray-100"
-                          >
-                            <div className="flex items-center gap-3 truncate">
-                              {getCreatorAvatar(creator) ? (
-                                <img src={getCreatorAvatar(creator)!} alt={creator.name} className="w-6 h-6 rounded-full object-cover" />
-                              ) : (
-                                <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                  <User className="w-4 h-4 text-gray-500 dark:text-gray-200" />
-                                </div>
-                              )}
-                              <span className="truncate">{creator.name}</span>
-                            </div>
-                            {form.creator_id === creator.id.toString() && (
-                              <Check className="w-5 h-5 text-indigo-500" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <CreatorAutoComplete
+                    value={creator}
+                    onChange={(v: string | null) => {
+                      setCreator(v);
+                      setCreatorId(null);
+                    }}
+                    onSelect={(c) => {
+                      setCreator(c?.name ?? null);
+                      setCreatorId(c?.id ?? null);
+                    }}
+                  />
                 </div>
 
                 {/* Platform */}

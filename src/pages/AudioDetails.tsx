@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { RiAlbumFill } from "react-icons/ri";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { getAudioByIdApi, uploadAudioToS3, updateAudio } from "../api/audios";
 import { getAudioAlbumsByAudioIdApi } from "../api/audioAlbum";
@@ -426,34 +427,32 @@ const AudioDetails: React.FC = () => {
                 <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-2">
                   <Music className="w-4 h-4" />
                   <span className="font-medium">Albums de cet audio</span>
-                  <a
-                    href={`/audio-albums/upload?audio_id=${audio?.id}`}
-                    className="ml-auto px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs font-semibold"
-                  >
-                    + Add Album
-                  </a>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 pt-2">
                   {audioAlbums.map((album) => (
-                    <a
+                    <Link
                       key={album.id}
-                      href={`/audio-albums/${album.id}`}
-                      className="block px-3 py-2 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                      to={`/audio-albums/${album.id}`}
+                      className="flex px-3 py-2 rounded justify-between hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors border border-slate-300 dark:border-slate-700"
                     >
-                      <span className="font-semibold">
-                        {album.ref || `Album #${album.id}`}
+                      <span className="flex items-center gap-1">
+                        {/* image cover audio */}
+                        <RiAlbumFill className=" " />
+                        <span className="font-semibold">
+                          {album.ref || `Album #${album.id}`}
+                        </span>
+                        {album.album_number && (
+                          <span className="ml-2 text-xs text-gray-500">
+                            (N° {album.album_number})
+                          </span>
+                        )}
+                        {album.total_tracks && (
+                          <span className="ml-2 text-xs text-gray-500">
+                            {album.total_tracks} tracks
+                          </span>
+                        )}
                       </span>
-                      {album.album_number && (
-                        <span className="ml-2 text-xs text-gray-500">
-                          (N° {album.album_number})
-                        </span>
-                      )}
-                      {album.total_tracks && (
-                        <span className="ml-2 text-xs text-gray-500">
-                          {album.total_tracks} tracks
-                        </span>
-                      )}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -472,9 +471,32 @@ const AudioDetails: React.FC = () => {
                       + Add album
                     </Link>
                   </div>
-                  <div>
-                    <div className="border-b-2 border-gray-300 dark:border-gray-700 mb-2"></div>
-                    <div className="p-2">jkkjkkj</div>
+                  <div className="flex flex-col gap-2">
+                    {audioAlbums.map((album) => (
+                      <Link
+                        key={album.id}
+                        to={`/audio-albums/${album.id}`}
+                        className="flex px-3 py-2 rounded justify-between hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors border border-slate-300 dark:border-slate-700"
+                      >
+                        <span className="flex items-center gap-1">
+                          {/* image cover audio */}
+                          <RiAlbumFill className=" " />
+                          <span className="font-semibold">
+                            {album.ref || `Album #${album.id}`}
+                          </span>
+                          {album.album_number && (
+                            <span className="ml-2 text-xs text-gray-500">
+                              (N° {album.album_number})
+                            </span>
+                          )}
+                          {album.total_tracks && (
+                            <span className="ml-2 text-xs text-gray-500">
+                              {album.total_tracks} tracks
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </>
