@@ -12,7 +12,7 @@ import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { getVideoForAppForBulkSync } from "../api/videoForApp";
 import { getCreatorsForBulkSync } from "../api/creators";
-import { singleSync } from "../api/videos";
+import { singleSync, multipleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import type { Plateform } from "../types/post";
 
@@ -379,68 +379,81 @@ const Synchronisation = () => {
     isLastEntity: boolean = true, // New parameter to know if this is the last entity being processed
     plateformId?: number
   ) => {
-    let processed = 0;
-    let succeeded = 0;
-    let failed = 0;
-    const errors: Array<{ resourceId: number; error: string }> = [];
+    if (signal.aborted) return;
 
-    for (const resource of resources) {
-      if (signal.aborted) break;
+    // Check if paused
+    while (bulkSyncProgress.isPaused && !signal.aborted) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-      // Check if paused
-      while (bulkSyncProgress.isPaused && !signal.aborted) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+    if (signal.aborted) return;
 
-      if (signal.aborted) break;
+    // Set current item to indicate processing started
+    setBulkSyncProgress(prev => ({
+      ...prev,
+      currentItem: resources[0] || null // Show first item as current
+    }));
+
+    try {
+      // Send all resources in one request using multipleSync
+      await multipleSync({
+        entity: entity,
+        originIds: resources.map(r => r.id),
+        isForce,
+        plateformId
+      });
+
+      // All resources succeeded
+      const succeeded = resources.length;
+      const failed = 0;
+      const processed = resources.length;
+      const errors: Array<{ resourceId: number; error: string }> = [];
 
       setBulkSyncProgress(prev => ({
         ...prev,
-        currentItem: resource
+        processed: prev.processed + processed,
+        succeeded: prev.succeeded + succeeded,
+        failed: prev.failed + failed,
+        errors: [...prev.errors, ...errors],
+        pageStats: prev.pageStats.map((stat, index) =>
+          index === prev.pageStats.length - 1 // Update the last (current) page stat
+            ? {
+                ...stat,
+                processed,
+                succeeded,
+                failed
+              }
+            : stat
+        )
       }));
 
-      try {
-        // Determine entity type for sync API call
-        let entityType: string;
-        // Use the source field to determine the correct entity type, or use the current entity
-        entityType = resource.source || entity;
-        
-        await singleSync({
-          entity: entityType,
-          origin_id: resource.id,
-          isForce,
-          plateformId
-        });
-        succeeded++;
-      } catch (error: any) {
-        failed++;
-        errors.push({
-          resourceId: resource.id,
-          error: error?.response?.data?.message || error?.message || "Unknown error"
-        });
-      } finally {
-        processed++;
-        setBulkSyncProgress(prev => ({
-          ...prev,
-          processed: prev.processed + 1, // Increment global processed count
-          succeeded: prev.succeeded + (succeeded > prev.succeeded ? 1 : 0),
-          failed: prev.failed + (failed > prev.failed ? 1 : 0),
-          errors: [...prev.errors, ...errors.slice(prev.errors.length)],
-          pageStats: prev.pageStats.map((stat, index) => 
-            index === prev.pageStats.length - 1 // Update the last (current) page stat
-              ? {
-                  ...stat,
-                  processed,
-                  succeeded,
-                  failed
-                }
-              : stat
-          )
-        }));
-      }
+    } catch (error: any) {
+      // All resources failed if the batch request fails
+      const failed = resources.length;
+      const succeeded = 0;
+      const processed = resources.length;
+      const errors: Array<{ resourceId: number; error: string }> = resources.map(resource => ({
+        resourceId: resource.id,
+        error: error?.response?.data?.message || error?.message || "Batch sync failed"
+      }));
 
-      // Small delay to prevent overwhelming the server
-      await new Promise(resolve => setTimeout(resolve, 100));
+      setBulkSyncProgress(prev => ({
+        ...prev,
+        processed: prev.processed + processed,
+        succeeded: prev.succeeded + succeeded,
+        failed: prev.failed + failed,
+        errors: [...prev.errors, ...errors],
+        pageStats: prev.pageStats.map((stat, index) =>
+          index === prev.pageStats.length - 1 // Update the last (current) page stat
+            ? {
+                ...stat,
+                processed,
+                succeeded,
+                failed
+              }
+            : stat
+        )
+      }));
     }
 
     // Mark current entity page as completed with end time and duration
@@ -450,7 +463,7 @@ const Synchronisation = () => {
       // Only set isRunning to false if this is the last entity and no auto-switch
       isRunning: isLastEntity && !autoSwitch,
       currentItem: isLastEntity ? null : prev.currentItem,
-      pageStats: prev.pageStats.map((stat, index) => 
+      pageStats: prev.pageStats.map((stat, index) =>
         index === prev.pageStats.length - 1 // Update the last (current) page stat
           ? {
               ...stat,

@@ -1,6 +1,7 @@
 // components/FileUploadZone.tsx
 import React, { useCallback, useState } from 'react';
 import { Video, Image, Upload } from 'lucide-react';
+import { cdnS3 } from '../utils/cdn';
 
 interface FileUploadZoneProps {
   type: 'video' | 'image';
