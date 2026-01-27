@@ -1,4 +1,4 @@
-import { FiHexagon } from "react-icons/fi";
+import { Check, X, Clock, AlertTriangle, RefreshCw } from "lucide-react";
 import { FaCheck } from "react-icons/fa";
 import type { TVideo, User } from "../hooks/useVideos";
 import { updateVideo } from "../api/videos";
@@ -33,8 +33,27 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
       const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
       setChecking && setChecking(Uv.data.checking);
       isDetails ? reFetch() : null;
+      toast.success('Statut mis à jour avec succès');
     } catch (err: any) {
-      toast.error("Error: " + (err.response?.data?.message || err.message));
+      toast.error("Erreur: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'checked': return <Check className="w-4 h-4 text-emerald-500" />;
+      case 'refused': return <X className="w-4 h-4 text-red-500" />;
+      case 'waiting for checking': return <Clock className="w-4 h-4 text-amber-500" />;
+      default: return <AlertTriangle className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'checked': return 'checked';
+      case 'refused': return 'refused';
+      case 'waiting for checking': return 'waiting for checking';
+      default: return status;
     }
   };
 
@@ -42,62 +61,75 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
     <>
       <div
         tabIndex={-1}
-        className="dropdown-content menu bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md z-100 w-52 p-2 shadow-sm dark:shadow-gray-700 transition-colors duration-300"
+        className="dropdown-content menu bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dark:shadow-gray-900/50 z-50 w-56 p-2"
       >
         {user?.role === "superadmin" && checking !== "null" ? (
-          ["refused", "checked"]?.map((check) => (
-            <div
-              key={check}
-              onClick={() => update(check === "go ready" ? "null" : check)}
-              tabIndex={actual?.id}
-              role="button"
-              className="flex items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300"
-            >
-              <span className="flex items-center gap-2">
-                <FiHexagon className="text-gray-500 dark:text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">{check}</span>
-              </span>
-              {(check === "go ready" ? "null" : check) === checking ? (
-                <FaCheck className="text-green-600 dark:text-green-400" />
-              ) : null}
-            </div>
-          ))
+          <div className="space-y-1">
+            {["checked", "refused"].map((check) => (
+              <button
+                key={check}
+                onClick={() => update(check)}
+                className={`
+                  flex items-center text-nowrap flex-nowrap justify-between gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium
+                  transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]
+                  ${check === checking
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  {getStatusIcon(check)}
+                  <span>{getStatusLabel(check)}</span>
+                </div>
+                {check === checking && (
+                  <FaCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                )}
+              </button>
+            ))}
+          </div>
         ) : (
           <>
             {checking === "null" && (
-              <div
+              <button
                 onClick={() => update("waiting for checking")}
-                tabIndex={actual?.id}
-                role="button"
-                className="flex items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300"
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]"
               >
-                <span className="flex items-center gap-2">
-                  <FiHexagon className="text-gray-500 dark:text-gray-400" />
-                  <span className="text-gray-700 dark:text-gray-300">ready</span>
-                </span>
-              </div>
+                <Clock className="w-4 h-4 text-blue-500" />
+                <span>ready</span>
+              </button>
             )}
             {checking === "refused" && (
-              <div className="flex flex-col items-center justify-between gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-full p-2 rounded-md cursor-default m-auto transition-colors duration-300 overflow-auto">
+              <div className="space-y-3 p-2">
                 {!hideTouchLink && (
                   <Link
                     to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
-                    className="btn bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none w-full transition-colors duration-300"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-md font-medium transition-all duration-200 hover:scale-[0.98] active:scale-[0.96] shadow-sm"
                   >
-                    Touch again
+                    <RefreshCw className="w-4 h-4" />
+                    Retoucher
                   </Link>
                 )}
 
-                <p className="text-gray-600 dark:text-gray-400 text-center px-2 text-wrap break-words overflow-auto max-h-32">
-                  {actual?.comment}
-                </p>
+                {actual?.comment && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                        <div className="font-medium mb-1">Commentaire de refus :</div>
+                        <div className="break-words">{actual.comment}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {!hideTouchLink && (
                   <Link
                     to={`/touch/${isPost ? 'post' : 'video'}/${actual.id}`}
-                    className=" text-blue-500 font-bold text-underline w-full transition-colors duration-300"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200"
                   >
-                    Touch again
+                    <RefreshCw className="w-4 h-4" />
+                    Retoucher à nouveau
                   </Link>
                 )}
               </div>
