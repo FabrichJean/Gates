@@ -179,8 +179,8 @@ export async function getVideoForAppForBulkSync(page: number = 1, limit: number 
     const params: any = {
         page,
         limit,
+        checking: 'checked',
         select: 'id,cn_title,en_title,status,cover,plateform_id', // Include plateform_id field
-        checking: 'checked'
     };
     
     // Add plateformId filter if provided

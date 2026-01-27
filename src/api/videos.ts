@@ -138,7 +138,7 @@ export async function singleSync({ entity, origin_id, isForce, plateformId }: { 
 }
 
 // Multiple Sync API - sends entire page at once
-export async function multipleSync({ entity, originIds, isForce, plateformId }: { entity: string; originIds: number[]; isForce: boolean; plateformId?: number }) {
+export async function multipleSync({ entity, originIds, isForce, plateformId, signal }: { entity: string; originIds: number[]; isForce: boolean; plateformId?: number; signal?: AbortSignal }) {
     const requestBody: any = { 
         isForce,
         [entity]: originIds.map(id => ({ originId: id }))
@@ -156,6 +156,7 @@ export async function multipleSync({ entity, originIds, isForce, plateformId }: 
             headers: {
                 Authorization: `Bearer ${getToken()}`,
             },
+            signal, // Add abort signal support
         }
     );
 }

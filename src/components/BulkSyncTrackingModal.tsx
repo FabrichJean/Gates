@@ -81,14 +81,18 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
 
-  // Reset local state when modal opens
+  // Sync with external props - only when modal opens or external values change significantly
   useEffect(() => {
-    if (open && progress.processed === 0 && progress.total === 0) {
-      setAutoSwitchPage(true);
-      setAutoSwitchDisabled(false);
-      setShowDetails(false);
+    // Only sync if we're not in the middle of user interaction (progress is empty)
+    if (progress.processed === 0 && progress.total === 0) {
+      if (externalCurrentPage && externalCurrentPage !== currentPage) {
+        setCurrentPage(externalCurrentPage);
+      }
+      if (externalCurrentLimit && externalCurrentLimit !== limit) {
+        setLimit(externalCurrentLimit);
+      }
     }
-  }, [open, progress.processed, progress.total]);
+  }, [externalCurrentPage, externalCurrentLimit, progress.processed, progress.total]);
 
   const handleStart = () => {
     const entities: SyncEntitySelection = selectedEntities.length === 4 ? "all" : selectedEntities;
@@ -250,7 +254,10 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       </label>
                       <select
                         value={limit}
-                        onChange={(e) => setLimit(parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const newValue = parseInt(e.target.value) || 10;
+                          setLimit(newValue);
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value={5}>5</option>

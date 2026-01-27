@@ -657,10 +657,10 @@ const VideoForAppManagement = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Ne pas modifier</option>
-                    <option value="ready">Prêt</option>
-                    <option value="not ready">Pas prêt</option>
+                    <option value="refused">Refusé</option>
                     <option value="checked">Vérifié</option>
-                    <option value="waiting for checking">En attente de vérification</option>
+                    <option value="null">Pas prêt</option>
+                    <option value="waiting for checking">Prêt: en attente de vérification</option>
                   </select>
                 </div>
               </div>

@@ -92,7 +92,6 @@ const Synchronisation = () => {
         isForce: optionId === "true",
         label: label,
         platformId: platformId,
-        isAll: typeof isMode !== "undefined" ? isMode : null,
       });
 
       reFetch();
@@ -246,7 +245,7 @@ const Synchronisation = () => {
     plateformId?: number,
     platformFilter?: number
   ) => {
-    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}, plateformId: ${plateformId}, platformFilter: ${platformFilter}`);
+    console.log(`processMultipleEntities called with autoSwitch: ${autoSwitch}, page: ${page}, limit: ${limit}, plateformId: ${plateformId}, platformFilter: ${platformFilter}`);
     
     for (let entityIndex = 0; entityIndex < entitiesToProcess.length; entityIndex++) {
       if (signal.aborted) break;
@@ -331,7 +330,7 @@ const Synchronisation = () => {
           // Check if any entity has resources on the next page
           let hasNextPageResources = false;
           for (const entity of entitiesToProcess) {
-            const nextResources = await fetchResources(entity, nextPage, currentLimit, platformFilter);
+            const nextResources = await fetchResources(entity, nextPage, limit, platformFilter);
             if (nextResources.length > 0) {
               hasNextPageResources = true;
               break;
@@ -344,7 +343,7 @@ const Synchronisation = () => {
             // Update current page and entity immediately for UI feedback
             setCurrentPage(nextPage);
             
-            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, currentLimit, true, plateformId, platformFilter);
+            await handleStartBulkSync(entitiesToProcess, isForce, nextPage, limit, true, plateformId, platformFilter);
           } else {
             console.log("No more resources found on any entity. Auto-pagination stopped.");
             setAutoSwitchEnabled(false);
@@ -400,8 +399,15 @@ const Synchronisation = () => {
         entity: entity,
         originIds: resources.map(r => r.id),
         isForce,
-        plateformId
+        plateformId,
+        signal // Pass the abort signal
       });
+
+      // Check if aborted after the request completes
+      if (signal.aborted) {
+        // Request was aborted, don't update progress
+        return;
+      }
 
       // All resources succeeded
       const succeeded = resources.length;
@@ -428,6 +434,12 @@ const Synchronisation = () => {
       }));
 
     } catch (error: any) {
+      // Check if this was an abort error
+      if (signal.aborted || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        // Request was aborted, don't update progress
+        return;
+      }
+
       // All resources failed if the batch request fails
       const failed = resources.length;
       const succeeded = 0;
@@ -756,7 +768,7 @@ const Synchronisation = () => {
 
                   {/* Progress Bar */}
                   <div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden mb-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden mb-2">
                       <div 
                         className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300" 
                         style={{ width: `${bulkSyncProgress.total > 0 ? (bulkSyncProgress.processed / bulkSyncProgress.total) * 100 : 0}%` }}
