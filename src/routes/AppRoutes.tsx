@@ -37,6 +37,9 @@ import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
+import PostForAppManagement from "../pages/PostForAppManagement";
+import PostForAppDetails from "../pages/PostForAppDetails";
+import PostForAppEdit from "../pages/PostForAppEdit";
 import UserDetails from "../pages/UserDetails";
 import VideoBotEdit from "../pages/VideoBotEdit";
 import Synchronisation from "../pages/Synchronisation";
@@ -424,11 +427,31 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/post/edit-media/:id"
+          path="/post-for-app"
           element={
             <ProtectedRoute>
               <InsideSidebar>
-                <MediaPostManager />
+                <PostForAppManagement />
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-for-app/:id"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <PostForAppDetails />
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-for-app/edit/:id"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <PostForAppEdit />
               </InsideSidebar>
             </ProtectedRoute>
           }

@@ -313,6 +313,7 @@ function Sidebar({
         />
 
         <NavLink to="/post" name="post" label="Posts" icon={MdDynamicFeed} />
+        <NavLink to="/post-for-app" name="post-for-app" label="Post For App" icon={MdVerified} />
         <NavLink
           to="/mangas"
           name="mangas"
