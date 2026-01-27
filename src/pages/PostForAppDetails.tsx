@@ -66,7 +66,7 @@ const InfoItem: React.FC<{
   </div>
 );
 
-// Composant de navigation
+// Composant de navigation compact
 const NavigationControls: React.FC<{
   hasPrev: boolean;
   hasNext: boolean;
@@ -74,34 +74,34 @@ const NavigationControls: React.FC<{
   nextPost?: string;
   onNavigate: (direction: 'prev' | 'next') => void;
 }> = ({ hasPrev, hasNext, prevPost, nextPost, onNavigate }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-1">
     <button
       onClick={() => onNavigate('prev')}
       disabled={!hasPrev}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all
-        ${hasPrev 
-          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700' 
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-700'
+        flex items-center justify-center w-8 h-8 rounded-lg text-sm font-medium transition-all
+        ${hasPrev
+          ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
         }
       `}
+      title="Post précédent"
     >
       <ChevronLeft className="w-4 h-4" />
-      Précédent
     </button>
-    
+
     <button
       onClick={() => onNavigate('next')}
       disabled={!hasNext}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all
-        ${hasNext 
-          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700' 
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-gray-200 dark:border-gray-700'
+        flex items-center justify-center w-8 h-8 rounded-lg text-sm font-medium transition-all
+        ${hasNext
+          ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
         }
       `}
+      title="Post suivant"
     >
-      Suivant
       <ChevronRight className="w-4 h-4" />
     </button>
   </div>
@@ -157,6 +157,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error, reFetch } = UsePostForApp(id);
+
   const { nextPost, prevPost, hasNext, hasPrev } = useNextPostForApp(id);
   const [showCover, setShowCover] = useState<boolean>(true);
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
@@ -203,9 +204,9 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
   };
 
   const handleNavigate = (direction: 'prev' | 'next') => {
-    const targetId = direction === 'prev' ? prevPost : nextPost;
+    const targetId = direction === 'prev' ? prevPost.id : nextPost.id;
     if (targetId) {
-      navigate(`/post/${targetId}`, { replace: true });
+      navigate(`/post-for-app/${targetId}`, { replace: true });
     }
   };
 
@@ -245,71 +246,46 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-      {/* Header */}
+      {/* Header compact et professionnel */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto mb-6"
+        className="max-w-6xl mx-auto mb-4"
       >
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex items-center gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          {/* Ligne principale compacte */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Section gauche - Navigation et titre */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 onClick={() => navigate('/post-for-app')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Retour à la liste"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4" />
               </button>
-              
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">
                     POST-{postId}
                   </h1>
-                  <StatusBadge 
-                    status={!post.isBanned} 
-                    label={post.isBanned ? "Banni" : "Actif"} 
+                  <StatusBadge
+                    status={!post.isBanned}
+                    label={post.isBanned ? "Banni" : "Actif"}
                     icon={post.isBanned ? <ShieldOff className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
                   />
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {post.plateform.name} · {post.postCategory?.name}
+                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                  {post.plateform.name} • {post.postCategory?.name}
+                  {post.postSubCategory && ` • ${post.postSubCategory.name}`}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* Actions admin */}
-              {user?.role === RoleEnum.SUPERADMIN && (
-                <>
-                  <button
-                    onClick={() => setSingleSyncOpen(true)}
-                    disabled={singleSyncLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 
-                             text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 
-                             dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-700 
-                             transition font-medium"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${singleSyncLoading ? 'animate-spin' : ''}`} />
-                    Sync
-                  </button>
-                  
-                  <button
-                    onClick={handleToggleBan}
-                    className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg border transition font-medium
-                      ${post.isBanned
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/50'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-200 dark:hover:bg-red-900/50'
-                      }
-                    `}
-                  >
-                    {post.isBanned ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
-                    {post.isBanned ? 'Débannir' : 'Bannir'}
-                  </button>
-                </>
-              )}
-
+            {/* Section droite - Actions */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Navigation compacte */}
               <NavigationControls
                 hasPrev={hasPrev}
                 hasNext={hasNext}
@@ -317,6 +293,34 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 nextPost={nextPost ? String(nextPost.id) : undefined}
                 onNavigate={handleNavigate}
               />
+
+              {/* Actions admin - seulement pour superadmin */}
+              {user?.role === RoleEnum.SUPERADMIN && (
+                <>
+                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+                  <button
+                    onClick={() => setSingleSyncOpen(true)}
+                    disabled={singleSyncLoading}
+                    className="flex-shrink-0 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
+                    title="Synchroniser"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${singleSyncLoading ? 'animate-spin' : ''}`} />
+                  </button>
+
+                  <button
+                    onClick={handleToggleBan}
+                    className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
+                      post.isBanned
+                        ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
+                        : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
+                    }`}
+                    title={post.isBanned ? 'Débannir' : 'Bannir'}
+                  >
+                    {post.isBanned ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -379,12 +383,6 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                   icon={<User className="w-4 h-4" />}
                 />
               ) : null}
-
-              <InfoItem
-                label="Utilisateur"
-                value={<span className="truncate">{(post as any)?.user?.username || '-'}</span>}
-                icon={<User className="w-4 h-4" />}
-              />
               
               <InfoItem
                 label="Catégorie"
@@ -396,16 +394,6 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 label="Sous-catégorie"
                 value={<span className="truncate">{post.postSubCategory?.name}</span>}
                 icon={<Tag className="w-4 h-4" />}
-              />
-              
-              <InfoItem
-                label="Durée"
-                value={post.videos[0]
-                  ? `${Math.floor(post.videos[0].duration / 60)}:${String(
-                      post.videos[0].duration % 60
-                    ).padStart(2, "0")}`
-                  : "N/A"}
-                icon={<Clock className="w-4 h-4" />}
               />
               
               <InfoItem
@@ -456,7 +444,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
             )}
 
             {/* Titres */}
-            <GetPostForAppTitles postTitles={post.titles} />
+            <GetPostForAppTitles postTitles={post.titles?.map(t => ({ ...t, id: String(t.id), post_for_app_id: String(t.post_for_app_id) }))} />
 
             {/* Médias */}
             <div className={`transition-all duration-300 ${post.isBanned && showCover ? 'filter blur-sm' : ''}`}>

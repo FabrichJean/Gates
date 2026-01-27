@@ -6,6 +6,9 @@ import axios from "axios";
 import useFetch from "http-react";
 import { type Creator } from "../components/creators/CreatorList";
 import type { TagCategoryItem } from "../api/tagCategory";
+import { getPostsForApp } from "../api/postsForApp";
+import usePostForAppManagement from "./usePostForAppManagement";
+import type { PostForAppTitle } from "../types/postForApp";
 
 export type PostForAppStatus = "approved" | "pending" | "rejected";
 export type PostForAppChecking = "verified" | "pending" | "rejected";
@@ -30,15 +33,8 @@ export type Language = {
     code: string;
     name: string;
 };
+// Use the PostForAppTitle type from ../types/postForApp for consistency
 
-export type PostForAppTitle = {
-    id: number;
-    title: string;
-    description: string | null;
-    post_for_app_id: number;
-    i18_language: string;
-    language: Language;
-};
 
 export type PostForAppContent = {
     id: number;
@@ -118,7 +114,7 @@ export function UsePostForApp(id: postForAppID) {
     })
 }
 
-// Hook pour récupérer tous les posts for app
+// Hook pour récupérer tous les posts for app (version simplifiée pour debug)
 export function UsePostsForApp() {
     const [data, setData] = useState<TPostForApp[]>([]);
     const [loading, setLoading] = useState(true);
@@ -129,23 +125,32 @@ export function UsePostsForApp() {
             try {
                 setLoading(true);
 
-                const response = await axios.get(`${apiURL}/posts-for-app`, {
-                    headers: {
-                        'Authorization': `Bearer ${getToken()}`,
-                        'Content-Type': 'application/json'
-                    }
+                // Utiliser la fonction API dédiée
+                const response = await getPostsForApp({
+                    limit: 50,
+                    page: 1
                 });
 
                 // Gérer différents formats de réponse API
                 const responseData = response.data;
+                
+                let posts: TPostForApp[] = [];
                 if (responseData && typeof responseData === 'object' && 'postsForApp' in responseData) {
-                    setData(responseData.postsForApp);
+                    posts = responseData.postsForApp;
                 } else if (Array.isArray(responseData)) {
-                    setData(responseData);
+                    posts = responseData;
+                } else if (responseData && typeof responseData === 'object' && 'data' in responseData && Array.isArray(responseData.data)) {
+                    posts = responseData.data;
                 } else {
-                    console.warn('Format de réponse inattendu pour posts-for-app:', responseData);
-                    setData([]);
+                    console.warn('UsePostsForApp - Format de réponse inattendu pour posts-for-app:', responseData);
+                    posts = [];
                 }
+                
+                console.log('Posts récupérés:', posts.length, 'posts');
+                setData(posts);
+                
+                console.log('Posts récupérés:', posts.length, 'posts');
+                setData(posts);
             } catch (err) {
                 console.error('Erreur lors de la récupération des posts for app:', err);
                 setError(err instanceof Error ? err : new Error('Erreur inconnue'));
@@ -161,20 +166,65 @@ export function UsePostsForApp() {
     return { data, loading, error };
 }
 
-// Hook pour naviguer entre les posts for app
+// Hook pour naviguer entre les posts for app (version finale)
 export function useNextPostForApp(currentId: string | undefined) {
-    const { data: posts, loading } = UsePostsForApp();
+    const {data} = usePostForAppManagement()
+    const [navigationData, setNavigationData] = useState<{
+        nextPost: TPostForApp | null;
+        prevPost: TPostForApp | null;
+        hasNext: boolean;
+        hasPrev: boolean;
+        loading: boolean;
+    }>({
+        nextPost: null,
+        prevPost: null,
+        hasNext: false,
+        hasPrev: false,
+        loading: true
+    });
 
-    const currentIndex = posts.findIndex(post => post.id.toString() === currentId);
+    useEffect(() => {
+        const fetchNavigationData = async () => {
+            if (!currentId) {
+                setNavigationData({
+                    nextPost: null,
+                    prevPost: null,
+                    hasNext: false,
+                    hasPrev: false,
+                    loading: false
+                });
+                return;
+            }
 
-    const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
-    const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+            try {
 
-    return {
-        nextPost,
-        prevPost,
-        hasNext: nextPost !== null,
-        hasPrev: prevPost !== null,
-        loading
-    };
+                const posts = data?.posts;
+                const currentIndex = posts?.findIndex(post => post.id === Number(currentId));
+                const nextPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+                const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+
+                setNavigationData({
+                    nextPost,
+                    prevPost,
+                    hasNext: nextPost !== null,
+                    hasPrev: prevPost !== null,
+                    loading: false
+                });
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données de navigation:', error);
+                setNavigationData({
+                    nextPost: null,
+                    prevPost: null,
+                    hasNext: false,
+                    hasPrev: false,
+                    loading: false
+                });
+            }
+        };
+
+        fetchNavigationData();
+    }, [currentId, data]);
+
+    return navigationData;
 }

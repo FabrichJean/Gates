@@ -1,6 +1,14 @@
 import React from "react";
 import { FileText, Globe, Languages } from "lucide-react";
-import type { PostForAppTitle } from "../../hooks/usePostForApp";
+// TODO: Replace with the correct type import if available
+// import type { PostForAppTitle } from "../../hooks/usePostForApp";
+type PostForAppTitle = {
+  id: string;
+  post_for_app_id: string;
+  i18_language: string;
+  title: string;
+  description?: string;
+};
 
 interface Props {
   postTitles?: PostForAppTitle[];
