@@ -1,8 +1,10 @@
 
+
 import { useState, useRef, useEffect } from "react";
 import TagCategorySelector from "../components/TagCategorySelector";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
+import PlateformAutoComplete from "../components/PlateformAutoComplete";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import toast from "react-hot-toast";
@@ -18,11 +20,13 @@ type Language = {
   name: string;
 };
 
+
 const PostForAppEdit = () => {
   // TagCategory state (doit être dans le composant !)
   // tags: peut contenir des ids, des noms, ou des objets {id, name}
   type Tag = { id?: number; name: string };
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedPlateform, setSelectedPlateform] = useState<{ id: number; name: string } | null>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -48,6 +52,10 @@ const PostForAppEdit = () => {
       // Préremplir les tags si présents
       if ((post as any).tagCategory && Array.isArray((post as any).tagCategory)) {
         setSelectedTags((post as any).tagCategory.map((t: any) => ({ id: t.id, name: t.name })));
+      }
+      // Préremplir la plateforme si présente
+      if (post.plateform) {
+        setSelectedPlateform({ id: post.plateform.id, name: post.plateform.name });
       }
     }
   }, [post]);
@@ -270,6 +278,7 @@ const PostForAppEdit = () => {
       id: post?.id,
       category_id: selectedCategory?.id ?? post?.postCategory?.id,
       sub_category_id: selectedSubCategory?.id ?? post?.postSubCategory?.id,
+      plateform_id: selectedPlateform?.id ?? post?.plateform?.id,
       titles: Object.entries(titles).map(([langId, title]) => {
         const lang = languages.find((l) => l.id === parseInt(langId));
         return {
@@ -433,6 +442,16 @@ const PostForAppEdit = () => {
           </div>
 
           <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+            {/* Plateform Selector */}
+            <div className="w-full">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Plateforme
+              </label>
+              <PlateformAutoComplete
+                value={selectedPlateform}
+                onSelect={setSelectedPlateform}
+              />
+            </div>
             {/* TagCategory Selector */}
             <div className="w-full">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
