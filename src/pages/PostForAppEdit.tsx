@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect } from "react";
 import TagCategorySelector from "../components/TagCategorySelector";
 import { useParams, useNavigate } from "react-router-dom";
@@ -20,13 +18,15 @@ type Language = {
   name: string;
 };
 
-
 const PostForAppEdit = () => {
   // TagCategory state (doit être dans le composant !)
   // tags: peut contenir des ids, des noms, ou des objets {id, name}
   type Tag = { id?: number; name: string };
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedPlateform, setSelectedPlateform] = useState<{ id: number; name: string } | null>(null);
+  const [selectedPlateform, setSelectedPlateform] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -50,12 +50,23 @@ const PostForAppEdit = () => {
         videos: post.videos || [],
       });
       // Préremplir les tags si présents
-      if ((post as any).tagCategory && Array.isArray((post as any).tagCategory)) {
-        setSelectedTags((post as any).tagCategory.map((t: any) => ({ id: t.id, name: t.name })));
+      if (
+        (post as any).tagCategory &&
+        Array.isArray((post as any).tagCategory)
+      ) {
+        setSelectedTags(
+          (post as any).tagCategory.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+          })),
+        );
       }
       // Préremplir la plateforme si présente
       if (post.plateform) {
-        setSelectedPlateform({ id: post.plateform.id, name: post.plateform.name });
+        setSelectedPlateform({
+          id: post.plateform.id,
+          name: post.plateform.name,
+        });
       }
     }
   }, [post]);
@@ -83,14 +94,20 @@ const PostForAppEdit = () => {
   } | null>(null);
   const [titles, setTitles] = useState<{ [key: number]: string }>({});
   const [descriptions, setDescriptions] = useState<{ [key: number]: string }>(
-    {}
+    {},
   );
 
   const [imageFields, setImageFields] = useState<
     { id: number; file: File | null; url?: string }[]
   >([]);
   const [videoFields] = useState<
-    { id: number; file: File | null; url?: string; cover?: File | null; coverUrl?: string }[]
+    {
+      id: number;
+      file: File | null;
+      url?: string;
+      cover?: File | null;
+      coverUrl?: string;
+    }[]
   >([]);
   // mapping of existing video id -> cover File (if user selected a new cover for an existing video)
   const [existingVideoCovers] = useState<Record<number, File | null>>({});
@@ -102,7 +119,7 @@ const PostForAppEdit = () => {
 
   const { data: categoriesResponse } = useCategoryPost();
   const { data: subCategoriesResponse } = useSubCategoryPost(
-    selectedCategory?.id
+    selectedCategory?.id,
   );
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
@@ -114,7 +131,7 @@ const PostForAppEdit = () => {
   useEffect(() => {
     if (post) {
       const matchingCategory = categoriesResponse?.categories.find(
-        (cat) => cat.id === post?.postCategory?.id
+        (cat) => cat.id === post?.postCategory?.id,
       );
       // const matchingSubCategory = subCategoriesResponse?.subCategories.find(subCat => subCat.id === post.sub_category_id);
       if (matchingCategory) {
@@ -204,7 +221,7 @@ const PostForAppEdit = () => {
     if (selectedLanguageFromBackend) {
       // Vérifier si la langue n'existe pas déjà
       const existingLanguage = languages.find(
-        (lang) => lang.code === selectedLanguageFromBackend.code
+        (lang) => lang.code === selectedLanguageFromBackend.code,
       );
       if (existingLanguage) {
         toast.error("This language is already added!");
@@ -231,7 +248,10 @@ const PostForAppEdit = () => {
   };
 
   const addImageField = () => {
-    const newId = imageFields.length > 0 ? Math.max(...imageFields.map((field) => field.id)) + 1 : 1;
+    const newId =
+      imageFields.length > 0
+        ? Math.max(...imageFields.map((field) => field.id)) + 1
+        : 1;
     setImageFields((prev) => [...prev, { id: newId, file: null }]);
   };
 
@@ -245,8 +265,8 @@ const PostForAppEdit = () => {
     if (file) {
       setImageFields((prev) =>
         prev.map((field) =>
-          field.id === id ? { ...field, file, url: undefined } : field
-        )
+          field.id === id ? { ...field, file, url: undefined } : field,
+        ),
       );
     }
   };
@@ -260,19 +280,32 @@ const PostForAppEdit = () => {
 
     // existing videos currently in media state
     videos.forEach((v) => {
-      videosPayload.push({ id: v.id, fileName: v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url, isNew: false });
+      videosPayload.push({
+        id: v.id,
+        fileName:
+          v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url,
+        isNew: false,
+      });
     });
 
     // new video fields (user added in form)
     videoFields
       .filter((field) => field.file !== null || field.url)
       .forEach((field) => {
-        videosPayload.push({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file });
+        videosPayload.push({
+          id: field.id,
+          fileName: field.file?.name || field.url,
+          isNew: !!field.file,
+        });
       });
 
     const imagesPayload = imageFields
       .filter((field) => field.file !== null || field.url)
-      .map((field) => ({ id: field.id, fileName: field.file?.name || field.url, isNew: !!field.file }));
+      .map((field) => ({
+        id: field.id,
+        fileName: field.file?.name || field.url,
+        isNew: !!field.file,
+      }));
 
     const payload = {
       id: post?.id,
@@ -317,14 +350,18 @@ const PostForAppEdit = () => {
         fd.append("payload", JSON.stringify(payload));
 
         // Append new image files
-        imageFields.filter((f) => f.file).forEach((f) => {
-          if (f.file) fd.append("images", f.file, f.file.name);
-        });
+        imageFields
+          .filter((f) => f.file)
+          .forEach((f) => {
+            if (f.file) fd.append("images", f.file, f.file.name);
+          });
 
         // Append new video files
-        videoFields.filter((f) => f.file).forEach((f) => {
-          if (f.file) fd.append("videos", f.file, f.file.name);
-        });
+        videoFields
+          .filter((f) => f.file)
+          .forEach((f) => {
+            if (f.file) fd.append("videos", f.file, f.file.name);
+          });
 
         // Build list of covers in the same order as payload.videos (existing videos first, then new fields)
         const coversInOrder: (File | null)[] = [];
@@ -348,15 +385,15 @@ const PostForAppEdit = () => {
           }
         });
 
-  await updatePostForApp(post?.id, fd);
+        await updatePostForApp(post?.id, fd);
       } else {
         // No files to upload — send JSON payload as before
-  await updatePostForApp(post?.id, payload);
+        await updatePostForApp(post?.id, payload);
       }
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
-  navigate(`/post-for-app/${id}?refresh=${Date.now()}`);
+      navigate(`/post-for-app/${id}?refresh=${Date.now()}`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update post. See console for details.");
@@ -442,27 +479,6 @@ const PostForAppEdit = () => {
           </div>
 
           <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
-            {/* Plateform Selector */}
-            <div className="w-full">
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Plateforme
-              </label>
-              <PlateformAutoComplete
-                value={selectedPlateform}
-                onSelect={setSelectedPlateform}
-              />
-            </div>
-            {/* TagCategory Selector */}
-            <div className="w-full">
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Tags (catégorie)
-              </label>
-              <TagCategorySelector
-                selected={selectedTags}
-                setSelected={setSelectedTags}
-                allowCustomTag
-              />
-            </div>
             <CategorySelector
               categories={categoriesResponse?.categories}
               selectedOptions={selectedOptions}
@@ -492,7 +508,9 @@ const PostForAppEdit = () => {
               handleDescriptionChange={handleDescriptionChange}
               setShowAddLanguageModal={setShowAddLanguageModal}
               handleRemoveLanguage={(languageId) => {
-                setLanguages((prev) => prev.filter((lang) => lang.id !== languageId));
+                setLanguages((prev) =>
+                  prev.filter((lang) => lang.id !== languageId),
+                );
                 setTitles((prev) => {
                   const newTitles = { ...prev };
                   delete newTitles[languageId];
@@ -506,7 +524,9 @@ const PostForAppEdit = () => {
                 // If the removed language was selected, select another or null
                 setSelectedLanguage((prev) => {
                   if (!prev || prev.id !== languageId) return prev;
-                  const remaining = languages.filter((lang) => lang.id !== languageId);
+                  const remaining = languages.filter(
+                    (lang) => lang.id !== languageId,
+                  );
                   return remaining.length > 0 ? remaining[0] : null;
                 });
               }}
@@ -524,6 +544,28 @@ const PostForAppEdit = () => {
               />
             </div>
 
+            {/* Plateform Selector */}
+            <div className="w-full">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Plateforme
+              </label>
+              <PlateformAutoComplete
+                value={selectedPlateform}
+                onSelect={setSelectedPlateform}
+              />
+            </div>
+            {/* TagCategory Selector */}
+            <div className="w-full">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Tags (catégorie)
+              </label>
+              <TagCategorySelector
+                selected={selectedTags}
+                setSelected={setSelectedTags}
+                allowCustomTag
+              />
+            </div>
+
             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
 
             {/* Boutons d'action */}
@@ -538,10 +580,11 @@ const PostForAppEdit = () => {
               <button
                 type="submit"
                 disabled={updating}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
+                className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${
+                  updating
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-blue-700"
-                  }`}
+                }`}
               >
                 <svg
                   className="w-5 h-5"

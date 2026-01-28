@@ -87,21 +87,13 @@ const PostForAppManagementInner = () => {
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post Management
+          Post For App
         </h1>
 
         {/* header  */}
         <header className="border-b border-gray-200 dark:border-gray-700 py-3">
           <div className="flex justify-between items-center">
             <div className="flex gap-3">
-              <Link
-                to={"/post/upload"}
-                className="flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all"
-              >
-                <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
-              </Link>
-
-              <SendToWebApp />
 
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>
@@ -177,9 +169,6 @@ const PostForAppManagementInner = () => {
                   Creator
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  User
-                </th>
-                <th scope="col" className="px-6 py-3">
                   Platform
                 </th>
                 <th scope="col" className="px-6 py-3">
@@ -241,11 +230,6 @@ const PostForAppManagementInner = () => {
                         {post.creator || "-"}
                       </span>
                     )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                      {(post as any)?.user?.username || "-"}
-                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
