@@ -99,9 +99,7 @@ export async function togglePostForAppBannedStatus(id: string | number): Promise
 }
 
 export async function updatePostForAppBannedStatus(id: string | number, isBanned: boolean): Promise<void> {
-  const formData = new FormData();
-  formData.append('isBanned', String(isBanned));
-  return await axios.put(`${apiURL}/posts-for-app/${id}`, formData, {
+  return await axios.put(`${apiURL}/posts-for-app/${id}`, {isBanned}, {
       headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'multipart/form-data',

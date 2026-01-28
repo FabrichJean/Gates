@@ -294,6 +294,16 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 onNavigate={handleNavigate}
               />
 
+              {/* Vérification - seulement si il y a des vidéos */}
+              {post.videos[0] && (
+                <>
+                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                  <div className="flex-shrink-0">
+                    <PostForAppChecking index={0} reFetch={reFetch} postForApp={post} />
+                  </div>
+                </>
+              )}
+
               {/* Actions admin - seulement pour superadmin */}
               {user?.role === RoleEnum.SUPERADMIN && (
                 <>
@@ -430,16 +440,6 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Vérification */}
-            {post.videos[0] && (
-              <div className="mb-8">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-                  Vérification
-                </h3>
-                <PostForAppChecking index={0} reFetch={reFetch} postForApp={post} />
               </div>
             )}
 
