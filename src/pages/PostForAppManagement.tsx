@@ -47,15 +47,11 @@ const PostForAppManagementInner = () => {
   // filters are now centralized in context
   const { filters, setFilters } = usePostForAppContext();
 
-  const [filteredData, setFilteredData] = useState<any | null>(null);
-
-  const posts = filteredData?.posts || data?.posts || [];
-  const total = filteredData?.total || data?.total || 0;
-
-  console.log(data);
+  const posts = data?.posts || [];
+  const total = data?.total || 0;
 
   // const totalSent = filteredData?.totalSent ?? data?.total;
-  const limit = filteredData?.limit || data?.limit || 10;
+  const limit = data?.limit || 10;
 
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();

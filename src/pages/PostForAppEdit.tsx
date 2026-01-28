@@ -548,29 +548,41 @@ const PostForAppEdit = () => {
               }}
             />
 
+            <div className="w-full mt-4"></div>
             <div className="w-full mt-4">
-
-              </div>
-              <div className="w-full mt-4">
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                  Creator (optional)
-                </label>
-                <CreatorAutoComplete
-                  value={creatorObj?.name}
-                  onSelect={(c) => {
-                    setCreatorObj(c ?? null);
-                  }}
-                />
-              </div>
-
-              {/* Video type selection for each video */}
-              <GetVideoPostForApp
-                videos={videos}
-                reFetch={() => {}}
-                editable
-                videoTypes={videoTypes}
-                onTypeChange={(id, type) => setVideoTypes((prev) => ({ ...prev, [id]: type }))}
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Creator (optional)
+              </label>
+              <CreatorAutoComplete
+                value={creatorObj?.name}
+                onSelect={(c) => {
+                  setCreatorObj(c ?? null);
+                }}
               />
+            </div>
+
+            <div className="w-full my-10">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Tags (catégorie)
+              </label>
+              <TagCategorySelector
+                selected={selectedTags}
+                setSelected={setSelectedTags}
+                allowCustomTag
+              />
+            </div>
+
+            {/* Video type selection for each video */}
+            <GetVideoPostForApp
+              videos={videos}
+              reFetch={() => {}}
+              editable
+              videoTypes={videoTypes}
+              onTypeChange={(id, type) =>
+                setVideoTypes((prev) => ({ ...prev, [id]: type }))
+              }
+            />
+
             {/* Boutons d'action */}
             <div className="flex justify-end gap-4">
               <button
