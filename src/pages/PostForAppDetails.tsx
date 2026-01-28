@@ -283,65 +283,91 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
               </div>
             </div>
 
-            {/* Section droite - Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-
-              {/* Vérification - seulement si il y a des vidéos */}
-              {post.videos[0] && (
-                <>
-                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-                  <div className="flex-shrink-0">
-                    <PostForAppChecking index={0} reFetch={reFetch} postForApp={post} />
-                  </div>
-                </>
+            {/* Section droite - Creator + Actions */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+              {/* Creator feed style */}
+              {post.creatorObj && (
+                <Link
+                  to={`/creators/${post.creatorObj.id}`}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition group"
+                  title={`Voir le profil de ${post.creatorObj.name}`}
+                >
+                  <img
+                    src={post.creatorObj.avatar}
+                    alt={post.creatorObj.name}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-blue-200 dark:border-blue-700 group-hover:border-blue-400"
+                    onError={e => (e.currentTarget.style.display = 'none')}
+                  />
+                  <span className="font-medium text-gray-900 dark:text-white text-sm truncate max-w-[120px]">
+                    {post.creatorObj.name}
+                  </span>
+                  {post.creatorObj.verified && (
+                    <span className="ml-1 inline-flex items-center text-blue-500 dark:text-blue-400" title="Vérifié">
+                      <CheckCircle className="w-4 h-4" />
+                    </span>
+                  )}
+                </Link>
               )}
 
-              {/* Bouton d'édition */}
-              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-              <button
-                onClick={() => navigate(`/post-for-app/edit/${post.id}`)}
-                className="flex-shrink-0 p-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                title="Modifier le post"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {/* Vérification - seulement si il y a des vidéos */}
+                {post.videos[0] && (
+                  <>
+                    <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                    <div className="flex-shrink-0">
+                      <PostForAppChecking index={0} reFetch={reFetch} postForApp={post} />
+                    </div>
+                  </>
+                )}
 
-              {/* Actions admin - seulement pour superadmin */}
-              {user?.role === RoleEnum.SUPERADMIN && (
-                <>
-                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                {/* Bouton d'édition */}
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                <button
+                  onClick={() => navigate(`/post-for-app/edit/${post.id}`)}
+                  className="flex-shrink-0 p-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  title="Modifier le post"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
 
-                  <button
-                    onClick={() => setSingleSyncOpen(true)}
-                    disabled={singleSyncLoading}
-                    className="flex-shrink-0 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
-                    title="Synchroniser"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${singleSyncLoading ? 'animate-spin' : ''}`} />
-                  </button>
+                {/* Actions admin - seulement pour superadmin */}
+                {user?.role === RoleEnum.SUPERADMIN && (
+                  <>
+                    <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-                  <button
-                    onClick={handleToggleBan}
-                    className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
-                      post.isBanned
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                        : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
-                    }`}
-                    title={post.isBanned ? 'Débannir' : 'Bannir'}
-                  >
-                    {post.isBanned ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
-                  </button>
-                </>
-              )}
-              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
-              {/* Navigation compacte */}
-              <NavigationControls
-                hasPrev={hasPrev}
-                hasNext={hasNext}
-                prevPost={prevPost ? String(prevPost.id) : undefined}
-                nextPost={nextPost ? String(nextPost.id) : undefined}
-                onNavigate={handleNavigate}
-              />
+                    <button
+                      onClick={() => setSingleSyncOpen(true)}
+                      disabled={singleSyncLoading}
+                      className="flex-shrink-0 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
+                      title="Synchroniser"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${singleSyncLoading ? 'animate-spin' : ''}`} />
+                    </button>
+
+                    <button
+                      onClick={handleToggleBan}
+                      className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
+                        post.isBanned
+                          ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
+                          : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
+                      }`}
+                      title={post.isBanned ? 'Débannir' : 'Bannir'}
+                    >
+                      {post.isBanned ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
+                    </button>
+                  </>
+                )}
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                {/* Navigation compacte */}
+                <NavigationControls
+                  hasPrev={hasPrev}
+                  hasNext={hasNext}
+                  prevPost={prevPost ? String(prevPost.id) : undefined}
+                  nextPost={nextPost ? String(nextPost.id) : undefined}
+                  onNavigate={handleNavigate}
+                />
+              </div>
             </div>
           </div>
         </div>
