@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import usePostTagCategories from "../hooks/usePostTagCategories";
 import TagCategorySelector from "../components/TagCategorySelector";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
@@ -24,6 +25,10 @@ const PostForAppEdit = () => {
   // tags: peut contenir des ids, des noms, ou des objets {id, name}
   type Tag = { id?: number; name: string };
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [suggestedTagsLoaded, setSuggestedTagsLoaded] = useState(false);
+  // Fetch all available tags for suggestion
+  // Use hook properly for tag categories
+  const { items: allTagCategories } = usePostTagCategories();
   const [selectedPlateform, setSelectedPlateform] = useState<{
     id: number;
     name: string;
@@ -54,16 +59,24 @@ const PostForAppEdit = () => {
         videos: post.videos || [],
       });
       // Préremplir les tags si présents
-      if (
-        (post as any).tagCategory &&
-        Array.isArray((post as any).tagCategory)
-      ) {
+      if ((post as any).tagCategory && Array.isArray((post as any).tagCategory) && (post as any).tagCategory.length > 0) {
         setSelectedTags(
           (post as any).tagCategory.map((t: any) => ({
             id: t.id,
             name: t.name,
           })),
         );
+        setSuggestedTagsLoaded(true);
+      } else if (!suggestedTagsLoaded && Array.isArray(allTagCategories) && allTagCategories.length > 0) {
+        // Suggérer 5 tags aléatoires si aucun tag
+        const shuffled = [...allTagCategories].sort(() => 0.5 - Math.random());
+        const randomTags = shuffled.slice(0, 5).map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          suggested: true,
+        }));
+        setSelectedTags(randomTags);
+        setSuggestedTagsLoaded(true);
       }
       // Préremplir la plateforme si présente
       if (post.plateform) {
