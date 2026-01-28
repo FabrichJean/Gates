@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
+import TagCategorySelector from "../components/TagCategorySelector";
 import { useParams, useNavigate } from "react-router-dom";
 import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -10,7 +11,6 @@ import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
-import MediaUploader from "./PostEdit/components/MediaUploader";
 import { deleteManyImages } from "../api/posts";
 
 type Language = {
@@ -19,6 +19,9 @@ type Language = {
 };
 
 const PostForAppEdit = () => {
+  // TagCategory state (doit être dans le composant !)
+  // tags: peut contenir des ids, des noms, ou des objets {id, name}
+  const [selectedTags, setSelectedTags] = useState<(number | string | { id?: number; name: string })[]>([]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -41,6 +44,10 @@ const PostForAppEdit = () => {
         images: post.images || [],
         videos: post.videos || [],
       });
+      // Préremplir les tags si présents
+      if ((post as any).tagCategory && Array.isArray((post as any).tagCategory)) {
+        setSelectedTags((post as any).tagCategory.map((t: any) => ({ id: t.id, name: t.name })));
+      }
     }
   }, [post]);
 
@@ -272,6 +279,7 @@ const PostForAppEdit = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
+      tags: selectedTags,
       // include deferred deletions so backend can remove them as part of the update
       // deleted_image_ids: deletedImageIds,
       // deleted_video_ids: deletedVideoIds,
@@ -424,6 +432,17 @@ const PostForAppEdit = () => {
           </div>
 
           <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
+            {/* TagCategory Selector */}
+            <div className="w-full">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Tags (catégorie)
+              </label>
+              <TagCategorySelector
+                selected={selectedTags}
+                setSelected={setSelectedTags}
+                allowCustomTag
+              />
+            </div>
             <CategorySelector
               categories={categoriesResponse?.categories}
               selectedOptions={selectedOptions}
@@ -485,17 +504,6 @@ const PostForAppEdit = () => {
               />
             </div>
 
-            <MediaUploader
-              images={images}
-              imageFields={imageFields}
-              handleImageChange={handleImageChange}
-              addImageField={addImageField}
-              removeImageField={removeImageField}
-              setDeletedImageIds={setDeletedImageIds}
-              existingVideoCovers={existingVideoCoversRecord}
-              setMedia={setMedia}
-            />
-
             <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
 
             {/* Boutons d'action */}
@@ -506,13 +514,6 @@ const PostForAppEdit = () => {
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(`/post/edit-media/${id}`)}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Manage Video/Cover {">"}
               </button>
               <button
                 type="submit"

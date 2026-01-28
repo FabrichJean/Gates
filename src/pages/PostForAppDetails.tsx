@@ -156,7 +156,17 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: post, loading, error, reFetch } = UsePostForApp(id);
+  // Ajout d'un paramètre refresh pour forcer le rechargement après édition
+  const [refreshKey, setRefreshKey] = useState(0);
+  const location = window.location;
+  useEffect(() => {
+    // Si l'URL contient ?refresh=, on force un refresh du composant
+    if (location && location.search && location.search.includes('refresh=')) {
+      setRefreshKey((k) => k + 1);
+    }
+  }, [location && location.search]);
+
+  const { data: post, loading, error, reFetch } = UsePostForApp(id + (refreshKey ? `?refresh=${refreshKey}` : ''));
 
   const { nextPost, prevPost, hasNext, hasPrev } = useNextPostForApp(id);
   const [showCover, setShowCover] = useState<boolean>(true);
