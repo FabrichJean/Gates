@@ -12,6 +12,7 @@ import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
 import { deleteManyImages } from "../api/posts";
+import GetVideoPostForApp from "./posts-for-app/getVideoPostForApp";
 
 type Language = {
   code: string;
@@ -39,6 +40,9 @@ const PostForAppEdit = () => {
     images: [],
     videos: [],
   });
+
+  // Video type state: { [videoId]: type }
+  const [videoTypes, setVideoTypes] = useState<Record<number, string>>({});
 
   // store ids of media to delete on next update (deferred deletion)
   const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
@@ -68,6 +72,16 @@ const PostForAppEdit = () => {
           name: post.plateform.name,
         });
       }
+      // Préremplir les types de vidéos
+      if (post.videos && Array.isArray(post.videos)) {
+        const types: Record<number, string> = {};
+        post.videos.forEach((v: any) => {
+          if (v.id && v.type) types[v.id] = String(v.type);
+        });
+        setVideoTypes(types);
+      }
+
+      console.log({ videos });
     }
   }, [post]);
 
@@ -285,6 +299,7 @@ const PostForAppEdit = () => {
         fileName:
           v.s3_urls?.hlsUrl || v.public_urls?.local_mp4_url || v.cdn_url,
         isNew: false,
+        type: videoTypes[v.id] || "1", // default to "1" (short) if not set
       });
     });
 
@@ -296,6 +311,7 @@ const PostForAppEdit = () => {
           id: field.id,
           fileName: field.file?.name || field.url,
           isNew: !!field.file,
+          type: "1", // default to short for new videos, can be enhanced
         });
       });
 
@@ -536,38 +552,62 @@ const PostForAppEdit = () => {
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
                 Creator (optional)
               </label>
-              <CreatorAutoComplete
-                value={creatorObj?.name}
-                onSelect={(c) => {
-                  setCreatorObj(c ?? null);
+
+              <TitlesEditor
+                languages={languages}
+                selectedLanguage={selectedLanguage}
+                setSelectedLanguage={setSelectedLanguage}
+                titles={titles}
+                descriptions={descriptions}
+                handleTitleChange={handleTitleChange}
+                handleDescriptionChange={handleDescriptionChange}
+                setShowAddLanguageModal={setShowAddLanguageModal}
+                handleRemoveLanguage={(languageId) => {
+                  setLanguages((prev) =>
+                    prev.filter((lang) => lang.id !== languageId),
+                  );
+                  setTitles((prev) => {
+                    const newTitles = { ...prev };
+                    delete newTitles[languageId];
+                    return newTitles;
+                  });
+                  setDescriptions((prev) => {
+                    const newDesc = { ...prev };
+                    delete newDesc[languageId];
+                    return newDesc;
+                  });
+                  // If the removed language was selected, select another or null
+                  setSelectedLanguage((prev) => {
+                    if (!prev || prev.id !== languageId) return prev;
+                    const remaining = languages.filter(
+                      (lang) => lang.id !== languageId,
+                    );
+                    return remaining.length > 0 ? remaining[0] : null;
+                  });
                 }}
               />
-            </div>
 
-            {/* Plateform Selector */}
-            <div className="w-full">
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Plateforme
-              </label>
-              <PlateformAutoComplete
-                value={selectedPlateform}
-                onSelect={setSelectedPlateform}
+              </div>
+              <div className="w-full mt-4">
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                  Creator (optional)
+                </label>
+                <CreatorAutoComplete
+                  value={creatorObj?.name}
+                  onSelect={(c) => {
+                    setCreatorObj(c ?? null);
+                  }}
+                />
+              </div>
+
+              {/* Video type selection for each video */}
+              <GetVideoPostForApp
+                videos={videos}
+                reFetch={() => {}}
+                editable
+                videoTypes={videoTypes}
+                onTypeChange={(id, type) => setVideoTypes((prev) => ({ ...prev, [id]: type }))}
               />
-            </div>
-            {/* TagCategory Selector */}
-            <div className="w-full">
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Tags (catégorie)
-              </label>
-              <TagCategorySelector
-                selected={selectedTags}
-                setSelected={setSelectedTags}
-                allowCustomTag
-              />
-            </div>
-
-            <div className="border-t border-gray-200 dark:border-gray-600 my-6"></div>
-
             {/* Boutons d'action */}
             <div className="flex justify-end gap-4">
               <button

@@ -9,7 +9,7 @@ interface CategoryResponse {
     message?: string;
 }
 
-const useCategoryPostForApp = () => useFetch<CategoryResponse>(`${apiURL}/post-for-app-categories`, {
+const useCategoryPostForApp = () => useFetch<CategoryResponse>(`${apiURL}/post-categories`, {
     headers: {
        'Authorization': `Bearer ${getToken()}`
     },
