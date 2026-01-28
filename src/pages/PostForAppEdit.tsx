@@ -21,7 +21,8 @@ type Language = {
 const PostForAppEdit = () => {
   // TagCategory state (doit être dans le composant !)
   // tags: peut contenir des ids, des noms, ou des objets {id, name}
-  const [selectedTags, setSelectedTags] = useState<(number | string | { id?: number; name: string })[]>([]);
+  type Tag = { id?: number; name: string };
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
