@@ -1,11 +1,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { UsePost, type Image, type Video } from "../hooks/usePost";
+import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import toast from "react-hot-toast";
-import useUpdatePost from "../hooks/useUpdatePost";
+import useUpdatePostForApp from "../hooks/useUpdatePostForApp";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CategorySelector from "./PostEdit/components/CategorySelector";
@@ -22,7 +22,7 @@ const PostForAppEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: post, loading, error } = UsePost(id);
+  const { data: post, loading, error } = UsePostForApp(id);
 
   const [{ images, videos }, setMedia] = useState<{
     images: Image[];
@@ -115,11 +115,11 @@ const PostForAppEdit = () => {
         post.titles.forEach((item, index) => {
           const languageId = index + 1;
           // Créer l'objet langue basé sur les données du post
-          // prefer explicit i18_language, otherwise fallback to language.code if available
-          const code = item.i18_language || item.language?.code || "";
+          // Utilise uniquement i18_language (pas de .language sur PostForAppTitle)
+          const code = item.i18_language || "";
           const postLanguage = {
             id: languageId,
-            name: item.language?.name || (code ? code.toUpperCase() : ""),
+            name: code ? code.toUpperCase() : "",
             code: code,
           };
           postLanguages.push(postLanguage);
@@ -235,7 +235,7 @@ const PostForAppEdit = () => {
     }
   };
 
-  const { updatePost, loading: updating } = useUpdatePost();
+  const { updatePostForApp, loading: updating } = useUpdatePostForApp();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -330,15 +330,15 @@ const PostForAppEdit = () => {
           }
         });
 
-        await updatePost(post?.id, fd);
+  await updatePostForApp(post?.id, fd);
       } else {
         // No files to upload — send JSON payload as before
-        await updatePost(post?.id, payload);
+  await updatePostForApp(post?.id, payload);
       }
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
-      navigate(`/post/${id}`);
+      navigate(`/post-for-app/${id}`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update post. See console for details.");
@@ -364,7 +364,7 @@ const PostForAppEdit = () => {
             Erreur: {error.message}
           </p>
           <button
-            onClick={() => navigate("/post")}
+            onClick={() => navigate("/post-for-app")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             Retour
@@ -382,7 +382,7 @@ const PostForAppEdit = () => {
             Post not Found
           </p>
           <button
-            onClick={() => navigate("/post")}
+            onClick={() => navigate("/post-for-app")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             back to list Post
@@ -404,7 +404,7 @@ const PostForAppEdit = () => {
               Modify: POST-{String(post.id).padStart(3, "0")}
             </h2>
             <button
-              onClick={() => navigate(`/post/${id}`)}
+              onClick={() => navigate(`/post-for-app/${id}`)}
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               <svg
@@ -452,7 +452,25 @@ const PostForAppEdit = () => {
               handleTitleChange={handleTitleChange}
               handleDescriptionChange={handleDescriptionChange}
               setShowAddLanguageModal={setShowAddLanguageModal}
-              handleRemoveLanguage={() => setLanguages((prev) => prev.filter((lang) => lang.id !== selectedLanguage?.id))}
+              handleRemoveLanguage={(languageId) => {
+                setLanguages((prev) => prev.filter((lang) => lang.id !== languageId));
+                setTitles((prev) => {
+                  const newTitles = { ...prev };
+                  delete newTitles[languageId];
+                  return newTitles;
+                });
+                setDescriptions((prev) => {
+                  const newDesc = { ...prev };
+                  delete newDesc[languageId];
+                  return newDesc;
+                });
+                // If the removed language was selected, select another or null
+                setSelectedLanguage((prev) => {
+                  if (!prev || prev.id !== languageId) return prev;
+                  const remaining = languages.filter((lang) => lang.id !== languageId);
+                  return remaining.length > 0 ? remaining[0] : null;
+                });
+              }}
             />
 
             <div className="w-full mt-4">
@@ -484,7 +502,7 @@ const PostForAppEdit = () => {
             <div className="flex justify-end gap-4">
               <button
                 type="button"
-                onClick={() => navigate(`/post/${id}`)}
+                onClick={() => navigate(`/post-for-app/${id}`)}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Cancel

@@ -4,7 +4,7 @@ import {
   ArrowLeft, Eye, EyeOff, Shield, ShieldOff,
   ChevronLeft, ChevronRight, RefreshCw, Trash2,
   User, Calendar, Clock, Tag, Film, Image as ImageIcon,
-  AlertTriangle, CheckCircle, Info
+  AlertTriangle, CheckCircle, Info, Edit
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useParams, useNavigate, Link } from "react-router-dom";
@@ -285,14 +285,6 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
 
             {/* Section droite - Actions */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Navigation compacte */}
-              <NavigationControls
-                hasPrev={hasPrev}
-                hasNext={hasNext}
-                prevPost={prevPost ? String(prevPost.id) : undefined}
-                nextPost={nextPost ? String(nextPost.id) : undefined}
-                onNavigate={handleNavigate}
-              />
 
               {/* Vérification - seulement si il y a des vidéos */}
               {post.videos[0] && (
@@ -303,6 +295,16 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                   </div>
                 </>
               )}
+
+              {/* Bouton d'édition */}
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+              <button
+                onClick={() => navigate(`/post-for-app/edit/${post.id}`)}
+                className="flex-shrink-0 p-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                title="Modifier le post"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
 
               {/* Actions admin - seulement pour superadmin */}
               {user?.role === RoleEnum.SUPERADMIN && (
@@ -331,6 +333,15 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                   </button>
                 </>
               )}
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+              {/* Navigation compacte */}
+              <NavigationControls
+                hasPrev={hasPrev}
+                hasNext={hasNext}
+                prevPost={prevPost ? String(prevPost.id) : undefined}
+                nextPost={nextPost ? String(nextPost.id) : undefined}
+                onNavigate={handleNavigate}
+              />
             </div>
           </div>
         </div>
