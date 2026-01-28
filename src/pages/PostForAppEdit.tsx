@@ -338,7 +338,7 @@ const PostForAppEdit = () => {
 
       toast.success("Post updated successfully");
       // navigate to post details or refresh
-      navigate(`/post-for-app/${id}`);
+  navigate(`/post-for-app/${id}?refresh=${Date.now()}`);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update post. See console for details.");
