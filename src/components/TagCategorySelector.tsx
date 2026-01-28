@@ -4,6 +4,7 @@ import usePostTagCategories from "../hooks/usePostTagCategories";
 interface Tag {
   id?: number;
   name: string;
+  suggested?: boolean;
 }
 
 interface TagCategorySelectorProps {
@@ -140,6 +141,11 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200 border border-blue-200 dark:border-blue-800"
           >
             #{tag.name}
+            {tag.suggested && (
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-yellow-200 text-yellow-800 text-xs font-semibold border border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-800">
+                Suggéré
+              </span>
+            )}
             <button
               type="button"
               onClick={() => handleRemoveTag(tag)}

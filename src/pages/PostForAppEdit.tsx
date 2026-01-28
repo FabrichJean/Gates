@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import usePostTagCategories from "../hooks/usePostTagCategories";
 import TagCategorySelector from "../components/TagCategorySelector";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
 import PlateformAutoComplete from "../components/PlateformAutoComplete";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
@@ -35,8 +35,17 @@ const PostForAppEdit = () => {
   } | null>(null);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { data: post, loading, error } = UsePostForApp(id);
+  const { data: post, loading, error, refetch } = UsePostForApp(id);
+
+  // Refetch when refresh param is present
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.has('refresh')) {
+      refetch();
+    }
+  }, [location.search, refetch]);
 
   const [{ images, videos }, setMedia] = useState<{
     images: Image[];
@@ -67,16 +76,6 @@ const PostForAppEdit = () => {
           })),
         );
         setSuggestedTagsLoaded(true);
-      } else if (!suggestedTagsLoaded && Array.isArray(allTagCategories) && allTagCategories.length > 0) {
-        // Suggérer 5 tags aléatoires si aucun tag
-        const shuffled = [...allTagCategories].sort(() => 0.5 - Math.random());
-        const randomTags = shuffled.slice(0, 5).map((t: any) => ({
-          id: t.id,
-          name: t.name,
-          suggested: true,
-        }));
-        setSelectedTags(randomTags);
-        setSuggestedTagsLoaded(true);
       }
       // Préremplir la plateforme si présente
       if (post.plateform) {
@@ -97,6 +96,26 @@ const PostForAppEdit = () => {
       console.log({ videos });
     }
   }, [post]);
+
+  // Suggest tags as soon as tag categories are loaded and no tags are selected
+  useEffect(() => {
+    if (
+      (!post || !((post as any).tagCategory && (post as any).tagCategory.length > 0)) &&
+      selectedTags.length === 0 &&
+      !suggestedTagsLoaded &&
+      Array.isArray(allTagCategories) &&
+      allTagCategories.length > 0
+    ) {
+      const shuffled = [...allTagCategories].sort(() => 0.5 - Math.random());
+      const randomTags = shuffled.slice(0, 5).map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        suggested: true,
+      }));
+      setSelectedTags(randomTags);
+      setSuggestedTagsLoaded(true);
+    }
+  }, [allTagCategories, post, selectedTags.length, suggestedTagsLoaded]);
 
   const [open, setOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);

@@ -109,9 +109,34 @@ export type TPostForApp = {
 
 // Hook pour récupérer un post for app par ID
 export function UsePostForApp(id: postForAppID) {
-    return useFetch<TPostForApp>(apiURL + '/posts-for-app/' + id, {
-        headers: { Authorization: `Bearer ${token()}` },
-    })
+    const [data, setData] = useState<TPostForApp | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const fetchPost = async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axios.get(apiURL + '/posts-for-app/' + id, {
+                headers: { Authorization: `Bearer ${token()}` },
+            });
+            setData(response.data);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPost();
+    }, [id, refreshKey]);
+
+    const refetch = () => setRefreshKey(prev => prev + 1);
+
+    return { data, loading, error, refetch };
 }
 
 // Hook pour récupérer tous les posts for app (version simplifiée pour debug)
