@@ -17,7 +17,7 @@ export const usePostForAppManagement = () => {
   const [params, setParams] = useState<any>(null);
 
   // Centralized filter state
-  const [filters, setFilters] = useState({
+  const [filters, _setFilters] = useState({
     category_id: "",
     sub_category_id: "",
     creator_id: "",
@@ -32,6 +32,14 @@ export const usePostForAppManagement = () => {
     sort: "createdAt",
     order: "DESC",
   });
+  // Memoize setFilters to avoid reference changes
+  const setFilters = useCallback((updater: any) => {
+    if (typeof updater === 'function') {
+      return _setFilters((prev: any) => updater(prev));
+    } else {
+      return _setFilters(updater);
+    }
+  }, []);
 
   // Restore filters from localStorage on mount
   useEffect(() => {
@@ -47,14 +55,15 @@ export const usePostForAppManagement = () => {
           return [k, v];
         })
       );
-      setFilters((prev) => ({ ...prev, ...normalized }));
+      // setFilters is defined above, so this is now correct
+  setFilters((prev: any) => ({ ...prev, ...normalized }));
     } catch (e) {
       // ignore
     }
-  }, []);
+  }, [setFilters]);
   const [data, setData] = useState<PostsForAppResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
+  
   const fetching = useRef(false);
   const refetchTimeout = useRef<number | null>(null);
   const pendingRefetch = useRef(false);
@@ -75,7 +84,11 @@ export const usePostForAppManagement = () => {
         isDeleted: normalizeBool((customFilters && customFilters.isDeleted !== undefined) ? customFilters.isDeleted : filters.isDeleted),
         processing: normalizeBool((customFilters && customFilters.processing !== undefined) ? customFilters.processing : filters.processing),
       };
-      const params = { ...normalizedFilters, page: pageNumber };
+      // Remove any filter with value 'all' from the params
+      const params = Object.fromEntries(
+        Object.entries({ ...normalizedFilters, page: pageNumber })
+          .filter(([k, v]) => v !== 'all')
+      );
       const res = await getPostsForApp(params);
       setData(res.data as PostsForAppResponse);
       setPage(res.data?.page || pageNumber);
@@ -157,8 +170,8 @@ export const usePostForAppManagement = () => {
     toWebapp,
     fetch,
     activate,
-    filters,
-    setFilters,
+  filters,
+  setFilters,
   };
 };
 

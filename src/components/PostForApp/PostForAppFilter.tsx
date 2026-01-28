@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, memo } from "react";
 import { getPostsForApp } from "../../api/postsForApp";
 import useCategoryPostForApp from "../../hooks/posts/useCategoryPostForApp";
 import useSubCategoryPostForApp from "../../hooks/posts/useSubCategoryPostForApp";
@@ -30,7 +30,7 @@ export type TPostForAppFilter = {
   creatorSearch?: string;
 };
 
-export default function PostForAppFilter({
+export default memo(function PostForAppFilter({
   filters,
   setFilters,
 }: {
@@ -38,6 +38,7 @@ export default function PostForAppFilter({
   filters: any;
   setFilters: (f: any) => void;
 }) {
+  // Internal local state for form fields
   const { data: users } = useUsers("");
   const { data: creators } = UseCreators();
   const {
@@ -56,21 +57,27 @@ export default function PostForAppFilter({
     filters?.category_id ? [String(filters.category_id)] : [],
   );
 
+  const [localFilters, setLocalFilters] = useState(() => ({ ...filters }));
+
+  useEffect(() => {
+    setLocalFilters({ ...filters });
+  }, [filters]);
+
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
   const creatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (filters?.category_id && categoriesResponse?.categories) {
+    if (localFilters?.category_id && categoriesResponse?.categories) {
       const found = categoriesResponse.categories.find(
-        (c: any) => String(c.id) === String(filters.category_id),
+        (c: any) => String(c.id) === String(localFilters.category_id),
       );
       if (found) setSelectedOptions([found.name]);
       else setSelectedOptions([]);
     } else {
       setSelectedOptions([]);
     }
-  }, [filters?.category_id, categoriesResponse]);
+  }, [localFilters?.category_id, categoriesResponse]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -97,40 +104,36 @@ export default function PostForAppFilter({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Removed: filter restoration from localStorage (now handled in hook only)
+  // Change handler for local state
+  const handleChange = useCallback((key: string, value: any) => {
+    setLocalFilters((prev: any) => ({ ...prev, [key]: value }));
+  }, []);
 
-  // accepte maintenant n'importe quel type de valeur (string | number)
-  const handleChange = (key: string, value: any) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSelectCategory = (cat: { id: number; name: string }) => {
-    setFilters((prev: any) => ({
+  const handleSelectCategory = useCallback((cat: { id: number; name: string }) => {
+    setLocalFilters((prev: any) => ({
       ...prev,
       category_id: String(cat.id),
       sub_category_id: "",
     }));
     setSelectedOptions([cat.name]);
-    setOpen(false);
-  };
+    // Ne pas fermer le dropdown ni le modal
+  }, []);
 
-  // No submit: just update filters, hook will fetch automatically
-  const submit = () => {
-    // save the raw filters (before mapping) so UI can restore human-friendly values
+  // Only update parent filters on submit
+  const submit = useCallback(() => {
     localStorage.setItem(
       "posts_for_app_filtered",
-      JSON.stringify({ ...filters }),
+      JSON.stringify({ ...localFilters }),
     );
-    setFilters({ ...filters, page: "1" });
-  };
+    setFilters({ ...localFilters, page: "1" });
+  }, [localFilters, setFilters]);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     const modal = document.getElementById(
       "search_modal_posts_for_app",
     ) as HTMLDialogElement | null;
-
     modal?.close();
-  };
+  }, []);
 
   return (
     <dialog
@@ -203,13 +206,13 @@ export default function PostForAppFilter({
 
               {open && (
                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
-                  <div
-                    onClick={() => {
-                      handleChange("sub_category_id", "");
-                      setSubOpen(false);
-                    }}
-                    className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500"
-                  >
+                      <div
+                        onClick={() => {
+                          handleChange("sub_category_id", "");
+                          // Ne pas fermer le dropdown ni le modal
+                        }}
+                        className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500"
+                      >
                     <span
                       className={`block truncate ${filters.category_id === "" ? "font-semibold" : ""}`}
                     >
@@ -327,7 +330,7 @@ export default function PostForAppFilter({
                       <div
                         onClick={() => {
                           handleChange("sub_category_id", "");
-                          setSubOpen(false);
+                          // setSubOpen(false); // Do not close modal on change
                         }}
                         className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500"
                       >
@@ -342,7 +345,7 @@ export default function PostForAppFilter({
                           key={c.id}
                           onClick={() => {
                             handleChange("sub_category_id", String(c.id));
-                            setSubOpen(false);
+                            // Ne pas fermer le dropdown ni le modal
                           }}
                           className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500"
                         >
@@ -386,10 +389,9 @@ export default function PostForAppFilter({
               type="text"
               placeholder="Search creator..."
               // on affiche uniquement creatorSearch — ainsi si l'utilisateur efface, la valeur n'est pas ré-écrasée par creator_id
-              value={filters.creatorSearch || ""}
+              value={localFilters.creatorSearch || ""}
               onChange={(e) => {
                 const value = e.target.value;
-                // si l'utilisateur vide le champ, on vide aussi creator_id pour permettre la suppression
                 if (value === "") {
                   handleChange("creatorSearch", "");
                   handleChange("creator_id", "");
@@ -410,7 +412,7 @@ export default function PostForAppFilter({
                   onClick={() => {
                     handleChange("creator_id", "");
                     handleChange("creatorSearch", "");
-                    setCreatorOpen(false);
+                    // Ne pas fermer le dropdown ni le modal
                   }}
                 >
                   all
@@ -428,17 +430,15 @@ export default function PostForAppFilter({
                   ?.filter((c) =>
                     c.name
                       .toLowerCase()
-                      .includes((filters.creatorSearch || "").toLowerCase()),
+                      .includes((localFilters.creatorSearch || "").toLowerCase()),
                   )
                   .map((c) => (
                     <div
                       key={c.id}
                       className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
                       onClick={() => {
-                        // stocke l'id en string pour garder la cohérence côté filters (backend attend string souvent)
                         handleChange("creator_id", String(c.id));
                         handleChange("creatorSearch", c.name);
-                        setCreatorOpen(false);
                       }}
                     >
                       {c.name}
@@ -454,7 +454,7 @@ export default function PostForAppFilter({
             </label>
             <select
               className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={filters.user_id}
+              value={localFilters.user_id}
               onChange={(e) => handleChange("user_id", e.target.value)}
             >
               <option value="">all</option>
@@ -475,7 +475,7 @@ export default function PostForAppFilter({
             <input
               type="date"
               className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={filters.startDate}
+              value={localFilters.startDate}
               onChange={(e) => handleChange("startDate", e.target.value)}
             />
           </div>
@@ -486,7 +486,7 @@ export default function PostForAppFilter({
             <input
               type="date"
               className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={filters.endDate}
+              value={localFilters.endDate}
               onChange={(e) => handleChange("endDate", e.target.value)}
             />
           </div>
@@ -516,9 +516,9 @@ export default function PostForAppFilter({
                       className="radio radio-sm accent-blue-500 dark:accent-blue-400"
                       checked={
                         option === "all"
-                          ? filters[key as keyof typeof filters] === "all" ||
-                            filters[key as keyof typeof filters] === ""
-                          : filters[key as keyof typeof filters] === option
+                          ? localFilters[key as keyof typeof localFilters] === "all" ||
+                            localFilters[key as keyof typeof localFilters] === ""
+                          : localFilters[key as keyof typeof localFilters] === option
                       }
                       onChange={() => handleChange(key, option)}
                     />
@@ -532,18 +532,17 @@ export default function PostForAppFilter({
           ))}
         </div>
 
-        <form
-          method="dialog"
+        <div
           className="pt-3 flex justify-end gap-3 sm:gap-3 sm:pt-3 sm:static fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t sm:border-t-0 sm:bg-transparent"
         >
-          <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
+          <button type="button" className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300" onClick={closeModal}>
             Close
           </button>
 
           <div
             className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
             onClick={() => {
-              setFilters({
+              setLocalFilters({
                 category_id: "",
                 sub_category_id: "",
                 creator_id: "",
@@ -552,7 +551,7 @@ export default function PostForAppFilter({
                 endDate: "",
                 uploaded: "all",
                 page: "1",
-                limit: "20",
+                limit: "10",
                 sort: "createdAt",
                 order: "DESC",
               });
@@ -563,17 +562,18 @@ export default function PostForAppFilter({
           </div>
 
           <button
+            type="button"
             className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300"
-            onClick={(e) => {
-              e.preventDefault();
-              submit();
-              closeModal();
-            }}
+            onClick={(e) => { e.preventDefault(); submit(); closeModal(); }}
           >
             Apply
           </button>
-        </form>
+        </div>
       </div>
     </dialog>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if filters actually changed
+  return JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters) &&
+         prevProps.setFilters === nextProps.setFilters;
+});

@@ -1,16 +1,13 @@
-import {
-  MdOutlineVerifiedUser,
-  MdDelete,
-  MdDeleteOutline,
-} from "react-icons/md";
+import { LiaSyncSolid } from "react-icons/lia";
+import { Check, X, Trash2, User, Coins, Eye } from "lucide-react";
 import { deleteCreator } from "../../api/creators";
 import { Link } from "react-router-dom";
 import SingleSyncModal from "../SingleSyncModal";
 import { useState } from "react";
 import { singleSync } from "../../api/videos";
 import toast from "react-hot-toast";
-import { LiaSyncSolid } from "react-icons/lia";
 import ConfirmAlert from "../ConfirmAlert";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface Creator {
   id: number;
@@ -27,7 +24,6 @@ export interface Creator {
   verified?: boolean;
   isDeleted?: boolean;
   video_count?: number;
-  video_bot_count?: number;
   post_count?: number;
 }
 
@@ -49,23 +45,6 @@ export default function CreatorList({
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<Creator | null>(null);
 
-  const extractErrorMessage = (err: unknown) => {
-    try {
-      if (!err) return "Error";
-      if (typeof err === "string") return err;
-      if (typeof err === "object" && err !== null) {
-        return (
-          (err as any)?.response?.data?.message ??
-          (err as any)?.message ??
-          "Error"
-        );
-      }
-      return String(err);
-    } catch {
-      return "Error";
-    }
-  };
-
   const handleSingleSync = async (isForce: boolean) => {
     if (!selectedCreator) return;
     setSingleSyncLoading(true);
@@ -75,10 +54,10 @@ export default function CreatorList({
         origin_id: selectedCreator.id,
         isForce,
       });
-      toast.success("✅ Sync single exécuté");
+      toast.success("Sync effectuée");
       reFetch?.(500);
-    } catch (err) {
-      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Erreur sync");
     } finally {
       setSingleSyncLoading(false);
       setSingleSyncOpen(false);
@@ -91,154 +70,136 @@ export default function CreatorList({
       await deleteCreator(id);
       reFetch?.(500);
       onDelete?.(id);
-    } catch (err) {
-      toast.error(extractErrorMessage(err) || "❌ Erreur suppression !");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Erreur suppression");
     }
   };
 
-  // Use a flat list and render a responsive grid (max 5 columns)
-  const items: Creator[] = creators || [];
-
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="w-full flex items-center justify-center py-10">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
-  }
+
+  if (!creators?.length)
+    return (
+      <div className="w-full text-center py-10 text-slate-500 dark:text-slate-400">
+        Aucun créateur
+      </div>
+    );
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="w-full pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
-          {items.map((creator) => (
-            <div
-              key={creator.id}
-              className="w-full bg-white dark:bg-slate-700 rounded-lg p-4 flex flex-col items-start relative transition-all hover:shadow-lg border border-gray-200 dark:border-gray-500"
-              style={{ backdropFilter: "blur(6px)" }}
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <AnimatePresence>
+          {creators.map((c) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="group relative bg-white/5 dark:bg-black/20 rounded-2xl p-4 flex flex-col gap-3
+                         border border-white/10 dark:border-white/5
+                         backdrop-blur-md shadow-lg shadow-black/20
+                         hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
             >
-              <div className="flex items-center gap-4 w-full">
-                <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border border-gray-200 min-w-[64px] min-h-[64px]">
+              {/* Avatar + verif */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20">
                   <img
-                    src={creator.avatar ?? ""}
-                    alt={creator.name}
-                    className="w-full h-full object-cover block"
+                    src={c.avatar ?? ""}
+                    alt={c.name}
+                    className="w-full h-full object-cover"
                   />
                 </div>
-
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Link
-                    to={`/creators/${creator.id}`}
-                    className="text-sm text-nowrap font-semibold text-gray-700 hover:text-blue-400 dark:text-white hover:underline"
+                    to={`/creators/${c.id}`}
+                    className="text-sm font-semibold text-gray-900 dark:text-white truncate block hover:text-sky-400 transition"
                   >
-                    {creator.name}
-                    {creator.verified && (
-                      <MdOutlineVerifiedUser
-                        size={14}
-                        className="inline ml-2 text-blue-500"
-                      />
+                    {c.name}
+                    {c.verified && (
+                      <Check className="inline-block w-3 h-3 ml-1.5 text-sky-400" />
                     )}
                   </Link>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
-                    {creator.gender ?? null}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {c.gender ?? "-"}
                   </p>
                 </div>
+              </div>
 
-                {/* btn single sync (positioned top-right) */}
-                {/* <button
-                  type="button"
-                  title="Synchroniser"
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="bg-slate-800/20 dark:bg-slate-900/30 rounded-lg p-2">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                    {c.followers ?? 0}
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">Followers</div>
+                </div>
+                <div className="bg-slate-800/20 dark:bg-slate-900/30 rounded-lg p-2">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                    {c.video_count ?? 0}
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">Videos</div>
+                </div>
+                <div className="bg-slate-800/20 dark:bg-slate-900/30 rounded-lg p-2">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                    {c.post_count ?? 0}
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">Posts</div>
+                </div>
+              </div>
+
+              {/* Source */}
+              <div className="text-xs text-slate-600 dark:text-slate-300 truncate">
+                Source : <span className="font-medium">{c.source ?? "–"}</span>
+              </div>
+
+              {/* NFT / Sales */}
+              {(c.highestNFTPrice || c.totalSales) && (
+                <div className="flex items-center gap-2 text-xs">
+                  <Coins className="w-4 h-4 text-amber-400" />
+                  <span className="text-slate-600 dark:text-slate-300">
+                    {c.highestNFTPrice || c.totalSales}
+                  </span>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 mt-auto pt-2">
+                <button
                   onClick={() => {
-                    setSelectedCreator(creator);
+                    setSelectedCreator(c);
                     setSingleSyncOpen(true);
                   }}
-                  className="absolute top-1 right-1 inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-medium transition-all duration-200"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg
+                             bg-sky-500/10 hover:bg-sky-500/20 text-sky-400
+                             border border-sky-500/20 hover:border-sky-500/30
+                             transition text-xs font-medium"
+                  aria-label="Sync"
                 >
                   <LiaSyncSolid className="w-4 h-4" />
-                </button> */}
+                  Sync
+                </button>
+                <button
+                  onClick={() => setConfirmTarget(c)}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg
+                             bg-rose-500/10 hover:bg-rose-500/20 text-rose-400
+                             border border-rose-500/20 hover:border-rose-500/30
+                             transition text-xs font-medium"
+                  aria-label="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
               </div>
-
-              <div className="flex flex-col w-full mt-2 gap-2 items-start">
-                <p className="text-sm font-bold text-gray-400 dark:text-gray-300 text-nowrap">
-                  Source :{" "}
-                  <span className="font-medium">{creator.source ?? "..."}</span>
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
-                  Followers:{" "}
-                  <span className="font-medium">
-                    {creator.followers ?? "..."}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
-                  Videos:{" "}
-                  <span className="font-medium">
-                    {creator.video_count ?? ""}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
-                  Posts:{" "}
-                  <span className="font-medium">
-                    {creator.post_count ?? ""}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-nowrap">
-                  Verified:{" "}
-                  {creator.verified ? (
-                    <span className="text-green-600 font-medium">Yes</span>
-                  ) : (
-                    <span className="text-orange-400 font-medium">
-                      Pending{" "}
-                    </span>
-                  )}
-                </p>
-                <div className="flex items-center gap-2 justify-content">
-                  {/* btn suprimer */}
-                  <button
-                    type="button"
-                    title="Delete"
-                    onClick={() => setConfirmTarget(creator)}
-                    className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-500 text-sm font-medium transition-all duration-200"
-                  >
-                    <MdDeleteOutline className="w-4 h-4 text-gray-500 dark:text-white" />
-                  </button>
-                  {/* btn single sync */}
-                  <button
-                    type="button"
-                    title="Synchroniser"
-                    onClick={() => {
-                      setSelectedCreator(creator);
-                      setSingleSyncOpen(true);
-                    }}
-                    className="inline-flex cursor-pointer items-center gap-2 px-2 py-2 rounded-md bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-500 text-sm font-medium transition-all duration-200"
-                  >
-                    <LiaSyncSolid className="w-4 h-4 text-blue-400 dark:text-white" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4 text-sm text-gray-700">
-                {creator.highestNFTPrice && (
-                  <p>
-                    Highest NFT Price:{" "}
-                    <span className="font-semibold text-green-600">
-                      {creator.highestNFTPrice}
-                    </span>
-                  </p>
-                )}
-                {creator.totalSales && (
-                  <p>
-                    Total Sale Proceeds:{" "}
-                    <span className="font-semibold text-purple-600">
-                      {creator.totalSales}
-                    </span>
-                  </p>
-                )}
-              </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </AnimatePresence>
       </div>
 
+      {/* Modales */}
       <SingleSyncModal
         open={singleSyncOpen}
         onClose={() => {
@@ -246,20 +207,13 @@ export default function CreatorList({
           setSelectedCreator(null);
         }}
         onSubmit={handleSingleSync}
-        title={
-          selectedCreator
-            ? `Synchroniser ${selectedCreator.name}`
-            : "Synchroniser"
-        }
+        title={selectedCreator ? `Sync ${selectedCreator.name}` : "Sync"}
       />
 
       <ConfirmAlert
         open={!!confirmTarget}
         onClose={() => setConfirmTarget(null)}
-        onConfirm={async () => {
-          if (!confirmTarget) return;
-          await handleDelete(confirmTarget.id);
-        }}
+        onConfirm={() => confirmTarget && handleDelete(confirmTarget.id)}
       />
     </div>
   );
