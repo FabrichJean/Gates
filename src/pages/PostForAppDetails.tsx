@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, Eye, EyeOff, Shield, ShieldOff,
-  ChevronLeft, ChevronRight, RefreshCw, Trash2,
-  User, Calendar, Clock, Tag, Film, Image as ImageIcon,
-  AlertTriangle, CheckCircle, Info, Edit
+  ChevronLeft, ChevronRight, RefreshCw,
+  User, Calendar, Tag, Film,
+  AlertTriangle, CheckCircle, Edit
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useParams, useNavigate, Link } from "react-router-dom";
@@ -15,7 +15,7 @@ import GetVideoPostForApp from "./posts-for-app/getVideoPostForApp";
 import GetPostForAppTitles from "./posts-for-app/GetPostForAppTitles";
 import SingleSyncModal from "../components/SingleSyncModal";
 import RoleEnum from "../utils/roleEnum";
-import { togglePostForAppBannedStatus, updatePostForAppBannedStatus } from "../api/postsForApp";
+import { updatePostForAppBannedStatus } from "../api/postsForApp";
 import toast from "react-hot-toast";
 import { singleSync } from "../api/videos";
 
