@@ -166,7 +166,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
     }
   }, [location && location.search]);
 
-  const { data: post, loading, error, reFetch } = UsePostForApp(id + (refreshKey ? `?refresh=${refreshKey}` : ''));
+  const { data: post, loading, error, refetch: reFetch } = UsePostForApp(id + (refreshKey ? `?refresh=${refreshKey}` : ''));
 
   const { nextPost, prevPost, hasNext, hasPrev } = useNextPostForApp(id);
   const [showCover, setShowCover] = useState<boolean>(true);

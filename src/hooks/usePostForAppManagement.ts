@@ -33,6 +33,7 @@ export const usePostForAppManagement = () => {
       isDeleted: "all",
       processing: "",
       uploaded: "all",
+      videoType: "all",
       page: "1",
       limit: "10",
       sort: "createdAt",

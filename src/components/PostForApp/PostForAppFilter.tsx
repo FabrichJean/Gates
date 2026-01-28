@@ -16,6 +16,7 @@ export type TPostForAppFilter = {
   isDeleted?: string;
   processing?: string;
   uploaded?: string;
+  videoType?: string;
   page: string;
   limit: string;
   creatorSearch?: string;
@@ -304,6 +305,20 @@ export default memo(function PostForAppFilter({
               <option value="null">Not ready</option>
             </select>
           </div>
+
+          {/* Video Type */}
+          <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
+            <label className="text-sm font-medium mb-2 block">Video Type</label>
+            <select
+              value={localFilters.videoType || "all"}
+              onChange={(e) => handleChange("videoType", e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            >
+              <option value="all">All</option>
+              <option value="1">Short</option>
+              <option value="2">Long</option>
+            </select>
+          </div>
         </div>
 
         {/* Actions */}
@@ -321,6 +336,7 @@ export default memo(function PostForAppFilter({
                 creatorSearch: "",
                 isDeleted: "",
                 uploaded: "all",
+                videoType: "all",
                 page: "1",
                 limit: "10",
               });
