@@ -40,7 +40,7 @@ export default memo(function PostForAppFilter({
 }) {
   // Internal local state for form fields
   const { data: users } = useUsers("");
-  const { data: creators } = UseCreators();
+  const { data: creators } = UseCreators({isAll: true});
   const {
     data: categoriesResponse,
     loading: categoriesLoading,
@@ -435,101 +435,81 @@ export default memo(function PostForAppFilter({
                   .map((c) => (
                     <div
                       key={c.id}
-                      className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+                      className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
                       onClick={() => {
                         handleChange("creator_id", String(c.id));
                         handleChange("creatorSearch", c.name);
                       }}
                     >
-                      {c.name}
+                      {c.avatar && (
+                        <img
+                          src={c.avatar}
+                          alt={c.name}
+                          className="w-6 h-6 rounded-full object-cover border border-gray-300"
+                          style={{ minWidth: 24, minHeight: 24 }}
+                        />
+                      )}
+                      <span>{c.name}</span>
                     </div>
                   ))}
               </div>
             )}
           </div>
-
-          <div>
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
-              User
-            </label>
-            <select
-              className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={localFilters.user_id}
-              onChange={(e) => handleChange("user_id", e.target.value)}
-            >
-              <option value="">all</option>
-              {users?.map((u, i) => (
-                <option key={i} value={u.id}>
-                  {u.username}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
-              Start Date
-            </label>
-            <input
-              type="date"
-              className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={localFilters.startDate}
-              onChange={(e) => handleChange("startDate", e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
-              End Date
-            </label>
-            <input
-              type="date"
-              className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-              value={localFilters.endDate}
-              onChange={(e) => handleChange("endDate", e.target.value)}
-            />
-          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { key: "isDeleted", label: "Deleted" },
-            { key: "processing", label: "Video Uploaded" },
-          ].map(({ key, label }) => (
-            <div
-              key={key}
-              className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300"
-            >
-              <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">
-                {label}
-              </p>
-              <div className="flex gap-3">
-                {["all", "yes", "no"].map((option) => (
-                  <label
-                    key={option}
-                    className="flex items-center gap-1 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name={key}
-                      className="radio radio-sm accent-blue-500 dark:accent-blue-400"
-                      checked={
-                        option === "all"
-                          ? localFilters[key as keyof typeof localFilters] === "all" ||
-                            localFilters[key as keyof typeof localFilters] === ""
-                          : localFilters[key as keyof typeof localFilters] === option
-                      }
-                      onChange={() => handleChange(key, option)}
-                    />
-                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
-                      {option}
-                    </span>
-                  </label>
-                ))}
-              </div>
+          {/* Deleted filter */}
+          <div
+            className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300"
+          >
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Deleted
+            </p>
+            <div className="flex gap-3">
+              {["all", "yes", "no"].map((option) => (
+                <label
+                  key={option}
+                  className="flex items-center gap-1 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="isDeleted"
+                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                    checked={
+                      option === "all"
+                        ? localFilters.isDeleted === "all" || localFilters.isDeleted === ""
+                        : localFilters.isDeleted === option
+                    }
+                    onChange={() => handleChange("isDeleted", option)}
+                  />
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                    {option}
+                  </span>
+                </label>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Checking status filter as select */}
+          <div
+            className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300"
+          >
+            <label className="font-medium mb-2 text-gray-700 dark:text-gray-300 block" htmlFor="checking-select">
+              Checking
+            </label>
+            <select
+              id="checking-select"
+              className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+              value={localFilters.checking || "all"}
+              onChange={e => handleChange("checking", e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="checked">Checked</option>
+              <option value="refused">Refused</option>
+              <option value="waiting for checking">Waiting for checking</option>
+              <option value="null">Not ready</option>
+            </select>
+          </div>
         </div>
 
         <div
