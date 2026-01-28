@@ -254,7 +254,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
       >
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           {/* Ligne principale compacte */}
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Section gauche - Navigation et titre */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
@@ -284,21 +284,22 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
             </div>
 
             {/* Section droite - Creator + Actions */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-4 flex-shrink-0 flex-wrap sm:flex-nowrap">
               {/* Creator feed style */}
               {post.creatorObj && (
                 <Link
                   to={`/creators/${post.creatorObj.id}`}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition group"
+                  className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition group min-w-0"
                   title={`Voir le profil de ${post.creatorObj.name}`}
+                  style={{ maxWidth: 180 }}
                 >
                   <img
                     src={post.creatorObj.avatar}
                     alt={post.creatorObj.name}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-blue-200 dark:border-blue-700 group-hover:border-blue-400"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-blue-200 dark:border-blue-700 group-hover:border-blue-400 flex-shrink-0"
                     onError={e => (e.currentTarget.style.display = 'none')}
                   />
-                  <span className="font-medium text-gray-900 dark:text-white text-sm truncate max-w-[120px]">
+                  <span className="font-medium text-gray-900 dark:text-white text-sm truncate max-w-[70px] sm:max-w-[120px]">
                     {post.creatorObj.name}
                   </span>
                   {post.creatorObj.verified && (
@@ -310,7 +311,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto sm:overflow-visible max-w-full sm:max-w-none">
                 {/* Vérification - seulement si il y a des vidéos */}
                 {post.videos[0] && (
                   <>
