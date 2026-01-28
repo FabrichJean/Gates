@@ -29,7 +29,7 @@ const PostManagementInner = () => {
     processing: "all",
     uploaded: "all",
     page: "1",
-    limit: "20",
+    limit: "10",
     sort: "createdAt",
     order: "DESC",
   });

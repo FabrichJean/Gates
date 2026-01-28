@@ -15,6 +15,43 @@ export const usePostForAppManagement = () => {
     }
   });
   const [params, setParams] = useState<any>(null);
+
+  // Centralized filter state
+  const [filters, setFilters] = useState({
+    category_id: "",
+    sub_category_id: "",
+    creator_id: "",
+    startDate: "",
+    endDate: "",
+    user_id: "",
+    isDeleted: "all",
+    processing: "",
+    uploaded: "all",
+    page: "1",
+    limit: "10",
+    sort: "createdAt",
+    order: "DESC",
+  });
+
+  // Restore filters from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("posts_for_app_filtered");
+      if (!saved) return;
+      const savedFilter = JSON.parse(saved);
+      // Convert 'yes'/'no' to true/false for all keys
+      const normalized = Object.fromEntries(
+        Object.entries(savedFilter).map(([k, v]) => {
+          if (v === 'yes') return [k, true];
+          if (v === 'no') return [k, false];
+          return [k, v];
+        })
+      );
+      setFilters((prev) => ({ ...prev, ...normalized }));
+    } catch (e) {
+      // ignore
+    }
+  }, []);
   const [data, setData] = useState<PostsForAppResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -22,11 +59,24 @@ export const usePostForAppManagement = () => {
   const refetchTimeout = useRef<number | null>(null);
   const pendingRefetch = useRef(false);
 
-  const fetch = useCallback(async (pageNumber = 1) => {
+  const fetch = useCallback(async (pageNumber = 1, customFilters = null) => {
     try {
       setLoading(true);
       fetching.current = true;
-      const res = await getPostsForApp({ page: pageNumber });
+      // Normalize 'yes'/'no' to true/false for boolean filters
+      const normalizeBool = (val: any) => {
+        if (val === 'yes') return true;
+        if (val === 'no') return false;
+        return val;
+      };
+      const normalizedFilters = {
+        ...filters,
+        ...(customFilters || {}),
+        isDeleted: normalizeBool((customFilters && customFilters.isDeleted !== undefined) ? customFilters.isDeleted : filters.isDeleted),
+        processing: normalizeBool((customFilters && customFilters.processing !== undefined) ? customFilters.processing : filters.processing),
+      };
+      const params = { ...normalizedFilters, page: pageNumber };
+      const res = await getPostsForApp(params);
       setData(res.data as PostsForAppResponse);
       setPage(res.data?.page || pageNumber);
     } catch (err: any) {
@@ -35,7 +85,7 @@ export const usePostForAppManagement = () => {
       fetching.current = false;
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   const safeRefetch = useCallback((delay = 500) => {
     if (fetching.current) {
@@ -63,7 +113,7 @@ export const usePostForAppManagement = () => {
     return () => {
       if (refetchTimeout.current) window.clearTimeout(refetchTimeout.current);
     };
-  }, [page, fetch]);
+  }, [page, fetch, filters]);
 
   useEffect(() => {
     try {
@@ -107,6 +157,8 @@ export const usePostForAppManagement = () => {
     toWebapp,
     fetch,
     activate,
+    filters,
+    setFilters,
   };
 };
 

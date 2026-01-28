@@ -10,16 +10,20 @@ import Loader from "../components/Loader";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import SingleSyncModal from "../components/SingleSyncModal";
 import { singleSync } from "../api/videos";
-import { PostForAppProvider, usePostForAppContext } from "../context/PostForAppContext";
+import {
+  PostForAppProvider,
+  usePostForAppContext,
+} from "../context/PostForAppContext";
 import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
-import PostForAppFilter, { type TPostForAppFilter } from "../components/PostForApp/PostForAppFilter";
+import PostForAppFilter, {
+  type TPostForAppFilter,
+} from "../components/PostForApp/PostForAppFilter";
 import { LiaSyncSolid } from "react-icons/lia";
 import { cdnS3 } from "../utils/cdn";
 
 // Inner component consumes PostForAppContext
 const PostForAppManagementInner = () => {
-
   // State for singleSync modal (per post)
   const [singleSyncOpenId, setSingleSyncOpenId] = useState<number | null>(null);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
@@ -37,29 +41,19 @@ const PostForAppManagementInner = () => {
       setSingleSyncLoading(false);
     }
   };
-  const { page, setPage, data, loading, reFetch, activate } = usePostForAppContext();
+  const { page, setPage, data, loading, reFetch, activate } =
+    usePostForAppContext();
 
-  // local state to hold filter UI and optionally filtered results
-  const [filters, setFilters] = useState<TPostForAppFilter>({
-    category_id: "",
-    sub_category_id: "",
-    creator_id: "",
-    startDate: "",
-    endDate: "",
-    user_id: "",
-    isDeleted: "all",
-    processing: "",
-    uploaded: "all",
-    page: "1",
-    limit: "20",
-    sort: "createdAt",
-    order: "DESC",
-  });
+  // filters are now centralized in context
+  const { filters, setFilters } = usePostForAppContext();
 
   const [filteredData, setFilteredData] = useState<any | null>(null);
 
   const posts = filteredData?.posts || data?.posts || [];
   const total = filteredData?.total || data?.total || 0;
+
+  console.log(data);
+
   // const totalSent = filteredData?.totalSent ?? data?.total;
   const limit = filteredData?.limit || data?.limit || 10;
 
@@ -69,17 +63,12 @@ const PostForAppManagementInner = () => {
   // client-side filtering of current page
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("fr-FR");
-  const filteredPosts = posts.filter(
-    (post: any) =>
-      post?.postCategory?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post?.postSubCategory?.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      post.plateform.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      formatDate(post.createdAt)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  );
+
+  function interpretBool(val: any) {
+    if (val === 'yes') return true;
+    if (val === 'no') return false;
+    return val;
+  }
 
   if (loading) return <Loader />;
 
@@ -94,32 +83,25 @@ const PostForAppManagementInner = () => {
         <header className="border-b border-gray-200 dark:border-gray-700 py-3">
           <div className="flex justify-between items-center">
             <div className="flex gap-3">
-
               {/* Post filters (dialog rendered by PostFilter) */}
               <div>
                 <button
                   onClick={() => {
                     const modal = document.getElementById(
-                      "search_modal_52"
+                      "search_modal_posts_for_app",
                     ) as HTMLDialogElement | null;
                     modal?.showModal();
                   }}
                   className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
+                  <Filter className="w-3 text-gray-600 dark:text-gray-400" />{" "}
+                  filters
                 </button>
 
                 <PostForAppFilter
                   filters={filters}
                   setFilters={setFilters}
                   params={{ page: String(page), limit: String(limit) }}
-                  onSubmit={(d: any) => {
-                    setFilteredData(d);
-                    try {
-                      const p = Number(d?.page || page);
-                      if (!Number.isNaN(p)) setPage(p);
-                    } catch { }
-                  }}
                 />
               </div>
             </div>
@@ -193,7 +175,7 @@ const PostForAppManagementInner = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPosts.map((post: any, idx: number) => (
+              {posts?.map((post: any, idx: number) => (
                 <tr
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
@@ -210,18 +192,21 @@ const PostForAppManagementInner = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    {(post).creatorObj ? (
+                    {post.creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
-                          src={(post).creatorObj.avatar!}
-                          alt={(post).creatorObj.name!}
+                          src={post.creatorObj.avatar!}
+                          alt={post.creatorObj.name!}
                           className="min-w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
                             const t = e.target as HTMLImageElement;
                             t.src = "";
                           }}
                         />
-                        <Link to={`/creators/` + post?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                        <Link
+                          to={`/creators/` + post?.creatorObj?.id}
+                          className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap"
+                        >
                           {(post as any).creatorObj.name}
                         </Link>
                       </div>
@@ -237,7 +222,11 @@ const PostForAppManagementInner = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <PostForAppChecking index={idx} reFetch={reFetch} postForApp={post} />
+                    <PostForAppChecking
+                      index={idx}
+                      reFetch={reFetch}
+                      postForApp={post}
+                    />
                   </td>
                   <td className="py-3 px-6 text-center border-r border-gray-100 dark:border-gray-800">
                     <input
@@ -277,28 +266,31 @@ const PostForAppManagementInner = () => {
                         </div>
                       )}
                       {post.videos?.length === 0 && (
-                        <span className="text-xs text-gray-400">
-                          No video
-                        </span>
+                        <span className="text-xs text-gray-400">No video</span>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-nowrap gap-1">
-                      {post.images?.slice(0, 2).map((image: any, index: number) => (
-                        <div key={image.id} className="relative group">
-                          <img
-                            src={cdnS3(image.s3_urls?.imageUrl) || image.public_urls.local_image_url}
-                            alt={`Image ${index + 1}`}
-                            className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src =
-                                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
-                            }}
-                          />
-                        </div>
-                      ))}
+                      {post.images
+                        ?.slice(0, 2)
+                        .map((image: any, index: number) => (
+                          <div key={image.id} className="relative group">
+                            <img
+                              src={
+                                cdnS3(image.s3_urls?.imageUrl) ||
+                                image.public_urls.local_image_url
+                              }
+                              alt={`Image ${index + 1}`}
+                              className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src =
+                                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+                              }}
+                            />
+                          </div>
+                        ))}
                       {post.images?.length > 2 && (
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
                           <span className="text-xs text-gray-600 dark:text-gray-300">
@@ -307,9 +299,7 @@ const PostForAppManagementInner = () => {
                         </div>
                       )}
                       {post.images?.length === 0 && (
-                        <span className="text-xs text-gray-400">
-                          No image
-                        </span>
+                        <span className="text-xs text-gray-400">No image</span>
                       )}
                     </div>
                   </td>
@@ -319,7 +309,10 @@ const PostForAppManagementInner = () => {
                   <td className="flex justify-center gap-2 px-6 py-4">
                     {user?.role === RoleEnum.SUPERADMIN ? (
                       <>
-                        <BtnTranscodeComponent post={post as any} reFetch={reFetch} />
+                        <BtnTranscodeComponent
+                          post={post as any}
+                          reFetch={reFetch}
+                        />
 
                         {/* bouton single sync (affiché seulement si post.processing === "done") */}
                         {post.processing === "done" && (
@@ -328,7 +321,10 @@ const PostForAppManagementInner = () => {
                               type="button"
                               onClick={() => setSingleSyncOpenId(post.id)}
                               className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
-                              disabled={singleSyncLoading && singleSyncOpenId === post.id}
+                              disabled={
+                                singleSyncLoading &&
+                                singleSyncOpenId === post.id
+                              }
                             >
                               <LiaSyncSolid className="w-3 h-3" />
                               Sync
@@ -337,7 +333,9 @@ const PostForAppManagementInner = () => {
                             <SingleSyncModal
                               open={singleSyncOpenId === post.id}
                               onClose={() => setSingleSyncOpenId(null)}
-                              onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
+                              onSubmit={(isForce) =>
+                                handleSingleSync(post.id, isForce)
+                              }
                               title={`Synchroniser le post #${post.id}`}
                             />
                           </>
@@ -364,7 +362,7 @@ const PostForAppManagementInner = () => {
             onPageChange={(p) => setPage(p)}
           />
 
-          {filteredPosts.length === 0 && (
+          {posts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
                 ? "No posts found for this search"
@@ -386,7 +384,7 @@ function SendToWebApp() {
 
   const toggle = (id: number) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 

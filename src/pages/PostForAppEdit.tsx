@@ -549,43 +549,6 @@ const PostForAppEdit = () => {
             />
 
             <div className="w-full mt-4">
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator (optional)
-              </label>
-
-              <TitlesEditor
-                languages={languages}
-                selectedLanguage={selectedLanguage}
-                setSelectedLanguage={setSelectedLanguage}
-                titles={titles}
-                descriptions={descriptions}
-                handleTitleChange={handleTitleChange}
-                handleDescriptionChange={handleDescriptionChange}
-                setShowAddLanguageModal={setShowAddLanguageModal}
-                handleRemoveLanguage={(languageId) => {
-                  setLanguages((prev) =>
-                    prev.filter((lang) => lang.id !== languageId),
-                  );
-                  setTitles((prev) => {
-                    const newTitles = { ...prev };
-                    delete newTitles[languageId];
-                    return newTitles;
-                  });
-                  setDescriptions((prev) => {
-                    const newDesc = { ...prev };
-                    delete newDesc[languageId];
-                    return newDesc;
-                  });
-                  // If the removed language was selected, select another or null
-                  setSelectedLanguage((prev) => {
-                    if (!prev || prev.id !== languageId) return prev;
-                    const remaining = languages.filter(
-                      (lang) => lang.id !== languageId,
-                    );
-                    return remaining.length > 0 ? remaining[0] : null;
-                  });
-                }}
-              />
 
               </div>
               <div className="w-full mt-4">
