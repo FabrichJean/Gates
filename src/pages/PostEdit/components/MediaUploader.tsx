@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+import { cdnS3 } from "../../../utils/cdn";
 
 export default function MediaUploader(props: {
   images: any[];
@@ -40,7 +41,7 @@ export default function MediaUploader(props: {
 
             return (
               <div key={image.id} className="relative group">
-                <img src={imageUrl || ""} alt={`image-${index}`} className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow" />
+                <img src={cdnS3(imageUrl) || ""} alt={`image-${index}`} className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow" />
                 <div className="absolute top-2 right-2 badge badge-neutral">{index + 1}/{images.length}</div>
                 <button type="button" title="Supprimer" onClick={handleDelete} className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"><Trash2 size={16} /></button>
               </div>
@@ -55,7 +56,7 @@ export default function MediaUploader(props: {
                   {field.file ? (
                     <img src={URL.createObjectURL(field.file)} alt="New" className="w-full h-full object-cover rounded" />
                   ) : field.url ? (
-                    <img src={field.url} alt="Existing" className="w-full h-full object-cover rounded" />
+                    <img src={cdnS3(field.url)} alt="Existing" className="w-full h-full object-cover rounded" />
                   ) : (
                     <div className="text-center">
                       <svg className="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" /></svg>

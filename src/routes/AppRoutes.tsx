@@ -37,6 +37,9 @@ import PostManagement from "../pages/PostManagement";
 import UploadPost from "../pages/UploadPost";
 import PostDetails from "../pages/PostDetails";
 import PostEdit from "../pages/PostEdit";
+import PostForAppManagement from "../pages/PostForAppManagement";
+import PostForAppDetails from "../pages/PostForAppDetails";
+import PostForAppEdit from "../pages/PostForAppEdit";
 import UserDetails from "../pages/UserDetails";
 import VideoBotEdit from "../pages/VideoBotEdit";
 import Synchronisation from "../pages/Synchronisation";
@@ -77,6 +80,8 @@ import RomanChaptersPage from "../pages/romans/romanChapters";
 import RomanDetails from "../pages/romans/romanDetails";
 import RomansManagement from "../pages/romans/RomansManagement";
 import RomanUpload from "../pages/romans/romanUpload";
+import { PostForAppProvider } from "../context/PostForAppContext";
+import { PostForAppSocketProvider } from "../context/PostForAppSocketContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -424,11 +429,37 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/post/edit-media/:id"
+          path="/post-for-app"
           element={
             <ProtectedRoute>
               <InsideSidebar>
-                <MediaPostManager />
+                <PostForAppProvider>
+                  <PostForAppSocketProvider>
+                    <PostForAppManagement />
+                  </PostForAppSocketProvider>
+                </PostForAppProvider>
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-for-app/:id"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <PostForAppProvider>
+                  <PostForAppDetails />
+                </PostForAppProvider>
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-for-app/edit/:id"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <PostForAppEdit />
               </InsideSidebar>
             </ProtectedRoute>
           }

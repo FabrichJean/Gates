@@ -137,6 +137,30 @@ export async function singleSync({ entity, origin_id, isForce, plateformId }: { 
     );
 }
 
+// Multiple Sync API - sends entire page at once
+export async function multipleSync({ entity, originIds, isForce, plateformId, signal }: { entity: string; originIds: number[]; isForce: boolean; plateformId?: number; signal?: AbortSignal }) {
+    const requestBody: any = { 
+        isForce,
+        [entity]: originIds.map(id => ({ originId: id }))
+    };
+    
+    // Add plateformId to request body if provided
+    if (plateformId !== undefined && plateformId !== null) {
+        requestBody.plateformId = plateformId;
+    }
+    
+    return await axios.post(
+        `${apiURL}/synchronize/multiple`,
+        requestBody,
+        {
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+            },
+            signal, // Add abort signal support
+        }
+    );
+}
+
 export async function toggleBannedStatus(videoId: string | number): Promise<void> {
     return await axios.put(`${apiURL}/videos/${videoId}/toggle-banned`, null, {
         headers: {

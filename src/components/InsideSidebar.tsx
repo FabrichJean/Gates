@@ -195,6 +195,7 @@ const Breadcrumb: React.FC = () => {
     "/upload": "Upload",
     "/upload-post": "Upload Post",
     "/post-management": "Post Management",
+    "/post-for-app": "Post For App",
     "/settings": "Settings",
     "/profil": "Profile",
     "/create-user": "Create User",

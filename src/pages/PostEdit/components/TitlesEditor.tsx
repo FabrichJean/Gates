@@ -35,6 +35,7 @@ export default function TitlesEditor(props: {
 
               {/* Bouton X superposé */}
               <button
+                type="button"
                 onClick={() => handleRemoveLanguage(language.id)}
                 className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2
                bg-red-400 dark:bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center"

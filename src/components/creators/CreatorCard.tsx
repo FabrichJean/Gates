@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from 'lucide-react';
 import type { Creator } from './CreatorList';
 
 export default function CreatorCard({ creator, onEdit, onDelete, isLoading }: {
@@ -6,40 +7,57 @@ export default function CreatorCard({ creator, onEdit, onDelete, isLoading }: {
   onDelete: (id: number) => void;
   isLoading?: boolean;
 }) {
-
-
   return (
-          <div
-            key={creator.id}
-            className="relative bg-white/90 rounded-3xl p-6 flex flex-col items-center text-center transition-all hover:-translate-y-2 hover:shadow-2xl border-2 border-transparent hover:border-blue-400"
-            style={{
-              backdropFilter: 'blur(8px)',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-            }}
-          >
-            <div className="w-28 h-28 mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg transform transition-transform duration-500 hover:scale-105">
-              <img
-                src={creator.avatar ?? ""}
-                alt={creator.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+    <div
+      key={creator.id}
+      className="relative bg-white/5 dark:bg-black/20 rounded-2xl p-4 flex flex-col items-center text-center
+                 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
+                 border border-white/10 dark:border-white/5
+                 backdrop-blur-md shadow-lg shadow-black/20 hover:shadow-black/30"
+    >
+      {/* Avatar */}
+      <div className="w-20 h-20 mb-3 rounded-full overflow-hidden border-2 border-white/20 shadow-md">
+        <img
+          src={creator.avatar ?? ""}
+          alt={creator.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">
-              {creator.name}
-            </h2>
+      {/* Nom */}
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+        {creator.name}
+      </h2>
 
-            <p className="text-sm text-gray-600 mb-2">
-              Ajouté le : {new Date(creator.createdAt).toLocaleDateString()}
-            </p>
+      {/* Date */}
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {new Date(creator.createdAt).toLocaleDateString()}
+      </p>
 
-            {creator.description && (
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {creator.description}
-              </p>
-            )}
-          </div>
-        
-  )
+      {/* Description tronquée */}
+      {creator.description && (
+        <p className="text-xs text-gray-600 dark:text-gray-300 leading-snug mt-2 line-clamp-2">
+          {creator.description}
+        </p>
+      )}
 
+      {/* Actions rapides au survol */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={() => onEdit(creator)}
+          className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-gray-700 dark:text-gray-300"
+          aria-label="Modifier"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => onDelete(creator.id)}
+          className="p-1.5 rounded-full bg-white/10 hover:bg-rose-500/20 text-rose-600"
+          aria-label="Supprimer"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
 }

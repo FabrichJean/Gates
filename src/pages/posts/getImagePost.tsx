@@ -84,7 +84,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
                 return (
                   <div key={image.id} className="relative group">
                     <img
-                      src={imageUrl || ""}
+                      src={cdnS3(imageUrl) || ""}
                       alt={`image-${index}`}
                       className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
                     />

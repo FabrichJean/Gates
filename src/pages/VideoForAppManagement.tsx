@@ -5,7 +5,6 @@ import DeepLoader from "../components/DeepLoader";
 import { checkObjectContent } from "../utils/filter";
 import { useVideoForAppContext } from "../context/VideoForAppContext";
 import { useAuth } from "../hooks/useAuth";
-import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 import { updateVideoForApp, fetchVideoForAppList } from "../api/videoForApp";
@@ -14,11 +13,8 @@ import VideoForAppFilter from "../components/VideoForAppFilter";
 import { toast } from "react-hot-toast";
 import { Edit, CheckSquare, Square, Users, X } from "lucide-react";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
-import CheckClassFButton from "../components/CheckClassFButton";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
-
-
 
 
 const VideoForAppManagement = () => {
@@ -657,10 +653,10 @@ const VideoForAppManagement = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Ne pas modifier</option>
-                    <option value="ready">Prêt</option>
-                    <option value="not ready">Pas prêt</option>
+                    <option value="refused">Refusé</option>
                     <option value="checked">Vérifié</option>
-                    <option value="waiting for checking">En attente de vérification</option>
+                    <option value="null">Pas prêt</option>
+                    <option value="waiting for checking">Prêt: en attente de vérification</option>
                   </select>
                 </div>
               </div>

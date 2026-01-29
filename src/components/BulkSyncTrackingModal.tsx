@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlay, FaPause, FaStop, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import type { Plateform } from "../types/post";
 
-export type SyncEntity = "video" | "post" | "video_for_app" | "creators";
+export type SyncEntity = "video" | "post" | "video_for_app" | "post_for_app" | "creators";
 export type SyncEntitySelection = SyncEntity[] | "all";
 
 export interface BulkSyncResource {
@@ -81,14 +81,18 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
 
   const percent = progress.total > 0 ? (progress.processed / progress.total) * 100 : 0;
 
-  // Reset local state when modal opens
+  // Sync with external props - only when modal opens or external values change significantly
   useEffect(() => {
-    if (open && progress.processed === 0 && progress.total === 0) {
-      setAutoSwitchPage(true);
-      setAutoSwitchDisabled(false);
-      setShowDetails(false);
+    // Only sync if we're not in the middle of user interaction (progress is empty)
+    if (progress.processed === 0 && progress.total === 0) {
+      if (externalCurrentPage && externalCurrentPage !== currentPage) {
+        setCurrentPage(externalCurrentPage);
+      }
+      if (externalCurrentLimit && externalCurrentLimit !== limit) {
+        setLimit(externalCurrentLimit);
+      }
     }
-  }, [open, progress.processed, progress.total]);
+  }, [externalCurrentPage, externalCurrentLimit, progress.processed, progress.total]);
 
   const handleStart = () => {
     const entities: SyncEntitySelection = selectedEntities.length === 4 ? "all" : selectedEntities;
@@ -142,6 +146,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       { value: "video" as SyncEntity, label: "Videos" },
                       { value: "post" as SyncEntity, label: "Posts" },
                       { value: "video_for_app" as SyncEntity, label: "Videos For App" },
+                      { value: "post_for_app" as SyncEntity, label: "Posts For App" },
                       { value: "creators" as SyncEntity, label: "Creators" },
                     ].map((entity) => (
                       <label key={entity.value} className="flex items-center p-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 cursor-pointer transition-all">
@@ -165,10 +170,10 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       <label className="flex items-center justify-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedEntities.length === 4}
+                          checked={selectedEntities.length === 5}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedEntities(["video", "post", "video_for_app", "creators"]);
+                              setSelectedEntities(["video", "post", "video_for_app", "post_for_app", "creators"]);
                             } else {
                               setSelectedEntities([]);
                             }
@@ -250,7 +255,10 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       </label>
                       <select
                         value={limit}
-                        onChange={(e) => setLimit(parseInt(e.target.value))}
+                        onChange={(e) => {
+                          const newValue = parseInt(e.target.value) || 10;
+                          setLimit(newValue);
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value={5}>5</option>
@@ -480,6 +488,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                               ? 'bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300'
                               : progress.currentItem.source === 'video_for_app'
                               ? 'bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300'
+                              : progress.currentItem.source === 'post_for_app'
+                              ? 'bg-teal-100 dark:bg-teal-800/50 text-teal-700 dark:text-teal-300'
                               : progress.currentItem.source === 'creators'
                               ? 'bg-purple-100 dark:bg-purple-800/50 text-purple-700 dark:text-purple-300'
                               : 'bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'
@@ -554,11 +564,13 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                             ? "bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300"
                             : externalCurrentEntity === "video_for_app"
                             ? "bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300"
+                            : externalCurrentEntity === "post_for_app"
+                            ? "bg-teal-100 dark:bg-teal-800/50 text-teal-700 dark:text-teal-300"
                             : externalCurrentEntity === "creators"
                             ? "bg-purple-100 dark:bg-purple-800/50 text-purple-700 dark:text-purple-300"
                             : "bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
                         }`}>
-                          {externalCurrentEntity === "video_for_app" ? "Videos For App" : externalCurrentEntity === "video" ? "Videos" : externalCurrentEntity === "post" ? "Posts" : externalCurrentEntity === "creators" ? "Creators" : externalCurrentEntity}
+                          {externalCurrentEntity === "video_for_app" ? "Videos For App" : externalCurrentEntity === "video" ? "Videos" : externalCurrentEntity === "post" ? "Posts" : externalCurrentEntity === "post_for_app" ? "Posts For App" : externalCurrentEntity === "creators" ? "Creators" : externalCurrentEntity}
                         </span>
                       </div>
                     )}
@@ -573,11 +585,13 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                               ? "bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300"
                               : entity === "video_for_app"
                               ? "bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300"
+                              : entity === "post_for_app"
+                              ? "bg-teal-100 dark:bg-teal-800/50 text-teal-700 dark:text-teal-300"
                               : entity === "creators"
                               ? "bg-purple-100 dark:bg-purple-800/50 text-purple-700 dark:text-purple-300"
                               : "bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
                           }`}>
-                            {entity === "video_for_app" ? "Videos For App" : entity === "video" ? "Videos" : entity === "post" ? "Posts" : entity === "creators" ? "Creators" : entity}
+                            {entity === "video_for_app" ? "Videos For App" : entity === "video" ? "Videos" : entity === "post" ? "Posts" : entity === "post_for_app" ? "Posts For App" : entity === "creators" ? "Creators" : entity}
                           </span>
                         ))}
                       </div>
@@ -728,6 +742,8 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                                       ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
                                       : stat.entity === 'video_for_app'
                                       ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+                                      : stat.entity === 'post_for_app'
+                                      ? 'bg-teal-100 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300'
                                       : stat.entity === 'creators'
                                       ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                                       : 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300'
