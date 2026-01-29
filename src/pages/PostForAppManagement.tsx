@@ -2,15 +2,14 @@ import { FilePlus, Eye, Filter, Edit, CheckSquare, Square, Users, X } from "luci
 import BulkEditModal from "../components/BulkEditModal";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import React, { useState } from "react";
 import UsePlateform from "../hooks/usePlateform";
 import PostForAppChecking from "../components/PostForApp/PostForAppChecking";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import Loader from "../components/Loader";
-import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
-import SingleSyncModal from "../components/SingleSyncModal";
 import { singleSync } from "../api/videos";
+import { getPostsForApp } from "../api/postsForApp";
 import {
   PostForAppProvider,
   usePostForAppContext,
@@ -20,7 +19,6 @@ import RoleEnum from "../utils/roleEnum";
 import PostForAppFilter, {
   type TPostForAppFilter,
 } from "../components/PostForApp/PostForAppFilter";
-import { LiaSyncSolid } from "react-icons/lia";
 import { cdnS3 } from "../utils/cdn";
 
 // Inner component consumes PostForAppContext
@@ -32,6 +30,15 @@ const PostForAppManagementInner = () => {
   // Selection state for bulk edit
   const [selectedPosts, setSelectedPosts] = useState<Set<number>>(new Set());
   const [showBulkEdit, setShowBulkEdit] = useState(false);
+
+  // Range selection state
+  const [showRangeSelector, setShowRangeSelector] = useState(false);
+  const [rangeSelection, setRangeSelection] = useState({
+    startPage: 1,
+    endPage: 1,
+  });
+  const [rangeLoading, setRangeLoading] = useState(false);
+  const [rangeProgress, setRangeProgress] = useState({ current: 0, total: 0 });
 
   const handleSingleSync = async (postId: number, isForce: boolean) => {
     setSingleSyncLoading(true);
@@ -82,6 +89,82 @@ const PostForAppManagementInner = () => {
     setSelectedPosts(new Set());
   };
 
+  const selectPageRange = async () => {
+    if (rangeSelection.startPage > rangeSelection.endPage) {
+      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
+      return;
+    }
+
+    setRangeLoading(true);
+    setRangeProgress({ current: 0, total: rangeSelection.endPage - rangeSelection.startPage + 1 });
+    try {
+      const allPostIds: number[] = [];
+      const totalPages = Math.ceil((data?.total || 0) / (data?.limit || 20));
+
+      // Validate range
+      if (rangeSelection.endPage > totalPages) {
+        toast.error(`La page d'arrêt ne peut pas dépasser ${totalPages}`);
+        return;
+      }
+
+      // Normalize filters like in usePostForAppManagement
+      const normalizeBool = (val: any) => {
+        if (val === "yes") return true;
+        if (val === "no") return false;
+        return val;
+      };
+
+      const normalizedFilters = {
+        ...filters,
+        isDeleted: normalizeBool(filters.isDeleted),
+        processing: normalizeBool(filters.processing),
+        uploaded: normalizeBool(filters.uploaded),
+      };
+
+      // Remove any filter with value 'all' from the params
+      const apiFilters = Object.fromEntries(
+        Object.entries(normalizedFilters).filter(([k, v]) => v !== "all" && v !== "" && v !== undefined && v !== null)
+      );
+
+      // Fetch all pages in the range
+      for (let currentPage = rangeSelection.startPage; currentPage <= rangeSelection.endPage; currentPage++) {
+        try {
+          const response = await getPostsForApp({
+            ...apiFilters,
+            page: currentPage,
+            limit: data?.limit || 20
+          });
+          const pagePostIds = response.data.posts.map((p: any) => p.id);
+          allPostIds.push(...pagePostIds);
+
+          // Update progress
+          setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
+        } catch (error) {
+          console.error(`Erreur lors du chargement de la page ${currentPage}:`, error);
+          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
+          return;
+        }
+      }
+
+      // Update selection
+      setSelectedPosts(prev => {
+        const newSelection = new Set(prev);
+        allPostIds.forEach(id => newSelection.add(id));
+        return newSelection;
+      });
+
+      toast.success(`${allPostIds.length} posts sélectionnés sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
+      setShowRangeSelector(false);
+
+    } catch (error) {
+      console.error('Erreur lors de la sélection par plage:', error);
+      toast.error('Erreur lors de la sélection par plage');
+    } finally {
+      setRangeLoading(false);
+      setRangeProgress({ current: 0, total: 0 });
+    }
+  };
+
   const openBulkEdit = () => {
     setShowBulkEdit(true);
   };
@@ -95,6 +178,15 @@ const PostForAppManagementInner = () => {
 
   // filters are now centralized in context
   const { filters, setFilters } = usePostForAppContext();
+
+  // Update range selection when page changes
+  React.useEffect(() => {
+    setRangeSelection(prev => ({
+      ...prev,
+      startPage: page,
+      endPage: Math.max(page, prev.endPage)
+    }));
+  }, [page]);
 
   const posts = data?.posts || [];
   const total = data?.total || 0;
@@ -197,6 +289,21 @@ const PostForAppManagementInner = () => {
                 )}
                 Select All Page
               </button>
+
+              <button
+                onClick={() => {
+                  setRangeSelection({
+                    startPage: page,
+                    endPage: page,
+                  });
+                  setShowRangeSelector(true);
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              >
+                <Users className="w-4 h-4" />
+                Sélectionner par plage
+              </button>
+
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 {selectedPosts.size} selected
               </span>
@@ -272,16 +379,12 @@ const PostForAppManagementInner = () => {
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
                 >
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => togglePostSelection(post.id)}
-                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                    >
-                      {selectedPosts.has(post.id) ? (
-                        <CheckSquare className="w-5 h-5" />
-                      ) : (
-                        <Square className="w-5 h-5" />
-                      )}
-                    </button>
+                    <input
+                      type="checkbox"
+                      checked={selectedPosts.has(post.id)}
+                      onChange={() => togglePostSelection(post.id)}
+                      className="checkbox checkbox-sm"
+                    />
                   </td>
                   <th
                     scope="row"
@@ -448,6 +551,117 @@ const PostForAppManagementInner = () => {
         onSuccess={reFetch}
         onDeselectAll={deselectAll}
       />
+
+      {/* Range Selection Modal */}
+      {showRangeSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Sélectionner par plage de pages
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowRangeSelector(false);
+                    setRangeProgress({ current: 0, total: 0 });
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Page de départ
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={rangeSelection.startPage}
+                      onChange={(e) => setRangeSelection(prev => ({
+                        ...prev,
+                        startPage: Math.max(1, parseInt(e.target.value) || 1)
+                      }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Page d'arrêt
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={rangeSelection.endPage}
+                      onChange={(e) => setRangeSelection(prev => ({
+                        ...prev,
+                        endPage: Math.max(1, parseInt(e.target.value) || 1)
+                      }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                {data && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Total de pages disponibles : {Math.ceil(data.total / data.limit)}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                {rangeLoading && rangeProgress.total > 0 && (
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(rangeProgress.current / rangeProgress.total) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      {rangeProgress.current} / {rangeProgress.total} pages
+                    </span>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setShowRangeSelector(false);
+                    setRangeProgress({ current: 0, total: 0 });
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  disabled={rangeLoading}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={selectPageRange}
+                  disabled={rangeLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  {rangeLoading ? (
+                    <>
+                      <div className="loading loading-spinner loading-sm"></div>
+                      Chargement...
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="w-4 h-4" />
+                      Sélectionner la plage
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

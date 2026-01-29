@@ -81,6 +81,7 @@ import RomanDetails from "../pages/romans/romanDetails";
 import RomansManagement from "../pages/romans/RomansManagement";
 import RomanUpload from "../pages/romans/romanUpload";
 import { PostForAppProvider } from "../context/PostForAppContext";
+import { PostForAppSocketProvider } from "../context/PostForAppSocketContext";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -432,7 +433,11 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <InsideSidebar>
-                <PostForAppManagement />
+                <PostForAppProvider>
+                  <PostForAppSocketProvider>
+                    <PostForAppManagement />
+                  </PostForAppSocketProvider>
+                </PostForAppProvider>
               </InsideSidebar>
             </ProtectedRoute>
           }

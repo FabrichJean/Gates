@@ -5,6 +5,7 @@ import { bulkUpdatePostsForApp } from '../api/postsForApp';
 import CreatorAutoComplete from './CreatorAutoComplete';
 import TagCategorySelector from './TagCategorySelector';
 import usePostTagCategories from '../hooks/usePostTagCategories';
+import { usePostForAppSocket } from '../context/PostForAppSocketContext';
 import type { Creator } from './creators/CreatorList';
 
 interface BulkEditData {
@@ -31,6 +32,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
   onSuccess,
   onDeselectAll,
 }) => {
+  const { subscribe, unsubscribe, startBulkUpdate } = usePostForAppSocket();
   const { items: availableTags } = usePostTagCategories();
   const [bulkEditData, setBulkEditData] = useState<BulkEditData>({
     creator: null,
@@ -62,6 +64,39 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       setBulkEditData(prev => ({ ...prev, creator: null, selectedCreator: null }));
     }
   }, []);
+
+  // Subscribe to Socket.IO events when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      subscribe({
+        onProgress: (data) => {
+          setBulkEditProgress(prev => ({
+            current: data.current || prev.current,
+            total: data.total || prev.total,
+          }));
+        },
+        onComplete: (data) => {
+          setBulkEditLoading(false);
+          setBulkEditProgress({ current: 0, total: 0 });
+          toast.success(`Successfully updated ${data.success} post${data.success > 1 ? 's' : ''}${data.failed > 0 ? ` (${data.failed} failed)` : ''}`);
+          onSuccess();
+          closeBulkEdit();
+          onDeselectAll();
+        },
+        onError: (data) => {
+          setBulkEditLoading(false);
+          setBulkEditProgress({ current: 0, total: 0 });
+          toast.error(`Bulk edit error: ${data.error}`);
+        },
+      });
+    } else {
+      unsubscribe();
+    }
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isOpen, subscribe, unsubscribe, onSuccess, onDeselectAll]);
 
   // Initialize random tags when modifyTags is enabled
   useEffect(() => {
@@ -115,20 +150,19 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         return;
       }
 
-      // Call the bulk update API
+      // Start bulk update via Socket.IO
+      startBulkUpdate(Array.from(selectedPosts));
+
+      // Call the bulk update API (this will trigger Socket.IO events)
       await bulkUpdatePostsForApp(Array.from(selectedPosts), updateData);
 
-      toast.success(`Successfully updated ${selectedPosts.size} post${selectedPosts.size > 1 ? 's' : ''}`);
-      onSuccess();
-      closeBulkEdit();
-      onDeselectAll();
+      // Note: Success/failure will be handled by Socket.IO callbacks
 
     } catch (error: any) {
       console.error('Bulk edit error:', error);
-      toast.error(error?.response?.data?.message || 'An error occurred during bulk edit');
-    } finally {
       setBulkEditLoading(false);
       setBulkEditProgress({ current: 0, total: 0 });
+      toast.error(error?.response?.data?.message || 'An error occurred during bulk edit');
     }
   };
 
