@@ -107,6 +107,15 @@ export async function updatePostForAppBannedStatus(id: string | number, isBanned
   });
 }
 
+export async function bulkUpdatePostsForApp(ids: number[], updateData: Record<string, any>) {
+  return await axios.put(`${apiURL}/posts-for-app/update/multiple`, { ids, updateData }, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 // Get posts for bulk sync (page 1 with limited results)
 export async function getPostsForAppForBulkSync(page: number = 1, limit: number = 50, plateformId?: number) {
   const params: any = {

@@ -1,4 +1,5 @@
-import { FilePlus, Eye, Filter } from "lucide-react";
+import { FilePlus, Eye, Filter, Edit, CheckSquare, Square, Users, X } from "lucide-react";
+import BulkEditModal from "../components/BulkEditModal";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -28,6 +29,10 @@ const PostForAppManagementInner = () => {
   const [singleSyncOpenId, setSingleSyncOpenId] = useState<number | null>(null);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
+  // Selection state for bulk edit
+  const [selectedPosts, setSelectedPosts] = useState<Set<number>>(new Set());
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+
   const handleSingleSync = async (postId: number, isForce: boolean) => {
     setSingleSyncLoading(true);
     try {
@@ -41,6 +46,50 @@ const PostForAppManagementInner = () => {
       setSingleSyncLoading(false);
     }
   };
+
+  // Selection handlers
+  const togglePostSelection = (postId: number) => {
+    setSelectedPosts(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(postId)) {
+        newSelection.delete(postId);
+      } else {
+        newSelection.add(postId);
+      }
+      return newSelection;
+    });
+  };
+
+  const selectAllPage = () => {
+    setSelectedPosts(prev => {
+      const newSelection = new Set(prev);
+      const currentPageIds = posts?.map(p => p.id) || [];
+      const allSelected = currentPageIds.every(id => newSelection.has(id));
+
+      if (allSelected) {
+        // If all are selected, deselect all on current page
+        currentPageIds.forEach(id => newSelection.delete(id));
+      } else {
+        // If not all are selected, select all on current page
+        currentPageIds.forEach(id => newSelection.add(id));
+      }
+
+      return newSelection;
+    });
+  };
+
+  const deselectAll = () => {
+    setSelectedPosts(new Set());
+  };
+
+  const openBulkEdit = () => {
+    setShowBulkEdit(true);
+  };
+
+  const closeBulkEdit = () => {
+    setShowBulkEdit(false);
+  };
+
   const { page, setPage, data, loading, reFetch, activate } =
     usePostForAppContext();
 
@@ -132,11 +181,57 @@ const PostForAppManagementInner = () => {
         </header>
       </div>
 
+      {/* Bulk edit controls */}
+      <div className="w-full mt-4 mb-4">
+        <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={selectAllPage}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              >
+                {posts?.length > 0 && posts.every(p => selectedPosts.has(p.id)) ? (
+                  <CheckSquare className="w-4 h-4" />
+                ) : (
+                  <Square className="w-4 h-4" />
+                )}
+                Select All Page
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {selectedPosts.size} selected
+              </span>
+            </div>
+
+            {selectedPosts.size > 0 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={deselectAll}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Deselect All
+                </button>
+                <button
+                  onClick={openBulkEdit}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Bulk Edit ({selectedPosts.size})
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="w-full mt-4">
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left border-t-3 border-blue-500 dark:border-blue-500 rtl:text-right text-gray-500 dark:text-gray-400">
             <thead className="text-xs text-gray-700 uppercase bg-blue-500/5 dark:bg-gray-700 dark:text-gray-400">
               <tr>
+                <th scope="col" className="px-6 py-3">
+                  <span className="sr-only">Select</span>
+                </th>
                 <th scope="col" className="px-6 py-3">
                   ID
                 </th>
@@ -176,6 +271,18 @@ const PostForAppManagementInner = () => {
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
                 >
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => togglePostSelection(post.id)}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                    >
+                      {selectedPosts.has(post.id) ? (
+                        <CheckSquare className="w-5 h-5" />
+                      ) : (
+                        <Square className="w-5 h-5" />
+                      )}
+                    </button>
+                  </td>
                   <th
                     scope="row"
                     className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
@@ -303,41 +410,6 @@ const PostForAppManagementInner = () => {
                     {new Date(post.createdAt).toLocaleDateString()}
                   </td>
                   <td className="flex justify-center gap-2 px-6 py-4">
-                    {user?.role === RoleEnum.SUPERADMIN ? (
-                      <>
-                        <BtnTranscodeComponent
-                          post={post as any}
-                          reFetch={reFetch}
-                        />
-
-                        {/* bouton single sync (affiché seulement si post.processing === "done") */}
-                        {post.processing === "done" && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setSingleSyncOpenId(post.id)}
-                              className="inline-flex items-center gap-2 px-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700 text-sm font-light transition-all duration-200"
-                              disabled={
-                                singleSyncLoading &&
-                                singleSyncOpenId === post.id
-                              }
-                            >
-                              <LiaSyncSolid className="w-3 h-3" />
-                              Sync
-                            </button>
-
-                            <SingleSyncModal
-                              open={singleSyncOpenId === post.id}
-                              onClose={() => setSingleSyncOpenId(null)}
-                              onSubmit={(isForce) =>
-                                handleSingleSync(post.id, isForce)
-                              }
-                              title={`Synchroniser le post #${post.id}`}
-                            />
-                          </>
-                        )}
-                      </>
-                    ) : null}
                     <Link
                       to={`/post-for-app/${post.id}`}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
@@ -367,6 +439,16 @@ const PostForAppManagementInner = () => {
           )}
         </div>
       </div>
+
+      {/* Bulk Edit Modal */}
+      <BulkEditModal
+        isOpen={showBulkEdit}
+        selectedPosts={selectedPosts}
+        onClose={closeBulkEdit}
+        onSuccess={reFetch}
+        onDeselectAll={deselectAll}
+      />
+
     </div>
   );
 };
@@ -440,7 +522,7 @@ function SendToWebApp() {
       </dialog>
     </>
   );
-}
+};
 
 const PostForAppManagement = () => {
   return (
