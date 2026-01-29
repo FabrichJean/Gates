@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { X, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { bulkUpdatePostsForApp } from '../api/postsForApp';
 import CreatorAutoComplete from './CreatorAutoComplete';
+import TagCategorySelector from './TagCategorySelector';
+import usePostTagCategories from '../hooks/usePostTagCategories';
 import type { Creator } from './creators/CreatorList';
 
 interface BulkEditData {
@@ -11,7 +13,7 @@ interface BulkEditData {
   isActive: boolean | null;
   checking: 'ready' | 'null' | 'checked' | 'refused' | null;
   modifyTags: boolean;
-  tags: (number | { name: string })[];
+  tags: { id?: number; name: string }[];
 }
 
 interface BulkEditModalProps {
@@ -29,6 +31,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
   onSuccess,
   onDeselectAll,
 }) => {
+  const { items: availableTags } = usePostTagCategories();
   const [bulkEditData, setBulkEditData] = useState<BulkEditData>({
     creator: null,
     selectedCreator: null,
@@ -60,6 +63,17 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     }
   }, []);
 
+  // Initialize random tags when modifyTags is enabled
+  useEffect(() => {
+    if (bulkEditData.modifyTags && availableTags.length > 0 && bulkEditData.tags.length === 0) {
+      const shuffled = [...availableTags].sort(() => 0.5 - Math.random());
+      const randomTags = shuffled.slice(0, 5).map(tag => ({ id: tag.id, name: tag.name }));
+      setBulkEditData(prev => ({ ...prev, tags: randomTags }));
+    } else if (!bulkEditData.modifyTags) {
+      setBulkEditData(prev => ({ ...prev, tags: [] }));
+    }
+  }, [bulkEditData.modifyTags, availableTags]);
+
   const closeBulkEdit = () => {
     setBulkEditData({
       creator: null,
@@ -71,28 +85,6 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     });
     setBulkEditProgress({ current: 0, total: 0 });
     onClose();
-  };
-
-  const handleTagSelect = (tag: number | { name: string }) => {
-    setBulkEditData(prev => ({
-      ...prev,
-      tags: [...prev.tags, tag]
-    }));
-  };
-
-  const handleTagDeselect = (tag: number | { name: string }) => {
-    setBulkEditData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => {
-        if (typeof tag === 'number' && typeof t === 'number') {
-          return t !== tag;
-        }
-        if (typeof tag === 'object' && typeof t === 'object') {
-          return t.name !== tag.name;
-        }
-        return true;
-      })
-    }));
   };
 
   const handleBulkEditSubmit = async () => {
@@ -114,7 +106,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
       if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
       if (bulkEditData.modifyTags && bulkEditData.tags.length > 0) {
-        updateData.tag_category_ids = bulkEditData.tags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name));
+        updateData.tags = bulkEditData.tags.map(t => t.id ? t.id : { name: t.name });
       }
 
       if (Object.keys(updateData).length === 0) {
@@ -234,20 +226,11 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             </div>
             {bulkEditData.modifyTags && (
               <div>
-                {/* TODO: Add tag selection component */}
-                <div className="flex flex-wrap gap-2">
-                  {bulkEditData.tags.map((tag, index) => (
-                    <div key={index} className="badge badge-outline gap-2">
-                      {typeof tag === 'number' ? `Tag ${tag}` : tag.name}
-                      <button
-                        onClick={() => handleTagDeselect(tag)}
-                        className="btn btn-xs btn-circle btn-ghost"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <TagCategorySelector
+                  selected={bulkEditData.tags}
+                  setSelected={(tags) => setBulkEditData(prev => ({ ...prev, tags }))}
+                  allowCustomTag={true}
+                />
               </div>
             )}
           </div>

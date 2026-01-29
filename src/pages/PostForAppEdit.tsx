@@ -3,7 +3,6 @@ import usePostTagCategories from "../hooks/usePostTagCategories";
 import TagCategorySelector from "../components/TagCategorySelector";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { UsePostForApp, type Image, type Video } from "../hooks/usePostForApp";
-import PlateformAutoComplete from "../components/PlateformAutoComplete";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
 import toast from "react-hot-toast";
