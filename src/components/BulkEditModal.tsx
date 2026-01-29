@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { X, Edit } from 'lucide-react';
+import { X, Edit, Check, AlertCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { bulkUpdatePostsForApp } from '../api/postsForApp';
 import CreatorAutoComplete from './CreatorAutoComplete';
@@ -67,7 +67,6 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     }
   }, []);
 
-  // Subscribe to Socket.IO events when modal opens
   useEffect(() => {
     if (isOpen) {
       subscribe({
@@ -100,7 +99,6 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     };
   }, [isOpen, subscribe, unsubscribe, onSuccess, onDeselectAll]);
 
-  // Initialize random tags when modifyTags is enabled
   useEffect(() => {
     if (bulkEditData.modifyTags && availableTags.length > 0 && bulkEditData.tags.length === 0) {
       const shuffled = [...availableTags].sort(() => 0.5 - Math.random());
@@ -154,13 +152,8 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         return;
       }
 
-      // Start bulk update via Socket.IO
       startBulkUpdate(Array.from(selectedPosts));
-
-      // Call the bulk update API (this will trigger Socket.IO events)
       await bulkUpdatePostsForApp(Array.from(selectedPosts), updateData);
-
-      // Note: Success/failure will be handled by Socket.IO callbacks
 
     } catch (error: any) {
       console.error('Bulk edit error:', error);
@@ -170,162 +163,254 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     }
   };
 
+  const hasChanges = () => {
+    return bulkEditData.creator !== null ||
+           bulkEditData.isActive !== null ||
+           bulkEditData.isBanned !== null ||
+           bulkEditData.checking !== null ||
+           (bulkEditData.modifyTags && bulkEditData.tags.length > 0);
+  };
+
   if (!isOpen) return null;
 
   return (
     <dialog className="modal modal-open">
-      <div className="modal-box max-w-2xl">
-        <h3 className="font-bold text-lg mb-4">Bulk Edit Posts ({selectedPosts.size} selected)</h3>
-
-        <div className="space-y-4">
-          {/* Creator Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Creator
-            </label>
-            <div className="space-y-2">
-              <CreatorAutoComplete
-                value={bulkEditData.creator === 'random' ? '' : (bulkEditData.creator || '')}
-                onChange={handleCreatorChange}
-                onSelect={handleCreatorSelect}
-                placeholder="Select creator or leave empty to keep current"
-                disabled={bulkEditLoading || bulkEditData.creator === 'random'}
-              />
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={bulkEditData.creator === 'random'}
-                  onChange={(e) => setBulkEditData(prev => ({
-                    ...prev,
-                    creator: e.target.checked ? 'random' : null,
-                    selectedCreator: e.target.checked ? null : prev.selectedCreator
-                  }))}
-                  className="checkbox checkbox-sm"
-                  disabled={bulkEditLoading}
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-400">Use random creator</span>
-              </div>
+      <div className="modal-box max-w-3xl p-0 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 p-2 rounded-lg">
+              <Edit className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl text-white">Bulk Edit Posts</h3>
+              <p className="text-blue-100 text-sm mt-0.5">
+                {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
+              </p>
             </div>
           </div>
-
-          {/* Activation Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Activation Status
-            </label>
-            <select
-              value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
-              onChange={(e) => setBulkEditData(prev => ({
-                ...prev,
-                isActive: e.target.value === '' ? null : e.target.value === 'true'
-              }))}
-              className="select select-bordered w-full"
-            >
-              <option value="">Keep current status</option>
-              <option value="true">Activate</option>
-              <option value="false">Deactivate</option>
-            </select>
-          </div>
-
-          {/* Ban Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Ban Status
-            </label>
-            <select
-              value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
-              onChange={(e) => setBulkEditData(prev => ({
-                ...prev,
-                isBanned: e.target.value === '' ? null : e.target.value === 'true'
-              }))}
-              className="select select-bordered w-full"
-            >
-              <option value="">Keep current status</option>
-              <option value="true">Ban</option>
-              <option value="false">Unban</option>
-            </select>
-          </div>
-
-          {/* Checking Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Checking Status
-            </label>
-            <select
-              value={bulkEditData.checking === null ? '' : bulkEditData.checking}
-              onChange={(e) => setBulkEditData(prev => ({
-                ...prev,
-                checking: e.target.value === '' ? null : e.target.value as 'ready' | 'null' | 'checked' | 'refused'
-              }))}
-              className="select select-bordered w-full"
-            >
-              <option value="">Keep current status</option>
-              <option value="null">Not Ready</option>
-              <option value="checked">Checked</option>
-              <option value="waiting for checking">Waiting for Checking</option>
-              <option value="refused">Refused</option>
-            </select>
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Tags
-            </label>
-            <div className="flex items-center gap-2 mb-2">
-              <input
-                type="checkbox"
-                checked={bulkEditData.modifyTags}
-                onChange={(e) => setBulkEditData(prev => ({ ...prev, modifyTags: e.target.checked }))}
-                className="checkbox"
-              />
-              <span className="text-sm">Modify tags</span>
-            </div>
-            {bulkEditData.modifyTags && (
-              <div>
-                <TagCategorySelector
-                  selected={bulkEditData.tags}
-                  setSelected={(tags) => setBulkEditData(prev => ({ ...prev, tags }))}
-                  allowCustomTag={true}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Progress */}
-        {bulkEditLoading && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(bulkEditProgress.current / bulkEditProgress.total) * 100}%` }}
-                ></div>
-              </div>
-              <span className="text-sm text-gray-600">
-                {bulkEditProgress.current}/{bulkEditProgress.total}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600">Processing bulk edit...</p>
-          </div>
-        )}
-
-        <div className="modal-action">
           <button
-            className="btn btn-outline"
             onClick={closeBulkEdit}
             disabled={bulkEditLoading}
+            className="btn btn-ghost btn-sm btn-circle text-white hover:bg-white/20 disabled:opacity-50"
           >
-            Cancel
+            <X className="w-5 h-5" />
           </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleBulkEditSubmit}
-            disabled={bulkEditLoading || selectedPosts.size === 0}
-          >
-            {bulkEditLoading ? 'Processing...' : `Apply Changes (${selectedPosts.size})`}
-          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-6 max-h-[calc(100vh-280px)] overflow-y-auto">
+          {/* Info Banner */}
+          <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-800 dark:text-blue-300">
+              <p className="font-medium mb-1">Apply changes to multiple posts</p>
+              <p className="text-blue-700 dark:text-blue-400">
+                Only fields you modify will be updated. Leave fields unchanged to keep their current values.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Creator Selection */}
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
+                Creator Assignment
+              </label>
+              <div className="space-y-3">
+                <CreatorAutoComplete
+                  value={bulkEditData.creator === 'random' ? '' : (bulkEditData.creator || '')}
+                  onChange={handleCreatorChange}
+                  onSelect={handleCreatorSelect}
+                  placeholder="Search or select a creator..."
+                  disabled={bulkEditLoading || bulkEditData.creator === 'random'}
+                />
+                <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={bulkEditData.creator === 'random'}
+                    onChange={(e) => setBulkEditData(prev => ({
+                      ...prev,
+                      creator: e.target.checked ? 'random' : null,
+                      selectedCreator: e.target.checked ? null : prev.selectedCreator
+                    }))}
+                    className="checkbox checkbox-sm checkbox-primary"
+                    disabled={bulkEditLoading}
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Assign random creator to each post
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Status Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Activation Status */}
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="w-1 h-5 bg-green-600 rounded-full"></div>
+                  Activation Status
+                </label>
+                <select
+                  value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
+                  onChange={(e) => setBulkEditData(prev => ({
+                    ...prev,
+                    isActive: e.target.value === '' ? null : e.target.value === 'true'
+                  }))}
+                  className="select select-bordered w-full bg-white dark:bg-gray-800"
+                  disabled={bulkEditLoading}
+                >
+                  <option value="">— No change —</option>
+                  <option value="true">✓ Activate</option>
+                  <option value="false">✗ Deactivate</option>
+                </select>
+              </div>
+
+              {/* Ban Status */}
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="w-1 h-5 bg-red-600 rounded-full"></div>
+                  Ban Status
+                </label>
+                <select
+                  value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
+                  onChange={(e) => setBulkEditData(prev => ({
+                    ...prev,
+                    isBanned: e.target.value === '' ? null : e.target.value === 'true'
+                  }))}
+                  className="select select-bordered w-full bg-white dark:bg-gray-800"
+                  disabled={bulkEditLoading}
+                >
+                  <option value="">— No change —</option>
+                  <option value="true">🚫 Ban</option>
+                  <option value="false">✓ Unban</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Checking Status */}
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                <div className="w-1 h-5 bg-purple-600 rounded-full"></div>
+                Review Status
+              </label>
+              <select
+                value={bulkEditData.checking === null ? '' : bulkEditData.checking}
+                onChange={(e) => setBulkEditData(prev => ({
+                  ...prev,
+                  checking: e.target.value === '' ? null : e.target.value as 'ready' | 'null' | 'checked' | 'refused'
+                }))}
+                className="select select-bordered w-full bg-white dark:bg-gray-800"
+                disabled={bulkEditLoading}
+              >
+                <option value="">— No change —</option>
+                <option value="null">⏸ Not Ready</option>
+                <option value="checked">✓ Checked</option>
+                <option value="waiting for checking">⏳ Waiting for Review</option>
+                <option value="refused">✗ Refused</option>
+              </select>
+            </div>
+
+            {/* Tags */}
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                <div className="w-1 h-5 bg-amber-600 rounded-full"></div>
+                Tags Management
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 transition-colors mb-3">
+                <input
+                  type="checkbox"
+                  checked={bulkEditData.modifyTags}
+                  onChange={(e) => setBulkEditData(prev => ({ ...prev, modifyTags: e.target.checked }))}
+                  className="checkbox checkbox-sm checkbox-warning"
+                  disabled={bulkEditLoading}
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  Update tags for selected posts
+                </span>
+              </label>
+              {bulkEditData.modifyTags && (
+                <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <TagCategorySelector
+                    selected={bulkEditData.tags}
+                    setSelected={(tags) => setBulkEditData(prev => ({ ...prev, tags }))}
+                    allowCustomTag={true}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Progress */}
+          {bulkEditLoading && (
+            <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
+                <span className="font-semibold text-blue-900 dark:text-blue-100">
+                  Processing updates...
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 bg-blue-200 dark:bg-blue-900 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-blue-600 to-blue-500 h-2.5 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${(bulkEditProgress.current / bulkEditProgress.total) * 100}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300 min-w-[4rem] text-right">
+                  {bulkEditProgress.current} / {bulkEditProgress.total}
+                </span>
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">
+                Please wait while changes are applied to all selected posts
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {hasChanges() ? (
+              <span className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-600" />
+                Changes ready to apply
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600" />
+                No changes selected
+              </span>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              className="btn btn-outline border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+              onClick={closeBulkEdit}
+              disabled={bulkEditLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 shadow-lg disabled:opacity-50"
+              onClick={handleBulkEditSubmit}
+              disabled={bulkEditLoading || selectedPosts.size === 0 || !hasChanges()}
+            >
+              {bulkEditLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Apply to {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </dialog>
