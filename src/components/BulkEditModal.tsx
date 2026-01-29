@@ -12,6 +12,7 @@ interface BulkEditData {
   creator: string | 'random' | null;
   selectedCreator: Creator | null;
   isActive: boolean | null;
+  isBanned: boolean | null;
   checking: 'ready' | 'null' | 'checked' | 'refused' | null;
   modifyTags: boolean;
   tags: { id?: number; name: string }[];
@@ -38,6 +39,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     creator: null,
     selectedCreator: null,
     isActive: null,
+    isBanned: null,
     checking: null,
     modifyTags: false,
     tags: [],
@@ -114,6 +116,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       creator: null,
       selectedCreator: null,
       isActive: null,
+      isBanned: null,
       checking: null,
       modifyTags: false,
       tags: [],
@@ -139,6 +142,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         }
       }
       if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
+      if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
       if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
       if (bulkEditData.modifyTags && bulkEditData.tags.length > 0) {
         updateData.tags = bulkEditData.tags.map(t => t.id ? t.id : { name: t.name });
@@ -220,6 +224,25 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <option value="">Keep current status</option>
               <option value="true">Activate</option>
               <option value="false">Deactivate</option>
+            </select>
+          </div>
+
+          {/* Ban Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Ban Status
+            </label>
+            <select
+              value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
+              onChange={(e) => setBulkEditData(prev => ({
+                ...prev,
+                isBanned: e.target.value === '' ? null : e.target.value === 'true'
+              }))}
+              className="select select-bordered w-full"
+            >
+              <option value="">Keep current status</option>
+              <option value="true">Ban</option>
+              <option value="false">Unban</option>
             </select>
           </div>
 
