@@ -122,7 +122,7 @@ export async function getPostsForAppForBulkSync(page: number = 1, limit: number 
     page,
     limit,
     select: 'id,title,status,cover,plateform_id', // Include plateform_id field
-    progressing: 'done'
+    checking: 'checked'
   };
 
   // Add plateformId filter if provided

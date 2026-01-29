@@ -7,12 +7,13 @@ import { Link } from "react-router-dom";
 import WaterProgressModal from "../components/WaterProgressModal";
 import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
 import type { SyncEntity, SyncEntitySelection, BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
-import { FaSyncAlt, FaTasks, FaCheck, FaTimes, FaClock, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaSyncAlt, FaTasks, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { getVideosForBulkSync } from "../api/videos";
 import { getPostsForBulkSync } from "../api/posts";
 import { getVideoForAppForBulkSync } from "../api/videoForApp";
+import { getPostsForAppForBulkSync } from "../api/postsForApp";
 import { getCreatorsForBulkSync } from "../api/creators";
-import { singleSync, multipleSync } from "../api/videos";
+import { multipleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import type { Plateform } from "../types/post";
 
@@ -155,6 +156,22 @@ const Synchronisation = () => {
         }
       }
       
+      if (entity === "post_for_app") {
+        const postForAppResponse = await getPostsForAppForBulkSync(page, limit, platformFilter);
+        // Handle different response formats
+        const postsForApp = postForAppResponse.data.posts || postForAppResponse.data.postsForApp || postForAppResponse.data;
+        if (Array.isArray(postsForApp)) {
+          resources.push(...postsForApp.map((p: any) => ({
+            id: p.id,
+            title: p.cn_title || p.en_title || p.title || `PostForApp #${p.id}`,
+            status: p.status,
+            source: "post_for_app" as SyncEntity,
+            cover: p.cover,
+            plateform_id: p.plateform_id,
+          })));
+        }
+      }
+      
       if (entity === "creators") {
         const creatorsResponse = await getCreatorsForBulkSync(page, limit);
         // Handle different response formats
@@ -184,7 +201,7 @@ const Synchronisation = () => {
 
       // Determine which entities to process
       let entitiesToProcess: SyncEntity[] = entities === "all" 
-        ? [ "creators", "video", "post", "video_for_app"] 
+        ? [ "creators", "video", "post", "video_for_app", "post_for_app"] 
         : (Array.isArray(entities) ? entities : [entities]);
       
       // Sort entities to prioritize creators first when selected
