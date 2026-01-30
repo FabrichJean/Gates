@@ -241,7 +241,7 @@ function Sidebar({
                 VMS
               </h1>
               <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 tracking-wider uppercase">
-                Video Management
+                视频管理
               </p>
             </div>
           )}
@@ -280,7 +280,7 @@ function Sidebar({
                   <MdVerified className="text-blue-500 w-4 h-4 flex-shrink-0" />
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                  View Profile
+                  查看资料
                   <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </p>
               </div>
@@ -294,7 +294,7 @@ function Sidebar({
         <NavLink
           to="/videos"
           name="videos"
-          label="Videos"
+          label="视频"
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -315,7 +315,7 @@ function Sidebar({
         <NavLink
           to="/post-for-app"
           name="post-for-app"
-          label="Post For App"
+          label="应用程序帖子"
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -335,7 +335,7 @@ function Sidebar({
         <NavLink
           to="/post"
           name="post"
-          label="Post"
+          label="帖子"
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -355,7 +355,7 @@ function Sidebar({
         <NavLink
           to="/mangas"
           name="mangas"
-          label="Mangas"
+          label="漫画"
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -375,7 +375,7 @@ function Sidebar({
         <NavLink
           to="/app-videos"
           name="app-videos"
-          label="Video For App"
+          label="应用视频"
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -399,7 +399,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  Bot Management
+                  机器人管理
                 </p>
               </div>
             )}
@@ -407,13 +407,13 @@ function Sidebar({
             <NavLink
               to="/bot-videos"
               name="bot-videos"
-              label="Video Bot"
+              label="视频机器人"
               icon={RiRobot2Line}
             />
             <NavLink
               to="/bot-posts"
               name="bot-posts"
-              label="Post Bot"
+              label="发帖机器人"
               icon={RiRobot2Line}
             />
 
@@ -421,7 +421,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  Categories
+                  分类
                 </p>
               </div>
             )}
@@ -429,39 +429,39 @@ function Sidebar({
             <NavLink
               to="/category-manager"
               name="category-manager"
-              label="Video Category"
+              label="视频类别"
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/post-categories"
               name="post-categories"
-              label="Post Category"
+              label="帖子分类"
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/mangas-categories"
               name="mangas-categories"
-              label="Manga Category"
+              label="漫画类别"
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/tag-category"
               name="tag-category"
-              label="Tag Category"
+              label="标签类别"
               icon={MdOutlineCategory}
             />
 
             <NavLink
               to="/audio-categories"
               name="audio-categories"
-              label="Audio Categories"
+              label="音频类别"
               iconComponent={<Music className="w-5 h-5" />}
             />
 
             <NavLink
               to="/roman-category"
               name="roman-category"
-              label="Roman Category"
+              label="罗马类别"
               icon={MdOutlineCategory}
             />
 
@@ -469,7 +469,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  Booking
+                  预订
                 </p>
               </div>
             )}
@@ -477,7 +477,7 @@ function Sidebar({
             <NavLink
               to="/audios"
               name="audios"
-              label="Audios"
+              label="音频"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -501,7 +501,7 @@ function Sidebar({
              <NavLink
               to="/romans"
               name="romans"
-              label="Romans"
+              label="罗马人"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -545,7 +545,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  Administration
+                  管理
                 </p>
               </div>
             )}
@@ -553,14 +553,14 @@ function Sidebar({
             <NavLink
               to="/plateform-relations"
               name="plateform-relations"
-              label="WebApps"
+              label="网页应用"
               icon={BiLogoInternetExplorer}
             />
 
             <NavLink
               to="/users"
               name="users"
-              label="Users"
+              label="用户"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -581,7 +581,7 @@ function Sidebar({
             <NavLink
               to="/archive"
               name="archive"
-              label="Blocked Users"
+              label="已屏蔽用户"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -602,7 +602,7 @@ function Sidebar({
             <NavLink
               to="/creators"
               name="creators"
-              label="Creators"
+              label="创作者"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -624,7 +624,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  Tools
+                  工具
                 </p>
               </div>
             )}
@@ -632,7 +632,7 @@ function Sidebar({
             <NavLink
               to="/settings"
               name="settings"
-              label="Settings"
+              label="设置"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -659,7 +659,7 @@ function Sidebar({
             <NavLink
               to="/conversion"
               name="conversion"
-              label="Excel Conversion"
+              label="Excel转换"
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -697,7 +697,7 @@ function Sidebar({
           >
             <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
             {!isCollapsed && (
-              <span className="font-medium text-sm">Logout</span>
+              <span className="font-medium text-sm">登出</span>
             )}
           </button>
         </div>
@@ -716,10 +716,10 @@ function Sidebar({
       >
         <div className="modal-box bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800">
           <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
-            Confirm Logout
+            确认注销
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Are you sure you want to log out? 😞
+            你确定要退出登录吗？ 😞
           </p>
           <div className="flex gap-3 justify-end">
             <button
@@ -730,7 +730,7 @@ function Sidebar({
                 hover:bg-gray-200 dark:hover:bg-gray-700
                 transition-all duration-200"
             >
-              Cancel
+              取消
             </button>
             <button
               onClick={() => {
@@ -743,7 +743,7 @@ function Sidebar({
                 hover:from-red-600 hover:to-red-700
                 transition-all duration-200"
             >
-              Logout
+              登出
             </button>
           </div>
         </div>

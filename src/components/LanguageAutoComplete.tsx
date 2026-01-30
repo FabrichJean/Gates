@@ -73,7 +73,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        placeholder="Enter a language..."
+        placeholder="输入一种语言..."
         className="flex-1  border-b-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 outline-none p-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300"
       />
 

@@ -183,7 +183,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <Edit className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-xl text-white">Bulk Edit Posts</h3>
+              <h3 className="font-bold text-xl text-white">批量编辑帖子</h3>
               <p className="text-blue-100 text-sm mt-0.5">
                 {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
               </p>
@@ -204,9 +204,9 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-medium mb-1">Apply changes to multiple posts</p>
+              <p className="font-medium mb-1">对多个帖子应用更改</p>
               <p className="text-blue-700 dark:text-blue-400">
-                Only fields you modify will be updated. Leave fields unchanged to keep their current values.
+                只有您修改的字段会被更新。保持字段不变以保留其当前值。
               </p>
             </div>
           </div>
@@ -216,14 +216,14 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
-                Creator Assignment
+                创作者分配
               </label>
               <div className="space-y-3">
                 <CreatorAutoComplete
                   value={bulkEditData.creator === 'random' ? '' : (bulkEditData.creator || '')}
                   onChange={handleCreatorChange}
                   onSelect={handleCreatorSelect}
-                  placeholder="Search or select a creator..."
+                  placeholder="搜索或选择创作者..."
                   disabled={bulkEditLoading || bulkEditData.creator === 'random'}
                 />
                 <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
@@ -239,7 +239,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                     disabled={bulkEditLoading}
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    Assign random creator to each post
+                    为每个帖子分配随机创作者
                   </span>
                 </label>
               </div>
@@ -251,7 +251,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-green-600 rounded-full"></div>
-                  Activation Status
+                  激活状态
                 </label>
                 <select
                   value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
@@ -272,7 +272,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-red-600 rounded-full"></div>
-                  Ban Status
+                  禁止状态
                 </label>
                 <select
                   value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
@@ -283,9 +283,9 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading}
                 >
-                  <option value="">— No change —</option>
-                  <option value="true">🚫 Ban</option>
-                  <option value="false">✓ Unban</option>
+                  <option value="">— 无更改 —</option>
+                  <option value="true">🚫 禁止</option>
+                  <option value="false">✓ 取消禁止</option>
                 </select>
               </div>
             </div>

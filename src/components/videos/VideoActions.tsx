@@ -73,10 +73,10 @@ const VideoActions = ({
     setSingleSyncLoading(true);
     try {
       await singleSync({ entity: "video", origin_id: video.id, isForce });
-      toast.success("✅ Sync single exécuté");
+      toast.success("✅ 单同步执行");
       refetch?.(500);
     } catch (err) {
-      toast.error(extractErrorMessage(err) || "❌ Erreur sync single !");
+      toast.error(extractErrorMessage(err) || "❌ 单同步错误！");
     } finally {
       setSingleSyncLoading(false);
     }
@@ -107,7 +107,7 @@ const VideoActions = ({
       onSend(video.id);
       refetch?.(500);
     } catch (err) {
-      toast.error(extractErrorMessage(err) || "Error during resend");
+      toast.error(extractErrorMessage(err) || "重新发送时出错");
     } finally {
       setResending(false);
     }
@@ -119,10 +119,10 @@ const VideoActions = ({
     setConverting(true);
     try {
       await convertToMp4Fn(video.id);
-      toast.success("✅ Conversion MP4 démarrée !");
+      toast.success("✅ MP4转换已启动！");
       refetch?.(500);
     } catch (err) {
-      toast.error(extractErrorMessage(err) || "Erreur lors de la conversion");
+      toast.error(extractErrorMessage(err) || "转换时出错");
     } finally {
       setConverting(false);
     }
@@ -143,12 +143,12 @@ const VideoActions = ({
               onClick={() => {
                 if (video.checking !== "checked") {
                   return alert.warning(
-                    "We need to check this video",
-                    "Video Check Required",
+                    "我们需要检查这个视频",
+                    "需要视频检查",
                   );
                 }
                 if (processingCount >= 5) {
-                  toast.error("Maximum 5 videos in process. Please wait.");
+                  toast.error("最多5个视频正在处理中。请等待。");
                   return;
                 }
                 onSend(video.id);
@@ -180,7 +180,7 @@ const VideoActions = ({
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  <span>Uploaded</span>
+                  <span>已上传</span>
                 </>
               ) : (
                 <>
@@ -197,7 +197,7 @@ const VideoActions = ({
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <span>Send</span>
+                  <span>发送</span>
                 </>
               )}
             </button>
@@ -224,7 +224,7 @@ const VideoActions = ({
                   />
                 </svg>
                 <span className="text-sm font-medium">
-                  Processing (
+                  处理中 (
                   {uploads.find((v) => Number(v.videoId) === Number(video.id))
                     ?.progress || 0}
                   %)
@@ -234,7 +234,7 @@ const VideoActions = ({
               <button
                 onClick={cancel}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
-                title="Cancel"
+                title="取消"
               >
                 <svg
                   className="w-4 h-4"
@@ -255,7 +255,7 @@ const VideoActions = ({
                 onClick={resend}
                 disabled={resending}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-all duration-200 disabled:opacity-50"
-                title="Resend"
+                title="重新发送"
               >
                 {resending ? (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
@@ -338,7 +338,7 @@ const VideoActions = ({
                   />
                 </svg>
               )}
-              <span>{converting ? "Converting..." : "Convert MP4"}</span>
+              <span>{converting ? "转换中..." : "转换为MP4"}</span>
             </button>
           )}
         </>
@@ -354,13 +354,13 @@ const VideoActions = ({
             disabled={singleSyncLoading}
           >
             <LiaSyncSolid className="w-4 h-4" />
-            Sync
+            同步
           </button>
           <SingleSyncModal
             open={singleSyncOpen}
             onClose={() => setSingleSyncOpen(false)}
             onSubmit={handleSingleSync}
-            title="Synchroniser cette vidéo"
+            title="同步这个视频"
           />
         </>
       )}
@@ -384,7 +384,7 @@ const VideoActions = ({
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>Details</span>
+          <span>详情</span>
         </Link>
       )}
     </div>

@@ -8,41 +8,41 @@ const VideoTableHeader = ({ showSelection = false }: VideoTableHeaderProps) => {
       <tr>
         {showSelection && (
           <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-            <span className="text-xs">Select</span>
+            <span className="text-xs">选择</span>
           </th>
         )}
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Ref
+          参考
         </th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Username
+          用户名
         </th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Creator
+          创建者
         </th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Category
+          类别
         </th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Status
+          状态
         </th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-          Cover
+          封面
         </th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-          Duration
+          时长
         </th>
         <th className="py-3 px-6 text-left border-b border-gray-200 dark:border-gray-700">
-          Activate
+          激活
         </th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-          Checking
+          检查
         </th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-          Actions
+          操作
         </th>
         <th className="py-3 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-          Date
+          日期
         </th>
       </tr>
     </thead>

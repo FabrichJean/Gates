@@ -28,11 +28,11 @@ const PostManagementInner = () => {
     setSingleSyncLoading(true);
     try {
       await singleSync({ entity: "post", origin_id: postId, isForce });
-      toast.success("✅ Sync single post exécuté");
+      toast.success("✅ 单帖同步执行");
       setSingleSyncOpenId(null);
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ Erreur sync single !");
+      toast.error(err?.response?.data?.message || "❌ 单同步错误！");
     } finally {
       setSingleSyncLoading(false);
     }
@@ -87,7 +87,7 @@ const PostManagementInner = () => {
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post Management
+          帖子管理
         </h1>
 
         {/* header  */}
@@ -114,7 +114,7 @@ const PostManagementInner = () => {
                   }}
                   className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
+                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> 过滤器
                 </button>
 
                 <PostFilter
@@ -136,7 +136,7 @@ const PostManagementInner = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search posts..."
+                  placeholder="搜索帖子..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
@@ -168,38 +168,38 @@ const PostManagementInner = () => {
             <thead className="text-xs text-gray-700 uppercase bg-blue-500/5 dark:bg-gray-700 dark:text-gray-400">
               <tr>
                 <th scope="col" className="px-6 py-3">
-                  ID
+                  编号
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Category
+                  类别
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Creator
+                  创建者
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  User
+                  用户
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Platform
+                  平台
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Checking
+                  检查
                 </th>
 
                 <th scope="col" className="px-6 py-3">
-                  Activate
+                  激活
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Videos
+                  视频
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Images
+                  图片
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Date de création
+                  创建日期
                 </th>
                 <th scope="col" className="px-6 py-3 text-left">
-                  Actions
+                  操作
                 </th>
               </tr>
             </thead>
@@ -294,7 +294,7 @@ const PostManagementInner = () => {
                       )}
                       {post.videos?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          No video
+                          无视频
                         </span>
                       )}
                     </div>
@@ -324,7 +324,7 @@ const PostManagementInner = () => {
                       )}
                       {post.images?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          No image
+                          无图片
                         </span>
                       )}
                     </div>
@@ -347,14 +347,14 @@ const PostManagementInner = () => {
                               disabled={singleSyncLoading && singleSyncOpenId === post.id}
                             >
                               <LiaSyncSolid className="w-3 h-3" />
-                              Sync
+                              同步
                             </button>
 
                             <SingleSyncModal
                               open={singleSyncOpenId === post.id}
                               onClose={() => setSingleSyncOpenId(null)}
                               onSubmit={(isForce) => handleSingleSync(post.id, isForce)}
-                              title={`Synchroniser le post #${post.id}`}
+                              title={`同步帖子 #${post.id}`}
                             />
                           </>
                         )}
@@ -365,7 +365,7 @@ const PostManagementInner = () => {
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
-                      <span>Details</span>
+                      <span>详情</span>
                     </Link>
                   </td>
                 </tr>
@@ -432,7 +432,7 @@ function SendToWebApp() {
     <>
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
-          <h3 className="font-bold text-lg">Select platforms to send</h3>
+          <h3 className="font-bold text-lg">选择要发送的平台</h3>
           <div className="max-h-60 overflow-auto mt-3">
             {plateforms?.map((p: any) => (
               <label
@@ -454,7 +454,7 @@ function SendToWebApp() {
               className="btn btn-outline"
               onClick={() => setWebappModalOpen(false)}
             >
-              Close
+              关闭
             </button>
             <button
               className="btn btn-primary"
