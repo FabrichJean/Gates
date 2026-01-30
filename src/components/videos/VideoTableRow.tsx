@@ -127,7 +127,7 @@ const VideoTableRow = ({
         <div className="flex items-center gap-3">
           {video?.creatorObj?.avatar ? (
             <img
-              src={video.creatorObj.avatar}
+              src={cdnS3(video.creatorObj.avatar)}
               alt={video.creatorObj.name}
               className="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
             />
@@ -171,7 +171,7 @@ const VideoTableRow = ({
       <td className="py-4 px-6">
         <div className="relative group">
           <img
-            src={`${cdnS3(video.s3_urls.coverUrl) || video.public_urls?.local_cover_url || ''}?t=` + Date.now()}
+            src={`${cdnS3(video?.s3_urls.coverUrl) || video?.public_urls?.cover_url || ''}?t=` + Date.now()}
             alt="cover"
             className="w-24 h-14 object-cover rounded-lg shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:scale-105"
           />

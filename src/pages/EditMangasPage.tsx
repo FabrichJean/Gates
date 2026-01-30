@@ -12,6 +12,7 @@ import { parseTitlesFromAPI, prepareTitlesForAPI } from "../utils/mangaTitlesUti
 import { MangaTitlesField } from "../components/MangaTitlesField";
 import { User, Check, ChevronDown, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cdnS3 } from "../utils/cdn";
 
 const EditMangasPage: React.FC = () => {
   const { mangaId } = useParams();
@@ -321,7 +322,7 @@ const EditMangasPage: React.FC = () => {
           <div className="relative" ref={creatorDropdownRef}>
             <div className="input input-bordered w-full text-left flex items-center gap-3 focus-within:ring-2 focus-within:ring-primary transition-colors">
               {selectedCreator?.avatar ? (
-                <img src={selectedCreator.avatar} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                <img src={cdnS3(selectedCreator.avatar)} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
               ) : (
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                   <User className="w-3 h-3 text-white" />
@@ -401,7 +402,7 @@ const EditMangasPage: React.FC = () => {
                     >
                       {creator.avatar ? (
                         <img
-                          src={creator.avatar}
+                          src={cdnS3(creator.avatar)}
                           alt={creator.name}
                           className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-transparent group-hover:ring-primary transition-all duration-200"
                         />

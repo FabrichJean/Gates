@@ -21,6 +21,7 @@ import {
 import toast from "react-hot-toast";
 import AddChapterModal from "../../components/AddChapterModal";
 import type { Roman } from './romanDetails.types';
+import { cdnS3 } from "../../utils/cdn";
 
 const RomanDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -154,7 +155,7 @@ const RomanDetails = () => {
                         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                             {roman.public_urls.cover_url || roman.public_urls.local_cover_url ? (
                                 <img
-                                    src={roman.s3_urls.coverUrl || roman.public_urls.cover_url || roman.public_urls.local_cover_url}
+                                    src={cdnS3(roman.s3_urls.coverUrl) || roman.public_urls.cover_url || roman.public_urls.local_cover_url}
                                     alt="Roman Cover"
                                     className="w-full rounded-lg shadow-md object-cover"
                                 />
@@ -322,7 +323,7 @@ const RomanDetails = () => {
                                     <div className="flex items-center gap-3">
                                         {roman.creatorObj.avatar ? (
                                             <img
-                                                src={roman.creatorObj.avatar}
+                                                src={cdnS3(roman.creatorObj.avatar)}
                                                 alt={roman.creatorObj.name}
                                                 className="w-12 h-12 rounded-full object-cover"
                                             />

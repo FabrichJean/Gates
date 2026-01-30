@@ -160,7 +160,7 @@ const VideoForAppDetails: React.FC = () => {
                           <div className="flex items-start gap-3">
                             {video.creatorObj.avatar ? (
                               <img
-                                src={video.creatorObj.avatar}
+                                src={cdnS3(video.creatorObj.avatar)}
                                 alt={video.creatorObj.name}
                                 className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                               />

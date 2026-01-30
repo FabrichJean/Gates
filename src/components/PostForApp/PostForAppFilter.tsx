@@ -7,6 +7,7 @@ import useCategoryPostForApp from "../../hooks/posts/useCategoryPostForApp";
 import useSubCategoryPostForApp from "../../hooks/posts/useSubCategoryPostForApp";
 import { useUsers } from "../../hooks/useAuth";
 import UseCreators from "../../hooks/useCreators";
+import { cdnS3 } from "../../utils/cdn";
 
 export type TPostForAppFilter = {
   category_id: string;
@@ -262,7 +263,7 @@ export default memo(function PostForAppFilter({
                         }}
                         className="px-3 py-2 text-sm hover:bg-sky-500/20 cursor-pointer flex items-center gap-2"
                       >
-                        {c.avatar && <img src={c.avatar} alt={c.name} className="w-6 h-6 rounded-full object-cover" />}
+                        {c.avatar && <img src={cdnS3(c.avatar)} alt={c.name} className="w-6 h-6 rounded-full object-cover" />}
                         {c.name}
                       </li>
                     ))}

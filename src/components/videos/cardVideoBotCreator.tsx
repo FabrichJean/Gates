@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { TVideo } from "../../hooks/useVideos";
 import { getToken } from "../../utils/storage";
 import { apiURL } from "../../constant";
+import { cdnS3 } from "../../utils/cdn";
 
 interface VideoResponse {
   total: number;
@@ -135,7 +136,7 @@ const CardVideoBotCreator = ({ creatorId }: { creatorId: string }) => {
             <figure>
               <img
                 src={
-                  video.s3_urls?.coverUrl ||
+                  cdnS3(video.s3_urls?.coverUrl) ||
                   video.public_urls?.local_cover_url ||
                   video.public_urls?.cover_url ||
                   "https://placehold.co/600x400"

@@ -8,6 +8,7 @@ import { UsePost } from '../hooks/usePost';
 import { videoToVideoCoverCouple } from '../utils/video';
 import { getToken } from '../utils/storage';
 import { deleteManyVideos } from '../api/posts';
+import { cdnS3 } from '../utils/cdn';
 
 export interface VideoCoverCouple {
   key: string;
@@ -147,7 +148,7 @@ const MediaPost: React.FC<VideoCoverManagerProps> = ({
                   accept="video/*"
                   title="Vidéo"
                   file={couple.videoFile}
-                  preview={couple.videoPreview}
+                  preview={cdnS3(couple.videoPreview)}
                   onFileSelect={(file, preview) => 
                     updateCouple(couple.key, { 
                       videoFile: file, 

@@ -9,6 +9,7 @@ import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
 import MangaTitlesViewer from "../components/MangaTitlesViewer";
 import BookFlip from "../components/BookFlip";
 import type { Manga } from "../hooks/useMangaManagement";
+import { cdnS3 } from "../utils/cdn";
 
 interface Episode {
   id: number;
@@ -126,7 +127,7 @@ const MangasEpisodeDetailsPage: React.FC = () => {
         {episode.images_url && episode.images_url.length > 0 ? (
           <div className="relative">
             {/* Image principale avec effet livre */}
-            <BookFlip cover={episode.chapter.manga.s3_cover_url} images={episode.mangasImages.map(i => i.s3_image_url || i.image_url)}/>
+            <BookFlip cover={cdnS3(episode.chapter.manga.s3_cover_url)} images={episode.mangasImages.map(i => cdnS3(i.s3_image_url) || i.image_url)}/>
           </div>
         ) : (
           <p className="text-gray-500">Aucune image disponible.</p>

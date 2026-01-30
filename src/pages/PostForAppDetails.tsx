@@ -18,6 +18,7 @@ import RoleEnum from "../utils/roleEnum";
 import { updatePostForAppBannedStatus } from "../api/postsForApp";
 import toast from "react-hot-toast";
 import { singleSync } from "../api/videos";
+import { cdnS3 } from "../utils/cdn";
 
 // Types
 interface PostForAppDetailsProps {}
@@ -304,7 +305,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                   style={{ maxWidth: 180 }}
                 >
                   <img
-                    src={post.creatorObj.avatar}
+                    src={cdnS3(post.creatorObj.avatar)}
                     alt={post.creatorObj.name}
                     className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-blue-200 dark:border-blue-700 group-hover:border-blue-400 flex-shrink-0"
                     onError={e => (e.currentTarget.style.display = 'none')}
@@ -424,7 +425,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                       className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       <img
-                        src={post.creatorObj.avatar}
+                        src={cdnS3(post.creatorObj.avatar)}
                         alt={post.creatorObj.name}
                         className="w-6 h-6 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-600"
                         onError={(e) => (e.currentTarget.style.display = 'none')}

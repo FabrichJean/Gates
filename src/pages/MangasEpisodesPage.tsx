@@ -4,6 +4,7 @@ import { getMangasEpisodesApi } from "../api/mangasEpisode";
 import { parseTitlesFromAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitlesViewer } from "../components/MangaTitlesViewer";
 import type { MangaTitles } from "../types/mangaTitles";
+import { cdnS3 } from "../utils/cdn";
 
 export interface MangasImage {
   id: number;
@@ -112,7 +113,7 @@ const MangasEpisodesPage: React.FC = () => {
                 {ep.images_url && ep.images_url.length > 0 && (
                   <div className="mt-2">
                     <img
-                      src={ep.mangasImages[0].s3_image_url || ep.mangasImages[0].image_url}
+                      src={cdnS3(ep.mangasImages[0].s3_image_url) || ep.mangasImages[0].image_url}
                       alt={ep.name}
                       className="w-full h-40 object-cover rounded"
                     />

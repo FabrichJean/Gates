@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import usePostCreators from "../../hooks/usePostCreators";
+import { cdnS3 } from "../../utils/cdn";
 
 interface Title {
   id: number;
@@ -24,7 +25,7 @@ export function PostCard({ post }: PostCardProps) {
   // choisir une image (priorité local > s3)
   const cover =
     post.images?.[0]?.public_urls?.local_image_url ||
-    post.images?.[0]?.s3_urls?.imageUrl;
+    cdnS3(post.images?.[0]?.s3_urls?.imageUrl);
 
   return (
     <div
@@ -64,7 +65,7 @@ export function PostCard({ post }: PostCardProps) {
         {/* Créateur */}
         <div className="flex items-center gap-2 mt-1">
           <img
-            src={post.creatorObj?.avatar}
+            src={cdnS3(post.creatorObj?.avatar)}
             className="w-7 h-7 rounded-full object-cover"
           />
           <span className="text-sm font-medium">{post.creatorObj?.name}</span>

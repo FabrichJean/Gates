@@ -39,6 +39,7 @@ import { server } from "../../constant";
 import RomanChapterDetails from "../../components/romanChapterDetails";
 import RomanAutoComplete from "../../components/RomanAutoComplete";
 import { Link } from "react-router-dom";
+import { cdnS3 } from "../../utils/cdn";
 
 // Types
 interface RomanTitle {
@@ -594,11 +595,7 @@ const RomanChapterManagement: React.FC = () => {
                                                 <div className="flex items-center gap-3">
                                                     {chapter.roman?.creatorObj?.avatar ? (
                                                         <img
-                                                            src={
-                                                                chapter.roman.creatorObj.avatar.startsWith('http')
-                                                                    ? chapter.roman.creatorObj.avatar
-                                                                    : `${server}/${chapter.roman.creatorObj.avatar}`
-                                                            }
+                                                            src={cdnS3(chapter.roman.creatorObj.avatar)}
                                                             alt={chapter.roman?.creatorObj?.name || "Creator"}
                                                             className="w-10 h-10 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900 flex-shrink-0"
                                                         />

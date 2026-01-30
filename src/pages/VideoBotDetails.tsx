@@ -17,6 +17,7 @@ import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import VideoActions from "../components/videos/VideoActions";
 import useSocketSend from "../hooks/useSocketSend";
 import Titles from "./posts/GetPostTitles";
+import { cdnS3 } from "../utils/cdn";
 
 const VideoBotDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -102,7 +103,7 @@ const VideoBotDetails: React.FC = () => {
           <div className="flex items-center gap-2">
             {video?.creatorObj?.avatar ? (
               <img
-                src={video.creatorObj.avatar}
+                src={cdnS3(video.creatorObj.avatar)}
                 alt={video.creatorObj.name}
                 className="w-8 h-8 rounded-full object-cover"
               />
@@ -167,8 +168,8 @@ const VideoBotDetails: React.FC = () => {
                 />
                 <img
                   src={
-                    currentCoverUrl ??
-                    video.s3_urls.coverUrl ??
+                    cdnS3(currentCoverUrl) ??
+                    cdnS3(video.s3_urls.coverUrl) ??
                     video.public_urls.cover_url
                     ?? "https://placehold.co/600x400"
                   }

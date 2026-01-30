@@ -6,6 +6,7 @@ import GetVideoPost from "./posts/getVideoPost";
 import GetPostTitles from "./posts/GetPostTitles";
 import BtnTranscodeComponent from "../components/Post/BtnTranscodeComponent";
 import { useNextPostBot, UsePostBot } from "../hooks/usePostBot";
+import { cdnS3 } from "../utils/cdn";
 
 const PostBotDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -191,7 +192,7 @@ const PostBotDetails = () => {
                                 </p>
                                 <div className="flex items-center gap-3">
                                     <img
-                                        src={(post).creatorObj.avatar!}
+                                        src={cdnS3((post).creatorObj.avatar)}
                                         alt={(post)?.creatorObj.name}
                                         className="w-10 h-10 rounded-full object-cover"
                                         onError={(e) => {

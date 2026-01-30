@@ -30,6 +30,7 @@ import { LiaSyncSolid } from "react-icons/lia";
 import toast from "react-hot-toast";
 import { singleSync } from "../api/videos";
 import SingleSyncModal from "../components/SingleSyncModal";
+import { cdnS3 } from "../utils/cdn";
 
 const SexyLoader = () => (
   <div className="relative w-16 h-16 mx-auto">
@@ -398,7 +399,7 @@ const Mangas: React.FC = () => {
                         <div className="flex items-center gap-1.5 mb-2">
                           {manga.creatorObj?.avatar && (
                             <img
-                              src={manga.creatorObj.avatar}
+                              src={cdnS3(manga.creatorObj.avatar)}
                               alt={manga.creatorObj.name}
                               className="w-5 h-5 rounded-full object-cover"
                             />
@@ -505,7 +506,7 @@ const Mangas: React.FC = () => {
                               <div className="w-12 h-16 rounded-md overflow-hidden shadow-sm">
                                 {manga.cover_url ? (
                                   <img
-                                    src={manga.s3_cover_url || manga.cover_url}
+                                    src={cdnS3(manga.s3_cover_url) || manga.cover_url}
                                     alt={manga.ref}
                                     className="w-full h-full object-cover"
                                   />
@@ -540,7 +541,7 @@ const Mangas: React.FC = () => {
                               <div className="flex items-center gap-3">
                                 {manga?.creatorObj?.avatar ? (
                                   <img
-                                    src={manga.creatorObj.avatar}
+                                    src={cdnS3(manga.creatorObj.avatar)}
                                     alt={manga.creatorObj.name}
                                     className="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                                   />

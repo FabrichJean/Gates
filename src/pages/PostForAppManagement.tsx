@@ -401,7 +401,7 @@ const PostForAppManagementInner = () => {
                     {post.creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
-                          src={post.creatorObj.avatar!}
+                          src={cdnS3(post.creatorObj.avatar)}
                           alt={post.creatorObj.name!}
                           className="min-w-8 h-8 rounded-full object-cover"
                           onError={(e) => {

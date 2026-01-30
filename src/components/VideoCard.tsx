@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { MoreVertical } from "lucide-react";
+import { cdnS3 } from "../utils/cdn";
 
 interface Props {
   video: {
@@ -59,7 +60,7 @@ const VideoCard: React.FC<Props> = ({ video }) => {
           />
         ) : (
           <img
-            src={video.thumbnail}
+            src={cdnS3(video.thumbnail)}
             alt={video.title}
             className="w-full h-48 object-cover"
           />

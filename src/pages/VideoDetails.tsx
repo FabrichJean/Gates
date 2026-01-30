@@ -196,7 +196,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           <div className="flex items-start gap-3">
                             {(video).creatorObj.avatar ? (
                               <img
-                                src={(video).creatorObj.avatar}
+                                src={cdnS3((video).creatorObj.avatar)}
                                 alt={(video).creatorObj.name}
                                 className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                               />
@@ -881,7 +881,7 @@ function EditVideo({
                       className="relative w-full"
                     >
                       <img
-                        src={coverPreview}
+                        src={cdnS3(coverPreview)}
                         alt="Preview"
                         className="rounded-lg object-cover w-full h-64"
                       />

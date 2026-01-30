@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import type { Roman, RomanChapter, RomanChapterDetailsProps } from './romanChapterDetails.types';
+import { cdnS3 } from "../utils/cdn";
 
 const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onClose }) => {
     const [selectedLang, setSelectedLang] = useState<string>("fr");
@@ -304,11 +305,7 @@ const RomanChapterDetails: React.FC<RomanChapterDetailsProps> = ({ chapter, onCl
                                         <div className="flex items-center gap-3 pb-3">
                                             {chapter.roman?.creatorObj?.avatar ? (
                                                 <img
-                                                    src={
-                                                        chapter.roman.creatorObj.avatar.startsWith('http')
-                                                            ? chapter.roman.creatorObj.avatar
-                                                            : `${server}${chapter.roman.creatorObj.avatar}`
-                                                    }
+                                                    src={cdnS3(chapter.roman.creatorObj.avatar)}
                                                     alt={chapter.roman?.creatorObj?.name || "Creator"}
                                                     className="w-12 h-12 rounded-full object-cover border-2 border-blue-100 dark:border-blue-900"
                                                 />

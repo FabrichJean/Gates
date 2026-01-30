@@ -26,6 +26,7 @@ import toast from "react-hot-toast";
 import { useAuthMe } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
 import { formatDateFR } from "../utils/date";
+import { cdnS3 } from "../utils/cdn";
 
 const MiniLoader = () => (
   <div className="flex items-center justify-center">
@@ -208,7 +209,7 @@ const AudioDetails: React.FC = () => {
               <div className="relative w-full h-40 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-900 mb-3">
                 {audio.cover_url || audio.s3_cover_url ? (
                   <img
-                    src={audio.cover_url || audio.s3_cover_url}
+                    src={cdnS3(audio.s3_cover_url) || cdnS3(audio.cover_url)}
                     alt={audio.title}
                     className="w-full h-full object-cover"
                   />

@@ -3,6 +3,7 @@ import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import type { TVideo } from "../hooks/useVideos";
 import { useNavigate } from "react-router-dom";
+import { cdnS3 } from "../utils/cdn";
 
 type SearchModalProps = {
   scope?: "videos" | "bot";
@@ -99,7 +100,7 @@ export default function SearchModal({ scope = "videos" }: SearchModalProps) {
             >
               {v.cover && (
                 <img
-                  src={v.s3_urls.coverUrl || v.public_urls.cover_url}
+                  src={cdnS3(v.s3_urls.coverUrl) || v.public_urls.cover_url}
                   alt={v.ref}
                   className="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-600"
                 />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import UseCreators from "../hooks/useCreators";
 import type { Creator } from "./creators/CreatorList";
 import { Shuffle } from "lucide-react";
+import { cdnS3 } from "../utils/cdn";
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
@@ -97,7 +98,7 @@ const CreatorAutoComplete = ({
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                 {selectedCreator.avatar ? (
                   <img
-                    src={selectedCreator.avatar}
+                    src={cdnS3(selectedCreator.avatar)}
                     alt={selectedCreator.name}
                     className="w-full h-full object-cover"
                   />
@@ -173,7 +174,7 @@ const CreatorAutoComplete = ({
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                 {c.avatar ? (
                   <img
-                    src={c.avatar}
+                    src={cdnS3(c.avatar)}
                     alt={c.name}
                     className="w-full h-full object-cover"
                   />

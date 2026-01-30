@@ -18,6 +18,7 @@ import { Eye, EyeOff, Trash2 } from "lucide-react";
 import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
+import { cdnS3 } from "../utils/cdn";
 
 const PostDetails = () => {
     const { user } = useAuth();
@@ -290,7 +291,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
                 </p>
                 <div className="flex items-center gap-3">
                   <img
-                    src={(post).creatorObj.avatar!}
+                    src={cdnS3((post).creatorObj.avatar)}
                     alt={(post)?.creatorObj.name}
                     className="w-10 h-10 rounded-full object-cover"
                     onError={(e) => {

@@ -4,6 +4,7 @@ import axios from "axios";
 import type { TVideo } from "../hooks/useVideos";
 import { getToken } from "../utils/storage";
 import { useNavigate } from "react-router-dom";
+import { cdnS3 } from "../utils/cdn";
 
 interface VideoResponse {
   total: number;
@@ -130,7 +131,7 @@ const CreatorVideosCard = ({ creatorId }: { creatorId: string }) => {
             <figure>
               <img
                 src={
-                  video.s3_urls?.coverUrl ||
+                  cdnS3(video.s3_urls?.coverUrl )||
                   video.public_urls?.local_cover_url ||
                   "https://placehold.co/600x400"
                 }

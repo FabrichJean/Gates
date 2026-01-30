@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { parseTitlesFromAPI, prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
 import type { MangaTitles } from "../types/mangaTitles";
 import { MangaTitlesField } from "../components/MangaTitlesField";
+import { cdnS3 } from "../utils/cdn";
 
 interface EpisodeImage {
   id: number;
@@ -230,7 +231,7 @@ const EditMangasEpisodePage: React.FC = () => {
                     className={`relative group ${isMarkedForDeletion ? 'opacity-50' : ''}`}
                   >
                     <img
-                      src={image.image_url}
+                      src={cdnS3(image.image_url)}
                       alt={`Image ${index + 1}`}
                       className="w-full h-40 object-cover rounded-lg shadow"
                     />

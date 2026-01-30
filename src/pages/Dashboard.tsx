@@ -4,6 +4,7 @@ import { MoreVertical } from "lucide-react"; // icône du menu (package: lucide-
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { cdnS3 } from "../utils/cdn";
 
 
 // import { useAuth } from "../hooks/useAuth";
@@ -102,7 +103,7 @@ const Dashboard = () => {
                 </td>
                 <td className="py-3 px-6 text-center">
                   <img
-                    src={video.cover}
+                    src={cdnS3(video.cover)}
                     alt="cover"
                     className="w-20 h-12 object-cover rounded-lg mx-auto"
                   />

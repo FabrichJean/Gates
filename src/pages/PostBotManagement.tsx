@@ -12,6 +12,7 @@ import { webAppPlateform } from "../api/plateforms";
 import RoleEnum from "../utils/roleEnum";
 import PostFilter, { type TPostFilter } from "../components/Post/PostFilter"; // mbola miandry
 import { PostsBotProvider, usePostsBotContext } from "../context/PostsBotContext";
+import { cdnS3 } from "../utils/cdn";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
@@ -201,7 +202,7 @@ const PostManagementInner = () => {
                     {(post_bot).creatorObj ? (
                       <div className="flex items-center gap-2">
                         <img
-                          src={(post_bot).creatorObj.avatar!}
+                          src={cdnS3((post_bot).creatorObj.avatar)}
                           alt={(post_bot).creatorObj.name!}
                           className="min-w-8 h-8 rounded-full object-cover"
                           onError={(e) => {
@@ -281,7 +282,7 @@ const PostManagementInner = () => {
                       {post_bot.images?.slice(0, 2).map((image: any, index: number) => (
                         <div key={image.id} className="relative group">
                           <img
-                            src={image.s3_urls?.imageUrl || image.public_urls.local_image_url}
+                            src={cdnS3(image.s3_urls?.imageUrl) || image.public_urls.local_image_url}
                             alt={`Image ${index + 1}`}
                             className="min-w-8 h-8 object-cover rounded whitespace-nowrap"
                             onError={(e) => {

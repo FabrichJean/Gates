@@ -8,6 +8,7 @@ import { singleSync } from "../../api/videos";
 import toast from "react-hot-toast";
 import ConfirmAlert from "../ConfirmAlert";
 import { motion, AnimatePresence } from "framer-motion";
+import { cdnS3 } from "../../utils/cdn";
 
 export interface Creator {
   id: number;
@@ -108,7 +109,7 @@ export default function CreatorList({
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20">
                   <img
-                    src={c.avatar ?? ""}
+                    src={cdnS3(c.avatar) ?? ""}
                     alt={c.name}
                     className="w-full h-full object-cover"
                   />

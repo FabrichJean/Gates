@@ -9,6 +9,7 @@ import CreatorFormModal from "../components/creators/CreatorFormModal";
 import ConfirmAlert from "../components/ConfirmAlert";
 import { deleteCreator } from "../api/creators";
 import toast from "react-hot-toast";
+import { cdnS3 } from "../utils/cdn";
 
 
 const Creatorr = () => {
@@ -52,7 +53,7 @@ const Creatorr = () => {
           {/* Avatar */}
           <img
             src={
-              creator?.avatar ||
+              cdnS3(creator?.avatar) ||
               "https://ui-avatars.com/api/?name=Creator&background=0D9488&color=fff"
             }
             alt="Avatar"

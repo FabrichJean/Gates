@@ -22,6 +22,7 @@ import Pagination from "../components/Pagination";
 import { PAGE_SIZE } from "../constant";
 import { useAudiosContext } from "../context/AudiosContext";
 import AudioChecking from "../components/AudioChecking";
+import { cdnS3 } from "../utils/cdn";
 
 const Audios: React.FC = () => {
   const { user } = useAuth();
@@ -201,7 +202,7 @@ const Audios: React.FC = () => {
                             <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
                               {audio.cover_url || audio.s3_cover_url ? (
                                 <img
-                                  src={audio.cover_url || audio.s3_cover_url}
+                                  src={ cdnS3(audio.s3_cover_url) || cdnS3(audio.cover_url)}
                                   alt={audio.title}
                                   className="w-full h-full object-cover"
                                 />
@@ -330,7 +331,7 @@ const Audios: React.FC = () => {
                   <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
                     {audio.cover_url || audio.s3_cover_url ? (
                       <img
-                        src={audio.cover_url || audio.s3_cover_url}
+                        src={cdnS3(audio.s3_cover_url) || cdnS3(audio.cover_url)}
                         alt={audio.title}
                         className="w-full h-full object-cover"
                       />

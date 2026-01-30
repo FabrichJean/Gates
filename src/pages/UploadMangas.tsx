@@ -26,6 +26,7 @@ import type { MangaTitles } from "../types/mangaTitles";
 import { prepareTitlesForAPI } from "../utils/mangaTitlesUtils";
 import { MangaTitlesField } from "../components/MangaTitlesField";
 import { useNavigate } from "react-router-dom";
+import { cdnS3 } from "../utils/cdn";
 
 const UploadMangas: React.FC = () => {
 
@@ -439,7 +440,7 @@ const UploadMangas: React.FC = () => {
               <div className="relative" ref={creatorDropdownRef}>
                 <div className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 transition-all duration-300 flex items-center gap-3">
                   {selectedCreator?.avatar ? (
-                    <img src={selectedCreator.avatar} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                    <img src={cdnS3(selectedCreator.avatar)} alt="Creator" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                       <User className="w-3 h-3 text-white" />
@@ -517,7 +518,7 @@ const UploadMangas: React.FC = () => {
                         >
                           {creator.avatar ? (
                             <img
-                              src={creator.avatar}
+                              src={cdnS3(creator.avatar)}
                               alt={creator.name}
                               className="w-8 h-8 rounded-full object-cover flex-shrink-0 ring-2 ring-transparent group-hover:ring-blue-500 transition-all duration-200"
                             />

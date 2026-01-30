@@ -26,6 +26,7 @@ import RoleEnum from "../../utils/roleEnum";
 
 import { motion } from "framer-motion";
 import { LiaSyncSolid } from "react-icons/lia";
+import { cdnS3 } from "../../utils/cdn";
 
 const RomansManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -198,7 +199,7 @@ const RomansManagement = () => {
           <div className="relative h-48 bg-gradient-to-br from-purple-400 to-pink-400">
             {roman.public_urls?.cover_url ? (
               <img
-                src={roman.s3_urls.coverUrl || roman.public_urls.cover_url}
+                src={cdnS3(roman.s3_urls.coverUrl) || roman.public_urls.cover_url}
                 alt={roman.ref}
                 className="w-full h-full object-cover"
               />
@@ -245,7 +246,7 @@ const RomansManagement = () => {
             <div className="flex items-center gap-3 mb-4">
               {roman.creatorObj?.avatar ? (
                 <img
-                  src={roman.creatorObj.avatar}
+                  src={cdnS3(roman.creatorObj.avatar)}
                   alt={roman.creatorObj.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
@@ -396,7 +397,7 @@ const RomansManagement = () => {
                   {roman.public_urls?.cover_url ? (
                     <img
                       src={
-                        roman.s3_urls.coverUrl || roman.public_urls?.cover_url
+                        cdnS3(roman.s3_urls.coverUrl) || roman.public_urls?.cover_url
                       }
                       alt={roman.ref}
                       className="w-12 h-16 object-cover rounded"
@@ -424,7 +425,7 @@ const RomansManagement = () => {
                   <div className="flex items-center gap-3">
                     {roman.creatorObj?.avatar ? (
                       <img
-                        src={roman.creatorObj.avatar}
+                        src={cdnS3(roman.creatorObj.avatar)}
                         alt={roman.creatorObj.name}
                         className="w-8 h-8 rounded-full object-cover"
                       />

@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { createCreator, updateCreator } from "../../api/creators";
 import useImagePreview from "../../hooks/useImagePreview";
 import type UseCreators from "../../hooks/useCreators";
+import { cdnS3 } from "../../utils/cdn";
 
 type Creator = Exclude<
   ReturnType<typeof UseCreators>["data"],
@@ -111,7 +112,7 @@ export default function CreatorFormModal({
               ) : creator ? (
                 creator.avatar ? (
                   <img
-                    src={creator.avatar || undefined}
+                    src={cdnS3(creator.avatar) || undefined}
                     alt="avatar"
                     className="w-full h-full object-cover"
                   />
