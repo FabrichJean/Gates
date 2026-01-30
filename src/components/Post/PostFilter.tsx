@@ -169,7 +169,7 @@ export default function PostFilter({
                                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
-                                    Erreur lors du chargement des catégories: {String(categoriesError)}
+                                    加载类别时出错： {String(categoriesError)}
                                 </span>
                             </div>
                         )}
@@ -203,11 +203,11 @@ export default function PostFilter({
                             {open && (
                                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                     {categoriesLoading ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">Chargement des catégories...</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">正在加载类别...</div>
                                     ) : categoriesError ? (
-                                        <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">Erreur: {String(categoriesError)}</div>
+                                        <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">错误： {String(categoriesError)}</div>
                                     ) : categoriesResponse?.categories?.length === 0 ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">Aucune catégorie disponible</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">没有可用类别</div>
                                     ) : (
                                         categoriesResponse?.categories?.map((c: any) => (
                                             <div
@@ -232,7 +232,7 @@ export default function PostFilter({
                     </div>
 
                     <div ref={subCategoryDropdownRef}>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">SubCategory</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">子类别</label>
 
                         <div className="mt-1 relative w-full">
                             <button
@@ -259,9 +259,9 @@ export default function PostFilter({
                             {subOpen && (
                                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                     {!filters?.category_id ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">Select a category first</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">请先选择一个类别</div>
                                     ) : !subcat?.subCategories || subcat.subCategories.length === 0 ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">No subcategories available</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">没有可用的子类别</div>
                                     ) : (
                                         <>
                                             <div
@@ -295,13 +295,13 @@ export default function PostFilter({
 
                     <div ref={creatorRef} className="relative">
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
-                            Creator
+                            创造者
                         </label>
 
                         {/* Champ de recherche */}
                         <input
                             type="text"
-                            placeholder="Search creator..."
+                            placeholder="搜索创建者..."
                             // on affiche uniquement creatorSearch — ainsi si l'utilisateur efface, la valeur n'est pas ré-écrasée par creator_id
                             value={filters.creatorSearch || ""}
                             onChange={(e) => {
@@ -336,7 +336,7 @@ export default function PostFilter({
 
                                 {/* Si aucun creator */}
                                 {(!creators || creators.length === 0) && (
-                                    <div className="px-3 py-2 text-gray-500">No creators found</div>
+                                    <div className="px-3 py-2 text-gray-500">没有找到创作者</div>
                                 )}
 
                                 {/* Résultats filtrés */}
@@ -365,7 +365,7 @@ export default function PostFilter({
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">User</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">用户</label>
                         <select
                             className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.user_id}
@@ -381,7 +381,7 @@ export default function PostFilter({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">开始日期</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -390,7 +390,7 @@ export default function PostFilter({
                         />
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">结束日期</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -402,8 +402,8 @@ export default function PostFilter({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                        { key: "isDeleted", label: "Deleted" },
-                        { key: "processing", label: "Video Uploaded" },
+                        { key: "isDeleted", label: "已删除" },
+                        { key: "processing", label: "视频已上传" },
                     ].map(({ key, label }) => (
                         <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
                             <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
@@ -426,7 +426,7 @@ export default function PostFilter({
                 </div>
 
                 <form method="dialog" className="pt-3 flex justify-end gap-3 sm:gap-3 sm:pt-3 sm:static fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t sm:border-t-0 sm:bg-transparent">
-                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">Close</button>
+                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">关闭</button>
 
                     <div
                         className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
@@ -448,12 +448,12 @@ export default function PostFilter({
                             await submit();
                         }}
                     >
-                        Reset
+                        重置
                     </div>
 
                     <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300"
                         onClick={(e) => { e.preventDefault(); submit(); closeModal(); }}>
-                        Apply
+                        申请
                     </button>
                 </form>
             </div>

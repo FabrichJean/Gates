@@ -283,9 +283,9 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading}
                 >
-                  <option value="">— 无更改 —</option>
-                  <option value="true">🚫 禁止</option>
-                  <option value="false">✓ 取消禁止</option>
+                  <option value="">— No change —</option>
+                  <option value="true">🚫 Ban</option>
+                  <option value="false">✓ Unban</option>
                 </select>
               </div>
             </div>
@@ -317,7 +317,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-amber-600 rounded-full"></div>
-                Tags Management
+                标签管理
               </label>
               <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 transition-colors mb-3">
                 <input
@@ -328,7 +328,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   disabled={bulkEditLoading}
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  Update tags for selected posts
+                  更新所选帖子的标签
                 </span>
               </label>
               {bulkEditData.modifyTags && (
@@ -337,7 +337,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                     selected={bulkEditData.tags}
                     setSelected={(tags) => setBulkEditData(prev => ({ ...prev, tags }))}
                     allowCustomTag={true}
-                  />
+                  />  
                 </div>
               )}
             </div>
@@ -349,7 +349,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="flex items-center gap-3 mb-3">
                 <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="font-semibold text-blue-900 dark:text-blue-100">
-                  Processing updates...
+                  正在处理更新...
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -364,7 +364,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">
-                Please wait while changes are applied to all selected posts
+                请等待，正在将更改应用到所有选中的帖子
               </p>
             </div>
           )}
@@ -376,12 +376,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             {hasChanges() ? (
               <span className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600" />
-                Changes ready to apply
+                准备应用更改
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600" />
-                No changes selected
+                未选择更改
               </span>
             )}
           </div>
@@ -391,7 +391,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               onClick={closeBulkEdit}
               disabled={bulkEditLoading}
             >
-              Cancel
+              取消
             </button>
             <button
               className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 shadow-lg disabled:opacity-50"
@@ -401,12 +401,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               {bulkEditLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
+                  处理中...
                 </>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
-                  Apply to {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''}
+                  申请 {selectedPosts.size} 帖子 {selectedPosts.size !== 1 ? 's' : ''}
                 </>
               )}
             </button>
