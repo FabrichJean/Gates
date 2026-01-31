@@ -232,9 +232,9 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
       {selected.length > 0 && (
         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">
-            Backspace
+            退格
           </kbd>{" "}
-          pour supprimer le dernier tag
+          删除最后一个标签
         </div>
       )}
     </div>
