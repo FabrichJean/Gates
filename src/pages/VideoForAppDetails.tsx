@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
-} from "lucide-react"; 
+} from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
 import type { TVideo } from "../hooks/useVideos";
 import { apiURL } from '../constant';
@@ -31,8 +31,8 @@ import { cdnS3 } from '../utils/cdn';
 
 
 // Helper function to get category display name
-const getCategoryDisplayName = (categories?: Array<{code: string, name: string}>): string => {
-  if (!categories || categories.length === 0) return 'No category';
+const getCategoryDisplayName = (categories?: Array<{ code: string, name: string }>): string => {
+  if (!categories || categories.length === 0) return '无分类';
 
   // Try to find English name first, then fallback to any available
   const englishName = categories.find(cat => cat.code === 'en')?.name;
@@ -43,8 +43,8 @@ const getCategoryDisplayName = (categories?: Array<{code: string, name: string}>
 };
 
 // Helper function to get subcategory display name
-const getSubCategoryDisplayName = (subCategories?: Array<{code: string, name: string}>): string => {
-  if (!subCategories || subCategories.length === 0) return 'No subcategory';
+const getSubCategoryDisplayName = (subCategories?: Array<{ code: string, name: string }>): string => {
+  if (!subCategories || subCategories.length === 0) return '无子分类';
 
   // Try to find English name first, then fallback to any available
   const englishName = subCategories.find(sub => sub.code === 'en')?.name;
@@ -55,11 +55,11 @@ const getSubCategoryDisplayName = (subCategories?: Array<{code: string, name: st
 };
 
 // Helper function to get platform display name
-const getPlatformDisplayName = (platform?: {id: number, name: string}): string => {
-  if (!platform) return 'No platform';
+const getPlatformDisplayName = (platform?: { id: number, name: string }): string => {
+  if (!platform) return '无平台';
   return platform.name;
 };
- 
+
 
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
@@ -91,7 +91,7 @@ const VideoForAppDetails: React.FC = () => {
     if (video?.plateform_id && platforms) {
       const videoPlatform = platforms.find(p => p.id === video.plateform_id);
       setPlatform(videoPlatform || null);
-    } 
+    }
   }, [video?.plateform_id, platforms]);
 
   const { showAlert, alertProps } = useAnimatedAlert();
@@ -107,7 +107,7 @@ const VideoForAppDetails: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="text-red-500 text-xl font-medium"
         >
-          App Video not found
+          未找到应用视频
         </motion.div>
       </div>
     );
@@ -130,7 +130,7 @@ const VideoForAppDetails: React.FC = () => {
             exit={{ opacity: 0, x: -100 }}
           >
             {/* Edit form can be added here */}
-            <div>Edit Mode</div>
+            <div>编辑模式</div>
           </motion.div>
         ) : (
           <motion.div
@@ -194,11 +194,10 @@ const VideoForAppDetails: React.FC = () => {
                       <motion.div whileHover={{ scale: hasPrev ? 1.05 : 1 }}>
                         <Link
                           to={hasPrev ? `/app-videos/${prevVideo?.id}` : '#'}
-                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
-                            hasPrev
-                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
-                          }`}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${hasPrev
+                            ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
                           onClick={(e) => !hasPrev && e.preventDefault()}
                         >
                           <ChevronLeft className="w-5 h-5" />
@@ -207,11 +206,10 @@ const VideoForAppDetails: React.FC = () => {
                       <motion.div whileHover={{ scale: hasNext ? 1.05 : 1 }}>
                         <Link
                           to={hasNext ? `/app-videos/${nextVideo?.id}` : '#'}
-                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${
-                            hasNext
-                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
-                          }`}
+                          className={`p-2 rounded-lg transition-all duration-200 flex items-center ${hasNext
+                            ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
                           onClick={(e) => !hasNext && e.preventDefault()}
                         >
                           <ChevronRight className="w-5 h-5" />
@@ -231,23 +229,22 @@ const VideoForAppDetails: React.FC = () => {
                       <button
                         onClick={async () => {
                           const should = window.confirm(
-                            video.isBanned ? "Are you sure you want to unban this video?" : "Are you sure you want to ban this video?"
+                            video.isBanned ? "您确定要解封此视频吗？" : "您确定要封禁此视频吗？"
                           );
                           if (!should) return;
                           try {
                             await updateVideoForAppBannedStatus(video.id, !video.isBanned);
-                            toast.success(`Video ${!video.isBanned ? 'banned' : 'unbanned'} successfully`);
+                            toast.success(`视频 ${!video.isBanned ? '已封禁' : '已解封'} 成功`);
                             reFetch();
                           } catch (error: any) {
-                            toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                            toast.error(error?.response?.data?.message || '更新封禁状态失败');
                           }
                         }}
-                        className={`p-2 rounded-lg transition-colors flex items-center ${
-                          video.isBanned
-                            ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800"
-                            : "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800"
-                        }`}
-                        title={video.isBanned ? "Unban video" : "Ban video"}
+                        className={`p-2 rounded-lg transition-colors flex items-center ${video.isBanned
+                          ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800"
+                          : "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800"
+                          }`}
+                        title={video.isBanned ? "解封视频" : "封禁视频"}
                       >
                         {video.isBanned ? "🔓" : "🚫"}
                       </button>
@@ -269,11 +266,10 @@ const VideoForAppDetails: React.FC = () => {
                 >
                   <div className="bg-white dark:bg-black rounded-sm shadow-lg overflow-hidden">
                     <div
-                      className={`relative overflow-hidden rounded-sm shadow-2xl transition-all duration-300 ${
-                        isPortrait
-                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
-                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
-                      } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
+                      className={`relative overflow-hidden rounded-sm shadow-2xl transition-all duration-300 ${isPortrait
+                        ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                        : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                        } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
                     >
                       {video.isBanned && (
                         <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
@@ -285,7 +281,7 @@ const VideoForAppDetails: React.FC = () => {
                                 localStorage.setItem(`app-video-show-cover-${routeId}`, String(next));
                               }}
                               className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
-                              title={showCover ? "Hide cover" : "Show cover"}
+                              title={showCover ? "隐藏封面" : "显示封面"}
                             >
                               {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
@@ -331,7 +327,7 @@ const VideoForAppDetails: React.FC = () => {
 
                   {/* Cover */}
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
-                    <h3 className="text-lg font-semibold mb-4">Cover</h3>
+                    <h3 className="text-lg font-semibold mb-4">封面</h3>
                     <img
                       src={cdnS3(video?.s3_urls.coverUrl) || video?.public_urls.coverUrl || 'https://placehold.co/300x200'}
                       alt="Cover"
@@ -350,19 +346,19 @@ const VideoForAppDetails: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <span className="font-medium">Duration:</span> {video.seconds}s
+                        <span className="font-medium">时长:</span> {video.seconds}s
                       </div>
                       <div>
-                        <span className="font-medium">Category:</span> {getCategoryDisplayName(video.categories)}
+                        <span className="font-medium">分类:</span> {getCategoryDisplayName(video.categories)}
                       </div>
                       <div>
-                        <span className="font-medium">Sub Category:</span> {getSubCategoryDisplayName(video.sub_categories)}
+                        <span className="font-medium">子分类:</span> {getSubCategoryDisplayName(video.sub_categories)}
                       </div>
                       <div>
-                        <span className="font-medium">Platform:</span> {getPlatformDisplayName(video.plateform)}
+                        <span className="font-medium">平台:</span> {getPlatformDisplayName(video.plateform)}
                       </div>
                       <div>
-                        <span className="font-medium">Video Type:</span>{' '}
+                        <span className="font-medium">视频类型:</span>{' '}
                         {video.type === "1" ? (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 ml-1">Short</span>
                         ) : (
@@ -378,7 +374,7 @@ const VideoForAppDetails: React.FC = () => {
                         )}
                       </div>
                       <div>
-                        <span className="font-medium">Tags:</span>
+                        <span className="font-medium">标签:</span>
                         {video.tagCategoryVideos && video.tagCategoryVideos.length > 0 ? (
                           <div className="flex flex-wrap gap-1 mt-1">
                             {video.tagCategoryVideos.map((tag) => (
@@ -391,7 +387,7 @@ const VideoForAppDetails: React.FC = () => {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-gray-500 dark:text-gray-400 ml-1">No tags</span>
+                          <span className="text-gray-500 dark:text-gray-400 ml-1">无标签</span>
                         )}
                       </div>
                     </div>
@@ -405,5 +401,4 @@ const VideoForAppDetails: React.FC = () => {
     </>
   );
 };
-
 export default VideoForAppDetails;

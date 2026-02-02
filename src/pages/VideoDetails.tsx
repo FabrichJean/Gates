@@ -56,7 +56,7 @@ import {
 } from "lucide-react";
 import SexyShortLoader from "../components/SexyShortLoader";
 import { apiURL, token } from "../constant";
-import {VideoPlayer} from "../components/VideoPlayer";
+import { VideoPlayer } from "../components/VideoPlayer";
 import { cdnS3 } from "../utils/cdn";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
@@ -469,11 +469,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                                 toast.error(error?.response?.data?.message || '更新禁止状态失败');
                               }
                             }}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
-                              video.isBanned
-                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
-                                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
-                            }`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${video.isBanned
+                              ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
+                              : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
+                              }`}
                           >
                             {video.isBanned ? "取消禁止视频" : "禁止视频"}
                           </motion.button>
@@ -843,14 +842,14 @@ function EditVideo({
                   }`}
               />
             </button>
-             <Link
-                to={`/touch/video/${video.id}`}
-                className="underline"
-              >
-                使用视频编辑
-              </Link>
+            <Link
+              to={`/touch/video/${video.id}`}
+              className="underline"
+            >
+              使用视频编辑
+            </Link>
           </div>
-          
+
         </div>
 
         <div className="flex flex-col gap-8">

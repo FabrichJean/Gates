@@ -141,7 +141,7 @@ const Mangas: React.FC = () => {
                 transition={{ delay: 0.1 }}
                 className="text-4xl font-bold text-gray-900 dark:text-gray-100"
               >
-                Bibliothèque de Mangas
+                漫画图书馆
               </motion.h1>
             </div>
 
@@ -157,11 +157,10 @@ const Mangas: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === "grid"
-                      ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === "grid"
+                    ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
                   title="Vue Grille"
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -170,11 +169,10 @@ const Mangas: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setViewMode("table")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === "table"
-                      ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                  className={`p-2 rounded-md transition-all duration-200 ${viewMode === "table"
+                    ? "bg-white dark:bg-gray-800 text-black dark:text-white shadow-md"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
                   title="Vue Tableau"
                 >
                   <List className="w-4 h-4" />
@@ -206,10 +204,10 @@ const Mangas: React.FC = () => {
               <BookOpen className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Aucun manga trouvé
+              未找到任何漫画
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Essayez d'ajuster vos filtres ou de créer un nouveau manga.
+              尝试调整筛选条件或创建一个新的漫画。
             </p>
           </motion.div>
         ) : (
@@ -278,11 +276,10 @@ const Mangas: React.FC = () => {
                             }}
                           >
                             <span
-                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium text-nowrap ${
-                                manga.processing === "done"
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                  : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                              }`}
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium text-nowrap ${manga.processing === "done"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                }`}
                             >
                               {manga.processing === "done"
                                 ? "✓ Uploaded"
@@ -330,19 +327,18 @@ const Mangas: React.FC = () => {
                                   manga.processing === "done" ||
                                   manga.processing === "working"
                                 }
-                                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${
-                                  manga.processing === "done" ||
+                                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 backdrop-blur-md rounded-lg transition-all duration-200 text-xs font-medium ${manga.processing === "done" ||
                                   manga.processing === "working"
-                                    ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
-                                    : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
-                                }`}
+                                  ? "bg-gray-500/20 text-gray-400 cursor-not-allowed opacity-60"
+                                  : "bg-blue-500/20 hover:bg-blue-500/30 text-white"
+                                  }`}
                                 title={
                                   manga.processing === "done" ||
-                                  manga.processing === "working"
+                                    manga.processing === "working"
                                     ? "Déjà envoyé"
                                     : manga.checking !== "checked"
-                                    ? "Manga must be checked first"
-                                    : "Envoyer"
+                                      ? "Manga must be checked first"
+                                      : "Envoyer"
                                 }
                               >
                                 <Send className="w-3.5 h-3.5" />
@@ -442,10 +438,10 @@ const Mangas: React.FC = () => {
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
                                 ? () =>
-                                    toggleDeleted(
-                                      manga.id,
-                                      manga.isDeleted || false
-                                    )
+                                  toggleDeleted(
+                                    manga.id,
+                                    manga.isDeleted || false
+                                  )
                                 : undefined
                             }
                           />
@@ -603,11 +599,10 @@ const Mangas: React.FC = () => {
                                 {/* Processing Status */}
                                 {manga.processing !== "working" ? (
                                   <span
-                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${
-                                      manga.processing === "done"
-                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
-                                    }`}
+                                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-nowrap ${manga.processing === "done"
+                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                      }`}
                                   >
                                     {manga.processing === "done"
                                       ? "✓ Uploaded"
@@ -632,10 +627,10 @@ const Mangas: React.FC = () => {
                                 onChange={
                                   user?.role === RoleEnum.SUPERADMIN
                                     ? () =>
-                                        toggleDeleted(
-                                          manga.id,
-                                          manga.isDeleted || false
-                                        )
+                                      toggleDeleted(
+                                        manga.id,
+                                        manga.isDeleted || false
+                                      )
                                     : undefined
                                 }
                               />
@@ -678,19 +673,18 @@ const Mangas: React.FC = () => {
                                         manga.processing === "done" ||
                                         manga.processing === "working"
                                       }
-                                      className={`p-1.5 rounded-lg transition-all duration-200 ${
-                                        manga.processing === "done" ||
+                                      className={`p-1.5 rounded-lg transition-all duration-200 ${manga.processing === "done" ||
                                         manga.processing === "working"
-                                          ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
-                                          : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
-                                      }`}
+                                        ? "bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed opacity-60"
+                                        : "bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                                        }`}
                                       title={
                                         manga.processing === "done" ||
-                                        manga.processing === "working"
+                                          manga.processing === "working"
                                           ? "Not to send"
                                           : manga.checking !== "checked"
-                                          ? "Manga must be checked first"
-                                          : "Envoyer"
+                                            ? "Manga must be checked first"
+                                            : "Envoyer"
                                       }
                                     >
                                       <Send className="w-4 h-4" />

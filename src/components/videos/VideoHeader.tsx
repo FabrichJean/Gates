@@ -95,7 +95,7 @@ const VideoHeader = ({
 
         {/* ---- Actions ---- */}
         <div className="flex gap-2">
-        {/* <small>(video sent : {sent})</small> */}
+          {/* <small>(video sent : {sent})</small> */}
           <Link
             to={"/videos/upload"}
             className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all"

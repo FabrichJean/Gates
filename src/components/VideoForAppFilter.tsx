@@ -160,7 +160,7 @@ export default function VideoForAppFilter({
         <div className="flex flex-col gap-4">
           {/* Deleted filter */}
           <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Deleted</p>
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">已删除</p>
             <div className="flex gap-3">
               {['all', 'yes', 'no'].map((option) => (
                 <label key={option} className="flex items-center gap-1 cursor-pointer">
@@ -182,14 +182,14 @@ export default function VideoForAppFilter({
           </div>
           {/* Checking filter */}
           <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Checking</p>
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">审核状态</p>
             <div className="flex gap-3 flex-wrap">
               {[
-                { value: 'all', label: 'all' },
-                { value: 'null', label: 'not ready' },
-                { value: 'waiting for checking', label: 'ready' },
-                { value: 'refused', label: 'refused' },
-                { value: 'checked', label: 'checked' },
+                { value: 'all', label: '全部' },
+                { value: 'null', label: '未就绪' },
+                { value: 'waiting for checking', label: '待审核' },
+                { value: 'refused', label: '已拒绝' },
+                { value: 'checked', label: '已审核' },
               ].map((option) => (
                 <label key={option.value} className="flex items-center gap-1 cursor-pointer">
                   <input
@@ -210,7 +210,7 @@ export default function VideoForAppFilter({
           </div>
           {/* Video Type filter */}
           <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Type</p>
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">类型</p>
             <div className="flex gap-3">
               {[
                 { value: '', label: 'all' },
@@ -240,10 +240,10 @@ export default function VideoForAppFilter({
         <div className="flex flex-col gap-6">
           {/* Creator searchable */}
           <div ref={creatorRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">创作者</label>
             <input
               type="text"
-              placeholder="Search creator..."
+              placeholder="搜索创作者..."
               value={filters.creatorSearch || ""}
               onChange={(e) => {
                 const value = e.target.value;
@@ -271,7 +271,7 @@ export default function VideoForAppFilter({
                   all
                 </div>
                 {(!creators || creators.length === 0) && (
-                  <div className="px-3 py-2 text-gray-500">No creators found</div>
+                  <div className="px-3 py-2 text-gray-500">未找到创作者</div>
                 )}
                 {creators
                   ?.filter((c: any) =>
@@ -296,10 +296,10 @@ export default function VideoForAppFilter({
 
           {/* Category searchable */}
           <div ref={categoryRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Category</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">分类</label>
             <input
               type="text"
-              placeholder="Search category..."
+              placeholder="搜索分类..."
               value={filters.categorySearch || ""}
               onChange={(e) => {
                 const value = e.target.value;
@@ -331,7 +331,7 @@ export default function VideoForAppFilter({
                   all
                 </div>
                 {(!categories || categories.length === 0) && (
-                  <div className="px-3 py-2 text-gray-500">No categories found</div>
+                  <div className="px-3 py-2 text-gray-500">未找到分类</div>
                 )}
                 {categories
                   ?.filter((c: any) =>
@@ -358,10 +358,10 @@ export default function VideoForAppFilter({
 
           {/* Subcategory searchable */}
           <div ref={subcategoryRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Subcategory F</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">子分类</label>
             <input
               type="text"
-              placeholder="Search subcategory..."
+              placeholder="搜索子分类..."
               value={filters.subcategorySearch || ""}
               onChange={(e) => {
                 const value = e.target.value;
@@ -390,7 +390,7 @@ export default function VideoForAppFilter({
                   all
                 </div>
                 {(!subCategories || subCategories.length === 0) && (
-                  <div className="px-3 py-2 text-gray-500">No subcategories found</div>
+                  <div className="px-3 py-2 text-gray-500">未找到子分类</div>
                 )}
                 {subCategories
                   ?.filter((sc: any) =>
@@ -415,7 +415,7 @@ export default function VideoForAppFilter({
         </div>
 
         <form method="dialog" className="pt-3 flex justify-end gap-3">
-          <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">Close</button>
+          <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">关闭</button>
           <div
             className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
             onClick={async () => {
@@ -439,7 +439,7 @@ export default function VideoForAppFilter({
               await submit();
             }}
           >
-            Reset
+            重置
           </div>
           <button
             className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300"
@@ -449,7 +449,7 @@ export default function VideoForAppFilter({
               closeModal();
             }}
           >
-            Apply
+            应用
           </button>
         </form>
       </div>
