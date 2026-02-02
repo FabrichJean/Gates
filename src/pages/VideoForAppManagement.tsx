@@ -165,7 +165,7 @@ const VideoForAppManagement = () => {
           const response = await fetchVideoForAppList({ page: currentPage, ...filters });
           const pageVideoIds = response.videos.map(v => v.id);
           allVideoIds.push(...pageVideoIds);
-          
+
           // Update progress
           setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
         } catch (error) {
@@ -310,7 +310,7 @@ const VideoForAppManagement = () => {
               modal?.showModal();
             }}
           >
-            Filter
+            过滤器
           </button>
           <VideoForAppFilter
             filters={filters}
@@ -335,7 +335,7 @@ const VideoForAppManagement = () => {
             }}
           />
           {checkObjectContent(filters).hasContent ? (
-            <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* app videos filters</span>
+            <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* 应用 视频 滤镜</span>
           ) : null}
         </div>
 
@@ -349,12 +349,12 @@ const VideoForAppManagement = () => {
             {isAllPageSelected ? (
               <>
                 <Square className="w-4 h-4 mr-1" />
-                Désélectionner la page
+                取消选择页面
               </>
             ) : (
               <>
                 <CheckSquare className="w-4 h-4 mr-1" />
-                Sélectionner la page
+                选择页面
               </>
             )}
           </button>
@@ -370,20 +370,20 @@ const VideoForAppManagement = () => {
             }}
           >
             <Users className="w-4 h-4 mr-1" />
-            Sélectionner par plage
+            选择范围
           </button>
 
           {isSomeSelected && (
             <>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''} sélectionnée{selectedVideos.size > 1 ? 's' : ''}
+                {selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''}  已选择 {selectedVideos.size > 1 ? 's' : ''}
               </span>
               <button
                 className="btn btn-primary btn-sm"
                 onClick={openBulkEdit}
               >
                 <Edit className="w-4 h-4 mr-1" />
-                Éditer en masse
+                批量编辑
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -397,7 +397,7 @@ const VideoForAppManagement = () => {
       </div>
 
       <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm dark:shadow-gray-800 overflow-hidden">
-  {loading && <DeepLoader />}
+        {loading && <DeepLoader />}
 
         <div className="overflow-x-auto pb-[8rem]">
           <table className="min-w-full w-max text-sm md:text-base bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
@@ -441,7 +441,7 @@ const VideoForAppManagement = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Sélectionner par plage de pages
+                  选择范围
                 </h2>
                 <button
                   onClick={() => {
@@ -458,7 +458,7 @@ const VideoForAppManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page de départ
+                      开始页
                     </label>
                     <input
                       type="number"
@@ -474,7 +474,7 @@ const VideoForAppManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page d'arrêt
+                      结束页
                     </label>
                     <input
                       type="number"
@@ -491,7 +491,7 @@ const VideoForAppManagement = () => {
 
                 {data && (
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Total de pages disponibles : {Math.ceil(data.total / data.limit)}
+                    可用页面总数 : {Math.ceil(data.total / data.limit)}
                   </div>
                 )}
               </div>
@@ -520,7 +520,7 @@ const VideoForAppManagement = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={rangeLoading}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={selectPageRange}
@@ -530,12 +530,12 @@ const VideoForAppManagement = () => {
                   {rangeLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Chargement...
+                      加载中...
                     </>
                   ) : (
                     <>
                       <CheckSquare className="w-4 h-4" />
-                      Sélectionner la plage
+                      选择范围
                     </>
                   )}
                 </button>
@@ -552,7 +552,7 @@ const VideoForAppManagement = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Édition en masse ({selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''})
+                  批量版 ({selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''})
                 </h2>
                 <button
                   onClick={closeBulkEdit}
@@ -573,14 +573,14 @@ const VideoForAppManagement = () => {
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <label htmlFor="modifyTags" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Modifier les tags
+                    修改标签
                   </label>
                 </div>
 
                 {bulkEditData.modifyTags && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Tags
+                      标签
                     </label>
                     <TagCategoryVideoForApp
                       selectedTags={bulkEditData.tags}
@@ -590,23 +590,23 @@ const VideoForAppManagement = () => {
                   </div>
                 )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Créer / Assign Creator</label>
-                    <select
-                      value={bulkEditData.creator_id}
-                      onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Ne pas modifier</option>
-                      {creators.map((c) => (
-                        <option key={c.id} value={String(c.id)}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Créer / Assign Creator</label>
+                  <select
+                    value={bulkEditData.creator_id}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">不修改</option>
+                    {creators.map((c) => (
+                      <option key={c.id} value={String(c.id)}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut d'activation
+                    激活状态
                   </label>
                   <select
                     value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
@@ -616,15 +616,15 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="true">Activer</option>
-                    <option value="false">Désactiver</option>
+                    <option value="">请勿修改</option>
+                    <option value="true">激活</option>
+                    <option value="false">禁用</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut Banned
+                    状态：已禁止
                   </label>
                   <select
                     value={bulkEditData.isBanned === null ? '' : String(bulkEditData.isBanned)}
@@ -634,15 +634,15 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="true">Bannir</option>
-                    <option value="false">Debannir</option>
+                    <option value="">请勿修改</option>
+                    <option value="true">封禁</option>
+                    <option value="false">解封</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut de vérification (Checking)
+                    审核状态 (Checking)
                   </label>
                   <select
                     value={bulkEditData.checking || ''}
@@ -652,11 +652,11 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="refused">Refusé</option>
-                    <option value="checked">Vérifié</option>
-                    <option value="null">Pas prêt</option>
-                    <option value="waiting for checking">Prêt: en attente de vérification</option>
+                    <option value="">请勿修改</option>
+                    <option value="refused">拒绝</option>
+                    <option value="checked">已审核</option>
+                    <option value="null">未准备</option>
+                    <option value="waiting for checking">准备就绪：等待审核</option>
                   </select>
                 </div>
               </div>
@@ -682,7 +682,7 @@ const VideoForAppManagement = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={bulkEditLoading}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={handleBulkEditSubmit}
@@ -692,12 +692,12 @@ const VideoForAppManagement = () => {
                   {bulkEditLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Mise à jour...
+                      更新...
                     </>
                   ) : (
                     <>
                       <Users className="w-4 h-4" />
-                      Appliquer les modifications
+                      应用修改
                     </>
                   )}
                 </button>

@@ -161,7 +161,7 @@ export default function PostFilter({
             <div className="flex flex-col gap-4 modal-box w-full max-w-lg sm:w-max h-[90vh] sm:h-auto overflow-auto p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div ref={categoryDropdownRef}>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Category</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">类别</label>
 
                         {categoriesError && (
                             <div className="mb-2 text-sm text-red-600 dark:text-red-400">

@@ -24,9 +24,9 @@ function VideoForAppEdit() {
   const { data: platforms } = usePlatformReactive();
 
   const ctx = useVideoForAppContext();
-    if (!ctx) return null;
-  
-    const {reFetch} = ctx;
+  if (!ctx) return null;
+
+  const { reFetch } = ctx;
 
   const navigate = useNavigate();
 
@@ -129,11 +129,11 @@ function VideoForAppEdit() {
 
         // Shuffle and pick up to 5 tags with ids
         const shuffled = [...tags].sort(() => 0.5 - Math.random());
-          const picked = shuffled.slice(0, Math.min(5, shuffled.length));
-          // Use objects with id+name so the Tag component can render them immediately
-          const pickedObjs = picked.map(t => ({ id: t.id, name: t.name }));
-          if (pickedObjs.length > 0) {
-            setSelectedTags(pickedObjs as any);
+        const picked = shuffled.slice(0, Math.min(5, shuffled.length));
+        // Use objects with id+name so the Tag component can render them immediately
+        const pickedObjs = picked.map(t => ({ id: t.id, name: t.name }));
+        if (pickedObjs.length > 0) {
+          setSelectedTags(pickedObjs as any);
         }
       } catch (err) {
         console.error("Failed to fetch tag categories for defaults", err);
@@ -205,7 +205,7 @@ function VideoForAppEdit() {
         en_title: titlesData.en_title,
         hi_title: titlesData.hi_title,
         type: videoType === "short" ? "1" : "2",
-  tag_category_ids: selectedTags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name)),
+        tag_category_ids: selectedTags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name)),
         need_vip: needVip,
       };
       // Find the 'en' category and subcategory id from video data
@@ -231,31 +231,31 @@ function VideoForAppEdit() {
       setProgress(0);
     }
   };
-  
+
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 p-6 transition-all duration-300">
       <div className="flex flex-col w-full">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 self-start transition-colors duration-300">
-          Edit App Video {video?.id}
+          编辑应用视频 {video?.id}
         </h1>
         <div className="flex flex-col gap-7 w-full bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
           <div className="space-y-6">
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator
+                创造者
               </label>
               <CreatorAutoComplete
                 value={creator}
-                onChange={(v: string | null) => { 
-                  setCreator(v); 
+                onChange={(v: string | null) => {
+                  setCreator(v);
                   // Only reset suggested flag if the value actually changed from the current creator
                   if (v !== creator) {
                     setCreatorSuggested(false);
                   }
                 }}
-                onSelect={(c) => { 
-                  setCreatorId(c?.id ?? null); 
+                onSelect={(c) => {
+                  setCreatorId(c?.id ?? null);
                   // Only reset suggested flag if the selection actually changed
                   if (c?.id !== creatorId) {
                     setCreatorSuggested(false);
@@ -268,7 +268,7 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Category
+                分类
               </label>
               <CategoryAutoComplete
                 defaultValue={category}
@@ -278,7 +278,7 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Sub Category
+                子分类
               </label>
               <SubCategoryAutoComplete
                 categoryId={category?.id}
@@ -289,7 +289,7 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Platform
+                平台
               </label>
               <PlatformSelectComponent
                 defaultValue={platform}
@@ -299,7 +299,7 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Video Type
+                视频类型
               </label>
               <div className="relative">
                 <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -335,7 +335,7 @@ function VideoForAppEdit() {
 
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Duration (seconds)
+                时长（秒）
               </label>
               <input
                 type="number"
@@ -345,18 +345,18 @@ function VideoForAppEdit() {
               />
             </div>
 
-              <TagCategoryVideoForApp
-                selectedTags={selectedTags}
-                onTagSelect={(tag) => setSelectedTags(prev => [...prev, tag])}
-                onTagDeselect={(tag) => setSelectedTags(prev => prev.filter(t => {
-                  if (typeof tag === 'number' && typeof t === 'number') {
-                    return t !== tag;
-                  } else if (typeof tag === 'object' && typeof t === 'object') {
-                    return t.name !== tag.name;
-                  }
-                  return true;
-                }))}
-              />
+            <TagCategoryVideoForApp
+              selectedTags={selectedTags}
+              onTagSelect={(tag) => setSelectedTags(prev => [...prev, tag])}
+              onTagDeselect={(tag) => setSelectedTags(prev => prev.filter(t => {
+                if (typeof tag === 'number' && typeof t === 'number') {
+                  return t !== tag;
+                } else if (typeof tag === 'object' && typeof t === 'object') {
+                  return t.name !== tag.name;
+                }
+                return true;
+              }))}
+            />
 
             {/* Barre de progression */}
             {uploading && (
@@ -390,11 +390,11 @@ function VideoForAppEdit() {
                 {uploading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Updating...
+                    更新中...
                   </>
                 ) : (
                   <>
-                    ✏️ Update
+                    ✏️ 更新
                   </>
                 )}
               </button>
