@@ -401,5 +401,4 @@ const VideoForAppDetails: React.FC = () => {
     </>
   );
 };
-
 export default VideoForAppDetails;
