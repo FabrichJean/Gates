@@ -39,7 +39,7 @@ function MangaCheckerDrop({
       if (isDetails) {
         reFetch();
       }
-      toast.success(`Statut mis à jour: ${check}`);
+      toast.success(`状态更新: ${check}`);
     } catch (err: any) {
       toast.error("Erreur: " + (err.response?.data?.message || err.message));
     }
@@ -80,7 +80,7 @@ function MangaCheckerDrop({
               >
                 <span className="flex items-center gap-2">
                   <FiHexagon className="text-gray-500 dark:text-gray-400" />
-                  <span className="text-gray-700 dark:text-gray-300">ready</span>
+                  <span className="text-gray-700 dark:text-gray-300">准备好</span>
                 </span>
               </div>
             )}
@@ -91,7 +91,7 @@ function MangaCheckerDrop({
                     to={`/mangas/${manga.id}/edit`}
                     className="btn bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700 border-none w-full transition-colors duration-300"
                   >
-                    Modifier à nouveau
+                    再次编辑
                   </Link>
                 )}
 
@@ -104,7 +104,7 @@ function MangaCheckerDrop({
                     to={`/mangas/${manga.id}/edit`}
                     className="text-blue-500 font-bold text-underline w-full transition-colors duration-300"
                   >
-                    Modifier à nouveau
+                    再次编辑
                   </Link>
                 )}
               </div>

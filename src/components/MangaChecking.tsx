@@ -42,7 +42,7 @@ export default function MangaChecking({ manga, index = 0, reFetch }: Props) {
           <FiHexagon className="text-gray-500 dark:text-gray-400" />
         )}
         <span className="text-gray-700 dark:text-gray-300">
-          {checking === "null" ? "not ready" : checking || "pending"}
+          {checking === "null" ? "还没准备好" : checking || "待办的"}
         </span>
       </div>
 
