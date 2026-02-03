@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useUsers } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, mapStatusProcessing, reverseStatus } from "../utils/filter";
-import UseCreators from "../hooks/useCreators";
+import CreatorAutoComplete from "./CreatorAutoComplete";
+import type { Creator } from "./creators/CreatorList";
 
 export type TFilter = {
     category_id: string;
@@ -32,12 +33,8 @@ export default function VideoFilters({
     scope?: "videos" | "bot";
 }) {
     const { data: users } = useUsers("");
-    const { data: creators } = UseCreators();
     const { data: cat } = UseCategory();
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
-
-    const [creatorOpen, setCreatorOpen] = useState(false);
-    const creatorRef = useRef<HTMLDivElement>(null);
 
     // Chargement des filtres sauvegardés
     useEffect(() => {
@@ -62,23 +59,28 @@ export default function VideoFilters({
             console.warn("⚠️ Impossible de lire le filtre sauvegardé :", e);
             localStorage.removeItem("videos_filtered");
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // fermer dropdown creator au clic hors zone
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (creatorRef.current && !creatorRef.current.contains(event.target as Node)) {
-                setCreatorOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleChange = (key: string, value: any) => {
+    const handleChange = useCallback((key: string, value: any) => {
         setFilters((prev: any) => ({ ...prev, [key]: value }));
-    };
+    }, []);
+
+    const handleCreatorChange = useCallback((value: string | null) => {
+        handleChange("creatorSearch", value || "");
+        if (!value) {
+            handleChange("creator_id", "");
+        }
+    }, [handleChange]);
+
+    const handleCreatorSelect = useCallback((creator: Creator | null) => {
+        if (creator) {
+            handleChange("creator_id", String(creator.id));
+            handleChange("creatorSearch", creator.name);
+        } else {
+            handleChange("creator_id", "");
+            handleChange("creatorSearch", "");
+        }
+    }, [handleChange]);
 
     // Soumission des filtres
     const submit = async () => {
@@ -172,63 +174,14 @@ export default function VideoFilters({
                     </div>
 
                     {/* Creator searchable */}
-                    <div ref={creatorRef} className="relative">
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">创建者</label>
-
-                        <input
-                            type="text"
-                            placeholder="搜索创建者..."
+                    <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+                        <CreatorAutoComplete
                             value={filters.creatorSearch || ""}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === "") {
-                                    // si l'utilisateur efface l'input, vide aussi creator_id
-                                    handleChange("creatorSearch", "");
-                                    handleChange("creator_id", "");
-                                } else {
-                                    handleChange("creatorSearch", value);
-                                }
-                            }}
-                            onFocus={() => setCreatorOpen(true)}
-                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                            onChange={handleCreatorChange}
+                            onSelect={handleCreatorSelect}
+                            placeholder="Search creator..."
                         />
-
-                        {creatorOpen && (
-                            <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
-                                <div
-                                    className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                                    onClick={() => {
-                                        handleChange("creator_id", "");
-                                        handleChange("creatorSearch", "");
-                                        setCreatorOpen(false);
-                                    }}
-                                >
-                                    all
-                                </div>
-
-                                {(!creators || creators.length === 0) && (
-                                    <div className="px-3 py-2 text-gray-500">未找到创建者</div>
-                                )}
-
-                                {creators
-                                    ?.filter((c: any) =>
-                                        c.name?.toLowerCase().includes((filters.creatorSearch || "").toLowerCase())
-                                    )
-                                    .map((c: any) => (
-                                        <div
-                                            key={c.id}
-                                            className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                                            onClick={() => {
-                                                handleChange("creator_id", String(c.id));
-                                                handleChange("creatorSearch", c.name);
-                                                setCreatorOpen(false);
-                                            }}
-                                        >
-                                            {c.name}
-                                        </div>
-                                    ))}
-                            </div>
-                        )}
                     </div>
                 </div>
 
