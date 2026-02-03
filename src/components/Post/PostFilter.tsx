@@ -43,14 +43,12 @@ export default function PostFilter({
 
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
-    const [creatorOpen, setCreatorOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>(
         filters?.category_id ? [String(filters.category_id)] : []
     );
 
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
-    const creatorRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (filters?.category_id && categoriesResponse?.categories) {
@@ -65,14 +63,11 @@ export default function PostFilter({
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-                setOpen(false);
-            }
-            if (subCategoryDropdownRef.current && !subCategoryDropdownRef.current.contains(event.target as Node)) {
-                setSubOpen(false);
-            }
-            if (creatorRef.current && !creatorRef.current.contains(event.target as Node)) {
-                setCreatorOpen(false);
-            }
+                    setOpen(false);
+                }
+                if (subCategoryDropdownRef.current && !subCategoryDropdownRef.current.contains(event.target as Node)) {
+                    setSubOpen(false);
+                }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
