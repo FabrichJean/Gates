@@ -49,7 +49,7 @@ export const MangaUploadProgress: React.FC<MangaUploadProgressProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
             <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
-              {state.currentTask || "Uploading..."}
+              {state.currentTask || "正在上传..."}
             </p>
             <span className="text-xs font-semibold text-emerald-600 flex-shrink-0">
               {Math.round(state.progress)}%
@@ -72,7 +72,7 @@ export const MangaUploadProgress: React.FC<MangaUploadProgressProps> = ({
       <div className="flex items-center gap-3 mb-2">
         <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-1">
-          {state.currentTask || "Uploading..."}
+          {state.currentTask || "正在上传..."}
         </p>
         <span className="text-sm font-semibold text-emerald-600">
           {Math.round(state.progress)}%

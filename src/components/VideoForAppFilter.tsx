@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import UseCreators from "../hooks/useCreators";
+import CreatorAutoComplete from "./CreatorAutoComplete";
 import UseCategory from "../hooks/useCategory";
 import { UseSubCategoryReactive } from "../hooks/useSubCategory";
 import type { Category } from "../components/CategoryAutoComplete";
@@ -39,7 +40,7 @@ export default function VideoForAppFilter({
   const { data: categories } = UseCategory();
   const { data: subCategories } = UseSubCategoryReactive(selectedCategory);
 
-  const [creatorOpen, setCreatorOpen] = useState(false);
+  // creator dropdown state removed; using CreatorAutoComplete instead
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [subcategoryOpen, setSubcategoryOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -87,9 +88,6 @@ export default function VideoForAppFilter({
   // fermer dropdown creator au clic hors zone
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (creatorRef.current && !creatorRef.current.contains(event.target as Node)) {
-        setCreatorOpen(false);
-      }
       if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
         setCategoryOpen(false);
       }
@@ -102,7 +100,15 @@ export default function VideoForAppFilter({
   }, []);
 
   const handleChange = (key: string, value: any) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
+    setFilters((prev: any) => {
+      // avoid creating a new object / triggering updates when value is unchanged
+      if (prev && Object.prototype.hasOwnProperty.call(prev, key)) {
+        // treat undefined/null/empty string as comparable
+        const prevVal = prev[key];
+        if (prevVal === value) return prev;
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   // Soumission des filtres
@@ -146,7 +152,6 @@ export default function VideoForAppFilter({
     ) as HTMLDialogElement | null;
     modal?.close();
     setHasInteracted(false);
-    setCreatorOpen(false);
     setCategoryOpen(false);
     setSubcategoryOpen(false);
   };
@@ -238,60 +243,32 @@ export default function VideoForAppFilter({
 
 
         <div className="flex flex-col gap-6">
-          {/* Creator searchable */}
+          {/* Creator searchable (replaced with CreatorAutoComplete) */}
           <div ref={creatorRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">创作者</label>
-            <input
-              type="text"
-              placeholder="搜索创作者..."
-              value={filters.creatorSearch || ""}
-              onChange={(e) => {
-                const value = e.target.value;
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+            <CreatorAutoComplete
+              value={filters.creatorSearch || null}
+              onChange={(v) => {
                 setHasInteracted(true);
-                if (value === "") {
+                if (!v) {
                   handleChange("creatorSearch", "");
                   handleChange("creator_id", "");
                 } else {
-                  handleChange("creatorSearch", value);
+                  handleChange("creatorSearch", v);
                 }
               }}
-              onFocus={() => setCreatorOpen(true)}
-              className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+              onSelect={(c) => {
+                if (c) {
+                  handleChange("creator_id", String(c.id));
+                  handleChange("creatorSearch", c.name);
+                } else {
+                  handleChange("creator_id", "");
+                  handleChange("creatorSearch", "");
+                }
+              }}
+              placeholder="Search creator..."
+              autoSuggest={false}
             />
-            {creatorOpen && (
-              <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
-                <div
-                  className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                  onClick={() => {
-                    handleChange("creator_id", "");
-                    handleChange("creatorSearch", "");
-                    setCreatorOpen(false);
-                  }}
-                >
-                  all
-                </div>
-                {(!creators || creators.length === 0) && (
-                  <div className="px-3 py-2 text-gray-500">未找到创作者</div>
-                )}
-                {creators
-                  ?.filter((c: any) =>
-                    c.name?.toLowerCase().includes((filters.creatorSearch || "").toLowerCase())
-                  )
-                  .map((c: any) => (
-                    <div
-                      key={c.id}
-                      className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                      onClick={() => {
-                        handleChange("creator_id", String(c.id));
-                        handleChange("creatorSearch", c.name);
-                        setCreatorOpen(false);
-                      }}
-                    >
-                      {c.name}
-                    </div>
-                  ))}
-              </div>
-            )}
           </div>
 
           {/* Category searchable */}
@@ -431,7 +408,6 @@ export default function VideoForAppFilter({
                 subcategorySearch: "",
               });
               setHasInteracted(false);
-              setCreatorOpen(false);
               setCategoryOpen(false);
               setSubcategoryOpen(false);
               // reset pagination to page 1 when filters are reset

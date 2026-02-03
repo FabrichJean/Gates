@@ -204,10 +204,10 @@ const Mangas: React.FC = () => {
               <BookOpen className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              未找到任何漫画
+              没有找到漫画{" "}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              尝试调整筛选条件或创建一个新的漫画。
+              尝试调整筛选条件或创作一部新的漫画。
             </p>
           </motion.div>
         ) : (
@@ -256,12 +256,12 @@ const Mangas: React.FC = () => {
                           {manga.isDeleted ? (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-medium">
                               <XCircle className="w-2.5 h-2.5" />
-                              Désactivé
+                              Disabled
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-[10px] font-medium">
                               <CheckCircle className="w-2.5 h-2.5" />
-                              Actif
+                              Activated
                             </span>
                           )}
                         </div>
@@ -282,8 +282,8 @@ const Mangas: React.FC = () => {
                                 }`}
                             >
                               {manga.processing === "done"
-                                ? "✓ Uploaded"
-                                : "Pending"}
+                                ? "✓ 已上传"
+                                : "待办的"}
                             </span>
                           </div>
                         )}
@@ -295,20 +295,20 @@ const Mangas: React.FC = () => {
                             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-white/20 backdrop-blur-md rounded-lg hover:bg-white/30 transition-all duration-200 text-white text-xs font-medium"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            Voir
+                            沃伊尔
                           </Link>
                           <Link
                             to={`/mangas/${manga.id}/edit`}
                             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-white/20 backdrop-blur-md rounded-lg hover:bg-white/30 transition-all duration-200 text-white text-xs font-medium"
                           >
                             <Edit className="w-3.5 h-3.5" />
-                            Éditer
+                            编辑器
                           </Link>
                           {user?.role === RoleEnum.SUPERADMIN && (
                             <>
                               <button // btn single sync
                                 type="button"
-                                title="Synchroniser"
+                                title="同步器"
                                 onClick={() => {
                                   setSelectedManga(manga);
                                   setSingleSyncOpen(true);
@@ -334,17 +334,17 @@ const Mangas: React.FC = () => {
                                   }`}
                                 title={
                                   manga.processing === "done" ||
-                                    manga.processing === "working"
-                                    ? "Déjà envoyé"
+                                  manga.processing === "working"
+                                    ? "似曾相识"
                                     : manga.checking !== "checked"
-                                      ? "Manga must be checked first"
-                                      : "Envoyer"
+                                      ? "漫画必须先经过检查。"
+                                      : "使者"
                                 }
                               >
                                 <Send className="w-3.5 h-3.5" />
                                 {manga.processing === "done"
-                                  ? "Uploaded"
-                                  : "Send"}
+                                  ? "已上传"
+                                  : "发送"}
                               </button>
                             </>
                           )}
@@ -438,10 +438,10 @@ const Mangas: React.FC = () => {
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
                                 ? () =>
-                                  toggleDeleted(
-                                    manga.id,
-                                    manga.isDeleted || false
-                                  )
+                                    toggleDeleted(
+                                      manga.id,
+                                      manga.isDeleted || false,
+                                    )
                                 : undefined
                             }
                           />
@@ -459,31 +459,31 @@ const Mangas: React.FC = () => {
                     <thead className="bg-gray-50 dark:bg-gray-800">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Cover
+                          覆盖
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Ref
+                          参考号
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Créateur
+                          创作者
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Catégorie
+                          类别
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Chapitres
+                          章节
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Checking
+                          检查
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Status
+                          地位
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Activate
+                          激活
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Actions
+                          行动
                         </th>
                       </tr>
                     </thead>
@@ -502,7 +502,10 @@ const Mangas: React.FC = () => {
                               <div className="w-12 h-16 rounded-md overflow-hidden shadow-sm">
                                 {manga.cover_url ? (
                                   <img
-                                    src={cdnS3(manga.s3_cover_url) || manga.cover_url}
+                                    src={
+                                      cdnS3(manga.s3_cover_url) ||
+                                      manga.cover_url
+                                    }
                                     alt={manga.ref}
                                     className="w-full h-full object-cover"
                                   />
@@ -605,8 +608,8 @@ const Mangas: React.FC = () => {
                                       }`}
                                   >
                                     {manga.processing === "done"
-                                      ? "✓ Uploaded"
-                                      : "Pending"}
+                                      ? "✓ 已上传"
+                                      : "待办的"}
                                   </span>
                                 ) : (
                                   <span className="text-xs text-gray-400 dark:text-gray-500">
@@ -627,10 +630,10 @@ const Mangas: React.FC = () => {
                                 onChange={
                                   user?.role === RoleEnum.SUPERADMIN
                                     ? () =>
-                                      toggleDeleted(
-                                        manga.id,
-                                        manga.isDeleted || false
-                                      )
+                                        toggleDeleted(
+                                          manga.id,
+                                          manga.isDeleted || false,
+                                        )
                                     : undefined
                                 }
                               />
@@ -642,7 +645,7 @@ const Mangas: React.FC = () => {
                                 <Link
                                   to={`/mangas/${manga.id}`}
                                   className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-all duration-200"
-                                  title="Voir"
+                                  title="看"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Link>
@@ -657,7 +660,7 @@ const Mangas: React.FC = () => {
                                   <>
                                     <button // btn single sync
                                       type="button"
-                                      title="Synchroniser"
+                                      title="同步"
                                       onClick={() => {
                                         setSelectedManga(manga);
                                         setSingleSyncOpen(true);
@@ -680,11 +683,11 @@ const Mangas: React.FC = () => {
                                         }`}
                                       title={
                                         manga.processing === "done" ||
-                                          manga.processing === "working"
-                                          ? "Not to send"
+                                        manga.processing === "working"
+                                          ? "不发送"
                                           : manga.checking !== "checked"
-                                            ? "Manga must be checked first"
-                                            : "Envoyer"
+                                            ? "漫画必须先经过检查。"
+                                            : "发送"
                                       }
                                     >
                                       <Send className="w-4 h-4" />
@@ -730,8 +733,8 @@ const Mangas: React.FC = () => {
         onSubmit={handleSingleSync}
         title={
           selectedManga
-            ? `Synchroniser ${selectedManga.title || selectedManga.ref}`
-            : "Synchroniser"
+            ? `同步 ${selectedManga.title || selectedManga.ref}`
+            : "同步"
         }
       />
     </div>

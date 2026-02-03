@@ -51,6 +51,8 @@ const VideoForAppManagement = () => {
     isBanned: null as boolean | null,
     creator_id: '',
     modifyTags: false,
+    randomTags: false,
+    randomTagsText: '',
   });
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
@@ -219,12 +221,37 @@ const VideoForAppManagement = () => {
       isBanned: null,
       creator_id: '',
       modifyTags: false,
+      randomTags: false,
+      randomTagsText: '',
     });
     setBulkEditProgress({ current: 0, total: 0 });
   };
 
+  // Helper function to pick random tags from a list
+  const pickRandomTags = (tagList: string[], count: number = 3): string[] => {
+    // Filter empty lines and trim
+    const cleanedTags = tagList
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+    // If we have fewer tags than requested, return all
+    if (cleanedTags.length <= count) {
+      return cleanedTags;
+    }
+
+    // Randomly pick count tags
+    const shuffled = [...cleanedTags].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
+
   const handleBulkEditSubmit = async () => {
     if (selectedVideos.size === 0) return;
+
+    // Validate random tags if enabled
+    if (bulkEditData.randomTags && bulkEditData.randomTagsText.trim().length === 0) {
+      toast.error('Veuillez fournir une liste de tags pour la sélection aléatoire');
+      return;
+    }
 
     setBulkEditLoading(true);
     setBulkEditProgress({ current: 0, total: selectedVideos.size });
@@ -239,7 +266,24 @@ const VideoForAppManagement = () => {
 
           if (bulkEditData.title) updateData.title = bulkEditData.title;
           if (bulkEditData.description) updateData.description = bulkEditData.description;
-          if (bulkEditData.modifyTags && bulkEditData.tags.length > 0) updateData.tag_category_ids = bulkEditData.tags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name));
+          
+          // Handle tags: either from manual selection or random selection
+          let tagsToApply: (number | string)[] = [];
+          
+          if (bulkEditData.randomTags) {
+            // Get random tags from the provided list
+            const tagList = bulkEditData.randomTagsText.split('\n');
+            const randomTagNames = pickRandomTags(tagList, 3);
+            tagsToApply = randomTagNames;
+          } else if (bulkEditData.modifyTags && bulkEditData.tags.length > 0) {
+            // Use manually selected tags
+            tagsToApply = bulkEditData.tags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name));
+          }
+          
+          if (tagsToApply.length > 0) {
+            updateData.tag_category_ids = tagsToApply;
+          }
+          
           if (bulkEditData.category) updateData.category = bulkEditData.category;
           if (bulkEditData.subcategory) updateData.subcategory = bulkEditData.subcategory;
           if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
@@ -587,6 +631,37 @@ const VideoForAppManagement = () => {
                       onTagSelect={handleTagSelect}
                       onTagDeselect={handleTagDeselect}
                     />
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="randomTags"
+                    checked={bulkEditData.randomTags}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, randomTags: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label htmlFor="randomTags" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Ajouter des tags aléatoires (3 par vidéo)
+                  </label>
+                </div>
+
+                {bulkEditData.randomTags && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Liste de tags (un par ligne)
+                    </label>
+                    <textarea
+                      value={bulkEditData.randomTagsText}
+                      onChange={(e) => setBulkEditData(prev => ({ ...prev, randomTagsText: e.target.value }))}
+                      placeholder="recommend&#10;featured&#10;mandatory&#10;creampie&#10;incest"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs"
+                      rows={8}
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      3 tags seront sélectionnés aléatoirement parmi cette liste pour chaque vidéo
+                    </p>
                   </div>
                 )}
 

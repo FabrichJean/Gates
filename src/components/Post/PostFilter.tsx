@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { getPosts } from "../../api/posts";
 import useCategoryPost from "../../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../../hooks/posts/useSubCategoryPost";
 import { useUsers } from "../../hooks/useAuth";
-import UseCreators from "../../hooks/useCreators";
 import { mapStatus, mapStatusProcessing, reverseStatus } from "../../utils/filter";
+import CreatorAutoComplete from "../CreatorAutoComplete";
+import type { Creator } from "../creators/CreatorList";
 
 export type TPostFilter = {
     category_id: string;
@@ -37,20 +38,17 @@ export default function PostFilter({
     onSubmit: (d: any) => void;
 }) {
     const { data: users } = useUsers("");
-    const { data: creators } = UseCreators();
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
     const { data: subcat } = useSubCategoryPost(Number(filters?.category_id));
 
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
-    const [creatorOpen, setCreatorOpen] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>(
         filters?.category_id ? [String(filters.category_id)] : []
     );
 
     const categoryDropdownRef = useRef<HTMLDivElement>(null);
     const subCategoryDropdownRef = useRef<HTMLDivElement>(null);
-    const creatorRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (filters?.category_id && categoriesResponse?.categories) {
@@ -69,9 +67,6 @@ export default function PostFilter({
             }
             if (subCategoryDropdownRef.current && !subCategoryDropdownRef.current.contains(event.target as Node)) {
                 setSubOpen(false);
-            }
-            if (creatorRef.current && !creatorRef.current.contains(event.target as Node)) {
-                setCreatorOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -98,13 +93,29 @@ export default function PostFilter({
             console.warn("⚠️ Impossible de lire le filtre sauvegardé posts:", e);
             localStorage.removeItem("posts_filtered");
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // accepte maintenant n'importe quel type de valeur (string | number)
-    const handleChange = (key: string, value: any) => {
+    const handleChange = useCallback((key: string, value: any) => {
         setFilters((prev: any) => ({ ...prev, [key]: value }));
-    };
+    }, []);
+
+    const handleCreatorChange = useCallback((value: string | null) => {
+        handleChange("creatorSearch", value || "");
+        if (!value) {
+            handleChange("creator_id", "");
+        }
+    }, [handleChange]);
+
+    const handleCreatorSelect = useCallback((creator: Creator | null) => {
+        if (creator) {
+            handleChange("creator_id", String(creator.id));
+            handleChange("creatorSearch", creator.name);
+        } else {
+            handleChange("creator_id", "");
+            handleChange("creatorSearch", "");
+        }
+    }, [handleChange]);
 
     const handleSelectCategory = (cat: { id: number; name: string }) => {
         setFilters((prev: any) => ({
@@ -293,75 +304,16 @@ export default function PostFilter({
                         </div>
                     </div>
 
-                    <div ref={creatorRef} className="relative">
+                    <div>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
                             创造者
                         </label>
-
-                        {/* Champ de recherche */}
-                        <input
-                            type="text"
-                            placeholder="搜索创建者..."
-                            // on affiche uniquement creatorSearch — ainsi si l'utilisateur efface, la valeur n'est pas ré-écrasée par creator_id
+                        <CreatorAutoComplete
                             value={filters.creatorSearch || ""}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                // si l'utilisateur vide le champ, on vide aussi creator_id pour permettre la suppression
-                                if (value === "") {
-                                    handleChange("creatorSearch", "");
-                                    handleChange("creator_id", "");
-                                } else {
-                                    handleChange("creatorSearch", value);
-                                }
-                            }}
-                            onFocus={() => setCreatorOpen(true)}
-                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                            onChange={handleCreatorChange}
+                            onSelect={handleCreatorSelect}
+                            placeholder="Search creator..."
                         />
-
-                        {/* Liste déroulante filtrée */}
-                        {creatorOpen && (
-                            <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
-
-                                {/* Option ALL */}
-                                <div
-                                    className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                                    onClick={() => {
-                                        handleChange("creator_id", "");
-                                        handleChange("creatorSearch", "");
-                                        setCreatorOpen(false);
-                                    }}
-                                >
-                                    all
-                                </div>
-
-                                {/* Si aucun creator */}
-                                {(!creators || creators.length === 0) && (
-                                    <div className="px-3 py-2 text-gray-500">没有找到创作者</div>
-                                )}
-
-                                {/* Résultats filtrés */}
-                                {creators
-                                    ?.filter((c) =>
-                                        c.name
-                                            .toLowerCase()
-                                            .includes((filters.creatorSearch || "").toLowerCase())
-                                    )
-                                    .map((c) => (
-                                        <div
-                                            key={c.id}
-                                            className="px-3 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
-                                            onClick={() => {
-                                                // stocke l'id en string pour garder la cohérence côté filters (backend attend string souvent)
-                                                handleChange("creator_id", String(c.id));
-                                                handleChange("creatorSearch", c.name);
-                                                setCreatorOpen(false);
-                                            }}
-                                        >
-                                            {c.name}
-                                        </div>
-                                    ))}
-                            </div>
-                        )}
                     </div>
 
                     <div>
