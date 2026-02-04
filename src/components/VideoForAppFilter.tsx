@@ -218,9 +218,9 @@ export default function VideoForAppFilter({
             <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">类型</p>
             <div className="flex gap-3">
               {[
-                { value: '', label: 'all' },
-                { value: '1', label: 'Short' },
-                { value: '2', label: 'Long' },
+                { value: '', label: '全部' },
+                { value: '1', label: '短片' },
+                { value: '2', label: '长片' },
               ].map((option) => (
                 <label key={option.value} className="flex items-center gap-1 cursor-pointer">
                   <input
@@ -245,7 +245,7 @@ export default function VideoForAppFilter({
         <div className="flex flex-col gap-6">
           {/* Creator searchable (replaced with CreatorAutoComplete) */}
           <div ref={creatorRef} className="relative">
-            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">创造者</label>
             <CreatorAutoComplete
               value={filters.creatorSearch || null}
               onChange={(v) => {
@@ -266,7 +266,7 @@ export default function VideoForAppFilter({
                   handleChange("creatorSearch", "");
                 }
               }}
-              placeholder="Search creator..."
+              placeholder="搜索创建者..."
               autoSuggest={false}
             />
           </div>
