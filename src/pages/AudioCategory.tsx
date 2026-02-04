@@ -52,7 +52,7 @@ export default function AudioCategory() {
       setCategories(res?.data || []);
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors du chargement des catégories audio");
+      toast.error("加载音频分类时出错");
     } finally {
       setLoading(false);
     }
@@ -109,13 +109,13 @@ export default function AudioCategory() {
 
   const handleCreateCategory = async () => {
     if (!categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
     setSubmitting(true);
     try {
       await createAudioCategoryApi({ name: categoryForm.name });
-      toast.success("Catégorie audio créée");
+      toast.success("音频分类创建成功");
       setShowCategoryModal(false);
       setCategoryForm({ name: "" });
       fetchCategories();
@@ -129,20 +129,20 @@ export default function AudioCategory() {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
     setSubmitting(true);
     try {
       await updateAudioCategoryApi(editingCategory.id, { name: categoryForm.name });
-      toast.success("Catégorie mise à jour");
+      toast.success("分类已更新");
       setShowCategoryModal(false);
       setEditingCategory(null);
       setCategoryForm({ name: "" });
       fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
     } finally {
       setSubmitting(false);
     }
@@ -151,16 +151,16 @@ export default function AudioCategory() {
   const handleDeleteCategory = async (id: number) => {
     const category = categories.find((c) => c.id === id);
     const confirmed = window.confirm(
-      `Êtes-vous sûr de vouloir supprimer la catégorie "${category?.name}" ? Cette action est irréversible.`
+      `您确定要删除分类 "${category?.name}" 吗？此操作不可逆。`
     );
     if (!confirmed) return;
     try {
       await deleteAudioCategoryApi(id);
-      toast.success("Catégorie supprimée");
+      toast.success("分类已删除");
       fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
     }
   };
 
@@ -178,13 +178,13 @@ export default function AudioCategory() {
 
   const handleCreateSubCategory = async () => {
     if (!subCategoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
     setSubmitting(true);
     try {
       await createAudioSubCategoryApi({ name: subCategoryForm.name, audio_category_id: subCategoryForm.audio_category_id });
-      toast.success("Sous-catégorie créée");
+      toast.success("子分类创建成功");
       setShowSubCategoryModal(false);
       setSubCategoryForm({ name: "", audio_category_id: 0 });
       await loadSubcategories(subCategoryForm.audio_category_id, true);
@@ -198,21 +198,21 @@ export default function AudioCategory() {
 
   const handleUpdateSubCategory = async () => {
     if (!editingSubCategory || !subCategoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
     setSubmitting(true);
     const categoryId = subCategoryForm.audio_category_id;
     try {
       await updateAudioSubCategoryApi(editingSubCategory.id, { name: subCategoryForm.name });
-      toast.success("Sous-catégorie mise à jour");
+      toast.success("子分类已更新");
       setShowSubCategoryModal(false);
       setEditingSubCategory(null);
       setSubCategoryForm({ name: "", audio_category_id: 0 });
       await loadSubcategories(categoryId, true);
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
     } finally {
       setSubmitting(false);
     }
@@ -220,16 +220,16 @@ export default function AudioCategory() {
 
   const handleDeleteSubCategory = async (subCategoryId: number, categoryId: number) => {
     const confirmed = window.confirm(
-      "Êtes-vous sûr de vouloir supprimer cette sous-catégorie ? Cette action est irréversible."
+      "您确定要删除此子分类吗？此操作不可逆。"
     );
     if (!confirmed) return;
     try {
       await deleteAudioSubCategoryApi(subCategoryId);
-      toast.success("Sous-catégorie supprimée");
+      toast.success("子分类已删除");
       setSubcategoriesMap((prev) => ({ ...prev, [categoryId]: prev[categoryId]?.filter((s) => s.id !== subCategoryId) || [] }));
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
     }
   };
 
@@ -241,15 +241,15 @@ export default function AudioCategory() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
                 <FolderTree className="w-8 h-8 text-indigo-600" />
-                Catégories audio
+                音频分类
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Gérer les catégories et sous-catégories audio</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">管理音频分类和子分类</p>
             </div>
 
             <div className="flex items-center gap-2">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => openCategoryModal()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow">
                 <Plus className="w-4 h-4" />
-                Nouvelle Catégorie
+                新建分类
               </motion.button>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function AudioCategory() {
         {/* Search */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-6">
           <div className="max-w-md">
-            <input type="text" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} placeholder="Rechercher une catégorie..." className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <input type="text" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} placeholder="搜索分类..." className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         </motion.div>
 
@@ -286,14 +286,14 @@ export default function AudioCategory() {
 
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <Tag className="w-3.5 h-3.5" />
-                        <span>{category.subCategoryCount || (subcategoriesMap[category.id] || []).length} sous-catégories</span>
+                        <span>{category.subCategoryCount || (subcategoriesMap[category.id] || []).length} 子分类</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => openSubCategoryModal(category.id)} className="p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg transition-colors" title="Ajouter une sous-catégorie"><Plus className="w-4 h-4" /></button>
-                      <button onClick={() => openCategoryModal(category)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors" title="Modifier"><Edit className="w-4 h-4" /></button>
-                      <button onClick={() => handleDeleteCategory(category.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors" title="Supprimer"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => openSubCategoryModal(category.id)} className="p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg transition-colors" title="添加子分类"><Plus className="w-4 h-4" /></button>
+                      <button onClick={() => openCategoryModal(category)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors" title="修改"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteCategory(category.id)} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors" title="删除"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </div>
                 </div>
@@ -305,7 +305,7 @@ export default function AudioCategory() {
                         {(() => {
                           const subcategories = subcategoriesMap[category.id] || [];
                           return subcategories.length === 0 ? (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Aucune sous-catégorie</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">无子分类</p>
                           ) : (
                             subcategories.map((sub) => (
                               <motion.div key={sub.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center justify-between gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -319,8 +319,8 @@ export default function AudioCategory() {
                                 </div>
 
                                 <div className="flex items-center gap-1 flex-shrink-0">
-                                  <button onClick={() => openSubCategoryModal(category.id, sub)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors" title="Modifier"><Edit className="w-3.5 h-3.5" /></button>
-                                  <button onClick={() => handleDeleteSubCategory(sub.id, category.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title="Supprimer"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => openSubCategoryModal(category.id, sub)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors" title="修改"><Edit className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => handleDeleteSubCategory(sub.id, category.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title="删除"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </motion.div>
                             ))
@@ -337,7 +337,7 @@ export default function AudioCategory() {
           {filteredCategories.length === 0 && (
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <FolderTree className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">{searchTerm ? "Aucun résultat trouvé" : "Aucune catégorie"}</p>
+              <p className="text-gray-600 dark:text-gray-400">{searchTerm ? "未找到结果" : "无分类"}</p>
             </div>
           )}
         </motion.div>
@@ -355,20 +355,20 @@ export default function AudioCategory() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}</h2>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{editingCategory ? "修改分类" : "新建分类"}</h2>
                   <button onClick={() => setShowCategoryModal(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"><X className="w-5 h-5" /></button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom <span className="text-red-500">*</span></label>
-                    <input type="text" value={categoryForm.name} onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Nom de la catégorie" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">名称 <span className="text-red-500">*</span></label>
+                    <input type="text" value={categoryForm.name} onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="分类名称" />
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 mt-6">
-                  <button onClick={() => setShowCategoryModal(false)} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" disabled={submitting}>Annuler</button>
-                  <button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory} disabled={submitting || !categoryForm.name.trim()} className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{submitting ? (<><Loader2 className="w-4 h-4 animate-spin" />Enregistrement...</>) : (<><Save className="w-4 h-4" />{editingCategory ? "Mettre à jour" : "Créer"}</>)}</button>
+                  <button onClick={() => setShowCategoryModal(false)} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" disabled={submitting}>取消</button>
+                  <button onClick={editingCategory ? handleUpdateCategory : handleCreateCategory} disabled={submitting || !categoryForm.name.trim()} className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{submitting ? (<><Loader2 className="w-4 h-4 animate-spin" />保存中...</>) : (<><Save className="w-4 h-4" />{editingCategory ? "更新" : "创建"}</>)}</button>
                 </div>
               </div>
             </motion.div>
@@ -382,28 +382,28 @@ export default function AudioCategory() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{editingSubCategory ? "Modifier la sous-catégorie" : "Nouvelle sous-catégorie"}</h2>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{editingSubCategory ? "修改子分类" : "新建子分类"}</h2>
                   <button onClick={() => setShowSubCategoryModal(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"><X className="w-5 h-5" /></button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Catégorie parente <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">父分类 <span className="text-red-500">*</span></label>
                     <select value={subCategoryForm.audio_category_id} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, audio_category_id: Number(e.target.value) })} className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled={loading}>
-                      <option value={0}>{loading ? "Chargement des catégories..." : "Sélectionner une catégorie"}</option>
+                      <option value={0}>{loading ? "加载分类中..." : "选择一个分类"}</option>
                       {categories.map((cat) => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom <span className="text-red-500">*</span></label>
-                    <input type="text" value={subCategoryForm.name} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, name: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Nom de la sous-catégorie" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">名称 <span className="text-red-500">*</span></label>
+                    <input type="text" value={subCategoryForm.name} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, name: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="子分类名称" />
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 mt-6">
-                  <button onClick={() => setShowSubCategoryModal(false)} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" disabled={submitting}>Annuler</button>
-                  <button onClick={editingSubCategory ? handleUpdateSubCategory : handleCreateSubCategory} disabled={submitting || loading || !subCategoryForm.name.trim() || (!editingSubCategory && !subCategoryForm.audio_category_id)} className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{submitting ? (<><Loader2 className="w-4 h-4 animate-spin" />Enregistrement...</>) : (<><Save className="w-4 h-4" />{editingSubCategory ? "Mettre à jour" : "Créer"}</>)}</button>
+                  <button onClick={() => setShowSubCategoryModal(false)} className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" disabled={submitting}>取消</button>
+                  <button onClick={editingSubCategory ? handleUpdateSubCategory : handleCreateSubCategory} disabled={submitting || loading || !subCategoryForm.name.trim() || (!editingSubCategory && !subCategoryForm.audio_category_id)} className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{submitting ? (<><Loader2 className="w-4 h-4 animate-spin" />保存中...</>) : (<><Save className="w-4 h-4" />{editingSubCategory ? "更新" : "创建"}</>)}</button>
                 </div>
               </div>
             </motion.div>

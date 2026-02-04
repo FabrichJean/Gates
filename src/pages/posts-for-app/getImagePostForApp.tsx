@@ -18,21 +18,21 @@ const ImageStatusBadge: React.FC<{ status: number; label: string }> = ({ status,
           bgColor: 'bg-green-100 dark:bg-green-900/30',
           textColor: 'text-green-700 dark:text-green-300',
           borderColor: 'border-green-200 dark:border-green-700',
-          label: 'Téléchargée'
+          label: '已上传'
         };
       case 0:
         return {
           bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
           textColor: 'text-yellow-700 dark:text-yellow-300',
           borderColor: 'border-yellow-200 dark:border-yellow-700',
-          label: 'En cours'
+          label: '进行中'
         };
       default:
         return {
           bgColor: 'bg-gray-100 dark:bg-gray-800',
           textColor: 'text-gray-700 dark:text-gray-300',
           borderColor: 'border-gray-200 dark:border-gray-700',
-          label: 'Inconnue'
+          label: '未知'
         };
     }
   };
@@ -52,15 +52,15 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
   const handleDelete = async (imageId: number) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) return;
+    if (!window.confirm('您确定要删除这张图片吗？')) return;
 
     setIsDeleting(imageId);
     try {
       await deletePostForAppImage(imageId);
-      toast.success('Image supprimée avec succès');
+      toast.success('图片删除成功');
       reFetch();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Erreur lors de la suppression');
+      toast.error(error?.response?.data?.message || '删除时出错');
     } finally {
       setIsDeleting(null);
     }
@@ -81,7 +81,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
           <ImageIcon className="w-8 h-8 text-gray-400" />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 text-center">Aucune image disponible</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center">无可用图片</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <ImageIcon className="w-5 h-5" />
-          Images ({images.length})
+          图片 ({images.length})
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -118,7 +118,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                       setSelectedImage(image);
                     }}
                     className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                    title="Voir en plein écran"
+                    title="全屏查看"
                   >
                     <Eye className="w-4 h-4 text-gray-900" />
                   </button>
@@ -130,7 +130,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                       handleDownload(imageUrl, `image-${image.id}.jpg`);
                     }}
                     className="p-2 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                    title="Télécharger"
+                    title="下载"
                   >
                     <Download className="w-4 h-4 text-gray-900" />
                   </button>
@@ -139,7 +139,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                     onClick={(e) => handleDelete(image.id)}
                     disabled={isDeleting === image.id}
                     className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                    title="Supprimer"
+                    title="删除"
                   >
                     {isDeleting === image.id ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -161,10 +161,10 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                   <div>ID: {image.id}</div>
                   <div>{new Date(image.createdAt).toLocaleDateString('fr-FR')}</div>
                   <div className="truncate">
-                    Local: {image.local_image_path ? '✓' : '✗'}
+                    本地: {image.local_image_path ? '✓' : '✗'}
                   </div>
                   <div className="truncate">
-                    Cloud: {image.s3_urls?.imageUrl ? '✓' : '✗'}
+                    云端: {image.s3_urls?.imageUrl ? '✓' : '✗'}
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                       handleDownload(imageUrl, `image-${selectedImage.id}.jpg`);
                     }}
                     className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                    title="Télécharger"
+                    title="下载"
                   >
                     <Download className="w-4 h-4" />
                   </button>
@@ -214,7 +214,7 @@ export default function GetImagePostForApp({ images, reFetch }: Props) {
                     onClick={() => handleDelete(selectedImage.id)}
                     disabled={isDeleting === selectedImage.id}
                     className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-50"
-                    title="Supprimer"
+                    title="删除"
                   >
                     {isDeleting === selectedImage.id ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

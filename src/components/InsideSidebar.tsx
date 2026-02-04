@@ -201,6 +201,13 @@ const Breadcrumb: React.FC = () => {
     "/create-user": "创建用户",
     "/convertion": "转换",
     "/touch-video": "触摸视频",
+    "/app-videos": "应用视频",
+    "/mangas": "漫画",
+    // "/romans": "罗马",
+    "/post": "帖子",
+    "/bot-videos": "机器人视频",
+    "/bot-posts": "机器人帖子",
+
   };
 
   const pathSegments = location.pathname
@@ -266,11 +273,10 @@ const Breadcrumb: React.FC = () => {
           <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
-            className={`text-sm transition-colors duration-200 ${
-              breadcrumbs.length === 1
-                ? "text-gray-900 dark:text-white font-medium cursor-default"
-                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-            }`}
+            className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
+              ? "text-gray-900 dark:text-white font-medium cursor-default"
+              : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+              }`}
             disabled={breadcrumbs.length === 1}
           >
             {breadcrumbs[0].name}
@@ -281,11 +287,10 @@ const Breadcrumb: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
             <button
               onClick={() => navigate(breadcrumb.path)}
-              className={`text-sm transition-colors duration-200 ${
-                index === breadcrumbs.length - 2
-                  ? "text-gray-900 dark:text-white font-medium cursor-default"
-                  : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-              }`}
+              className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
+                ? "text-gray-900 dark:text-white font-medium cursor-default"
+                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+                }`}
               disabled={index === breadcrumbs.length - 2}
             >
               {breadcrumb.name}
@@ -426,13 +431,12 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
       <div
         className={`
                     flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
-                    ${
-                      isMobile
-                        ? "w-full"
-                        : isCollapsed
-                          ? "w-[calc(100%-5rem)]"
-                          : "w-[calc(100%-16rem)]"
-                    }
+                    ${isMobile
+            ? "w-full"
+            : isCollapsed
+              ? "w-[calc(100%-5rem)]"
+              : "w-[calc(100%-16rem)]"
+          }
                 `}
       >
         {/* Header */}

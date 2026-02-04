@@ -64,7 +64,7 @@ const RomanEdit = () => {
                 }
             } catch (error: any) {
                 console.error("Error fetching roman data:", error);
-                toast.error("Failed to load roman data");
+                toast.error("加载小说数据失败");
             } finally {
                 setLoading(false);
             }
@@ -82,14 +82,14 @@ const RomanEdit = () => {
 
     const handleSubmitRoman = useCallback(async () => {
         if (!selectedCategory || !ref) {
-            toast.error("Please fill in all required fields!");
+            toast.error("请填写所有必填字段！");
             return;
         }
 
         // Vérifier qu'au moins un titre est renseigné
         const hasTitle = titles.some(entry => entry.title.trim() !== "");
         if (!hasTitle) {
-            toast.error("Please add at least one title");
+            toast.error("请至少添加一个标题");
             return;
         }
 
@@ -126,12 +126,12 @@ const RomanEdit = () => {
                 }
             });
 
-            toast.success("✅ Roman updated successfully!");
+            toast.success("✅ 小说更新成功！");
             navigate("/romans");
         } catch (err: any) {
             console.error(err);
             toast.error(
-                "Update error: " + (err.response?.data?.message || err.message)
+                "更新错误: " + (err.response?.data?.message || err.message)
             );
         } finally {
             setUploading(false);
@@ -155,7 +155,7 @@ const RomanEdit = () => {
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">Loading roman data...</p>
+                    <p className="text-gray-600 dark:text-gray-400">正在加载小说数据...</p>
                 </div>
             </div>
         );
@@ -172,10 +172,10 @@ const RomanEdit = () => {
                             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-4"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            Back to Romans
+                            返回小说列表
                         </button>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            Edit Roman
+                            编辑小说
                         </h1>
                     </div>
                 </div>
@@ -184,14 +184,14 @@ const RomanEdit = () => {
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 mb-4">
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                         <Tag className="w-5 h-5" />
-                        Reference
+                        参考编号
                     </h2>
                     <input
                         type="text"
                         value={ref || ""}
                         onChange={(e) => setRef(e.currentTarget.value.trim())}
                         className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
-                        placeholder="Roman reference"
+                        placeholder="输入参考编号"
                     />
                 </div>
 
@@ -200,7 +200,7 @@ const RomanEdit = () => {
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                             <FolderTree className="w-5 h-5" />
-                            Category
+                            分类
                         </h2>
                         <RomanCategoryAutoComplete
                             onSelect={(category) => {
@@ -214,7 +214,7 @@ const RomanEdit = () => {
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                             <FolderOpen className="w-5 h-5" />
-                            Sub Category
+                            子分类
                         </h2>
                         <RomanSubCategoryAutoComplete
                             categoryId={selectedCategory?.id}
@@ -229,7 +229,7 @@ const RomanEdit = () => {
                     <FileUploadZone
                         type="image"
                         accept="image/*"
-                        title="Cover Image"
+                        title="封面图片"
                         file={coverFile}
                         preview={coverPreview}
                         onFileSelect={handleCoverSelect}
@@ -241,7 +241,7 @@ const RomanEdit = () => {
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                             <Globe className="w-5 h-5" />
-                            Platform
+                            平台
                         </h2>
                         <PlatformSelectComponent
                             onSelect={setPlatform}
@@ -252,7 +252,7 @@ const RomanEdit = () => {
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                             <User className="w-5 h-5" />
-                            Creator
+                            创建者
                         </h2>
                         <CreatorAutoComplete
                             value={creator}
@@ -272,7 +272,7 @@ const RomanEdit = () => {
                 <MangaTitlesField
                     value={titles}
                     onChange={setTitles}
-                    label="Titres multilingues"
+                    label="多语言标题"
                     required={false}
                 />
 
@@ -290,12 +290,12 @@ const RomanEdit = () => {
                     {uploading ? (
                         <>
                             <Loader2 className="w-6 h-6 animate-spin" />
-                            <span>Updating... {progress}%</span>
+                            <span>更新中... {progress}%</span>
                         </>
                     ) : (
                         <>
                             <Upload className="w-6 h-6" />
-                            <span>Update Roman</span>
+                            <span>更新小说</span>
                         </>
                     )}
                 </motion.button>
@@ -305,7 +305,7 @@ const RomanEdit = () => {
                     <div className="mt-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Updating Roman...
+                                更新小说中...
                             </span>
                             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                                 {progress}%

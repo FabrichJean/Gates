@@ -308,8 +308,8 @@ function VideoForAppEdit() {
                   value={videoType}
                   onChange={(e) => setVideoType(e.target.value)}
                 >
-                  <option value="short">Short Video</option>
-                  <option value="long">Long Video</option>
+                  <option value="short">短视频</option>
+                  <option value="long">长视频</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
@@ -374,8 +374,8 @@ function VideoForAppEdit() {
               <I18nField
                 value={titles}
                 onChange={setTitles}
-                label="Titles"
-                placeholder="Enter title..."
+                label="标题"
+                placeholder="输入标题..."
                 supportedLanguages={['zh', 'en', 'hi']}
               />
             </div>

@@ -95,7 +95,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
   useEffect(() => {
     // Update selectedTagCategories based on selectedTags
     const selected: SelectedTag[] = [];
-    
+
     selectedTags.forEach(tag => {
       if (typeof tag === 'number') {
         // Existing tag by ID
@@ -108,7 +108,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
         selected.push({ ...tag, isNew: true, isDefault: false });
       }
     });
-    
+
     setSelectedTagCategories(selected);
   }, [selectedTags, allTags, defaultAssignedIds]);
 
@@ -149,7 +149,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
   const addSuggestion = (tag: TagCategory) => {
     if (tag.id) {
       // Check if this existing tag is already selected
-      const isAlreadySelected = selectedTags.some(selectedTag => 
+      const isAlreadySelected = selectedTags.some(selectedTag =>
         typeof selectedTag === 'number' && selectedTag === tag.id
       );
       if (!isAlreadySelected) {
@@ -195,7 +195,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Tags
+        标签
       </label>
       <div className="flex gap-3">
         <div className="flex-1 relative">
@@ -213,8 +213,8 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
             }}
             ref={inputRef}
             onFocus={() => {
-          if (suppressSuggestions) return;
-          setShowTagDropdown(true);
+              if (suppressSuggestions) return;
+              setShowTagDropdown(true);
               if (tagQuery.trim().length === 0) {
                 // Show all available tags when focused and no query
                 const availableTags = allTags.filter(tag => {
@@ -240,7 +240,7 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
                 addTagByName(tagQuery);
               }
             }}
-            placeholder="Type tag name or select suggestion..."
+            placeholder="输入标签名称或选择建议..."
             className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
           />
           <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -293,13 +293,13 @@ const TagCategoryVideoForApp: React.FC<TagCategoryVideoForAppProps> = ({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 px-4 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 px-4 py-2 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
             >
               <Tag className="w-3 h-3" />
               <span>{t.name}</span>
-                {t.isDefault && (
-                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">suggestion</span>
-                )}
+              {t.isDefault && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">suggestion</span>
+              )}
               <button
                 type="button"
                 onClick={() => removeSelectedTag(i)}

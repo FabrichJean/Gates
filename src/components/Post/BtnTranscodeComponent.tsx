@@ -23,9 +23,9 @@ const BtnTranscodeComponent = ({
   };
   const handleCancelTranscode = async () => {
     try {
-        await cancelPostProcessing({ id: post.id });
+      await cancelPostProcessing({ id: post.id });
 
-        reFetch();
+      reFetch();
     } catch (error) {
       console.error("Error transcoding post:", error);
     }
@@ -63,25 +63,25 @@ const BtnTranscodeComponent = ({
         className={`relative flex items-center justify-center p-2 rounded-md transition-all duration-300 backdrop-blur-md border focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-500 ${getButtonStyles()}`}
         title={
           post?.processing === "working"
-            ? "Transcoding in progress..."
+            ? "转码中..."
             : post?.processing === "done"
-            ? "Transcoding completed"
-            : "Transcode video"
+              ? "转码完成"
+              : "转码视频"
         }
       >
         {getIcon()}
       </button>
-        {post.processing === "working" && (
-            <button
-            onClick={handleCancelTranscode}
-            className="relative flex items-center justify-center p-2 rounded-md transition-all duration-300 backdrop-blur-md border focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 bg-red-100/90 dark:bg-red-700/90 hover:bg-red-200 dark:hover:bg-red-600 text-red-800 dark:text-red-200 border-red-200 dark:border-red-600 hover:border-red-300 dark:hover:border-red-500 cursor-pointer"
-            title="Cancel transcoding"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-            </button>
+      {post.processing === "working" && (
+        <button
+          onClick={handleCancelTranscode}
+          className="relative flex items-center justify-center p-2 rounded-md transition-all duration-300 backdrop-blur-md border focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 bg-red-100/90 dark:bg-red-700/90 hover:bg-red-200 dark:hover:bg-red-600 text-red-800 dark:text-red-200 border-red-200 dark:border-red-600 hover:border-red-300 dark:hover:border-red-500 cursor-pointer"
+          title="取消转码"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       )}
     </div>
   );

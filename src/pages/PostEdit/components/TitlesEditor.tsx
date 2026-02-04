@@ -15,7 +15,7 @@ export default function TitlesEditor(props: {
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Title and description by language:</label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">标题和描述:</label>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         {languages.length > 0 && languages.map((language) => (
@@ -49,30 +49,30 @@ export default function TitlesEditor(props: {
           </>
         ))}
 
-        <button type="button" onClick={() => setShowAddLanguageModal(true)} className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1" title="Add new language">
+        <button type="button" onClick={() => setShowAddLanguageModal(true)} className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1" title="添加新语言">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          <span>Add Title</span>
+          <span>添加标题</span>
         </button>
       </div>
 
       <div className="space-y-4 w-full">
         {languages.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p className="text-sm">No titles created yet. Click "Add Title" to create your first title.</p>
+            <p className="text-sm">尚未创建标题。点击“添加标题”来创建您的第一个标题.</p>
           </div>
         ) : (
           <>
             {selectedLanguage && (
               <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title ({selectedLanguage.name})</label>
-                <input type="text" value={titles[selectedLanguage.id] || ""} onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)} placeholder={`Enter title in ${selectedLanguage.name}`} className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题 ({selectedLanguage.name})</label>
+                <input type="text" value={titles[selectedLanguage.id] || ""} onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)} placeholder={`输入标题 ${selectedLanguage.name}`} className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" />
               </div>
             )}
 
             {selectedLanguage && (
               <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description ({selectedLanguage.name})</label>
-                <textarea value={descriptions[selectedLanguage.id] || ""} onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)} placeholder={`Enter description in ${selectedLanguage.name}`} rows={4} className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">描述 ({selectedLanguage.name})</label>
+                <textarea value={descriptions[selectedLanguage.id] || ""} onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)} placeholder={`输入描述 ${selectedLanguage.name}`} rows={4} className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical" />
               </div>
             )}
           </>

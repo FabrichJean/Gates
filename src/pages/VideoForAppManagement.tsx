@@ -145,7 +145,7 @@ const VideoForAppManagement = () => {
   // Range selection handler
   const selectPageRange = async () => {
     if (rangeSelection.startPage > rangeSelection.endPage) {
-      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
+      toast.error("起始页必须小于或等于结束页");
       return;
     }
 
@@ -157,7 +157,7 @@ const VideoForAppManagement = () => {
 
       // Validate range
       if (rangeSelection.endPage > totalPages) {
-        toast.error(`La page d'arrêt ne peut pas dépasser ${totalPages}`);
+        toast.error(`结束页不能超过 ${totalPages}`);
         return;
       }
 
@@ -171,8 +171,8 @@ const VideoForAppManagement = () => {
           // Update progress
           setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
         } catch (error) {
-          console.error(`Erreur lors du chargement de la page ${currentPage}:`, error);
-          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
+          console.error(`加载第 ${currentPage} 页时出错:`, error);
+          toast.error(`加载第 ${currentPage} 页时出错`);
           return;
         }
       }
@@ -184,12 +184,12 @@ const VideoForAppManagement = () => {
         return newSelection;
       });
 
-      toast.success(`${allVideoIds.length} vidéos sélectionnées sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
+      toast.success(`在 ${rangeSelection.endPage - rangeSelection.startPage + 1} 页中选中了 ${allVideoIds.length} 个视频`);
       setShowRangeSelector(false);
 
     } catch (error) {
-      console.error('Erreur lors de la sélection par plage:', error);
-      toast.error('Erreur lors de la sélection par plage');
+      console.error('范围选择时出错:', error);
+      toast.error('范围选择时出错');
     } finally {
       setRangeLoading(false);
       setRangeProgress({ current: 0, total: 0 });
@@ -304,18 +304,18 @@ const VideoForAppManagement = () => {
       }
 
       if (successCount > 0) {
-        toast.success(`Successfully updated ${successCount} video${successCount > 1 ? 's' : ''}`);
+        toast.success(`成功更新了 ${successCount} 个视频`);
         reFetch();
         closeBulkEdit();
         deselectAll();
       }
 
       if (errorCount > 0) {
-        toast.error(`Failed to update ${errorCount} video${errorCount > 1 ? 's' : ''}`);
+        toast.error(`更新 ${errorCount} 个视频失败`);
       }
     } catch (error) {
-      console.error('Bulk edit error:', error);
-      toast.error('An error occurred during bulk edit');
+      console.error('批量编辑错误:', error);
+      toast.error('批量编辑过程中出错');
     } finally {
       setBulkEditLoading(false);
       setBulkEditProgress({ current: 0, total: 0 });
@@ -420,7 +420,7 @@ const VideoForAppManagement = () => {
           {isSomeSelected && (
             <>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''}  已选择 {selectedVideos.size > 1 ? 's' : ''}
+                已选择 {selectedVideos.size} 个视频
               </span>
               <button
                 className="btn btn-primary btn-sm"
@@ -666,7 +666,7 @@ const VideoForAppManagement = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Créer / Assign Creator</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">创建 / 分配创建者</label>
                   <select
                     value={bulkEditData.creator_id}
                     onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}

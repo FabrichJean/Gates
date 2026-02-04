@@ -237,7 +237,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                           }`}
                       >
-                        {video.type === "1" ? "Short" : "Long"}
+                        {video.type === "1" ? "短视频" : "长视频"}
                       </span>
                       {video?.plateform?.name && (
                         <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium">

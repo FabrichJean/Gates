@@ -33,9 +33,9 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
       const Uv = updateFn ? await updateFn(actual?.id, { checking: check }) : await updateVideo(actual?.id, { checking: check });
       setChecking && setChecking(Uv.data.checking);
       isDetails ? reFetch() : null;
-      toast.success('Statut mis à jour avec succès');
+      toast.success('状态更新成功');
     } catch (err: any) {
-      toast.error("Erreur: " + (err.response?.data?.message || err.message));
+      toast.error("错误: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -50,9 +50,9 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'checked': return 'checked';
-      case 'refused': return 'refused';
-      case 'waiting for checking': return 'waiting for checking';
+      case 'checked': return '已验证';
+      case 'refused': return '已拒绝';
+      case 'waiting for checking': return '等待验证';
       default: return status;
     }
   };
@@ -96,7 +96,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
                 className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 hover:scale-[0.98] active:scale-[0.96]"
               >
                 <Clock className="w-4 h-4 text-blue-500" />
-                <span>ready</span>
+                <span>准备好了</span>
               </button>
             )}
             {checking === "refused" && (
@@ -107,7 +107,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
                     className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-md font-medium transition-all duration-200 hover:scale-[0.98] active:scale-[0.96] shadow-sm"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    Retoucher
+                    修饰
                   </Link>
                 )}
 
@@ -116,7 +116,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                        <div className="font-medium mb-1">Commentaire de refus :</div>
+                        <div className="font-medium mb-1">拒绝意见 :</div>
                         <div className="break-words">{actual.comment}</div>
                       </div>
                     </div>
@@ -129,7 +129,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
                     className="flex items-center justify-center gap-2 w-full px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    Retoucher à nouveau
+                    再次修饰
                   </Link>
                 )}
               </div>

@@ -65,7 +65,7 @@ const PostManagementInner = () => {
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post Bot Management
+          机器人帖子管理
         </h1>
 
         {/* header  */}
@@ -78,7 +78,7 @@ const PostManagementInner = () => {
               >
                 <FilePlus className="w-5 h-auto text-blue-400 dark:text-blue-300" />
               </Link>
-              
+
               <SendToWebApp />
 
               {/* Post filters (dialog rendered by PostFilter) */}
@@ -92,7 +92,7 @@ const PostManagementInner = () => {
                   }}
                   className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
+                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> 筛选
                 </button>
 
                 <PostFilter
@@ -104,7 +104,7 @@ const PostManagementInner = () => {
                     try {
                       const p = Number(d?.page || page);
                       if (!Number.isNaN(p)) setPage(p);
-                    } catch {}
+                    } catch { }
                   }}
                 />
               </div>
@@ -114,7 +114,7 @@ const PostManagementInner = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search posts..."
+                  placeholder="搜索帖子..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
@@ -149,35 +149,35 @@ const PostManagementInner = () => {
                   ID
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Category
+                  分类
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Creator
+                  创建者
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  User
+                  用户
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Platform
+                  平台
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Checking
+                  审核
                 </th>
-                
+
                 <th scope="col" className="px-6 py-3">
-                  Activate
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Videos
+                  启用
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Images
+                  视频
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Date de création
+                  图片
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  创建日期
                 </th>
                 <th scope="col" className="px-6 py-3 text-left">
-                  Actions
+                  操作
                 </th>
               </tr>
             </thead>
@@ -210,12 +210,12 @@ const PostManagementInner = () => {
                             t.src = "";
                           }}
                         />
-                        <Link to={`/creators/`+post_bot?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
+                        <Link to={`/creators/` + post_bot?.creatorObj?.id} className="text-sm font-medium text-gray-900 dark:text-gray-100 text-nowrap">
                           {(post_bot as any).creatorObj.name}
                         </Link>
                       </div>
                     ) : (
-                      <Link to={`/creators/`+post_bot?.creatorObj?.id} className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                      <Link to={`/creators/` + post_bot?.creatorObj?.id} className="px-2 py-1 text-xs font-medium rounded-full bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-300">
                         {post_bot.creator || "-"}
                       </Link>
                     )}
@@ -272,7 +272,7 @@ const PostManagementInner = () => {
                       )}
                       {post_bot.videos?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          No video
+                          无视频
                         </span>
                       )}
                     </div>
@@ -302,7 +302,7 @@ const PostManagementInner = () => {
                       )}
                       {post_bot.images?.length === 0 && (
                         <span className="text-xs text-gray-400">
-                          No image
+                          无图片
                         </span>
                       )}
                     </div>
@@ -320,7 +320,7 @@ const PostManagementInner = () => {
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
-                      <span>Details</span>
+                      <span>详情</span>
                     </Link>
                   </td>
                 </tr>
@@ -338,8 +338,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-              ? "No posts found for this search"
-              : "No posts available"}
+                ? "未找到符合条件的帖子"
+                : "暂无帖子"}
             </div>
           )}
         </div>
@@ -369,15 +369,15 @@ function SendToWebApp() {
 
   const sendToWebapp = async () => {
     if (selectedIds.length === 0)
-      return toast.error("Select at least one platform");
+      return toast.error("请至少选择一个平台");
     setLoading(true);
     try {
       await webAppPlateform(selectedIds);
-      toast.success("Envoyé avec succès vers le WebApp !");
+      toast.success("成功发送至 WebApp！");
       setWebappModalOpen(false);
       setSelectedIds([]);
     } catch (err) {
-      toast.error("Erreur lors de l'envoi vers WebApp");
+      toast.error("发送至 WebApp 时出错");
     } finally {
       setLoading(false);
     }
@@ -387,7 +387,7 @@ function SendToWebApp() {
     <>
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
-          <h3 className="font-bold text-lg">Select platforms to send</h3>
+          <h3 className="font-bold text-lg">选择要发送的平台</h3>
           <div className="max-h-60 overflow-auto mt-3">
             {plateforms?.map((p: any) => (
               <label
@@ -409,14 +409,14 @@ function SendToWebApp() {
               className="btn btn-outline"
               onClick={() => setWebappModalOpen(false)}
             >
-              Close
+              关闭
             </button>
             <button
               className="btn btn-primary"
               onClick={sendToWebapp}
               disabled={loading}
             >
-              {loading ? "Sending..." : "Send"}
+              {loading ? "发送中..." : "发送"}
             </button>
           </div>
         </div>

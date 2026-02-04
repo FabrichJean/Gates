@@ -129,7 +129,7 @@ export function TitlesForm({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
           <FileVideo className="w-5 h-5" />
-         标题和描述
+          标题和描述
         </h3>
 
         <div className="flex items-center gap-2">
@@ -244,11 +244,10 @@ export function TitlesForm({
         whileTap={{ scale: 0.98 }}
         onClick={submit}
         disabled={uploading}
-        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-          uploading
-            ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-            : "rounded-lg border shadow-lg hover:shadow-xl"
-        }`}
+        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${uploading
+          ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+          : "rounded-lg border shadow-lg hover:shadow-xl"
+          }`}
       >
         {uploading ? (
           <>
@@ -671,14 +670,12 @@ const Upload = () => {
             <button
               type="button"
               onClick={() => setNeedVip((v) => !v)}
-              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
-              }`}
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                  needVip ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
 
@@ -858,7 +855,7 @@ const Upload = () => {
                         addTagByName(tagQuery);
                       }
                     }}
-                    placeholder="Type tag name or select suggestion..."
+                    placeholder="输入标签名称或选择建议..."
                     className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
                   />
                   <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />

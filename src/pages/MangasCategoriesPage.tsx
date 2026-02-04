@@ -93,7 +93,7 @@ const MangasCategoriesPage: React.FC = () => {
       setCategories(catsWithSubs);
       setSubCategories(subs);
     } catch (error) {
-      toast.error("Erreur lors du chargement des données");
+      toast.error("加载数据时出错");
       console.error(error);
     } finally {
       setLoading(false);
@@ -103,19 +103,19 @@ const MangasCategoriesPage: React.FC = () => {
   // Category CRUD
   const handleCreateCategory = async () => {
     if (!categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await createMangasCategoryApi(categoryForm);
-      toast.success("Catégorie créée avec succès");
+      toast.success("分类创建成功");
       setShowCategoryModal(false);
       setCategoryForm({ name: "", description: "" });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la création");
+      toast.error("创建时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -124,20 +124,20 @@ const MangasCategoriesPage: React.FC = () => {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await updateMangasCategoryApi(editingCategory.id, categoryForm);
-      toast.success("Catégorie mise à jour avec succès");
+      toast.success("分类更新成功");
       setShowCategoryModal(false);
       setEditingCategory(null);
       setCategoryForm({ name: "", description: "" });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -145,14 +145,14 @@ const MangasCategoriesPage: React.FC = () => {
   };
 
   const handleDeleteCategory = async (id: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) return;
+    if (!confirm("您确定要删除此分类吗？")) return;
 
     try {
       await deleteMangasCategoryApi(id);
-      toast.success("Catégorie supprimée avec succès");
+      toast.success("分类删除成功");
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
       console.error(error);
     }
   };
@@ -160,19 +160,19 @@ const MangasCategoriesPage: React.FC = () => {
   // SubCategory CRUD
   const handleCreateSubCategory = async () => {
     if (!subCategoryForm.name.trim() || !subCategoryForm.mangas_category_id) {
-      toast.error("Le nom et la catégorie sont requis");
+      toast.error("名称和分类必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await createMangasSubCategoryApi(subCategoryForm);
-      toast.success("Sous-catégorie créée avec succès");
+      toast.success("子分类创建成功");
       setShowSubCategoryModal(false);
       setSubCategoryForm({ name: "", description: "", mangas_category_id: 0 });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la création");
+      toast.error("创建时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -181,20 +181,20 @@ const MangasCategoriesPage: React.FC = () => {
 
   const handleUpdateSubCategory = async () => {
     if (!editingSubCategory || !subCategoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await updateMangasSubCategoryApi(editingSubCategory.id, subCategoryForm);
-      toast.success("Sous-catégorie mise à jour avec succès");
+      toast.success("子分类更新成功");
       setShowSubCategoryModal(false);
       setEditingSubCategory(null);
       setSubCategoryForm({ name: "", description: "", mangas_category_id: 0 });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -202,14 +202,14 @@ const MangasCategoriesPage: React.FC = () => {
   };
 
   const handleDeleteSubCategory = async (id: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette sous-catégorie ?")) return;
+    if (!confirm("您确定要删除此子分类吗？")) return;
 
     try {
       await deleteMangasSubCategoryApi(id);
-      toast.success("Sous-catégorie supprimée avec succès");
+      toast.success("子分类删除成功");
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
       console.error(error);
     }
   };
@@ -272,7 +272,7 @@ const MangasCategoriesPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">加载中...</p>
         </div>
       </div>
     );
@@ -287,7 +287,7 @@ const MangasCategoriesPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <FolderTree className="w-6 h-6 text-gray-600 dark:text-gray-400" />
               <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Catégories de Mangas
+                漫画分类
               </h1>
             </div>
             <button
@@ -295,7 +295,7 @@ const MangasCategoriesPage: React.FC = () => {
               className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
-              Nouvelle
+              新建
             </button>
           </div>
         </div>
@@ -309,7 +309,7 @@ const MangasCategoriesPage: React.FC = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Rechercher..."
+                placeholder="搜索..."
                 className="w-full pl-8 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
@@ -369,21 +369,21 @@ const MangasCategoriesPage: React.FC = () => {
                       <button
                         onClick={() => openSubCategoryModal(category.id)}
                         className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded transition-colors"
-                        title="Ajouter une sous-catégorie"
+                        title="添加子分类"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => openCategoryModal(category)}
                         className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                        title="Modifier"
+                        title="修改"
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(category.id)}
                         className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                        title="Supprimer"
+                        title="删除"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -431,14 +431,14 @@ const MangasCategoriesPage: React.FC = () => {
                               <button
                                 onClick={() => openSubCategoryModal(category.id, subCategory)}
                                 className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                title="Modifier"
+                                title="修改"
                               >
                                 <Edit className="w-3 h-3" />
                               </button>
                               <button
                                 onClick={() => handleDeleteSubCategory(subCategory.id)}
                                 className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                title="Supprimer"
+                                title="删除"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -450,7 +450,7 @@ const MangasCategoriesPage: React.FC = () => {
                           <div className="text-center py-4">
                             <Tag className="w-6 h-6 text-gray-400 mx-auto mb-1" />
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Aucune sous-catégorie
+                              无子分类
                             </p>
                           </div>
                         )}
@@ -466,7 +466,7 @@ const MangasCategoriesPage: React.FC = () => {
             <div className="text-center py-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <FolderTree className="w-8 h-8 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {searchTerm ? 'Aucune catégorie trouvée' : 'Aucune catégorie'}
+                {searchTerm ? '未找到分类' : '无分类'}
               </p>
             </div>
           )}
@@ -489,7 +489,7 @@ const MangasCategoriesPage: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+                  {editingCategory ? "修改分类" : "新建分类"}
                 </h2>
                 <button
                   onClick={() => setShowCategoryModal(false)}
@@ -502,20 +502,20 @@ const MangasCategoriesPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nom <span className="text-red-500">*</span>
+                    名称 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={categoryForm.name}
                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nom de la catégorie"
+                    placeholder="分类名称"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Description
+                    描述
                   </label>
                   <textarea
                     value={categoryForm.description}
@@ -524,7 +524,7 @@ const MangasCategoriesPage: React.FC = () => {
                     }
                     rows={3}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="Description de la catégorie"
+                    placeholder="分类描述"
                   />
                 </div>
               </div>
@@ -535,7 +535,7 @@ const MangasCategoriesPage: React.FC = () => {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
@@ -545,12 +545,12 @@ const MangasCategoriesPage: React.FC = () => {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enregistrement...
+                      保存中...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingCategory ? "Mettre à jour" : "Créer"}
+                      {editingCategory ? "更新" : "创建"}
                     </>
                   )}
                 </button>
@@ -577,8 +577,8 @@ const MangasCategoriesPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {editingSubCategory
-                    ? "Modifier la sous-catégorie"
-                    : "Nouvelle sous-catégorie"}
+                    ? "修改子分类"
+                    : "新建子分类"}
                 </h2>
                 <button
                   onClick={() => setShowSubCategoryModal(false)}
@@ -591,7 +591,7 @@ const MangasCategoriesPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Catégorie parente <span className="text-red-500">*</span>
+                    父分类 <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={subCategoryForm.mangas_category_id}
@@ -604,7 +604,7 @@ const MangasCategoriesPage: React.FC = () => {
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={!!editingSubCategory}
                   >
-                    <option value={0}>Sélectionner une catégorie</option>
+                    <option value={0}>选择一个分类</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -615,7 +615,7 @@ const MangasCategoriesPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nom <span className="text-red-500">*</span>
+                    名称 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -624,13 +624,13 @@ const MangasCategoriesPage: React.FC = () => {
                       setSubCategoryForm({ ...subCategoryForm, name: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nom de la sous-catégorie"
+                    placeholder="子分类名称"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Description
+                    描述
                   </label>
                   <textarea
                     value={subCategoryForm.description}
@@ -639,7 +639,7 @@ const MangasCategoriesPage: React.FC = () => {
                     }
                     rows={3}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    placeholder="Description de la sous-catégorie"
+                    placeholder="子分类描述"
                   />
                 </div>
               </div>
@@ -650,7 +650,7 @@ const MangasCategoriesPage: React.FC = () => {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={
@@ -666,12 +666,12 @@ const MangasCategoriesPage: React.FC = () => {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enregistrement...
+                      保存中...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingSubCategory ? "Mettre à jour" : "Créer"}
+                      {editingSubCategory ? "更新" : "创建"}
                     </>
                   )}
                 </button>

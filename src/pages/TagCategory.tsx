@@ -21,36 +21,36 @@ export default function TagCategory() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <TagIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Tag Categories</h1>
+                            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">标签分类</h1>
                         </div>
                         <div className="flex gap-4 text-sm">
                             <div className="text-center">
-                                        <div className="text-lg font-medium text-blue-600 dark:text-blue-400">{video.items.length}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Video</div>
+                                <div className="text-lg font-medium text-blue-600 dark:text-blue-400">{video.items.length}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">视频</div>
                             </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-medium text-green-600 dark:text-green-400">{post.items.length}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Post</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-medium text-purple-600 dark:text-purple-400">{manga.items.length}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Manga</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-medium text-yellow-600 dark:text-yellow-400">{audio.items.length}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">Audio</div>
-                                    </div>
-                                        <div className="text-center">
-                                            <div className="text-lg font-medium text-rose-600 dark:text-rose-400">{roman.items.length}</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400">Roman</div>
-                                        </div>
+                            <div className="text-center">
+                                <div className="text-lg font-medium text-green-600 dark:text-green-400">{post.items.length}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">帖子</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-medium text-purple-600 dark:text-purple-400">{manga.items.length}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">漫画</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-medium text-yellow-600 dark:text-yellow-400">{audio.items.length}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">音频</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-lg font-medium text-rose-600 dark:text-rose-400">{roman.items.length}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">小说</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <TagListPanel
-                        title="Video Tags"
+                        title="视频标签"
                         icon={<TagIcon className="w-4 h-4 text-blue-500" />}
                         items={video.items}
                         loading={video.loading}
@@ -60,7 +60,7 @@ export default function TagCategory() {
                     />
 
                     <TagListPanel
-                        title="Post Tags"
+                        title="帖子标签"
                         icon={<TagIcon className="w-4 h-4 text-green-500" />}
                         items={post.items}
                         loading={post.loading}
@@ -70,7 +70,7 @@ export default function TagCategory() {
                     />
 
                     <TagListPanel
-                        title="Manga Tags"
+                        title="漫画标签"
                         icon={<TagIcon className="w-4 h-4 text-purple-500" />}
                         items={manga.items}
                         loading={manga.loading}
@@ -80,7 +80,7 @@ export default function TagCategory() {
                     />
 
                     <TagListPanel
-                        title="Audio Tags"
+                        title="音频标签"
                         icon={<TagIcon className="w-4 h-4 text-yellow-500" />}
                         items={audio.items}
                         loading={audio.loading}
@@ -90,7 +90,7 @@ export default function TagCategory() {
                     />
 
                     <TagListPanel
-                        title="Roman Tags"
+                        title="小说标签"
                         icon={<TagIcon className="w-4 h-4 text-rose-500" />}
                         items={roman.items}
                         loading={roman.loading}

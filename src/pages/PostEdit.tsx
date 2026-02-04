@@ -191,7 +191,7 @@ const PostEdit = () => {
         (lang) => lang.code === selectedLanguageFromBackend.code
       );
       if (existingLanguage) {
-        toast.error("This language is already added!");
+        toast.error("该语言已添加！");
         return;
       }
 
@@ -336,12 +336,12 @@ const PostEdit = () => {
         await updatePost(post?.id, payload);
       }
 
-      toast.success("Post updated successfully");
+      toast.success("帖子更新成功");
       // navigate to post details or refresh
       navigate(`/post/${id}`);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update post. See console for details.");
+      toast.error("更新帖子失败，请查看控制台了解详情。");
     }
   };
 
@@ -350,7 +350,7 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">loading...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">加载中...</p>
         </div>
       </div>
     );
@@ -361,13 +361,13 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">
-            Erreur: {error.message}
+            错误：{error.message}
           </p>
           <button
             onClick={() => navigate("/post")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            Retour
+            返回
           </button>
         </div>
       </div>
@@ -379,13 +379,13 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Post not Found
+            未找到帖子
           </p>
           <button
             onClick={() => navigate("/post")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            back to list Post
+            返回帖子列表
           </button>
         </div>
       </div>
@@ -401,7 +401,7 @@ const PostEdit = () => {
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-              Modify: POST-{String(post.id).padStart(3, "0")}
+              修改：POST-{String(post.id).padStart(3, "0")}
             </h2>
             <button
               onClick={() => navigate(`/post/${id}`)}
@@ -457,7 +457,7 @@ const PostEdit = () => {
 
             <div className="w-full mt-4">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Creator (optional)
+                创建者（可选）
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}
@@ -487,21 +487,21 @@ const PostEdit = () => {
                 onClick={() => navigate(`/post/${id}`)}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Cancel
+                取消
               </button>
               <button
                 type="button"
                 onClick={() => navigate(`/post/edit-media/${id}`)}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Manage Video/Cover {">"}
+                管理视频/封面 {">"}
               </button>
               <button
                 type="submit"
                 disabled={updating}
                 className={`px-6 py-2 bg-blue-600 text-white rounded-md flex items-center gap-2 ${updating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-700"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
                   }`}
               >
                 <svg
@@ -517,7 +517,7 @@ const PostEdit = () => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {updating ? "Updating..." : "Update"}
+                {updating ? "更新中..." : "更新"}
               </button>
             </div>
           </form>
@@ -529,12 +529,12 @@ const PostEdit = () => {
         <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              New Title
+              新标题
             </h3>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select Language
+                选择语言
               </label>
               <div className="">
                 <LanguageAutoComplete
@@ -550,7 +550,7 @@ const PostEdit = () => {
                 onClick={handleCancelAddLanguage}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
               >
-                Cancel
+                取消
               </button>
               <button
                 type="button"
@@ -558,7 +558,7 @@ const PostEdit = () => {
                 disabled={!selectedLanguageFromBackend}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
               >
-                Add Title
+                添加标题
               </button>
             </div>
           </div>

@@ -55,21 +55,21 @@ const Audios: React.FC = () => {
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
             <CheckCircle className="w-3 h-3 mr-1" />
-            Approuvé
+            已批准
           </span>
         );
       case "rejected":
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
             <XCircle className="w-3 h-3 mr-1" />
-            Rejeté
+            已拒绝
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
             <Clock className="w-3 h-3 mr-1" />
-            En attente
+            等待中
           </span>
         );
     }
@@ -88,7 +88,7 @@ const Audios: React.FC = () => {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white md:text-4xl">
-                Bibliothèque Audio
+                音频库
               </h1>
             </div>
 
@@ -104,24 +104,22 @@ const Audios: React.FC = () => {
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`rounded-full p-1.5 transition
-                    ${
-                      viewMode === "grid"
-                        ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
-                        : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    ${viewMode === "grid"
+                      ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                     }`}
-                  title="Vue grille"
+                  title="网格视图"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
                   className={`rounded-full p-1.5 transition
-                    ${
-                      viewMode === "table"
-                        ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
-                        : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    ${viewMode === "table"
+                      ? "bg-white text-indigo-600 shadow dark:bg-gray-700 dark:text-indigo-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                     }`}
-                  title="Vue liste"
+                  title="列表视图"
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -139,17 +137,17 @@ const Audios: React.FC = () => {
           >
             <Volume2 className="w-20 h-20 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Aucun audio trouvé
+              未找到音频
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Commencez par ajouter votre premier audio
+              开始添加您的第一个音频
             </p>
             <Link
               to="/audios/upload"
               className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors"
             >
               <FilePlus className="w-5 h-5" />
-              Ajouter un audio
+              添加音频
             </Link>
           </motion.div>
         ) : viewMode === "table" ? (
@@ -164,25 +162,25 @@ const Audios: React.FC = () => {
                 <thead className="bg-gray-50 dark:bg-gray-900/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Audio
+                      音频
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Catégorie
+                      分类
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Durée
+                      时长
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Créateur
+                      创建者
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Statut
+                      状态
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Active
+                      激活
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Actions
+                      操作
                     </th>
                   </tr>
                 </thead>
@@ -202,7 +200,7 @@ const Audios: React.FC = () => {
                             <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
                               {audio.cover_url || audio.s3_cover_url ? (
                                 <img
-                                  src={ cdnS3(audio.s3_cover_url) || cdnS3(audio.cover_url)}
+                                  src={cdnS3(audio.s3_cover_url) || cdnS3(audio.cover_url)}
                                   alt={audio.title}
                                   className="w-full h-full object-cover"
                                 />
@@ -216,7 +214,7 @@ const Audios: React.FC = () => {
                               </div>
                               {audio.ref && (
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  Ref: {audio.ref}
+                                  参考编号: {audio.ref}
                                 </div>
                               )}
                             </div>
@@ -266,10 +264,10 @@ const Audios: React.FC = () => {
                             onChange={
                               user?.role === RoleEnum.SUPERADMIN
                                 ? () =>
-                                    toggleDeleted(
-                                      audio.id,
-                                      audio.isDeleted || false
-                                    )
+                                  toggleDeleted(
+                                    audio.id,
+                                    audio.isDeleted || false
+                                  )
                                 : undefined
                             }
                           />
@@ -279,14 +277,14 @@ const Audios: React.FC = () => {
                             <Link
                               to={`/audios/${audio.id}`}
                               className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                              title="Voir"
+                              title="查看"
                             >
                               <Eye className="w-4 h-4" />
                             </Link>
                             <Link
                               to={`/audios/${audio.id}/edit`}
                               className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                              title="Éditer"
+                              title="编辑"
                             >
                               <Edit className="w-4 h-4" />
                             </Link>
@@ -295,7 +293,7 @@ const Audios: React.FC = () => {
                                 <button
                                   onClick={() => sendAudio(audio.id)}
                                   className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                                  title="Envoyer vers S3"
+                                  title="发送到 S3"
                                 >
                                   <Send className="w-4 h-4" />
                                 </button>
@@ -381,7 +379,7 @@ const Audios: React.FC = () => {
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors"
                       >
                         <Eye className="w-4 h-4" />
-                        Voir
+                        查看
                       </Link>
                       <Link
                         to={`/audios/${audio.id}/edit`}

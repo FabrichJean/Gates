@@ -91,7 +91,7 @@ const RomanCategoryPage: React.FC = () => {
       setCategories(catsWithSubs);
       setSubCategories(subs);
     } catch (error) {
-      toast.error("Erreur lors du chargement des données");
+      toast.error("加载数据时出错");
       console.error(error);
     } finally {
       setLoading(false);
@@ -101,19 +101,19 @@ const RomanCategoryPage: React.FC = () => {
   // Category CRUD
   const handleCreateCategory = async () => {
     if (!categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await createRomanCategoryApi(categoryForm);
-      toast.success("Catégorie créée avec succès");
+      toast.success("分类创建成功");
       setShowCategoryModal(false);
       setCategoryForm({ name: "" });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la création");
+      toast.error("创建时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -122,20 +122,20 @@ const RomanCategoryPage: React.FC = () => {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await updateRomanCategoryApi(editingCategory.id, categoryForm);
-      toast.success("Catégorie mise à jour avec succès");
+      toast.success("分类更新成功");
       setShowCategoryModal(false);
       setEditingCategory(null);
       setCategoryForm({ name: "" });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -143,14 +143,14 @@ const RomanCategoryPage: React.FC = () => {
   };
 
   const handleDeleteCategory = async (id: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")) return;
+    if (!confirm("您确定要删除此分类吗？")) return;
 
     try {
       await deleteRomanCategoryApi(id);
-      toast.success("Catégorie supprimée avec succès");
+      toast.success("分类删除成功");
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
       console.error(error);
     }
   };
@@ -158,19 +158,19 @@ const RomanCategoryPage: React.FC = () => {
   // SubCategory CRUD
   const handleCreateSubCategory = async () => {
     if (!subCategoryForm.name.trim() || !subCategoryForm.category_id) {
-      toast.error("Le nom et la catégorie sont requis");
+      toast.error("名称和分类必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await createRomanSubCategoryApi(subCategoryForm);
-      toast.success("Sous-catégorie créée avec succès");
+      toast.success("子分类创建成功");
       setShowSubCategoryModal(false);
       setSubCategoryForm({ name: "", category_id: 0 });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la création");
+      toast.error("创建时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -179,20 +179,20 @@ const RomanCategoryPage: React.FC = () => {
 
   const handleUpdateSubCategory = async () => {
     if (!editingSubCategory || !subCategoryForm.name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error("名称必填");
       return;
     }
 
     setSubmitting(true);
     try {
       await updateRomanSubCategoryApi(editingSubCategory.id, subCategoryForm);
-      toast.success("Sous-catégorie mise à jour avec succès");
+      toast.success("子分类更新成功");
       setShowSubCategoryModal(false);
       setEditingSubCategory(null);
       setSubCategoryForm({ name: "", category_id: 0 });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error("更新时出错");
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -200,14 +200,14 @@ const RomanCategoryPage: React.FC = () => {
   };
 
   const handleDeleteSubCategory = async (id: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette sous-catégorie ?")) return;
+    if (!confirm("您确定要删除此子分类吗？")) return;
 
     try {
       await deleteRomanSubCategoryApi(id);
-      toast.success("Sous-catégorie supprimée avec succès");
+      toast.success("子分类删除成功");
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("删除时出错");
       console.error(error);
     }
   };
@@ -265,7 +265,7 @@ const RomanCategoryPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
         </div>
       </div>
     );
@@ -284,10 +284,10 @@ const RomanCategoryPage: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
                 <FolderTree className="w-8 h-8 text-blue-600" />
-                Catégories de Romans
+                小说分类
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Gérer les catégories et sous-catégories
+                管理分类和子分类
               </p>
             </div>
 
@@ -299,7 +299,7 @@ const RomanCategoryPage: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
               >
                 <Plus className="w-4 h-4" />
-                Nouvelle Catégorie
+                新建分类
               </motion.button>
             </div>
           </div>
@@ -350,7 +350,7 @@ const RomanCategoryPage: React.FC = () => {
 
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <Tag className="w-3.5 h-3.5" />
-                        <span>{category.subCategories?.length || 0} sous-catégories</span>
+                        <span>{category.subCategories?.length || 0} 子分类</span>
                       </div>
                     </div>
 
@@ -358,14 +358,14 @@ const RomanCategoryPage: React.FC = () => {
                       <button
                         onClick={() => openSubCategoryModal(category.id)}
                         className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
-                        title="Ajouter une sous-catégorie"
+                        title="添加子分类"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openCategoryModal(category)}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
-                        title="Modifier"
+                        title="修改"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
@@ -393,7 +393,7 @@ const RomanCategoryPage: React.FC = () => {
                       <div className="p-4 space-y-2">
                         {category.subCategories.length === 0 ? (
                           <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                            Aucune sous-catégorie
+                            无子分类
                           </p>
                         ) : (
                           category.subCategories.map((sub) => (
@@ -418,14 +418,14 @@ const RomanCategoryPage: React.FC = () => {
                                 <button
                                   onClick={() => openSubCategoryModal(category.id, sub)}
                                   className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                  title="Modifier"
+                                  title="修改"
                                 >
                                   <Edit className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteSubCategory(sub.id)}
                                   className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                  title="Supprimer"
+                                  title="删除"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -445,7 +445,7 @@ const RomanCategoryPage: React.FC = () => {
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <FolderTree className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-600 dark:text-gray-400">
-                {searchTerm ? "Aucun résultat trouvé" : "Aucune catégorie"}
+                {searchTerm ? "未找到结果" : "无分类"}
               </p>
             </div>
           )}
@@ -468,7 +468,7 @@ const RomanCategoryPage: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
+                  {editingCategory ? "修改分类" : "新建分类"}
                 </h2>
                 <button
                   onClick={() => setShowCategoryModal(false)}
@@ -481,14 +481,14 @@ const RomanCategoryPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nom <span className="text-red-500">*</span>
+                    名称 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={categoryForm.name}
                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nom de la catégorie"
+                    placeholder="分类名称"
                   />
                 </div>
               </div>
@@ -499,7 +499,7 @@ const RomanCategoryPage: React.FC = () => {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
@@ -509,12 +509,12 @@ const RomanCategoryPage: React.FC = () => {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enregistrement...
+                      保存中...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingCategory ? "Mettre à jour" : "Créer"}
+                      {editingCategory ? "更新" : "创建"}
                     </>
                   )}
                 </button>
@@ -541,8 +541,8 @@ const RomanCategoryPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {editingSubCategory
-                    ? "Modifier la sous-catégorie"
-                    : "Nouvelle sous-catégorie"}
+                    ? "修改子分类"
+                    : "新建子分类"}
                 </h2>
                 <button
                   onClick={() => setShowSubCategoryModal(false)}
@@ -555,7 +555,7 @@ const RomanCategoryPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Catégorie parente <span className="text-red-500">*</span>
+                    父分类 <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={subCategoryForm.category_id}
@@ -568,7 +568,7 @@ const RomanCategoryPage: React.FC = () => {
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={!!editingSubCategory}
                   >
-                    <option value={0}>Sélectionner une catégorie</option>
+                    <option value={0}>选择一个分类</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -579,7 +579,7 @@ const RomanCategoryPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nom <span className="text-red-500">*</span>
+                    名称 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -588,7 +588,7 @@ const RomanCategoryPage: React.FC = () => {
                       setSubCategoryForm({ ...subCategoryForm, name: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nom de la sous-catégorie"
+                    placeholder="子分类名称"
                   />
                 </div>
               </div>
@@ -599,7 +599,7 @@ const RomanCategoryPage: React.FC = () => {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={
@@ -615,12 +615,12 @@ const RomanCategoryPage: React.FC = () => {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Enregistrement...
+                      保存中...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingSubCategory ? "Mettre à jour" : "Créer"}
+                      {editingSubCategory ? "更新" : "创建"}
                     </>
                   )}
                 </button>

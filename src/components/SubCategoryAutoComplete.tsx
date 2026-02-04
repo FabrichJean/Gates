@@ -31,7 +31,7 @@ const SubCategoryAutoComplete = ({
   onSelect,
 }: Props) => {
   console.log(defaultValue);
-  
+
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [selected, setSelected] = useState<number | "">(defaultValue?.id || "");
 
@@ -83,7 +83,7 @@ const SubCategoryAutoComplete = ({
       className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none transition-all duration-300 text-gray-700 dark:text-gray-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500"
     >
       <option value="" className="flex items-center justify-center">
-        --Select a subcategory--
+        --选择一个子类别--
       </option>
       {subCategories?.map((sub) => (
         <option

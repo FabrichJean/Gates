@@ -943,7 +943,7 @@ const PostBotEdit = () => {
                                                 setShowPostTagDropdown(false);
                                             }
                                         }}
-                                        placeholder="Type tag name or select suggestion..."
+                                        placeholder="输入标签名称或选择建议..."
                                         className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
                                     />
 
