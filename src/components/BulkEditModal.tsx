@@ -5,12 +5,17 @@ import { bulkUpdatePostsForApp } from '../api/postsForApp';
 import CreatorAutoComplete from './CreatorAutoComplete';
 import TagCategorySelector from './TagCategorySelector';
 import usePostTagCategories from '../hooks/usePostTagCategories';
+import useCategoryPost from '../hooks/posts/useCategoryPost';
+import useSubCategoryPost from '../hooks/posts/useSubCategoryPost';
 import { usePostForAppSocket } from '../context/PostForAppSocketContext';
 import type { Creator } from './creators/CreatorList';
+import type { Category } from './CategoryAutoComplete';
 
 interface BulkEditData {
   creator: string | 'random' | null;
   selectedCreator: Creator | null;
+  category: Category | null;
+  subCategory: any | null; // Using any since SubCategory type may vary
   isActive: boolean | null;
   isBanned: boolean | null;
   checking: 'ready' | 'null' | 'checked' | 'refused' | null;
@@ -35,15 +40,19 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
 }) => {
   const { subscribe, unsubscribe, startBulkUpdate } = usePostForAppSocket();
   const { items: availableTags } = usePostTagCategories();
+  const { data: categoriesResponse } = useCategoryPost();
   const [bulkEditData, setBulkEditData] = useState<BulkEditData>({
     creator: null,
     selectedCreator: null,
+    category: null,
+    subCategory: null,
     isActive: null,
     isBanned: null,
     checking: null,
     modifyTags: false,
     tags: [],
   });
+  const { data: subCategoriesResponse } = useSubCategoryPost(Number(bulkEditData.category?.id));
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
 
@@ -65,6 +74,21 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     } else {
       setBulkEditData(prev => ({ ...prev, creator: null, selectedCreator: null }));
     }
+  }, []);
+
+  const handleCategorySelect = useCallback((category: Category | null) => {
+    setBulkEditData(prev => ({
+      ...prev,
+      category: category,
+      subCategory: null // Reset subcategory when category changes
+    }));
+  }, []);
+
+  const handleSubCategorySelect = useCallback((subCategory: any | null) => {
+    setBulkEditData(prev => ({
+      ...prev,
+      subCategory: subCategory
+    }));
   }, []);
 
   useEffect(() => {
@@ -113,6 +137,8 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     setBulkEditData({
       creator: null,
       selectedCreator: null,
+      category: null,
+      subCategory: null,
       isActive: null,
       isBanned: null,
       checking: null,
@@ -138,6 +164,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         } else if (bulkEditData.selectedCreator) {
           updateData.creator = bulkEditData.selectedCreator.id.toString();
         }
+      }
+      if (bulkEditData.category !== null) {
+        updateData.category_id = bulkEditData.category.id;
+      }
+      if (bulkEditData.subCategory !== null) {
+        updateData.sub_category_id = bulkEditData.subCategory.id;
       }
       if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
       if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
@@ -165,6 +197,8 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
 
   const hasChanges = () => {
     return bulkEditData.creator !== null ||
+           bulkEditData.category !== null ||
+           bulkEditData.subCategory !== null ||
            bulkEditData.isActive !== null ||
            bulkEditData.isBanned !== null ||
            bulkEditData.checking !== null ||
@@ -242,6 +276,71 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                     Assign random creator to each post
                   </span>
                 </label>
+              </div>
+            </div>
+
+            {/* Category and Subcategory Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Category Selection */}
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                  Category
+                </label>
+                <select
+                  value={bulkEditData.category?.id || ''}
+                  onChange={(e) => {
+                    const categoryId = e.target.value;
+                    if (categoryId === '') {
+                      handleCategorySelect(null);
+                    } else {
+                      const selectedCategory = categoriesResponse?.categories?.find(
+                        (cat: Category) => cat.id.toString() === categoryId
+                      );
+                      handleCategorySelect(selectedCategory || null);
+                    }
+                  }}
+                  className="select select-bordered w-full bg-white dark:bg-gray-800"
+                  disabled={bulkEditLoading}
+                >
+                  <option value="">— No change —</option>
+                  {categoriesResponse?.categories?.map((category: Category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subcategory Selection */}
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
+                  Subcategory
+                </label>
+                <select
+                  value={bulkEditData.subCategory?.id || ''}
+                  onChange={(e) => {
+                    const subCategoryId = e.target.value;
+                    if (subCategoryId === '') {
+                      handleSubCategorySelect(null);
+                    } else {
+                      const selectedSubCategory = subCategoriesResponse?.subCategories?.find(
+                        (subCat: any) => subCat.id.toString() === subCategoryId
+                      );
+                      handleSubCategorySelect(selectedSubCategory || null);
+                    }
+                  }}
+                  className="select select-bordered w-full bg-white dark:bg-gray-800"
+                  disabled={bulkEditLoading || !bulkEditData.category}
+                >
+                  <option value="">— No change —</option>
+                  {bulkEditData.category && subCategoriesResponse?.subCategories?.map((subCategory: any) => (
+                    <option key={subCategory.id} value={subCategory.id}>
+                      {subCategory.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

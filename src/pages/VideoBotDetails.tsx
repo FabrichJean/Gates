@@ -246,7 +246,8 @@ const VideoBotDetails: React.FC = () => {
               />
 
               {/* Download MP4 button - visible when temp_url exists and user is superadmin */}
-              {user?.role === RoleEnum.SUPERADMIN &&
+              {/* {user?.role === RoleEnum.SUPERADMIN && */}
+              {true &&
                 (video.public_urls?.temp_url || video.s3_urls.hlsUrl) && (
                   <button
                     onClick={() =>
