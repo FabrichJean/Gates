@@ -83,7 +83,7 @@ export async function uploadCover(videoId: string | number): Promise<void> {
 }
 
 export async function sendProcessing(videoId: string | number) {
-    return await axios.post(`${apiURL}/videos/${videoId}/deep-upload`, null, {
+    return await axios.post(`${apiURL}/videos/${videoId}/deep-upload?time=${Date.now()}`, {videoId}, {
         headers: {
             Authorization: `Bearer ${getToken()}`,
         }
