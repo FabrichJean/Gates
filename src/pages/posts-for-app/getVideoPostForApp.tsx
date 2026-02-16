@@ -92,9 +92,9 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
             >
               {/* Container de l'image/vidéo */}
               <div className="relative aspect-video bg-gray-900 overflow-hidden">
-                {video.thumbnail_url ? (
+                {video.s3_urls.coverUrl ? (
                   <img
-                    src={cdnS3(video.thumbnail_url)}
+                    src={cdnS3(video.s3_urls.coverUrl)}
                     alt={`Vidéo ${video.id}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {

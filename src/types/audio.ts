@@ -60,13 +60,13 @@ export interface Audio {
   local_cover_path?: string;
   audio_file?: string;
   local_audio_path?: string;
-  upload_status?: "pending" | "uploading" | "completed" | "failed";
+  processing?: "null" | "working" | "done" | "canceled";
   checking?: "pending" | "approved" | "rejected";
   comment?: string;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-
+  
   // Relations
   audioCategory?: AudioCategory;
   audioSubCategory?: AudioSubCategory;
