@@ -61,7 +61,7 @@ export interface Audio {
   audio_file?: string;
   local_audio_path?: string;
   processing?: "null" | "working" | "done" | "canceled";
-  checking?: "pending" | "approved" | "rejected";
+  checking?: "waiting for checking" | "checked" | "rejected";
   comment?: string;
   isDeleted: boolean;
   createdAt: string;
@@ -80,6 +80,11 @@ export interface Audio {
   s3_cover_url?: string;
   audio_url?: string;
   s3_audio_url?: string;
+
+  s3_urls: {
+    audio?: string;
+    cover?: string;
+  }
 }
 
 export interface AudioFilter {

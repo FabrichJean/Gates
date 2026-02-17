@@ -368,7 +368,7 @@ const Audios: React.FC = () => {
                             </Link>
 
                             {user?.role === RoleEnum.SUPERADMIN &&
-                              audio.processing === "null" && (
+                              (audio.processing === "null" && audio.checking === "checked") && (
                                 <button
                                   onClick={() => sendAudio(audio.id)}
                                   className="p-2 rounded-xl backdrop-blur-sm bg-white/60 dark:bg-slate-800/60 hover:bg-slate-900 hover:text-white dark:hover:bg-slate-700 transition-all duration-200 shadow-lg"

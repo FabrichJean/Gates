@@ -264,7 +264,7 @@ const AudioDetails: React.FC = () => {
                   <>
                     <button
                       onClick={handleSendToS3}
-                      disabled={uploading || audio.processing !== "null"}
+                      disabled={uploading || audio.processing !== "null" || audio.checking !== "checked"}
                       className="inline-flex items-center justify-center p-2.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 disabled:opacity-50 shadow-sm border border-gray-200 dark:border-gray-600"
                       title="Envoyer vers S3"
                     >
