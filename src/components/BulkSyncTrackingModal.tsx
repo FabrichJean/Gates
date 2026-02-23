@@ -95,7 +95,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
   }, [externalCurrentPage, externalCurrentLimit, progress.processed, progress.total]);
 
   const handleStart = () => {
-    const entities: SyncEntitySelection = selectedEntities.length === 4 ? "all" : selectedEntities;
+    const entities: SyncEntitySelection = selectedEntities.length === 5 ? "all" : selectedEntities;
     onStartSync(entities, isForce, currentPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
   };
 
@@ -170,6 +170,11 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                       <label className="flex items-center justify-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
                         <input
                           type="checkbox"
+                          ref={el => {
+                            if (el) {
+                              el.indeterminate = selectedEntities.length > 0 && selectedEntities.length < 5;
+                            }
+                          }}
                           checked={selectedEntities.length === 5}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -655,7 +660,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         onClick={() => {
                           const newPage = currentPage + 1;
                           setCurrentPage(newPage);
-                          const entities: SyncEntitySelection = selectedEntities.length === 4 ? "all" : selectedEntities;
+                          const entities: SyncEntitySelection = selectedEntities.length === 5 ? "all" : selectedEntities;
                           onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
                         }}
                         disabled={progress.isRunning}
@@ -669,7 +674,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                           onClick={() => {
                             const newPage = currentPage - 1;
                             setCurrentPage(newPage);
-                            const entities: SyncEntitySelection = selectedEntities.length === 4 ? "all" : selectedEntities;
+                            const entities: SyncEntitySelection = selectedEntities.length === 5 ? "all" : selectedEntities;
                             onStartSync(entities, isForce, newPage, limit, autoSwitchPage, selectedPlateformId, platformFilter);
                           }}
                           disabled={progress.isRunning}
@@ -801,10 +806,10 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
                         <div className="mt-2 text-center">
                           <div className="text-sm text-gray-600 dark:text-gray-400">
                             Average Success Rate: {
-                              progress.pageStats.length > 0 
+                              progress.pageStats.length > 0 && progress.pageStats.reduce((sum, stat) => sum + stat.processed, 0) > 0
                                 ? Math.round(
-                                    (progress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0) / 
-                                     progress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)) * 100
+                                    (progress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0) /
+                                      progress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)) * 100
                                   )
                                 : 0
                             }%
@@ -818,7 +823,7 @@ const BulkSyncTrackingModal: React.FC<BulkSyncTrackingModalProps> = ({
             </div>
           )}
         </div>
-
+        {/* Footer */}
         {/* Footer */}
         {(progress.processed === progress.total && progress.total > 0) || (!progress.isRunning && progress.processed > 0) ? (
           <div className="border-t border-gray-200 dark:border-gray-700 p-4">

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { getAudioAlbumByIdApi, deleteAudioAlbumApi, getAudioAlbumTracksApi, createAudioAlbumTrackApi, updateAudioAlbumTrackApi, deleteAudioAlbumTrackApi } from "../api/audioAlbum";
+import AudioPlayer from "../components/AudioPlayer";
 import type { AudioAlbum, AudioAlbumTrack } from "../types/audio";
 import toast from "react-hot-toast";
 import { useAuthMe } from "../hooks/useAuth";
@@ -60,11 +61,8 @@ const AudioAlbumDetails: React.FC = () => {
   });
   const [trackUploading, setTrackUploading] = useState(false);
   // Audio playback state
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [trackDurations, setTrackDurations] = useState<Record<number, number>>({});
 
   const fetchAlbum = async () => {
     if (!id) return;
@@ -81,75 +79,21 @@ const AudioAlbumDetails: React.FC = () => {
     }
   };
 
-  // Playback handlers
-  const loadAndPlay = (track: AudioAlbumTrack) => {
-    const src = track.audio_url || track.s3_audio_url || '';
-    if (!src) {
+  // Playback handler
+  const handlePlayPause = (track: AudioAlbumTrack) => {
+    if (!track.audio_url && !track.s3_audio_url) {
       toast.error('Aucun fichier audio disponible pour cette piste');
       return;
     }
-
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-    }
-
-    // If switching track, pause current and reset time
-    if (playingTrackId && playingTrackId !== track.id) {
-      audioRef.current.pause();
-      setCurrentTime(0);
-    }
-
-    audioRef.current.src = src;
-    audioRef.current.play().then(() => {
+    if (playingTrackId === track.id) {
+      setIsPlaying((prev) => !prev);
+    } else {
       setPlayingTrackId(track.id);
       setIsPlaying(true);
-    }).catch((err) => {
-      console.error('Playback error', err);
-      toast.error('Impossible de lire la piste');
-    });
-
-    // attach events
-    audioRef.current.onloadedmetadata = () => {
-      setTrackDurations(prev => ({ ...prev, [track.id]: Math.floor(audioRef.current?.duration || 0) }));
-    };
-
-    audioRef.current.ontimeupdate = () => {
-      setCurrentTime(Math.floor(audioRef.current?.currentTime || 0));
-    };
-
-    audioRef.current.onended = () => {
-      setIsPlaying(false);
-      setPlayingTrackId(null);
-      setCurrentTime(0);
-    };
-  };
-
-  const handlePlayPause = (track: AudioAlbumTrack) => {
-    // If same track
-    if (playingTrackId === track.id) {
-      if (isPlaying) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current?.play().then(() => setIsPlaying(true)).catch(() => toast.error('Impossible de lire la piste'));
-      }
-      return;
     }
-
-    // Otherwise load and play new track
-    loadAndPlay(track);
   };
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  // Plus de cleanup audioRef nécessaire (AudioPlayer gère le cycle de vie)
 
   const fetchTracks = async () => {
     if (!id) return;
@@ -539,39 +483,87 @@ const AudioAlbumDetails: React.FC = () => {
                   {tracks
                     .sort((a, b) => a.track_number - b.track_number)
                     .map((track) => (
-                      <div key={track.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/40 rounded">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-medium text-sm">
+                      <div
+                        key={track.id}
+                        className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 rounded-2xl transition-all duration-200"
+                        style={{
+                          background: "linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45))",
+                          backdropFilter: "blur(8px)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          boxShadow: "0 6px 18px rgba(2,6,23,0.06)",
+                        }}
+                      >
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                          <div className="flex items-center justify-center w-10 h-10 bg-white/60 dark:bg-slate-900/40 rounded-xl border border-white/30 dark:border-slate-700 shadow-sm font-semibold text-sm text-slate-900 dark:text-white">
                             {track.track_number}
                           </div>
 
                           <button
                             onClick={() => handlePlayPause(track)}
-                            className="p-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 shadow hover:scale-105 transition-transform"
                             title={playingTrackId === track.id && isPlaying ? 'Pause' : 'Lire'}
                           >
                             {playingTrackId === track.id && isPlaying ? (
-                              <Pause className="w-4 h-4" />
+                              <Pause className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             ) : (
-                              <Play className="w-4 h-4" />
+                              <Play className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             )}
                           </button>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {track.title}
+                        <div className="flex-1 w-full">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="min-w-0">
+                              <div className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                                {track.title}
+                              </div>
+                              {track.description && (
+                                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                  {track.description}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="hidden md:flex items-center gap-3 ml-4">
+                              {track.duration && (
+                                <span className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  {formatDuration(track.duration)}
+                                </span>
+                              )}
+                              {track.audio_url && (
+                                <a
+                                  href={track.audio_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-300 hover:underline"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Télécharger
+                                </a>
+                              )}
+                            </div>
                           </div>
-                          {track.description && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {track.description}
+
+                          {/* Progress / player */}
+                          {playingTrackId === track.id && (
+                            <div className="mt-3">
+                              <AudioPlayer
+                                audioUrl={track.audio_url}
+                                s3AudioUrl={track.s3_audio_url}
+                                className="w-full"
+                                key={track.id}
+                                title={track.title}
+                              />
                             </div>
                           )}
+                        </div>
 
-                          <div className="flex items-center gap-2 mt-1">
+                        <div className="mt-3 md:mt-0 md:ml-4 flex items-center gap-2">
+                          <div className="flex items-center gap-2 md:hidden">
                             {track.duration && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
+                              <span className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" />
                                 {formatDuration(track.duration)}
                               </span>
                             )}
@@ -580,48 +572,32 @@ const AudioAlbumDetails: React.FC = () => {
                                 href={track.audio_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+                                className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-300 hover:underline"
                               >
-                                <Download className="w-3 h-3" />
-                                Télécharger
+                                <Download className="w-3.5 h-3.5" />
                               </a>
                             )}
                           </div>
 
-                          {/* Progress for currently playing track */}
-                          {playingTrackId === track.id && (
-                            <div className="mt-2">
-                              <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
-                                <div
-                                  className="h-1 bg-blue-600"
-                                  style={{ width: `${Math.max(0, Math.min(100, Math.round(((currentTime) / (trackDurations[track.id] ?? track.duration ?? 1)) * 100)))}%` }}
-                                />
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {formatDuration(currentTime)} / {formatDuration(trackDurations[track.id] ?? track.duration)}
-                              </div>
+                          {user?.role === RoleEnum.SUPERADMIN && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditTrack(track)}
+                                className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-colors"
+                                title="Modifier"
+                              >
+                                <Edit3 className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTrack(track.id)}
+                                className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-colors"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                              </button>
                             </div>
                           )}
                         </div>
-
-                        {user?.role === RoleEnum.SUPERADMIN && (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleEditTrack(track)}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                              title="Modifier"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteTrack(track.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
                       </div>
                     ))}
                 </div>

@@ -60,13 +60,13 @@ export interface Audio {
   local_cover_path?: string;
   audio_file?: string;
   local_audio_path?: string;
-  upload_status?: "pending" | "uploading" | "completed" | "failed";
-  checking?: "pending" | "approved" | "rejected";
+  processing?: "null" | "working" | "done" | "canceled";
+  checking?: "waiting for checking" | "checked" | "rejected";
   comment?: string;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-
+  
   // Relations
   audioCategory?: AudioCategory;
   audioSubCategory?: AudioSubCategory;
@@ -80,6 +80,11 @@ export interface Audio {
   s3_cover_url?: string;
   audio_url?: string;
   s3_audio_url?: string;
+
+  s3_urls: {
+    audio?: string;
+    cover?: string;
+  }
 }
 
 export interface AudioFilter {
