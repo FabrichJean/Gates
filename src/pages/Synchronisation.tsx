@@ -113,7 +113,7 @@ const Synchronisation = () => {
         // Handle different response formats
         const videos = videoResponse.data.data || videoResponse.data.videos || videoResponse.data;
         if (Array.isArray(videos)) {
-          resources.push(...videos.map((v: any) => ({
+          resources.push(...videos.filter(v => v.processing === "done").map((v: any) => ({
             id: v.id,
             title: v.title || v.name || `Video #${v.id}`,
             status: v.status,
@@ -129,7 +129,7 @@ const Synchronisation = () => {
         // Handle different response formats
         const posts = postResponse.data.data || postResponse.data.posts || postResponse.data;
         if (Array.isArray(posts)) {
-          resources.push(...posts.map((p: any) => ({
+          resources.push(...posts.filter(p => p.processing === "done").map((p: any) => ({
             id: p.id,
             title: p.title || p.name || `Post #${p.id}`,
             status: p.status,
@@ -145,7 +145,7 @@ const Synchronisation = () => {
         // Handle different response formats
         const videosForApp = videoForAppResponse.data.videos || videoForAppResponse.data.videosForApp || videoForAppResponse.data;
         if (Array.isArray(videosForApp)) {
-          resources.push(...videosForApp.map((v: any) => ({
+          resources.push(...videosForApp.filter(v => v.checking === "checked").map((v: any) => ({
             id: v.id,
             title: v.cn_title || v.en_title || v.title || `VideoForApp #${v.id}`,
             status: v.status,
@@ -161,7 +161,7 @@ const Synchronisation = () => {
         // Handle different response formats
         const postsForApp = postForAppResponse.data.posts || postForAppResponse.data.postsForApp || postForAppResponse.data;
         if (Array.isArray(postsForApp)) {
-          resources.push(...postsForApp.map((p: any) => ({
+          resources.push(...postsForApp.filter(p => p.checking === "checked").map((p: any) => ({
             id: p.id,
             title: p.cn_title || p.en_title || p.title || `PostForApp #${p.id}`,
             status: p.status,

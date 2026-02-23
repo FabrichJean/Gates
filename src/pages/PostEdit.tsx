@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { UsePost, type Image, type Video } from "../hooks/usePost";
 import useCategoryPost from "../hooks/posts/useCategoryPost";
 import useSubCategoryPost from "../hooks/posts/useSubCategoryPost";
+import usePostTagCategories from "../hooks/usePostTagCategories";
+import TagCategorySelector from "../components/TagCategorySelector";
 import toast from "react-hot-toast";
 import useUpdatePost from "../hooks/useUpdatePost";
 import LanguageAutoComplete from "../components/LanguageAutoComplete";
@@ -84,6 +86,12 @@ const PostEdit = () => {
 
   const [creatorObj, setCreatorObj] = useState<any | null>(null);
 
+  // TagCategory state
+  type Tag = { id?: number; name: string; suggested?: boolean };
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [suggestedTagsLoaded, setSuggestedTagsLoaded] = useState(false);
+  const { items: allTagCategories } = usePostTagCategories();
+
   const { data: categoriesResponse } = useCategoryPost();
   const { data: subCategoriesResponse } = useSubCategoryPost(
     selectedCategory?.id
@@ -136,6 +144,17 @@ const PostEdit = () => {
           setSelectedLanguage(postLanguages[0]);
         }
       }
+      // Préremplir les tags si présents
+      if ((post as any).tagCategory && Array.isArray((post as any).tagCategory) && (post as any).tagCategory.length > 0) {
+        setSelectedTags(
+          (post as any).tagCategory.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+          })),
+        );
+        setSuggestedTagsLoaded(true);
+      }
+
       // Prefill creator fields if available on post
       // prefer creatorObj when present
       if ((post as any).creatorObj) {
@@ -143,6 +162,26 @@ const PostEdit = () => {
       }
     }
   }, [post, categoriesResponse]);
+
+  // Suggest tags as soon as tag categories are loaded and no tags are selected
+  useEffect(() => {
+    if (
+      (!post || !((post as any).tagCategory && (post as any).tagCategory.length > 0)) &&
+      selectedTags.length === 0 &&
+      !suggestedTagsLoaded &&
+      Array.isArray(allTagCategories) &&
+      allTagCategories.length > 0
+    ) {
+      const shuffled = [...allTagCategories].sort(() => 0.5 - Math.random());
+      const randomTags = shuffled.slice(0, 5).map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        suggested: true,
+      }));
+      setSelectedTags(randomTags);
+      setSuggestedTagsLoaded(true);
+    }
+  }, [allTagCategories, post, selectedTags.length, suggestedTagsLoaded]);
 
   // Effet pour s'assurer que selectedLanguage est toujours valide
   useEffect(() => {
@@ -272,6 +311,7 @@ const PostEdit = () => {
       }),
       images: imagesPayload,
       videos: videosPayload,
+      tags: selectedTags,
       // include deferred deletions so backend can remove them as part of the update
       // deleted_image_ids: deletedImageIds,
       // deleted_video_ids: deletedVideoIds,
@@ -464,6 +504,17 @@ const PostEdit = () => {
                 onSelect={(c) => {
                   setCreatorObj(c ?? null);
                 }}
+              />
+            </div>
+
+            <div className="w-full my-10">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
+                Tags (catégorie)
+              </label>
+              <TagCategorySelector
+                selected={selectedTags}
+                setSelected={setSelectedTags}
+                allowCustomTag
               />
             </div>
 

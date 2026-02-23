@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { X, Edit, Check, AlertCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { bulkUpdatePostsForApp } from '../api/postsForApp';
+import { bulkUpdatePosts } from '../api/posts';
 import CreatorAutoComplete from './CreatorAutoComplete';
 import TagCategorySelector from './TagCategorySelector';
 import usePostTagCategories from '../hooks/usePostTagCategories';
 import useCategoryPost from '../hooks/posts/useCategoryPost';
 import useSubCategoryPost from '../hooks/posts/useSubCategoryPost';
-import { usePostForAppSocket } from '../context/PostForAppSocketContext';
 import type { Creator } from './creators/CreatorList';
 import type { Category } from './CategoryAutoComplete';
 
@@ -15,15 +14,15 @@ interface BulkEditData {
   creator: string | 'random' | null;
   selectedCreator: Creator | null;
   category: Category | null;
-  subCategory: any | null; // Using any since SubCategory type may vary
+  subCategory: any | null;
   isActive: boolean | null;
   isBanned: boolean | null;
-  checking: 'ready' | 'null' | 'checked' | 'refused' | null;
+  checking: 'ready' | 'null' | 'checked' | 'refused' | 'waiting for checking' | null;
   modifyTags: boolean;
   tags: { id?: number; name: string }[];
 }
 
-interface BulkEditModalProps {
+interface BulkEditPostModalProps {
   isOpen: boolean;
   selectedPosts: Set<number>;
   onClose: () => void;
@@ -31,14 +30,13 @@ interface BulkEditModalProps {
   onDeselectAll: () => void;
 }
 
-const BulkEditModal: React.FC<BulkEditModalProps> = ({
+const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
   isOpen,
   selectedPosts,
   onClose,
   onSuccess,
   onDeselectAll,
 }) => {
-  const { subscribe, unsubscribe, startBulkUpdate } = usePostForAppSocket();
   const { items: availableTags } = usePostTagCategories();
   const { data: categoriesResponse } = useCategoryPost();
   const [bulkEditData, setBulkEditData] = useState<BulkEditData>({
@@ -92,38 +90,6 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      subscribe({
-        onProgress: (data) => {
-          setBulkEditProgress(prev => ({
-            current: data.current || prev.current,
-            total: data.total || prev.total,
-          }));
-        },
-        onComplete: (data) => {
-          setBulkEditLoading(false);
-          setBulkEditProgress({ current: 0, total: 0 });
-          toast.success(`Successfully updated ${data.success} post${data.success > 1 ? 's' : ''}${data.failed > 0 ? ` (${data.failed} failed)` : ''}`);
-          onSuccess();
-          closeBulkEdit();
-          onDeselectAll();
-        },
-        onError: (data) => {
-          setBulkEditLoading(false);
-          setBulkEditProgress({ current: 0, total: 0 });
-          toast.error(`Bulk edit error: ${data.error}`);
-        },
-      });
-    } else {
-      unsubscribe();
-    }
-
-    return () => {
-      unsubscribe();
-    };
-  }, [isOpen, subscribe, unsubscribe, onSuccess, onDeselectAll]);
-
-  useEffect(() => {
     if (bulkEditData.modifyTags && availableTags.length > 0 && bulkEditData.tags.length === 0) {
       const shuffled = [...availableTags].sort(() => 0.5 - Math.random());
       const randomTags = shuffled.slice(0, 5).map(tag => ({ id: tag.id, name: tag.name }));
@@ -162,7 +128,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         if (bulkEditData.creator === 'random') {
           updateData.creator = 'random';
         } else if (bulkEditData.selectedCreator) {
-          updateData.creator = bulkEditData.selectedCreator.id.toString();
+          updateData.creator_id = bulkEditData.selectedCreator.id.toString();
         }
       }
       if (bulkEditData.category !== null) {
@@ -184,14 +150,36 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         return;
       }
 
-      startBulkUpdate(Array.from(selectedPosts));
-      await bulkUpdatePostsForApp(Array.from(selectedPosts), updateData);
+      // Simulate progress for better UX
+      const simulateProgress = (current: number, total: number) => {
+        setBulkEditProgress({ current, total });
+      };
+
+      // Start progress simulation
+      const progressInterval = setInterval(() => {
+        setBulkEditProgress(prev => {
+          const newCurrent = Math.min(prev.current + 1, prev.total - 1);
+          return { ...prev, current: newCurrent };
+        });
+      }, 100);
+
+      await bulkUpdatePosts(Array.from(selectedPosts), updateData);
+
+      clearInterval(progressInterval);
+      setBulkEditProgress({ current: selectedPosts.size, total: selectedPosts.size });
+
+      toast.success(`Successfully updated ${selectedPosts.size} post${selectedPosts.size > 1 ? 's' : ''}`);
+      onSuccess();
+      closeBulkEdit();
+      onDeselectAll();
 
     } catch (error: any) {
       console.error('Bulk edit error:', error);
       setBulkEditLoading(false);
       setBulkEditProgress({ current: 0, total: 0 });
       toast.error(error?.response?.data?.message || 'An error occurred during bulk edit');
+    } finally {
+      setBulkEditLoading(false);
     }
   };
 
@@ -217,7 +205,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <Edit className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-xl text-white">批量编辑帖子</h3>
+              <h3 className="font-bold text-xl text-white">Bulk Edit Posts</h3>
               <p className="text-blue-100 text-sm mt-0.5">
                 {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
               </p>
@@ -238,9 +226,9 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-medium mb-1">对多个帖子应用更改</p>
+              <p className="font-medium mb-1">Apply changes to multiple posts</p>
               <p className="text-blue-700 dark:text-blue-400">
-                只有您修改的字段会被更新。保持字段不变以保留其当前值。
+                Only fields you modify will be updated. Leave fields unchanged to keep their current values.
               </p>
             </div>
           </div>
@@ -250,14 +238,14 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
-                创作者分配
+                Creator Assignment
               </label>
               <div className="space-y-3">
                 <CreatorAutoComplete
                   value={bulkEditData.creator === 'random' ? '' : (bulkEditData.creator || '')}
                   onChange={handleCreatorChange}
                   onSelect={handleCreatorSelect}
-                  placeholder="搜索或选择创作者..."
+                  placeholder="Search or select a creator..."
                   disabled={bulkEditLoading || bulkEditData.creator === 'random'}
                 />
                 <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
@@ -273,7 +261,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                     disabled={bulkEditLoading}
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    为每个帖子分配随机创作者
+                    Assign random creator to each post
                   </span>
                 </label>
               </div>
@@ -350,7 +338,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-green-600 rounded-full"></div>
-                  激活状态
+                  Activation Status
                 </label>
                 <select
                   value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
@@ -371,7 +359,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-red-600 rounded-full"></div>
-                  禁止状态
+                  Ban Status
                 </label>
                 <select
                   value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
@@ -399,7 +387,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 value={bulkEditData.checking === null ? '' : bulkEditData.checking}
                 onChange={(e) => setBulkEditData(prev => ({
                   ...prev,
-                  checking: e.target.value === '' ? null : e.target.value as 'ready' | 'null' | 'checked' | 'refused'
+                  checking: e.target.value === '' ? null : e.target.value as 'ready' | 'null' | 'checked' | 'refused' | 'waiting for checking'
                 }))}
                 className="select select-bordered w-full bg-white dark:bg-gray-800"
                 disabled={bulkEditLoading}
@@ -416,7 +404,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-amber-600 rounded-full"></div>
-                标签管理
+                Tags Management
               </label>
               <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 transition-colors mb-3">
                 <input
@@ -427,7 +415,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   disabled={bulkEditLoading}
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  更新所选帖子的标签
+                  Update tags for selected posts
                 </span>
               </label>
               {bulkEditData.modifyTags && (
@@ -436,7 +424,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                     selected={bulkEditData.tags}
                     setSelected={(tags) => setBulkEditData(prev => ({ ...prev, tags }))}
                     allowCustomTag={true}
-                  />  
+                  />
                 </div>
               )}
             </div>
@@ -448,7 +436,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               <div className="flex items-center gap-3 mb-3">
                 <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="font-semibold text-blue-900 dark:text-blue-100">
-                  正在处理更新...
+                  Processing updates...
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -463,7 +451,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">
-                请等待，正在将更改应用到所有选中的帖子
+                Please wait while changes are applied to all selected posts
               </p>
             </div>
           )}
@@ -475,12 +463,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             {hasChanges() ? (
               <span className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600" />
-                准备应用更改
+                Changes ready to apply
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600" />
-                未选择更改
+                No changes selected
               </span>
             )}
           </div>
@@ -490,7 +478,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               onClick={closeBulkEdit}
               disabled={bulkEditLoading}
             >
-              取消
+              Cancel
             </button>
             <button
               className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 shadow-lg disabled:opacity-50"
@@ -500,12 +488,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
               {bulkEditLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  处理中...
+                  Processing...
                 </>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
-                  申请 {selectedPosts.size} 帖子 {selectedPosts.size !== 1 ? 's' : ''}
+                  Apply to {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''}
                 </>
               )}
             </button>
@@ -516,4 +504,4 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
   );
 };
 
-export default BulkEditModal;
+export default BulkEditPostModal;

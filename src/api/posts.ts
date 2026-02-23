@@ -129,6 +129,20 @@ export async function updatePostBannedStatus(id: string | number, isBanned: bool
   });
 }
 
+// Bulk update posts
+export async function bulkUpdatePosts(ids: number[], updateData: Record<string, any>) {
+  const response = await axios.put(`${apiURL}/posts/update/bulk-update`, {
+    ids,
+    updateData
+  }, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      'Content-Type': 'application/json',
+    }
+  });
+  return response.data;
+}
+
 // Get posts for bulk sync (page 1 with limited results)
 export async function getPostsForBulkSync(page: number = 1, limit: number = 50, plateformId?: number) {
   const params: any = {

@@ -83,6 +83,7 @@ export type Video = {
     s3_urls: {
         hlsUrl: string | null;
         cdnUrl: string | null;
+        coverUrl: string | null;
     };
 };
 
@@ -225,8 +226,29 @@ export function useNextPostForApp(currentId: string | undefined) {
 
                 const posts = data?.posts;
                 const currentIndex = posts?.findIndex(post => post.id === Number(currentId));
-                const nextPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
-                const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+                const nextPostRaw = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+                const prevPostRaw = currentIndex > 0 ? posts[currentIndex - 1] : null;
+
+                // Ensure videos.s3_urls includes coverUrl property
+                const mapPostForAppVideo = (post: any): TPostForApp | null => {
+                    if (!post) return null;
+                    return {
+                        ...post,
+                        videos: Array.isArray(post.videos)
+                            ? post.videos.map((video: any) => ({
+                                ...video,
+                                s3_urls: {
+                                    hlsUrl: video.s3_urls?.hlsUrl ?? null,
+                                    cdnUrl: video.s3_urls?.cdnUrl ?? null,
+                                    coverUrl: video.s3_urls?.coverUrl ?? null,
+                                }
+                            }))
+                            : [],
+                    };
+                };
+
+                const nextPost = mapPostForAppVideo(nextPostRaw);
+                const prevPost = mapPostForAppVideo(prevPostRaw);
 
                 setNavigationData({
                     nextPost,

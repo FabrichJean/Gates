@@ -139,9 +139,10 @@ function Sidebar({
       className={`
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-300 overflow-hidden
-        ${isActive(name)
-          ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+        ${
+          isActive(name)
+            ? "bg-gradient-to-r from-blue-300/50 to-indigo-300/50 dark:shadow-blue-500/20"
+            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
         }
       `}
     >
@@ -154,10 +155,11 @@ function Sidebar({
       <div
         className={`
         relative z-10 transition-transform duration-300
-        ${isActive(name)
+        ${
+          isActive(name)
             ? "scale-110"
             : "group-hover:scale-110 group-hover:rotate-3"
-          }
+        }
       `}
       >
         {iconComponent || (Icon && <Icon className="w-5 h-5" />)}
@@ -168,10 +170,11 @@ function Sidebar({
         <span
           className={`
           relative z-10 font-medium text-sm
-          ${isActive(name)
+          ${
+            isActive(name)
               ? ""
               : "group-hover:text-gray-900 dark:group-hover:text-gray-100"
-            }
+          }
         `}
         >
           {label}
@@ -417,6 +420,8 @@ function Sidebar({
               icon={RiRobot2Line}
             />
 
+        {user?.role === RoleEnum.SUPERADMIN && (
+          <>
             {/* Separator */}
             {!isCollapsed && (
               <div className="pt-4 pb-2">
@@ -495,10 +500,9 @@ function Sidebar({
               }
             />
 
-
             {/* '''''''' */}
 
-             <NavLink
+            <NavLink
               to="/romans"
               name="romans"
               label="罗马人"
@@ -539,7 +543,6 @@ function Sidebar({
                 </svg>
               }
             /> */}
-          
 
             {/* Separator */}
             {!isCollapsed && (
