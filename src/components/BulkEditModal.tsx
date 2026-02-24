@@ -55,6 +55,10 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
   const { data: subCategoriesResponse } = useSubCategoryPost(Number(bulkEditData.category?.id));
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
+  const [currentBatch, setCurrentBatch] = useState(0);
+  const [totalBatches, setTotalBatches] = useState(0);
+  const [serverResult, setServerResult] = useState<{ success: number; failed: number } | null>(null);
+  const [localBatchesDone, setLocalBatchesDone] = useState(false);
 
   const handleCreatorChange = useCallback((value: string | null) => {
     if (value === null || value === '') {
@@ -95,18 +99,21 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
     if (isOpen) {
       subscribe({
         onProgress: (data) => {
+          const d: any = data;
           setBulkEditProgress(prev => ({
-            current: data.current || prev.current,
-            total: data.total || prev.total,
+            current: d.current ?? prev.current,
+            total: d.total ?? prev.total,
           }));
         },
+        // Store server completion result; do not close UI here — we'll finalize only when local batches are done too
         onComplete: (data) => {
-          setBulkEditLoading(false);
-          setBulkEditProgress({ current: 0, total: 0 });
-          toast.success(`Successfully updated ${data.success} post${data.success > 1 ? 's' : ''}${data.failed > 0 ? ` (${data.failed} failed)` : ''}`);
-          onSuccess();
-          closeBulkEdit();
-          onDeselectAll();
+          const d: any = data;
+          setServerResult({ success: d.success ?? 0, failed: d.failed ?? 0 });
+          // update progress to server-reported totals if provided
+          setBulkEditProgress(prev => ({
+            current: d.current ?? prev.current,
+            total: d.total ?? prev.total,
+          }));
         },
         onError: (data) => {
           setBulkEditLoading(false);
@@ -122,6 +129,27 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       unsubscribe();
     };
   }, [isOpen, subscribe, unsubscribe, onSuccess, onDeselectAll]);
+
+  // finalize only when both local batches are processed and server confirms completion
+  useEffect(() => {
+    if (localBatchesDone && serverResult) {
+      setBulkEditLoading(false);
+      // ensure progress reflects server totals if available
+      setBulkEditProgress(prev => ({
+        current: prev.current || (serverResult.success + serverResult.failed),
+        total: prev.total || (serverResult.success + serverResult.failed),
+      }));
+
+      toast.success(`Bulk edit completed: ${serverResult.success} succeeded, ${serverResult.failed} failed`);
+      onSuccess();
+      closeBulkEdit();
+      onDeselectAll();
+
+      // reset coordination flags
+      setServerResult(null);
+      setLocalBatchesDone(false);
+    }
+  }, [localBatchesDone, serverResult, onSuccess, onDeselectAll]);
 
   useEffect(() => {
     if (bulkEditData.modifyTags && availableTags.length > 0 && bulkEditData.tags.length === 0) {
@@ -185,7 +213,7 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       }
 
       const ids = Array.from(selectedPosts);
-      const BATCH_SIZE = 10; // adjust as needed
+      const BATCH_SIZE = 5; // adjust as needed
 
       // Notify socket/back-end that a bulk update is starting
       startBulkUpdate(ids);
@@ -202,7 +230,14 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
       let success = 0;
       let failed = 0;
 
-      for (const batch of batches) {
+      setTotalBatches(batches.length);
+      setCurrentBatch(0);
+
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        // indicate which batch we're processing (1-based)
+        setCurrentBatch(i + 1);
+
         try {
           // send batch to API
           const res = await bulkUpdatePostsForApp(batch, updateData);
@@ -225,15 +260,12 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         setBulkEditProgress({ current: processed, total: ids.length });
       }
 
-      // finished all batches
-      setBulkEditLoading(false);
-      setBulkEditProgress({ current: ids.length, total: ids.length });
-
-      // show summary
-      toast.success(`Bulk edit completed: ${success} succeeded, ${failed} failed`);
-      onSuccess();
-      closeBulkEdit();
-      onDeselectAll();
+  // cleanup batch indicators and mark local batches done. Wait for server confirmation (onComplete) before closing.
+  setCurrentBatch(0);
+  setTotalBatches(0);
+  setLocalBatchesDone(true);
+  // ensure progress shows full processed count
+  setBulkEditProgress({ current: ids.length, total: ids.length });
 
     } catch (error: any) {
       console.error('Bulk edit error:', error);
@@ -499,11 +531,20 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
                   Processing updates...
                 </span>
               </div>
+              {/* Per-batch status (shows when we split into batches) */}
+              {totalBatches > 0 && (
+                <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 mb-3">
+                  <Loader2 className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
+                  <span className="font-medium">
+                    Processing batch {currentBatch} / {totalBatches}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <div className="flex-1 bg-blue-200 dark:bg-blue-900 rounded-full h-2.5 overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-blue-600 to-blue-500 h-2.5 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${(bulkEditProgress.current / bulkEditProgress.total) * 100}%` }}
+                        style={{ width: `${bulkEditProgress.total ? (bulkEditProgress.current / bulkEditProgress.total) * 100 : 0}%` }}
                   ></div>
                 </div>
                 <span className="text-sm font-medium text-blue-700 dark:text-blue-300 min-w-[4rem] text-right">
@@ -547,8 +588,18 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
             >
               {bulkEditLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {totalBatches > 0 ? (
+                      <>
+                        Processing batch {currentBatch} / {totalBatches}
+                        <span className="mx-2">—</span>
+                        {bulkEditProgress.current} / {bulkEditProgress.total}
+                      </>
+                    ) : (
+                      <>
+                        Processing... {bulkEditProgress.current} / {bulkEditProgress.total}
+                      </>
+                    )}
                 </>
               ) : (
                 <>
