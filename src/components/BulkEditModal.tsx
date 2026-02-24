@@ -184,8 +184,56 @@ const BulkEditModal: React.FC<BulkEditModalProps> = ({
         return;
       }
 
-      startBulkUpdate(Array.from(selectedPosts));
-      await bulkUpdatePostsForApp(Array.from(selectedPosts), updateData);
+      const ids = Array.from(selectedPosts);
+      const BATCH_SIZE = 10; // adjust as needed
+
+      // Notify socket/back-end that a bulk update is starting
+      startBulkUpdate(ids);
+
+      // helper to split into chunks
+      const chunk = <T,>(arr: T[], size: number) => {
+        const out: T[][] = [];
+        for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+        return out;
+      };
+
+      const batches = chunk<number>(ids, BATCH_SIZE);
+      let processed = 0;
+      let success = 0;
+      let failed = 0;
+
+      for (const batch of batches) {
+        try {
+          // send batch to API
+          const res = await bulkUpdatePostsForApp(batch, updateData);
+
+          // If API returns counts, use them; otherwise assume full batch succeeded
+          const batchSuccess = res?.data?.success ?? batch.length;
+          const batchFailed = res?.data?.failed ?? (batch.length - batchSuccess);
+
+          success += batchSuccess;
+          failed += batchFailed;
+          processed += batch.length;
+        } catch (err) {
+          console.error('Batch update error for ids', batch, err);
+          // on error, consider whole batch failed
+          failed += batch.length;
+          processed += batch.length;
+        }
+
+        // update progress UI
+        setBulkEditProgress({ current: processed, total: ids.length });
+      }
+
+      // finished all batches
+      setBulkEditLoading(false);
+      setBulkEditProgress({ current: ids.length, total: ids.length });
+
+      // show summary
+      toast.success(`Bulk edit completed: ${success} succeeded, ${failed} failed`);
+      onSuccess();
+      closeBulkEdit();
+      onDeselectAll();
 
     } catch (error: any) {
       console.error('Bulk edit error:', error);
