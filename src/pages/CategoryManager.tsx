@@ -442,7 +442,7 @@ export default function CategoryManager() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                                      {sub.name}
+                                      <span className="text-xs">{sub.id}</span> - {sub.name}
                                     </h4>
                                   </div>
                                 </div>

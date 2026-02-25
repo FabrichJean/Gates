@@ -419,6 +419,8 @@ function Sidebar({
               label="发帖机器人"
               icon={RiRobot2Line}
             />
+          </>
+        )}
 
         {user?.role === RoleEnum.SUPERADMIN && (
           <>

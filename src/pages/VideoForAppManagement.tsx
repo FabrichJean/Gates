@@ -12,6 +12,10 @@ import { getCreators } from "../api/creators";
 import VideoForAppFilter from "../components/VideoForAppFilter";
 import { toast } from "react-hot-toast";
 import { Edit, CheckSquare, Square, Users, X } from "lucide-react";
+import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
+import type { BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
+import { multipleSync } from "../api/videos";
+import { getAllPlateformsApi } from "../api/plateforms";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
@@ -53,6 +57,7 @@ const VideoForAppManagement = () => {
     modifyTags: false,
     randomTags: false,
     randomTagsText: '',
+    synchronize: false,
   });
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
@@ -67,6 +72,151 @@ const VideoForAppManagement = () => {
   const [rangeProgress, setRangeProgress] = useState({ current: 0, total: 0 });
 
   const [creators, setCreators] = useState<any[]>([]);
+  // Bulk sync modal / progress state
+  const [bulkSyncOpen, setBulkSyncOpen] = useState(false);
+  const [bulkSyncProgress, setBulkSyncProgress] = useState<BulkSyncProgress>({
+    processed: 0,
+    total: 0,
+    failed: 0,
+    succeeded: 0,
+    currentItem: null,
+    isRunning: false,
+    isPaused: false,
+    errors: [],
+    pageStats: []
+  });
+  const [bulkSyncAbortController, setBulkSyncAbortController] = useState<AbortController | null>(null);
+  const [availablePlateforms, setAvailablePlateforms] = useState<any[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    const fetchPlateforms = async () => {
+      try {
+        const res = await getAllPlateformsApi();
+        if (!mounted) return;
+        setAvailablePlateforms(res.data || []);
+      } catch (err) {
+        console.error('Failed to load platforms', err);
+        if (!mounted) return;
+        setAvailablePlateforms([]);
+      }
+    };
+    fetchPlateforms();
+    return () => { mounted = false; };
+  }, []);
+  const [pendingSyncOriginIds, setPendingSyncOriginIds] = useState<number[] | null>(null);
+
+  // Start synchronization using multipleSync and update the tracking modal progress
+  const startSynchronization = async (originIds: number[], isForce: boolean = false, plateformId?: number) => {
+    if (!originIds || originIds.length === 0) return;
+
+    setBulkSyncOpen(true);
+    const controller = new AbortController();
+    setBulkSyncAbortController(controller);
+
+    setBulkSyncProgress({
+      processed: 0,
+      total: originIds.length,
+      failed: 0,
+      succeeded: 0,
+      currentItem: null,
+      isRunning: true,
+      isPaused: false,
+      errors: [],
+      pageStats: []
+    });
+
+    try {
+      // Chunk the originIds to avoid very large requests and to provide progressive feedback
+      const BATCH_SIZE = Math.max(10, data?.limit || 50);
+      const chunk = <T,>(arr: T[], size: number) => {
+        const out: T[][] = [];
+        for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+        return out;
+      };
+
+      const batches = chunk<number>(originIds, BATCH_SIZE);
+      // initialize progress
+      setBulkSyncProgress(prev => ({ ...prev, total: originIds.length, processed: 0, succeeded: 0, failed: 0, errors: [] }));
+
+      for (let i = 0; i < batches.length; i++) {
+        if (controller.signal.aborted) break;
+
+        // Respect pause
+        // eslint-disable-next-line no-await-in-loop
+        while (bulkSyncProgress.isPaused && !controller.signal.aborted) {
+          // wait 200ms
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        const batch = batches[i];
+        // update currentItem to show first id in batch (UI shows title/cover when available, but we at least set an id)
+        setBulkSyncProgress(prev => ({ ...prev, currentItem: { id: batch[0], title: `Batch ${i + 1}/${batches.length}` } as any }));
+
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await multipleSync({ entity: 'video_for_app', originIds: batch, isForce, plateformId, signal: controller.signal });
+
+          // success for this batch
+          setBulkSyncProgress(prev => ({
+            ...prev,
+            processed: prev.processed + batch.length,
+            succeeded: prev.succeeded + batch.length,
+            // append a pageStat for UI
+            pageStats: [...prev.pageStats, { page: i + 1, entity: 'video_for_app', limit: batch.length, processed: batch.length, succeeded: batch.length, failed: 0, startTime: new Date() } as any]
+          }));
+        } catch (batchErr: any) {
+          if (controller.signal.aborted) {
+            // aborted by user
+            setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+            toast.error('Synchronization aborted');
+            break;
+          }
+
+          // Batch failed — count all in batch as failed and record error
+          const errorsForBatch = batch.map(id => ({ resourceId: id, error: batchErr?.response?.data?.message || batchErr?.message || 'Batch sync failed' }));
+          setBulkSyncProgress(prev => ({
+            ...prev,
+            processed: prev.processed + batch.length,
+            failed: prev.failed + batch.length,
+            errors: [...prev.errors, ...errorsForBatch],
+            pageStats: [...prev.pageStats, { page: i + 1, entity: 'video_for_app', limit: batch.length, processed: batch.length, succeeded: 0, failed: batch.length, startTime: new Date() } as any]
+          }));
+        }
+      }
+
+      // finished all batches (or aborted)
+      setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+      toast.success(`Synchronization finished — processed ${originIds.length} items`);
+      // keep modal open briefly so user can see result, then close
+      setTimeout(() => setBulkSyncOpen(false), 1200);
+    } catch (err: any) {
+      console.error('Bulk synchronization failed', err);
+      setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+      toast.error('Synchronization failed for selected videos');
+    } finally {
+      setBulkSyncAbortController(null);
+      // refresh list
+      reFetch();
+      deselectAll();
+    }
+  };
+
+  const handleBulkSyncPause = () => {
+    setBulkSyncProgress(prev => ({ ...prev, isPaused: true }));
+  };
+
+  const handleBulkSyncResume = () => {
+    setBulkSyncProgress(prev => ({ ...prev, isPaused: false }));
+  };
+
+  const handleBulkSyncStop = () => {
+    if (bulkSyncAbortController) {
+      bulkSyncAbortController.abort();
+    }
+    setBulkSyncProgress(prev => ({ ...prev, isRunning: false, isPaused: false }));
+    setBulkSyncOpen(false);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -223,6 +373,7 @@ const VideoForAppManagement = () => {
       modifyTags: false,
       randomTags: false,
       randomTagsText: '',
+      synchronize: false,
     });
     setBulkEditProgress({ current: 0, total: 0 });
   };
@@ -266,10 +417,10 @@ const VideoForAppManagement = () => {
 
           if (bulkEditData.title) updateData.title = bulkEditData.title;
           if (bulkEditData.description) updateData.description = bulkEditData.description;
-          
+
           // Handle tags: either from manual selection or random selection
           let tagsToApply: (number | string)[] = [];
-          
+
           if (bulkEditData.randomTags) {
             // Get random tags from the provided list
             const tagList = bulkEditData.randomTagsText.split('\n');
@@ -279,17 +430,18 @@ const VideoForAppManagement = () => {
             // Use manually selected tags
             tagsToApply = bulkEditData.tags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name));
           }
-          
+
           if (tagsToApply.length > 0) {
             updateData.tag_category_ids = tagsToApply;
           }
-          
+
           if (bulkEditData.category) updateData.category = bulkEditData.category;
           if (bulkEditData.subcategory) updateData.subcategory = bulkEditData.subcategory;
           if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
           if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
           if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
 
+          // Apply update if needed
           if (Object.keys(updateData).length > 0) {
             await updateVideoForApp(videoId, updateData);
             successCount++;
@@ -301,6 +453,14 @@ const VideoForAppManagement = () => {
 
         // Update progress
         setBulkEditProgress(prev => ({ ...prev, current: prev.current + 1 }));
+      }
+
+      // If user asked to synchronize selected videos, call multipleSync once for all selected
+      if (bulkEditData.synchronize && selectedVideos.size > 0) {
+        // request synchronization: store selected ids and open tracking modal for configuration
+        const originIds = Array.from(selectedVideos);
+        setPendingSyncOriginIds(originIds);
+        setBulkSyncOpen(true);
       }
 
       if (successCount > 0) {
@@ -647,6 +807,19 @@ const VideoForAppManagement = () => {
                   </label>
                 </div>
 
+                <div className="flex items-center space-x-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="synchronize"
+                    checked={bulkEditData.synchronize}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, synchronize: e.target.checked }))}
+                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label htmlFor="synchronize" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Synchronize selected videos (send to platform)
+                  </label>
+                </div>
+
                 {bulkEditData.randomTags && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -781,6 +954,30 @@ const VideoForAppManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Bulk Sync Tracking Modal - reused for synchronizing selected videos */}
+      <BulkSyncTrackingModal
+        open={bulkSyncOpen}
+        onClose={() => setBulkSyncOpen(false)}
+        onStartSync={(entities, isForce, pageNum, limitNum, autoSwitch, plateformId, platformFilter) => {
+          // Use pending origin ids (from bulk edit) if available, otherwise use current selection
+          const originIds = pendingSyncOriginIds ?? Array.from(selectedVideos);
+          // close bulk edit UI if it's still open
+          if (showBulkEdit) closeBulkEdit();
+          startSynchronization(originIds, isForce, plateformId);
+          // clear pending ids after starting
+          setPendingSyncOriginIds(null);
+        }}
+        progress={bulkSyncProgress}
+        onPause={handleBulkSyncPause}
+        onResume={handleBulkSyncResume}
+        onStop={handleBulkSyncStop}
+        onDisableAutoSwitch={() => { /* noop */ }}
+        currentPage={page}
+        currentEntity={"video"}
+        currentLimit={data?.limit}
+        availablePlateforms={availablePlateforms}
+      />
     </div>
   );
 };
