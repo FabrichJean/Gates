@@ -51,7 +51,7 @@ const CreateNewDropdown: React.FC = () => {
           >
             <Video className="w-5 h-5 text-blue-500 dark:text-blue-400 transition-transform duration-300 group-hover/item:scale-110" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              New Video
+              新视频
             </span>
           </button>
 
@@ -65,7 +65,7 @@ const CreateNewDropdown: React.FC = () => {
           >
             <MdDynamicFeed className="w-5 h-5 text-purple-500 dark:text-purple-400 transition-transform duration-300 group-hover/item:scale-110" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              New Post
+              新帖子
             </span>
           </button>
 
@@ -79,7 +79,7 @@ const CreateNewDropdown: React.FC = () => {
           >
             <img src="/mangas.png" alt="Manga" className="w-5 h-5" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              New Manga
+              新漫画
             </span>
           </button>
 
@@ -105,7 +105,7 @@ const CreateNewDropdown: React.FC = () => {
               />
             </svg>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              New Roman
+              新罗马
             </span>
           </button>
         </div>
@@ -185,22 +185,29 @@ const Breadcrumb: React.FC = () => {
 
   // Mapping des routes vers des noms lisibles
   const routeNames: Record<string, string> = {
-    "/": "Home",
-    "/users": "Users",
-    "/users-archive": "Users Archive",
-    "/videos": "Videos Management",
-    "/category-manager": "Category Video",
-    "/mangas-categories": "Mangas Categories",
-    "/post-categories": "Post Categories",
-    "/upload": "Upload",
-    "/upload-post": "Upload Post",
-    "/post-management": "Post Management",
-    "/post-for-app": "Post For App",
-    "/settings": "Settings",
-    "/profil": "Profile",
-    "/create-user": "Create User",
-    "/convertion": "Conversion",
-    "/touch-video": "Touch Video",
+    "/": "首页",
+    "/users": "用户",
+    "/users-archive": "用户档案",
+    "/videos": "视频管理",
+    "/category-manager": "视频类别",
+    "/mangas-categories": "漫画类别",
+    "/post-categories": "文章分类",
+    "/upload": "上传",
+    "/upload-post": "上传帖子",
+    "/post-management": "帖子管理",
+    "/post-for-app": "应用帖子",
+    "/settings": "设置",
+    "/profil": "个人资料",
+    "/create-user": "创建用户",
+    "/convertion": "转换",
+    "/touch-video": "触摸视频",
+    "/app-videos": "应用视频",
+    "/mangas": "漫画",
+    // "/romans": "罗马",
+    "/post": "帖子",
+    "/bot-videos": "机器人视频",
+    "/bot-posts": "机器人帖子",
+
   };
 
   const pathSegments = location.pathname
@@ -208,7 +215,7 @@ const Breadcrumb: React.FC = () => {
     .filter((segment) => segment !== "");
 
   // Construire les breadcrumbs
-  const breadcrumbs = [{ name: "Home", path: "/videos" }];
+  const breadcrumbs = [{ name: "首页", path: "/videos" }];
 
   let currentPath = "";
   pathSegments.forEach((segment) => {
@@ -266,11 +273,10 @@ const Breadcrumb: React.FC = () => {
           <Home className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
           <button
             onClick={() => navigate(breadcrumbs[0].path)}
-            className={`text-sm transition-colors duration-200 ${
-              breadcrumbs.length === 1
-                ? "text-gray-900 dark:text-white font-medium cursor-default"
-                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-            }`}
+            className={`text-sm transition-colors duration-200 ${breadcrumbs.length === 1
+              ? "text-gray-900 dark:text-white font-medium cursor-default"
+              : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+              }`}
             disabled={breadcrumbs.length === 1}
           >
             {breadcrumbs[0].name}
@@ -281,11 +287,10 @@ const Breadcrumb: React.FC = () => {
             <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
             <button
               onClick={() => navigate(breadcrumb.path)}
-              className={`text-sm transition-colors duration-200 ${
-                index === breadcrumbs.length - 2
-                  ? "text-gray-900 dark:text-white font-medium cursor-default"
-                  : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
-              }`}
+              className={`text-sm transition-colors duration-200 ${index === breadcrumbs.length - 2
+                ? "text-gray-900 dark:text-white font-medium cursor-default"
+                : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+                }`}
               disabled={index === breadcrumbs.length - 2}
             >
               {breadcrumb.name}
@@ -321,7 +326,7 @@ const Breadcrumb: React.FC = () => {
           >
             <FaSyncAlt />
             <span className="md:inline hidden text-gray-600 dark:text-gray-400 PX-3">
-              Synchronisation
+              同步
             </span>
           </button>
         </span>
@@ -426,13 +431,12 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
       <div
         className={`
                     flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 h-full overflow-auto
-                    ${
-                      isMobile
-                        ? "w-full"
-                        : isCollapsed
-                          ? "w-[calc(100%-5rem)]"
-                          : "w-[calc(100%-16rem)]"
-                    }
+                    ${isMobile
+            ? "w-full"
+            : isCollapsed
+              ? "w-[calc(100%-5rem)]"
+              : "w-[calc(100%-16rem)]"
+          }
                 `}
       >
         {/* Header */}
@@ -479,9 +483,9 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
           className="modal modal-bottom sm:modal-middle"
         >
           <div className="modal-box bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
-            <h3 className="font-bold text-lg">Disconnect</h3>
+            <h3 className="font-bold text-lg">断开连接</h3>
             <p className="py-4">
-              Are you sure you want to log out? <span>😞</span>
+              你确定要退出登录吗？ <span>😞</span>
             </p>
             <div className="modal-action">
               <form
@@ -496,14 +500,14 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
                   className="btn bg-red-500 hover:bg-red-600 text-white border-none transition-colors duration-300"
                   type="submit"
                 >
-                  logout
+                  登出
                 </button>
                 <button
                   type="button"
                   className="btn bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 border-none transition-colors duration-300"
                   onClick={closeLogoutModal}
                 >
-                  cancel
+                  取消
                 </button>
               </form>
             </div>

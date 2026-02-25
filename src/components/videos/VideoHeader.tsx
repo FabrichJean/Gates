@@ -49,7 +49,7 @@ const VideoHeader = ({
   return (
     <header className="flex flex-wrap justify-start items-center">
       <h1 className="text-3xl font-semibold pb-3 text-gray-500 dark:text-gray-400 transition-colors duration-300">
-        Video Management
+        视频管理
       </h1>
 
       <div className="flex items-center gap-4 justify-between w-full">
@@ -72,7 +72,7 @@ const VideoHeader = ({
             }}
             className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
           >
-            {checkObjectContent(filters).allEmpty ? null : <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>} <Filter className="w-3 text-gray-600 dark:text-gray-400" /> filters
+            {checkObjectContent(filters).allEmpty ? null : <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce"></div>} <Filter className="w-3 text-gray-600 dark:text-gray-400" /> 过滤器
           </button>
 
           <SearchModal scope={scope} />
@@ -86,7 +86,7 @@ const VideoHeader = ({
             }}
             className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
           >
-            <span className="grow text-left text-gray-600 dark:text-gray-300">Search…</span>
+            <span className="grow text-left text-gray-600 dark:text-gray-300">搜索…</span>
             <kbd className="kbd kbd-sm font-mono opacity-50 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
               <span className="me-1 text-sm">⌘</span>K
             </kbd>
@@ -95,7 +95,7 @@ const VideoHeader = ({
 
         {/* ---- Actions ---- */}
         <div className="flex gap-2">
-        {/* <small>(video sent : {sent})</small> */}
+          {/* <small>(video sent : {sent})</small> */}
           <Link
             to={"/videos/upload"}
             className="hidden md:flex items-center justify-center gap-2 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 font-medium text-sm hover:bg-blue-50 dark:hover:bg-gray-800 transition-all"
@@ -107,7 +107,7 @@ const VideoHeader = ({
             <>
               <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
                 <div className="modal-box max-w-lg">
-                  <h3 className="font-bold text-lg">Select WebApp</h3>
+                  <h3 className="font-bold text-lg">选择 WebApp</h3>
                   <div className="max-h-60 overflow-auto mt-3">
                     {plateforms?.map((p: any) => (
                       <label key={p.id} className="flex items-center gap-3 p-2 border-b">
@@ -122,8 +122,8 @@ const VideoHeader = ({
                     ))}
                   </div>
                   <div className="modal-action">
-                    <button className="btn btn-outline" onClick={() => setWebappModalOpen(false)}>Close</button>
-                    <button className="btn btn-primary" onClick={sendToWebapp}>Send</button>
+                    <button className="btn btn-outline" onClick={() => setWebappModalOpen(false)}>关闭</button>
+                    <button className="btn btn-primary" onClick={sendToWebapp}>发送</button>
                   </div>
                 </div>
               </dialog>

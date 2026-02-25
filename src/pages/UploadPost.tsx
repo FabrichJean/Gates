@@ -192,7 +192,7 @@ const UploadPost = () => {
             // Vérifier si la langue n'existe pas déjà
             const existingLanguage = languages.find(lang => lang.code === selectedLanguageFromBackend.code);
             if (existingLanguage) {
-                toast.error("This language is already added!");
+                toast.error("此语言已添加！");
                 return;
             }
 
@@ -258,7 +258,7 @@ const UploadPost = () => {
             // Vérifier la taille du fichier vidéo (2GB max = 2 * 1024 * 1024 * 1024 bytes)
             const maxSize = 2 * 1024 * 1024 * 1024; // 2GB en bytes
             if (file.size > maxSize) {
-                toast.error(`⚠️ La vidéo est trop volumineuse !\n\nTaille du fichier: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\nTaille maximum autorisée: 2 GB\n\nVeuillez choisir une vidéo plus petite.`);
+                toast.error(`⚠️ 视频文件过大！\n\n文件大小: ${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB\n最大允许大小: 2 GB\n\n请选择较小的视频文件。`);
                 return;
             }
 
@@ -290,7 +290,7 @@ const UploadPost = () => {
         setOpen(false);
         setSubOpen(false);
         setWebAppOpen(false);
-        toast.success("Formulaire réinitialisé");
+        toast.success("表单已重置");
     };
 
     // Upload post avec useCallback
@@ -299,24 +299,24 @@ const UploadPost = () => {
 
         // Validation des champs obligatoires
         if (!selectedCategory || !selectedSubCategory || !selectedWebApp) {
-            toast.error("Veuillez remplir tous les champs obligatoires !");
+            toast.error("请填写所有必填项！");
             return;
         }
 
         // Vérifier qu'au moins un titre est renseigné
         const hasTitle = Object.values(titles).some(title => title.trim() !== "");
         if (!hasTitle) {
-            toast.error("Veuillez saisir au moins un titre");
+            toast.error("请输入至少一个标题");
             return;
         }
 
         // Vérifier que chaque vidéo a un cover
         const videosWithoutCover = videoFields.filter(field => field.file !== null && field.cover === null);
         if (videosWithoutCover.length > 0) {
-            toast.error("Veuillez ajouter une image cover pour chaque vidéo !");
+            toast.error("请为每个视频添加封面图片！");
             return;
         }
-        
+
         // Préparer les titres multilingues selon la nouvelle structure
         const titlesArray: { title: string, i18_language: string, description?: string }[] = [];
 
@@ -412,7 +412,7 @@ const UploadPost = () => {
                 timeout: 10 * 60 * 1000 // 10 minutes timeout
             });
 
-            toast.success("✅ Post uploadé avec succès !");
+            toast.success("✅ 帖子发布成功！");
             navigate("/post");
 
             // Réinitialiser le formulaire
@@ -428,7 +428,7 @@ const UploadPost = () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error(err);
-            toast.error("Erreur lors de l'upload : " + (err.response?.data?.message || err.message));
+            toast.error("上传出错：" + (err.response?.data?.message || err.message));
         } finally {
             setIsSubmitting(false);
         }
@@ -439,20 +439,20 @@ const UploadPost = () => {
             {/* contenu de l'upload */}
             <div className="flex w-full border border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6">
                 <div className="w-full justify-start">
-                    <h2 className="text-lg sm:text-xl font-semibold text-left text-gray-900 dark:text-white">Upload Post</h2>
+                    <h2 className="text-lg sm:text-xl font-semibold text-left text-gray-900 dark:text-white">上传帖子</h2>
                     <div className="mt-4">
                         {/* formulaire de l'upload */}
                         <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
                             {/* champ select de catégorie */}
                             <div className="relative w-full" ref={categoryDropdownRef}>
-                                <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category:</label>
+                                <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">分类：</label>
                                 {categoriesError && (
                                     <div className="mb-2 text-sm text-red-600 dark:text-red-400">
                                         <span className="flex items-center">
                                             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                             </svg>
-                                            Erreur lors du chargement des catégories: {categoriesError}
+                                            加载分类时出错: {categoriesError}
                                         </span>
                                     </div>
                                 )}
@@ -467,12 +467,12 @@ const UploadPost = () => {
                                             }`}>
                                         <span className="block truncate">
                                             {categoriesLoading
-                                                ? 'Chargement des catégories...'
+                                                ? '正在加载分类...'
                                                 : categoriesError
-                                                    ? 'Erreur lors du chargement'
+                                                    ? '加载错误'
                                                     : selectedOptions.length
                                                         ? selectedOptions[0]
-                                                        : 'Select category'
+                                                        : '选择分类'
                                             }
                                         </span>
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -489,15 +489,15 @@ const UploadPost = () => {
                                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                             {categoriesLoading ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Chargement des catégories...
+                                                    正在加载分类...
                                                 </div>
                                             ) : categoriesError ? (
                                                 <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">
-                                                    Erreur: {categoriesError}
+                                                    错误: {categoriesError}
                                                 </div>
                                             ) : categoriesResponse?.categories?.length === 0 ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Aucune catégorie disponible
+                                                    暂无可用分类
                                                 </div>
                                             ) : (
                                                 categoriesResponse?.categories?.map((cat) => (
@@ -532,7 +532,7 @@ const UploadPost = () => {
                             {/* champ select de sous-catégorie */}
                             <div className="relative w-full" ref={subCategoryDropdownRef}>
                                 <label htmlFor="subcategory-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Sub Category:
+                                    子分类：
                                 </label>
                                 <div className="mt-1 relative w-full">
                                     <button
@@ -546,10 +546,10 @@ const UploadPost = () => {
                                     >
                                         <span className="block truncate">
                                             {selectedSubCategory ? selectedSubCategory.name :
-                                                !selectedCategory ? 'Please select a category first' :
-                                                    subCategoriesLoading ? 'Chargement des sous-catégories...' :
-                                                        subCategoriesError ? 'Erreur lors du chargement' :
-                                                            'Select sub category'}
+                                                !selectedCategory ? '请先选择分类' :
+                                                    subCategoriesLoading ? '正在加载子分类...' :
+                                                        subCategoriesError ? '加载错误' :
+                                                            '选择子分类'}
                                         </span>
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                             <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -565,15 +565,15 @@ const UploadPost = () => {
                                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                             {subCategoriesLoading ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Chargement des sous-catégories...
+                                                    正在加载子分类...
                                                 </div>
                                             ) : subCategoriesError ? (
                                                 <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">
-                                                    Erreur: {subCategoriesError}
+                                                    错误: {subCategoriesError}
                                                 </div>
                                             ) : availableSubCategories?.subCategories?.length === 0 ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Aucune sous-catégorie disponible
+                                                    暂无可用子分类
                                                 </div>
                                             ) : (
                                                 availableSubCategories?.subCategories?.map((subCat) => (
@@ -612,7 +612,7 @@ const UploadPost = () => {
 
                             {/* Tag categories for Post */}
                             <div className="relative w-full" ref={postTagWrapperRef}>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tags:</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">标签：</label>
                                 <div className="flex gap-2 items-center">
                                     <div className="relative flex-1">
                                         <input
@@ -629,7 +629,7 @@ const UploadPost = () => {
                                                     addPostTagByName(postTagQuery);
                                                 }
                                             }}
-                                            placeholder="Type tag name or select suggestion..."
+                                            placeholder="输入标签名称或选择建议..."
                                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
                                         />
 
@@ -659,7 +659,7 @@ const UploadPost = () => {
                                         }}
                                         className="px-3 py-2 rounded-md bg-sky-600 text-white hover:bg-sky-700"
                                     >
-                                        Add
+                                        添加
                                     </button>
                                 </div>
 
@@ -675,14 +675,14 @@ const UploadPost = () => {
 
                             {/* champ de sélection de l'application web */}
                             <div className="relative w-full" ref={webAppDropdownRef}>
-                                <label htmlFor="webapp-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Web Application:</label>
+                                <label htmlFor="webapp-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Web 应用：</label>
                                 {plateformsError && (
                                     <div className="mb-2 text-sm text-red-600 dark:text-red-400">
                                         <span className="flex items-center">
                                             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                             </svg>
-                                            Erreur lors du chargement des plateformes: {plateformsError}
+                                            加载平台时出错: {plateformsError}
                                         </span>
                                     </div>
                                 )}
@@ -697,12 +697,12 @@ const UploadPost = () => {
                                             }`}>
                                         <span className="block truncate">
                                             {plateformsLoading
-                                                ? 'Chargement des plateformes...'
+                                                ? '正在加载平台...'
                                                 : plateformsError
-                                                    ? 'Erreur lors du chargement'
+                                                    ? '加载错误'
                                                     : selectedWebApp
                                                         ? selectedWebApp.name
-                                                        : 'Select web application'
+                                                        : '选择 Web 应用'
                                             }
                                         </span>
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -719,15 +719,15 @@ const UploadPost = () => {
                                         <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                             {plateformsLoading ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Chargement des plateformes...
+                                                    正在加载平台...
                                                 </div>
                                             ) : plateformsError ? (
                                                 <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">
-                                                    Erreur: {plateformsError}
+                                                    错误: {plateformsError}
                                                 </div>
                                             ) : plateformsData?.length === 0 ? (
                                                 <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">
-                                                    Aucune plateforme disponible
+                                                    暂无可用平台
                                                 </div>
                                             ) : (
                                                 plateformsData?.map((platform) => (
@@ -760,7 +760,7 @@ const UploadPost = () => {
 
                             {/* champ de titre avec onglets de langues */}
                             <div className="relative w-full">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Title:</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">标题：</label>
 
                                 {/* Onglets des langues */}
                                 <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -783,12 +783,12 @@ const UploadPost = () => {
                                         type="button"
                                         onClick={() => setShowAddLanguageModal(true)}
                                         className="px-3 py-2 text-sm font-medium bg-transparent text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border border-dashed border-gray-400 dark:border-gray-500 hover:border-gray-500 dark:hover:border-gray-400 rounded-md transition-colors duration-200 flex items-center space-x-1"
-                                        title="Add new title"
+                                        title="添加新标题"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
-                                        <span>Add Title</span>
+                                        <span>添加标题</span>
                                     </button>
                                 </div>
                                 {selectedLanguage && (
@@ -797,17 +797,17 @@ const UploadPost = () => {
                                             type="text"
                                             value={titles[selectedLanguage.id] || ''}
                                             onChange={(e) => handleTitleChange(selectedLanguage.id, e.target.value)}
-                                            placeholder={`Enter title in ${selectedLanguage.name}`}
+                                            placeholder={`输入标题 (${selectedLanguage.name})`}
                                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
                                         />
 
                                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Description ({selectedLanguage.name})
+                                            描述 ({selectedLanguage.name})
                                         </label>
                                         <textarea
                                             value={descriptions[selectedLanguage.id] || ''}
                                             onChange={(e) => handleDescriptionChange(selectedLanguage.id, e.target.value)}
-                                            placeholder={`Enter description in ${selectedLanguage.name}`}
+                                            placeholder={`输入描述 (${selectedLanguage.name})`}
                                             rows={4}
                                             className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-vertical"
                                         />
@@ -820,7 +820,7 @@ const UploadPost = () => {
 
                             {/* champ image multiple */}
                             <div className="relative w-full">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Image:</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">图片：</label>
 
                                 {/* Liste des champs d'upload d'images en grille */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
@@ -862,7 +862,7 @@ const UploadPost = () => {
                                                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                             </svg>
                                                             <div className="text-gray-600 dark:text-gray-400">
-                                                                <p className="text-sm font-medium">Click to upload an image</p>
+                                                                <p className="text-sm font-medium">点击上传图片</p>
                                                                 <p className="text-xs">PNG, JPG, GIF, WebP, etc.</p>
                                                             </div>
                                                         </div>
@@ -877,7 +877,7 @@ const UploadPost = () => {
                                                         type="button"
                                                         onClick={() => removeImageField(field.id)}
                                                         className="flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                                                        title="Remove image"
+                                                        title="删除图片"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -899,7 +899,7 @@ const UploadPost = () => {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
-                                        <span>New image field</span>
+                                        <span>新增图片栏</span>
                                     </button>
                                 </div>
                             </div>
@@ -909,7 +909,7 @@ const UploadPost = () => {
 
                             {/* champ video multiple */}
                             <div className="relative w-full">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Video:</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">视频：</label>
 
                                 {/* Liste des champs d'upload de vidéos en grille */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
@@ -917,7 +917,7 @@ const UploadPost = () => {
                                         <div key={`video-${field.id}`} className="space-y-3 w-full">
                                             {/* Zone d'upload vidéo */}
                                             <div className="relative w-full">
-                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Video</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">视频</label>
                                                 <input
                                                     type="file"
                                                     accept="video/*"
@@ -952,7 +952,7 @@ const UploadPost = () => {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                             </svg>
                                                             <div className="text-gray-600 dark:text-gray-400">
-                                                                <p className="text-xs font-medium">Upload video</p>
+                                                                <p className="text-xs font-medium">上传视频</p>
                                                                 <p className="text-xs">MP4, AVI, MOV</p>
                                                             </div>
                                                         </div>
@@ -963,7 +963,7 @@ const UploadPost = () => {
                                             {/* Zone d'upload cover (obligatoire si vidéo) */}
                                             <div className="relative w-full">
                                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    Cover <span className="text-red-500">*</span>
+                                                    封面 <span className="text-red-500">*</span>
                                                 </label>
                                                 <input
                                                     type="file"
@@ -981,8 +981,8 @@ const UploadPost = () => {
                                                 <label
                                                     htmlFor={`cover-upload-${field.id}`}
                                                     className={`border-2 border-dashed ${field.file && !field.cover
-                                                            ? 'border-red-400 dark:border-red-600'
-                                                            : 'border-gray-300 dark:border-gray-600'
+                                                        ? 'border-red-400 dark:border-red-600'
+                                                        : 'border-gray-300 dark:border-gray-600'
                                                         } bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer h-[120px] w-full`}
                                                 >
                                                     {field.cover ? (
@@ -1001,7 +1001,7 @@ const UploadPost = () => {
                                                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                             </svg>
                                                             <div className={`${field.file && !field.cover ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
-                                                                <p className="text-xs font-medium">Upload cover</p>
+                                                                <p className="text-xs font-medium">上传封面</p>
                                                                 <p className="text-xs">PNG, JPG, GIF</p>
                                                             </div>
                                                         </div>
@@ -1011,7 +1011,7 @@ const UploadPost = () => {
 
                                             {/* zone de selection type `short` ou `long` */}
                                             <div className="relative w-full">
-                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">类型</label>
                                                 <div className="flex items-center space-x-2">
                                                     <button
                                                         type="button"
@@ -1019,9 +1019,9 @@ const UploadPost = () => {
                                                         className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'short'
                                                             ? 'bg-indigo-600 text-white'
                                                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                            }`} 
+                                                            }`}
                                                     >
-                                                        Short
+                                                        短视频
                                                     </button>
 
                                                     <button
@@ -1030,13 +1030,13 @@ const UploadPost = () => {
                                                         className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 focus:outline-none ${field.type === 'long'
                                                             ? 'bg-indigo-600 text-white'
                                                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                            }`} 
+                                                            }`}
                                                     >
-                                                        Long
+                                                        长视频
                                                     </button>
                                                 </div>
                                             </div>
-                                            
+
 
                                             {/* Bouton supprimer placé en bas du champ */}
                                             {videoFields.length > 1 && (
@@ -1045,7 +1045,7 @@ const UploadPost = () => {
                                                         type="button"
                                                         onClick={() => removeVideoField(field.id)}
                                                         className="flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                                                        title="Remove video"
+                                                        title="删除视频"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1067,12 +1067,12 @@ const UploadPost = () => {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
-                                        <span>New video field</span>
+                                        <span>新增视频栏</span>
                                     </button>
                                 </div>
 
                                 <div className="w-full mt-4">
-                                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">Creator</label>
+                                    <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">创作者</label>
                                     <CreatorAutoComplete
                                         value={creator}
                                         onChange={(v: string | null) => {
@@ -1107,7 +1107,7 @@ const UploadPost = () => {
                                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
-                                    <span>Reset Form</span>
+                                    <span>重置表单</span>
                                 </button>
 
                                 {/* Bouton Upload */}
@@ -1125,14 +1125,14 @@ const UploadPost = () => {
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            <span>Uploading...</span>
+                                            <span>上传中...</span>
                                         </>
                                     ) : (
                                         <>
                                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
-                                            <span>Upload</span>
+                                            <span>上传</span>
                                         </>
                                     )}
                                 </button>
@@ -1147,12 +1147,12 @@ const UploadPost = () => {
                 <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                            New Title
+                            新标题
                         </h3>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Select Language
+                                选择语言
                             </label>
                             <div className="">
                                 <LanguageAutoComplete
@@ -1168,7 +1168,7 @@ const UploadPost = () => {
                                 onClick={handleCancelAddLanguage}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
                             >
-                                Cancel
+                                取消
                             </button>
                             <button
                                 type="button"
@@ -1176,7 +1176,7 @@ const UploadPost = () => {
                                 disabled={!selectedLanguageFromBackend}
                                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
                             >
-                                Add Title
+                                添加标题
                             </button>
                         </div>
                     </div>

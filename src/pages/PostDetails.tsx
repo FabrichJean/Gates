@@ -21,23 +21,23 @@ import { getToken } from "../utils/storage";
 import { cdnS3 } from "../utils/cdn";
 
 const PostDetails = () => {
-    const { user } = useAuth();
-    const [singleSyncOpen, setSingleSyncOpen] = useState(false);
-    const [singleSyncLoading, setSingleSyncLoading] = useState(false);
+  const { user } = useAuth();
+  const [singleSyncOpen, setSingleSyncOpen] = useState(false);
+  const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
-    const handleSingleSync = async (isForce: boolean) => {
-      if (!post) return;
-      setSingleSyncLoading(true);
-      try {
-        await singleSync({ entity: "post", origin_id: post.id, isForce });
-        setSingleSyncOpen(false);
-        reFetch();
-      } catch (err: any) {
-        // Optionally: toast.error(err?.response?.data?.message || "❌ Erreur sync single !");
-      } finally {
-        setSingleSyncLoading(false);
-      }
-    };
+  const handleSingleSync = async (isForce: boolean) => {
+    if (!post) return;
+    setSingleSyncLoading(true);
+    try {
+      await singleSync({ entity: "post", origin_id: post.id, isForce });
+      setSingleSyncOpen(false);
+      reFetch();
+    } catch (err: any) {
+      // Optionally: toast.error(err?.response?.data?.message || "❌ Erreur sync single !");
+    } finally {
+      setSingleSyncLoading(false);
+    }
+  };
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: post, loading, error, reFetch } = UsePost(id);
@@ -55,7 +55,7 @@ const PostDetails = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+        <div className="text-gray-600 dark:text-gray-400">加载中...</div>
       </div>
     );
   }
@@ -63,18 +63,18 @@ const PostDetails = () => {
   if (error || !post) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-red-600 dark:text-red-400"> Post Not Found</div>
+        <div className="text-red-600 dark:text-red-400"> 未找到帖子</div>
       </div>
     );
   }
 
-  
+
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between flex-col md:flex-row mb-4">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post Details - POST-{String(post.id).padStart(3, "0")}
+          帖子详情 - 帖子-{String(post.id).padStart(3, "0")}
         </h1>
         <PostChecking reFetch={reFetch} post={post} />
         <div className="flex gap-2">
@@ -86,8 +86,8 @@ const PostDetails = () => {
           >
             <ArrowLeft size={16} />
             <span className="sm:hidden">←</span>
-            <span className="hidden sm:inline">back</span>
-            <span className="sm:hidden">Back</span>
+            <span className="hidden sm:inline">返回</span>
+            <span className="sm:hidden">返回</span>
           </button>
           <button
             onClick={handleModify}
@@ -110,39 +110,38 @@ const PostDetails = () => {
                 disabled={singleSyncLoading}
               >
                 <LiaSyncSolid className="w-4 h-4" />
-                Sync
+                同步
               </button>
               <SingleSyncModal
                 open={singleSyncOpen}
                 onClose={() => setSingleSyncOpen(false)}
                 onSubmit={handleSingleSync}
-                title={`Synchroniser le post #${post.id}`}
+                title={`同步帖子 #${post.id}`}
               />
             </>
           )}
           <button
             onClick={async () => {
               const should = window.confirm(
-                post.isBanned ? "Are you sure you want to unban this post?" : "Are you sure you want to ban this post?"
+                post.isBanned ? "确定要解禁这个帖子吗？" : "确定要禁止这个帖子吗？"
               );
               if (!should) return;
               try {
                 await updatePostBannedStatus(post.id, !post.isBanned);
-                toast.success(`Post ${!post.isBanned ? 'banned' : 'unbanned'} successfully`);
+                toast.success(`帖子 ${!post.isBanned ? '禁止' : '解禁'} 成功`);
                 reFetch();
               } catch (error: any) {
-                toast.error(error?.response?.data?.message || 'Failed to update banned status');
+                toast.error(error?.response?.data?.message || '更新禁止状态失败');
               }
             }}
             className={`relative flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5
 font-medium text-sm rounded-md transition-all duration-300
-backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 ${
-              post.isBanned
+backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-500 ${post.isBanned
                 ? "bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600"
                 : "bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 hover:border-red-300 dark:hover:border-red-600"
-            } flex-shrink-0`}
+              } flex-shrink-0`}
           >
-            {post.isBanned ? "Unban Post" : "Ban Post"}
+            {post.isBanned ? "解禁" : "禁止"}
           </button>
 
           {hasPrev ? (
@@ -168,7 +167,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              prev
+              上一个
             </Link>
           ) : (
             <div
@@ -203,7 +202,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
     text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
     hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
             >
-              next
+              下一个
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"
@@ -227,7 +226,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
     text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
     flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
             >
-              next
+              下一个
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"
@@ -250,7 +249,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
         {post.isBanned && showCover && (
           <div className="absolute inset-0 backdrop-blur-md bg-opacity-5 z-10 flex items-center justify-center pointer-events-none">
             <div className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-xl shadow-lg transform rotate-12">
-              BANNED
+              禁止
             </div>
           </div>
         )}
@@ -263,7 +262,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
                 if (post?.id) localStorage.setItem(`post-show-cover-${post.id}`, String(next));
               }}
               className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
-              title={showCover ? "Hide cover" : "Show cover"}
+              title={showCover ? "隐藏封面" : "显示封面"}
             >
               {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             </button>
@@ -271,13 +270,13 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
         )}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Ref</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">编号</p>
             <p className="font-medium text-gray-900 dark:text-white">
-              POST-{String(post?.id).padStart(3, "0")}
+              后-{String(post?.id).padStart(3, "0")}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Platform</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">平台</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {post?.plateform.name}
             </p>
@@ -287,7 +286,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
             (post as any)?.creatorObj ? (
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Creator
+                  作者
                 </p>
                 <div className="flex items-center gap-3">
                   <img
@@ -310,7 +309,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
             ) : post?.creator ? (
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Creator
+                  作者
                 </p>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {post?.creator}
@@ -321,28 +320,28 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
           {/* User / owner information (if provided by API) */}
 
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">User</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">用户</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {(post as any)?.user?.username}
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">类别</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {post?.postCategory?.name}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Sub Category
+              子类别
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
               {post?.postSubCategory?.name}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Duration</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">时长</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {post?.videos[0]
                 ? `${Math.floor(post.videos[0].duration / 60)}:${String(
@@ -353,7 +352,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Verification
+              验证
             </p>
             {post?.videos[0] ? (
               <PostChecking index={0} reFetch={reFetch} post={post} />
@@ -361,27 +360,27 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
               <span
                 className={`px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300`}
               >
-                No video
+                没有视频
               </span>
             )}
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Published
+              发布
             </p>
             <p className="font-medium text-gray-900 dark:text-white">
               {new Date(post?.published_at).toLocaleDateString()}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Created</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">创建</p>
             <p className="font-medium text-gray-900 dark:text-white">
               {new Date(post?.createdAt).toLocaleDateString()}
             </p>
           </div>
           {/* Tag Category chips */}
           <div className="col-span-2 mt-2">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tags</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">标签</p>
             {Array.isArray((post as any)?.tagCategory) && (post as any)?.tagCategory.length > 0 ? (
               <div className="flex flex-wrap gap-2 mt-1">
                 {(post as any).tagCategory.map((tg: any) => (
@@ -395,7 +394,7 @@ backdrop-blur-md border cursor-pointer focus:outline-none focus:ring-2 focus:rin
                 ))}
               </div>
             ) : (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">没有标签</span>
             )}
           </div>
         </div>

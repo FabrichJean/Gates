@@ -54,8 +54,8 @@ const Pagination: React.FC<PaginationProps> = ({
     <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
       {/* Info pages */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        <span className="font-medium text-gray-900 dark:text-gray-100">{totalItems}</span> éléments • Page{" "}
-        <span className="font-medium text-gray-900 dark:text-gray-100">{currentPage}</span> sur{" "}
+        <span className="font-medium text-gray-900 dark:text-gray-100">{totalItems}</span> 元素 • 页面{" "}
+        <span className="font-medium text-gray-900 dark:text-gray-100">{currentPage}</span> /{" "}
         <span className="font-medium text-gray-900 dark:text-gray-100">{totalPages}</span>
       </div>
 
@@ -103,7 +103,7 @@ const Pagination: React.FC<PaginationProps> = ({
             value={goToPage}
             onChange={(e) => setGoToPage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Aller à..."
+            placeholder="前往..."
             className="w-14 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors duration-200"
           />
           <button
@@ -111,7 +111,7 @@ const Pagination: React.FC<PaginationProps> = ({
             disabled={!goToPage || parseInt(goToPage) < 1 || parseInt(goToPage) > totalPages}
             className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors duration-200 font-medium"
           >
-            Aller
+            所有
           </button>
         </div>
       </div>

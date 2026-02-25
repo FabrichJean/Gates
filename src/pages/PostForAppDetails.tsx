@@ -86,7 +86,7 @@ const NavigationControls: React.FC<{
           : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
         }
       `}
-      title="Post précédent"
+      title="上一个帖子"
     >
       <ChevronLeft className="w-4 h-4" />
     </button>
@@ -101,7 +101,7 @@ const NavigationControls: React.FC<{
           : 'bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
         }
       `}
-      title="Post suivant"
+      title="下一个帖子"
     >
       <ChevronRight className="w-4 h-4" />
     </button>
@@ -134,7 +134,7 @@ const BannedOverlay: React.FC<{
             <ShieldOff className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Contenu Banni
+            内容被禁止
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             {postTitle || 'Ce post'} a été banni et n\'est plus visible publiquement.
@@ -144,7 +144,7 @@ const BannedOverlay: React.FC<{
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition mx-auto"
           >
             {showCover ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showCover ? 'Masquer le contenu' : 'Afficher le contenu'}
+            {showCover ? '隐藏内容' : '显示内容'}
           </button>
         </motion.div>
       </motion.div>
@@ -189,9 +189,9 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
       await singleSync({ entity: "post-for-app", origin_id: post.id, isForce });
       setSingleSyncOpen(false);
       reFetch();
-      toast.success('Synchronisation réussie');
+      toast.success('同步成功');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Erreur de synchronisation');
+      toast.error(err?.response?.data?.message || '同步错误');
     } finally {
       setSingleSyncLoading(false);
     }
@@ -200,17 +200,17 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
   const handleToggleBan = async () => {
     const should = window.confirm(
       post?.isBanned 
-        ? "Êtes-vous sûr de vouloir débannir ce post ?" 
-        : "Êtes-vous sûr de vouloir bannir ce post ?"
+        ? "您确定要取消禁止这个帖子吗？" 
+        : "您确定要禁止这个帖子吗？"
     );
     if (!should) return;
     
     try {
       await updatePostForAppBannedStatus(post!.id, !post!.isBanned);
-      toast.success(`Post ${post?.isBanned ? 'débanni' : 'banni'} avec succès`);
+      toast.success(`帖子已成功${post?.isBanned ? '取消禁止' : '禁止'}`);
       reFetch();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Erreur lors de la mise à jour');
+      toast.error(error?.response?.data?.message || '更新错误');
     }
   };
 
@@ -226,7 +226,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
         </div>
       </div>
     );
@@ -240,13 +240,13 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
             <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Post introuvable</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Le post demandé n'existe pas ou a été supprimé.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">请求的帖子不存在或已被删除。</p>
           <button
             onClick={() => navigate('/post-for-app')}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition mx-auto"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à la liste
+            返回列表
           </button>
         </div>
       </div>
@@ -271,7 +271,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
               <button
                 onClick={() => navigate('/post-for-app')}
                 className="flex-shrink-0 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title="Retour à la liste"
+                title="返回列表"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -283,7 +283,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                   </h1>
                   <StatusBadge
                     status={!post.isBanned}
-                    label={post.isBanned ? "Banni" : "Actif"}
+                    label={post.isBanned ? "已禁止" : "活跃"}
                     icon={post.isBanned ? <ShieldOff className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
                   />
                 </div>
@@ -301,7 +301,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 <Link
                   to={`/creators/${post.creatorObj.id}`}
                   className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition group min-w-0"
-                  title={`Voir le profil de ${post.creatorObj.name}`}
+                  title={`查看个人资料 ${post.creatorObj.name}`}
                   style={{ maxWidth: 180 }}
                 >
                   <img
@@ -314,7 +314,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                     {post.creatorObj.name}
                   </span>
                   {post.creatorObj.verified && (
-                    <span className="ml-1 inline-flex items-center text-blue-500 dark:text-blue-400" title="Vérifié">
+                    <span className="ml-1 inline-flex items-center text-blue-500 dark:text-blue-400" title="已验证">
                       <CheckCircle className="w-4 h-4" />
                     </span>
                   )}
@@ -338,7 +338,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 <button
                   onClick={() => navigate(`/post-for-app/edit/${post.id}`)}
                   className="flex-shrink-0 p-2 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  title="Modifier le post"
+                  title="修改帖子"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
@@ -352,7 +352,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                       onClick={() => setSingleSyncOpen(true)}
                       disabled={singleSyncLoading}
                       className="flex-shrink-0 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
-                      title="Synchroniser"
+                      title="同步"
                     >
                       <RefreshCw className={`w-4 h-4 ${singleSyncLoading ? 'animate-spin' : ''}`} />
                     </button>
@@ -364,7 +364,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                           ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
                           : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
                       }`}
-                      title={post.isBanned ? 'Débannir' : 'Bannir'}
+                      title={post.isBanned ? '取消禁止' : '禁止'}
                     >
                       {post.isBanned ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
                     </button>
@@ -405,20 +405,20 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
           <div className="p-6 lg:p-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
               <InfoItem
-                label="Référence"
+                label="参考"
                 value={`POST-${postId}`}
                 icon={<Tag className="w-4 h-4" />}
               />
               
               <InfoItem
-                label="Plateforme"
+                label="平台"
                 value={post.plateform.name}
                 icon={<Film className="w-4 h-4" />}
               />
               
               {(post as any)?.creatorObj ? (
                 <InfoItem
-                  label="Créateur"
+                  label="创作者"
                   value={
                     <Link 
                       to={`/creators/${post.creatorObj.id}`}
@@ -437,32 +437,32 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
                 />
               ) : post.creator ? (
                 <InfoItem
-                  label="Créateur"
+                  label="创作者"
                   value={<span className="truncate">{post.creator}</span>}
                   icon={<User className="w-4 h-4" />}
                 />
               ) : null}
               
               <InfoItem
-                label="Catégorie"
+                label="类别"
                 value={<span className="truncate">{post.postCategory?.name}</span>}
                 icon={<Tag className="w-4 h-4" />}
               />
               
               <InfoItem
-                label="Sous-catégorie"
+                label="子类别"
                 value={<span className="truncate">{post.postSubCategory?.name}</span>}
                 icon={<Tag className="w-4 h-4" />}
               />
               
               <InfoItem
-                label="Publication"
+                label="发布日期"
                 value={new Date(post.published_at).toLocaleDateString('fr-FR')}
                 icon={<Calendar className="w-4 h-4" />}
               />
               
               <InfoItem
-                label="Création"
+                label="创建日期"
                 value={new Date(post.createdAt).toLocaleDateString('fr-FR')}
                 icon={<Calendar className="w-4 h-4" />}
               />
@@ -473,7 +473,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
               <div className="mb-8">
                 <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                   <Tag className="w-4 h-4" />
-                  Tags
+                  标签
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {(post as any).tagCategory.map((tg: any) => (
@@ -509,7 +509,7 @@ const PostForAppDetails: React.FC<PostForAppDetailsProps> = () => {
         open={singleSyncOpen}
         onClose={() => setSingleSyncOpen(false)}
         onSubmit={handleSingleSync}
-        title={`Synchroniser le post #${postId}`}
+        title={`同步帖子 #${postId}`}
       />
     </div>
   );

@@ -37,8 +37,8 @@ function VideoBotEdit() {
   useEffect(() => {
     setVideoPreview(
       video?.s3_urls?.hlsUrl ||
-        video?.public_urls.temp_url ||
-        video?.local_mp4_path
+      video?.public_urls.temp_url ||
+      video?.local_mp4_path
     );
     setCoverPreview(
       video?.s3_urls?.coverUrl || video?.public_urls.cover_url || video?.cover
@@ -291,7 +291,7 @@ function VideoBotEdit() {
               />
             </div>
 
-             <div>
+            <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
                 Platform
               </label>
@@ -350,7 +350,7 @@ function VideoBotEdit() {
                         setShowPostTagDropdown(false);
                       }
                     }}
-                    placeholder="Type tag name or select suggestion..."
+                    placeholder="输入标签名称或选择建议..."
                     className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md p-2 outline-none focus:border-blue-500 transition-all duration-300"
                   />
 

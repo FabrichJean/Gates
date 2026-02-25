@@ -47,10 +47,10 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
 }) => {
   // Détecter la langue du navigateur
   const browserLang = navigator.language.split('-')[0];
-  
+
   // Mode d'affichage : 'single' ou 'all'
   const [viewMode, setViewMode] = useState<'single' | 'all'>('single');
-  
+
   // Trouver la langue par défaut (navigateur ou anglais ou première disponible)
   const defaultLang = useMemo(() => {
     if (!titles || titles.length === 0) return 'en';
@@ -83,7 +83,7 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
         <div className="flex items-center gap-2 flex-wrap flex-1">
           <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
             <Languages className="w-3.5 h-3.5" />
-            <span className="font-medium">Langues</span>
+            <span className="font-medium">语言</span>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {titles.map((entry) => {
@@ -137,10 +137,10 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
               }
             `}
-            title={viewMode === 'all' ? 'Vue unique' : 'Voir toutes les langues'}
+            title={viewMode === 'all' ? '单一视图' : '所有语言视图'}
           >
             <Grid3x3 className="w-3.5 h-3.5" />
-            <span>{viewMode === 'all' ? 'Une' : 'Toutes'}</span>
+            <span>{viewMode === 'all' ? '单一' : '所有'}</span>
           </motion.button>
         )}
       </div>
@@ -162,7 +162,7 @@ export const MangaTitlesViewer: React.FC<MangaTitlesViewerProps> = ({
                 <TitleTag className={titleClassName}>
                   {currentContent.title || fallbackText}
                 </TitleTag>
-                
+
                 {showDescription && currentContent.description && (
                   <DescriptionTag className={descriptionClassName}>
                     {currentContent.description}

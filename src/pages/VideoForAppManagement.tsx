@@ -12,6 +12,10 @@ import { getCreators } from "../api/creators";
 import VideoForAppFilter from "../components/VideoForAppFilter";
 import { toast } from "react-hot-toast";
 import { Edit, CheckSquare, Square, Users, X } from "lucide-react";
+import BulkSyncTrackingModal from "../components/BulkSyncTrackingModal";
+import type { BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncTrackingModal";
+import { multipleSync } from "../api/videos";
+import { getAllPlateformsApi } from "../api/plateforms";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
@@ -53,6 +57,7 @@ const VideoForAppManagement = () => {
     modifyTags: false,
     randomTags: false,
     randomTagsText: '',
+    synchronize: false,
   });
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
@@ -67,6 +72,151 @@ const VideoForAppManagement = () => {
   const [rangeProgress, setRangeProgress] = useState({ current: 0, total: 0 });
 
   const [creators, setCreators] = useState<any[]>([]);
+  // Bulk sync modal / progress state
+  const [bulkSyncOpen, setBulkSyncOpen] = useState(false);
+  const [bulkSyncProgress, setBulkSyncProgress] = useState<BulkSyncProgress>({
+    processed: 0,
+    total: 0,
+    failed: 0,
+    succeeded: 0,
+    currentItem: null,
+    isRunning: false,
+    isPaused: false,
+    errors: [],
+    pageStats: []
+  });
+  const [bulkSyncAbortController, setBulkSyncAbortController] = useState<AbortController | null>(null);
+  const [availablePlateforms, setAvailablePlateforms] = useState<any[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    const fetchPlateforms = async () => {
+      try {
+        const res = await getAllPlateformsApi();
+        if (!mounted) return;
+        setAvailablePlateforms(res.data || []);
+      } catch (err) {
+        console.error('Failed to load platforms', err);
+        if (!mounted) return;
+        setAvailablePlateforms([]);
+      }
+    };
+    fetchPlateforms();
+    return () => { mounted = false; };
+  }, []);
+  const [pendingSyncOriginIds, setPendingSyncOriginIds] = useState<number[] | null>(null);
+
+  // Start synchronization using multipleSync and update the tracking modal progress
+  const startSynchronization = async (originIds: number[], isForce: boolean = false, plateformId?: number) => {
+    if (!originIds || originIds.length === 0) return;
+
+    setBulkSyncOpen(true);
+    const controller = new AbortController();
+    setBulkSyncAbortController(controller);
+
+    setBulkSyncProgress({
+      processed: 0,
+      total: originIds.length,
+      failed: 0,
+      succeeded: 0,
+      currentItem: null,
+      isRunning: true,
+      isPaused: false,
+      errors: [],
+      pageStats: []
+    });
+
+    try {
+      // Chunk the originIds to avoid very large requests and to provide progressive feedback
+      const BATCH_SIZE = Math.max(10, data?.limit || 50);
+      const chunk = <T,>(arr: T[], size: number) => {
+        const out: T[][] = [];
+        for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+        return out;
+      };
+
+      const batches = chunk<number>(originIds, BATCH_SIZE);
+      // initialize progress
+      setBulkSyncProgress(prev => ({ ...prev, total: originIds.length, processed: 0, succeeded: 0, failed: 0, errors: [] }));
+
+      for (let i = 0; i < batches.length; i++) {
+        if (controller.signal.aborted) break;
+
+        // Respect pause
+        // eslint-disable-next-line no-await-in-loop
+        while (bulkSyncProgress.isPaused && !controller.signal.aborted) {
+          // wait 200ms
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        const batch = batches[i];
+        // update currentItem to show first id in batch (UI shows title/cover when available, but we at least set an id)
+        setBulkSyncProgress(prev => ({ ...prev, currentItem: { id: batch[0], title: `Batch ${i + 1}/${batches.length}` } as any }));
+
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await multipleSync({ entity: 'video_for_app', originIds: batch, isForce, plateformId, signal: controller.signal });
+
+          // success for this batch
+          setBulkSyncProgress(prev => ({
+            ...prev,
+            processed: prev.processed + batch.length,
+            succeeded: prev.succeeded + batch.length,
+            // append a pageStat for UI
+            pageStats: [...prev.pageStats, { page: i + 1, entity: 'video_for_app', limit: batch.length, processed: batch.length, succeeded: batch.length, failed: 0, startTime: new Date() } as any]
+          }));
+        } catch (batchErr: any) {
+          if (controller.signal.aborted) {
+            // aborted by user
+            setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+            toast.error('Synchronization aborted');
+            break;
+          }
+
+          // Batch failed — count all in batch as failed and record error
+          const errorsForBatch = batch.map(id => ({ resourceId: id, error: batchErr?.response?.data?.message || batchErr?.message || 'Batch sync failed' }));
+          setBulkSyncProgress(prev => ({
+            ...prev,
+            processed: prev.processed + batch.length,
+            failed: prev.failed + batch.length,
+            errors: [...prev.errors, ...errorsForBatch],
+            pageStats: [...prev.pageStats, { page: i + 1, entity: 'video_for_app', limit: batch.length, processed: batch.length, succeeded: 0, failed: batch.length, startTime: new Date() } as any]
+          }));
+        }
+      }
+
+      // finished all batches (or aborted)
+      setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+      toast.success(`Synchronization finished — processed ${originIds.length} items`);
+      // keep modal open briefly so user can see result, then close
+      setTimeout(() => setBulkSyncOpen(false), 1200);
+    } catch (err: any) {
+      console.error('Bulk synchronization failed', err);
+      setBulkSyncProgress(prev => ({ ...prev, isRunning: false, currentItem: null }));
+      toast.error('Synchronization failed for selected videos');
+    } finally {
+      setBulkSyncAbortController(null);
+      // refresh list
+      reFetch();
+      deselectAll();
+    }
+  };
+
+  const handleBulkSyncPause = () => {
+    setBulkSyncProgress(prev => ({ ...prev, isPaused: true }));
+  };
+
+  const handleBulkSyncResume = () => {
+    setBulkSyncProgress(prev => ({ ...prev, isPaused: false }));
+  };
+
+  const handleBulkSyncStop = () => {
+    if (bulkSyncAbortController) {
+      bulkSyncAbortController.abort();
+    }
+    setBulkSyncProgress(prev => ({ ...prev, isRunning: false, isPaused: false }));
+    setBulkSyncOpen(false);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -145,7 +295,7 @@ const VideoForAppManagement = () => {
   // Range selection handler
   const selectPageRange = async () => {
     if (rangeSelection.startPage > rangeSelection.endPage) {
-      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
+      toast.error("起始页必须小于或等于结束页");
       return;
     }
 
@@ -157,7 +307,7 @@ const VideoForAppManagement = () => {
 
       // Validate range
       if (rangeSelection.endPage > totalPages) {
-        toast.error(`La page d'arrêt ne peut pas dépasser ${totalPages}`);
+        toast.error(`结束页不能超过 ${totalPages}`);
         return;
       }
 
@@ -167,12 +317,12 @@ const VideoForAppManagement = () => {
           const response = await fetchVideoForAppList({ page: currentPage, ...filters });
           const pageVideoIds = response.videos.map(v => v.id);
           allVideoIds.push(...pageVideoIds);
-          
+
           // Update progress
           setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
         } catch (error) {
-          console.error(`Erreur lors du chargement de la page ${currentPage}:`, error);
-          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
+          console.error(`加载第 ${currentPage} 页时出错:`, error);
+          toast.error(`加载第 ${currentPage} 页时出错`);
           return;
         }
       }
@@ -184,12 +334,12 @@ const VideoForAppManagement = () => {
         return newSelection;
       });
 
-      toast.success(`${allVideoIds.length} vidéos sélectionnées sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
+      toast.success(`在 ${rangeSelection.endPage - rangeSelection.startPage + 1} 页中选中了 ${allVideoIds.length} 个视频`);
       setShowRangeSelector(false);
 
     } catch (error) {
-      console.error('Erreur lors de la sélection par plage:', error);
-      toast.error('Erreur lors de la sélection par plage');
+      console.error('范围选择时出错:', error);
+      toast.error('范围选择时出错');
     } finally {
       setRangeLoading(false);
       setRangeProgress({ current: 0, total: 0 });
@@ -223,6 +373,7 @@ const VideoForAppManagement = () => {
       modifyTags: false,
       randomTags: false,
       randomTagsText: '',
+      synchronize: false,
     });
     setBulkEditProgress({ current: 0, total: 0 });
   };
@@ -266,10 +417,10 @@ const VideoForAppManagement = () => {
 
           if (bulkEditData.title) updateData.title = bulkEditData.title;
           if (bulkEditData.description) updateData.description = bulkEditData.description;
-          
+
           // Handle tags: either from manual selection or random selection
           let tagsToApply: (number | string)[] = [];
-          
+
           if (bulkEditData.randomTags) {
             // Get random tags from the provided list
             const tagList = bulkEditData.randomTagsText.split('\n');
@@ -279,17 +430,18 @@ const VideoForAppManagement = () => {
             // Use manually selected tags
             tagsToApply = bulkEditData.tags.map(t => (typeof t === 'number' ? t : (t as any).id ?? (t as any).name));
           }
-          
+
           if (tagsToApply.length > 0) {
             updateData.tag_category_ids = tagsToApply;
           }
-          
+
           if (bulkEditData.category) updateData.category = bulkEditData.category;
           if (bulkEditData.subcategory) updateData.subcategory = bulkEditData.subcategory;
           if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
           if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
           if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
 
+          // Apply update if needed
           if (Object.keys(updateData).length > 0) {
             await updateVideoForApp(videoId, updateData);
             successCount++;
@@ -303,19 +455,27 @@ const VideoForAppManagement = () => {
         setBulkEditProgress(prev => ({ ...prev, current: prev.current + 1 }));
       }
 
+      // If user asked to synchronize selected videos, call multipleSync once for all selected
+      if (bulkEditData.synchronize && selectedVideos.size > 0) {
+        // request synchronization: store selected ids and open tracking modal for configuration
+        const originIds = Array.from(selectedVideos);
+        setPendingSyncOriginIds(originIds);
+        setBulkSyncOpen(true);
+      }
+
       if (successCount > 0) {
-        toast.success(`Successfully updated ${successCount} video${successCount > 1 ? 's' : ''}`);
+        toast.success(`成功更新了 ${successCount} 个视频`);
         reFetch();
         closeBulkEdit();
         deselectAll();
       }
 
       if (errorCount > 0) {
-        toast.error(`Failed to update ${errorCount} video${errorCount > 1 ? 's' : ''}`);
+        toast.error(`更新 ${errorCount} 个视频失败`);
       }
     } catch (error) {
-      console.error('Bulk edit error:', error);
-      toast.error('An error occurred during bulk edit');
+      console.error('批量编辑错误:', error);
+      toast.error('批量编辑过程中出错');
     } finally {
       setBulkEditLoading(false);
       setBulkEditProgress({ current: 0, total: 0 });
@@ -354,7 +514,7 @@ const VideoForAppManagement = () => {
               modal?.showModal();
             }}
           >
-            Filter
+            过滤器
           </button>
           <VideoForAppFilter
             filters={filters}
@@ -379,7 +539,7 @@ const VideoForAppManagement = () => {
             }}
           />
           {checkObjectContent(filters).hasContent ? (
-            <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* app videos filters</span>
+            <span className="mb-3 text-xs font-bold text-gray-800 dark:text-gray-200 transition-colors duration-300">* 应用 视频 滤镜</span>
           ) : null}
         </div>
 
@@ -393,12 +553,12 @@ const VideoForAppManagement = () => {
             {isAllPageSelected ? (
               <>
                 <Square className="w-4 h-4 mr-1" />
-                Désélectionner la page
+                取消选择页面
               </>
             ) : (
               <>
                 <CheckSquare className="w-4 h-4 mr-1" />
-                Sélectionner la page
+                选择页面
               </>
             )}
           </button>
@@ -414,20 +574,20 @@ const VideoForAppManagement = () => {
             }}
           >
             <Users className="w-4 h-4 mr-1" />
-            Sélectionner par plage
+            选择范围
           </button>
 
           {isSomeSelected && (
             <>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''} sélectionnée{selectedVideos.size > 1 ? 's' : ''}
+                已选择 {selectedVideos.size} 个视频
               </span>
               <button
                 className="btn btn-primary btn-sm"
                 onClick={openBulkEdit}
               >
                 <Edit className="w-4 h-4 mr-1" />
-                Éditer en masse
+                批量编辑
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -441,7 +601,7 @@ const VideoForAppManagement = () => {
       </div>
 
       <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm dark:shadow-gray-800 overflow-hidden">
-  {loading && <DeepLoader />}
+        {loading && <DeepLoader />}
 
         <div className="overflow-x-auto pb-[8rem]">
           <table className="min-w-full w-max text-sm md:text-base bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
@@ -485,7 +645,7 @@ const VideoForAppManagement = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Sélectionner par plage de pages
+                  选择范围
                 </h2>
                 <button
                   onClick={() => {
@@ -502,7 +662,7 @@ const VideoForAppManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page de départ
+                      开始页
                     </label>
                     <input
                       type="number"
@@ -518,7 +678,7 @@ const VideoForAppManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page d'arrêt
+                      结束页
                     </label>
                     <input
                       type="number"
@@ -535,7 +695,7 @@ const VideoForAppManagement = () => {
 
                 {data && (
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Total de pages disponibles : {Math.ceil(data.total / data.limit)}
+                    可用页面总数 : {Math.ceil(data.total / data.limit)}
                   </div>
                 )}
               </div>
@@ -564,7 +724,7 @@ const VideoForAppManagement = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={rangeLoading}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={selectPageRange}
@@ -574,12 +734,12 @@ const VideoForAppManagement = () => {
                   {rangeLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Chargement...
+                      加载中...
                     </>
                   ) : (
                     <>
                       <CheckSquare className="w-4 h-4" />
-                      Sélectionner la plage
+                      选择范围
                     </>
                   )}
                 </button>
@@ -596,7 +756,7 @@ const VideoForAppManagement = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Édition en masse ({selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''})
+                  批量版 ({selectedVideos.size} vidéo{selectedVideos.size > 1 ? 's' : ''})
                 </h2>
                 <button
                   onClick={closeBulkEdit}
@@ -617,14 +777,14 @@ const VideoForAppManagement = () => {
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <label htmlFor="modifyTags" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Modifier les tags
+                    修改标签
                   </label>
                 </div>
 
                 {bulkEditData.modifyTags && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Tags
+                      标签
                     </label>
                     <TagCategoryVideoForApp
                       selectedTags={bulkEditData.tags}
@@ -647,6 +807,19 @@ const VideoForAppManagement = () => {
                   </label>
                 </div>
 
+                <div className="flex items-center space-x-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="synchronize"
+                    checked={bulkEditData.synchronize}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, synchronize: e.target.checked }))}
+                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <label htmlFor="synchronize" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Synchronize selected videos (send to platform)
+                  </label>
+                </div>
+
                 {bulkEditData.randomTags && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -665,23 +838,23 @@ const VideoForAppManagement = () => {
                   </div>
                 )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Créer / Assign Creator</label>
-                    <select
-                      value={bulkEditData.creator_id}
-                      onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Ne pas modifier</option>
-                      {creators.map((c) => (
-                        <option key={c.id} value={String(c.id)}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">创建 / 分配创建者</label>
+                  <select
+                    value={bulkEditData.creator_id}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, creator_id: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">不修改</option>
+                    {creators.map((c) => (
+                      <option key={c.id} value={String(c.id)}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut d'activation
+                    激活状态
                   </label>
                   <select
                     value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
@@ -691,15 +864,15 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="true">Activer</option>
-                    <option value="false">Désactiver</option>
+                    <option value="">请勿修改</option>
+                    <option value="true">激活</option>
+                    <option value="false">禁用</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut Banned
+                    状态：已禁止
                   </label>
                   <select
                     value={bulkEditData.isBanned === null ? '' : String(bulkEditData.isBanned)}
@@ -709,15 +882,15 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="true">Bannir</option>
-                    <option value="false">Debannir</option>
+                    <option value="">请勿修改</option>
+                    <option value="true">封禁</option>
+                    <option value="false">解封</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Statut de vérification (Checking)
+                    审核状态 (Checking)
                   </label>
                   <select
                     value={bulkEditData.checking || ''}
@@ -727,11 +900,11 @@ const VideoForAppManagement = () => {
                     }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Ne pas modifier</option>
-                    <option value="refused">Refusé</option>
-                    <option value="checked">Vérifié</option>
-                    <option value="null">Pas prêt</option>
-                    <option value="waiting for checking">Prêt: en attente de vérification</option>
+                    <option value="">请勿修改</option>
+                    <option value="refused">拒绝</option>
+                    <option value="checked">已审核</option>
+                    <option value="null">未准备</option>
+                    <option value="waiting for checking">准备就绪：等待审核</option>
                   </select>
                 </div>
               </div>
@@ -757,7 +930,7 @@ const VideoForAppManagement = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={bulkEditLoading}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={handleBulkEditSubmit}
@@ -767,12 +940,12 @@ const VideoForAppManagement = () => {
                   {bulkEditLoading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Mise à jour...
+                      更新...
                     </>
                   ) : (
                     <>
                       <Users className="w-4 h-4" />
-                      Appliquer les modifications
+                      应用修改
                     </>
                   )}
                 </button>
@@ -781,6 +954,30 @@ const VideoForAppManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Bulk Sync Tracking Modal - reused for synchronizing selected videos */}
+      <BulkSyncTrackingModal
+        open={bulkSyncOpen}
+        onClose={() => setBulkSyncOpen(false)}
+        onStartSync={(entities, isForce, pageNum, limitNum, autoSwitch, plateformId, platformFilter) => {
+          // Use pending origin ids (from bulk edit) if available, otherwise use current selection
+          const originIds = pendingSyncOriginIds ?? Array.from(selectedVideos);
+          // close bulk edit UI if it's still open
+          if (showBulkEdit) closeBulkEdit();
+          startSynchronization(originIds, isForce, plateformId);
+          // clear pending ids after starting
+          setPendingSyncOriginIds(null);
+        }}
+        progress={bulkSyncProgress}
+        onPause={handleBulkSyncPause}
+        onResume={handleBulkSyncResume}
+        onStop={handleBulkSyncStop}
+        onDisableAutoSwitch={() => { /* noop */ }}
+        currentPage={page}
+        currentEntity={"video"}
+        currentLimit={data?.limit}
+        availablePlateforms={availablePlateforms}
+      />
     </div>
   );
 };

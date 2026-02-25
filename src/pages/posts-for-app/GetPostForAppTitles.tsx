@@ -53,13 +53,13 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5" />
-          Titres
+          标题
         </h3>
         <div className="flex flex-col items-center justify-center py-8 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
           <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
             <FileText className="w-6 h-6 text-gray-400" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-center">Aucun titre disponible</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center">无可用标题</p>
         </div>
       </div>
     );
@@ -81,7 +81,7 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
     <div className="mb-8">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <FileText className="w-5 h-5" />
-        Titres multilingues ({postTitles.length})
+        多语言标题 ({postTitles.length})
       </h3>
 
       {/* Switcher de langue ergonomique */}
@@ -110,7 +110,7 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
             <Languages className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             <LanguageBadge languageCode={selectedLang} />
             <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-              {titlesByLanguage[selectedLang].length} titre{titlesByLanguage[selectedLang].length > 1 ? 's' : ''}
+              {titlesByLanguage[selectedLang].length} 标题{titlesByLanguage[selectedLang].length > 1 ? 's' : ''}
             </span>
           </div>
           <div className="flex-1 flex flex-col divide-y divide-gray-100 dark:divide-gray-700">
@@ -125,14 +125,14 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300 mb-2">
           <Globe className="w-4 h-4" />
-          <span className="font-medium">Résumé des langues</span>
+          <span className="font-medium">语言概览</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {Object.entries(titlesByLanguage).map(([languageCode, titles]) => (
             <div key={languageCode} className="flex items-center gap-2 text-sm">
               <LanguageBadge languageCode={languageCode} />
               <span className="text-blue-700 dark:text-blue-400">
-                {titles.length} titre{titles.length > 1 ? 's' : ''}
+                {titles.length} 标题{titles.length > 1 ? 's' : ''}
               </span>
             </div>
           ))}
@@ -157,7 +157,7 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
               className="text-xs text-blue-600 dark:text-blue-300 hover:underline focus:outline-none"
               onClick={() => setShowDesc((v) => !v)}
             >
-              {showDesc ? 'Masquer la description' : 'Voir la description'}
+              {showDesc ? '隐藏描述' : '查看描述'}
             </button>
             <div className={`transition-all duration-200 overflow-hidden ${showDesc ? 'max-h-40 mt-2' : 'max-h-0'}`}>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -168,7 +168,7 @@ export default function GetPostForAppTitles({ postTitles }: Props) {
         )}
         <div className="flex items-center justify-between pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
           <span>ID: {title.id}</span>
-          <span>Code: {title.i18_language}</span>
+          <span>语言代码: {title.i18_language}</span>
         </div>
       </div>
     );

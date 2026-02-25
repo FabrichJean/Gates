@@ -104,7 +104,7 @@ export default memo(function PostForAppFilter({
     <dialog id="search_modal_posts_for_app" className="modal modal-bottom sm:modal-middle">
       <form method="dialog" className="modal-box max-w-3xl bg-white/60 dark:bg-black/30 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl text-gray-800 dark:text-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Filtres</h3>
+          <h3 className="text-lg font-semibold">过滤器</h3>
           <button type="button" onClick={closeModal} className="btn btn-sm btn-ghost">
             <X className="w-4 h-4" />
           </button>
@@ -113,9 +113,9 @@ export default memo(function PostForAppFilter({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Category */}
           <div ref={categoryDropdownRef}>
-            <label className="block text-sm font-medium mb-1">Category</label>
+            <label className="block text-sm font-medium mb-1">类别</label>
             {categoriesError && (
-              <div className="text-sm text-rose-400 mb-2">Erreur : {String(categoriesError)}</div>
+              <div className="text-sm text-rose-400 mb-2">错误： {String(categoriesError)}</div>
             )}
             <button
               type="button"
@@ -126,7 +126,7 @@ export default memo(function PostForAppFilter({
               }`}
             >
               <span className="truncate">
-                {categoriesLoading ? "Chargement..." : selectedOptions[0] || "all"}
+                {categoriesLoading ? "加载中..." : selectedOptions[0] || "all"}
               </span>
               <ChevronDown className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} />
             </button>
@@ -143,11 +143,11 @@ export default memo(function PostForAppFilter({
                       handleChange("category_id", "");
                       handleChange("sub_category_id", "");
                       setOpen(false);
-                      setSelectedOptions(["all"]);
+                      setSelectedOptions(["全部"]);
                     }}
                     className="px-3 py-2 text-sm hover:bg-sky-500/20 cursor-pointer"
                   >
-                    all
+                    全部
                   </li>
                   {categoriesResponse?.categories?.map((c: any) => (
                     <li
@@ -171,7 +171,7 @@ export default memo(function PostForAppFilter({
 
           {/* SubCategory */}
           <div ref={subCategoryDropdownRef}>
-            <label className="block text-sm font-medium mb-1">SubCategory</label>
+            <label className="block text-sm font-medium mb-1">子类别</label>
             <button
               type="button"
               onClick={() => (subcat?.subCategories ? setSubOpen(!subOpen) : null)}
@@ -198,7 +198,7 @@ export default memo(function PostForAppFilter({
                     }}
                     className="px-3 py-2 text-sm hover:bg-sky-500/20 cursor-pointer"
                   >
-                    all
+                    全部
                   </li>
                   {subcat?.subCategories?.map((s: any) => (
                     <li
@@ -220,10 +220,10 @@ export default memo(function PostForAppFilter({
 
           {/* Creator Search */}
           <div ref={creatorRef} className="relative">
-            <label className="block text-sm font-medium mb-1">Creator</label>
+            <label className="block text-sm font-medium mb-1">创建者</label>
             <input
               type="text"
-              placeholder="Search creator..."
+              placeholder="搜索创建者..."
               value={localFilters.creatorSearch || ""}
               onChange={(e) => {
                 const value = e.target.value;
@@ -249,7 +249,7 @@ export default memo(function PostForAppFilter({
                     }}
                     className="px-3 py-2 text-sm hover:bg-sky-500/20 cursor-pointer"
                   >
-                    all
+                    全部
                   </li>
                   {creators
                     ?.filter((c) => c.name.toLowerCase().includes((localFilters.creatorSearch || "").toLowerCase()))
@@ -274,7 +274,7 @@ export default memo(function PostForAppFilter({
 
           {/* Deleted */}
           <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
-            <p className="text-sm font-medium mb-2">Deleted</p>
+            <p className="text-sm font-medium mb-2">已删除</p>
             <div className="flex gap-3">
               {["all", "yes", "no"].map((option) => (
                 <label key={option} className="flex items-center gap-1.5 cursor-pointer">
@@ -285,7 +285,7 @@ export default memo(function PostForAppFilter({
                     checked={option === "all" ? localFilters.isDeleted === "all" || !localFilters.isDeleted : localFilters.isDeleted === option}
                     onChange={() => handleChange("isDeleted", option)}
                   />
-                  <span className="text-sm capitalize">{option}</span>
+                <span className="text-sm capitalize">{option}</span>
                 </label>
               ))}
             </div>
@@ -293,31 +293,31 @@ export default memo(function PostForAppFilter({
 
           {/* Checking */}
           <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
-            <label className="text-sm font-medium mb-2 block">Checking</label>
+            <label className="text-sm font-medium mb-2 block">检查</label>
             <select
               value={localFilters.checking || "all"}
               onChange={(e) => handleChange("checking", e.target.value)}
               className="w-full px-3 py-2 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
-              <option value="all">All</option>
-              <option value="checked">Checked</option>
-              <option value="refused">Refused</option>
-              <option value="waiting for checking">Waiting for checking</option>
-              <option value="null">Not ready</option>
+              <option value="all">all</option>
+              <option value="checked">checked</option>
+              <option value="refused">refused</option>
+              <option value="waiting for checking">waiting for checking</option>
+              <option value="null">not ready</option>
             </select>
           </div>
 
           {/* Video Type */}
           <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
-            <label className="text-sm font-medium mb-2 block">Video Type</label>
+            <label className="text-sm font-medium mb-2 block">视频类型</label>
             <select
               value={localFilters.videoType || "all"}
               onChange={(e) => handleChange("videoType", e.target.value)}
               className="w-full px-3 py-2 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
-              <option value="all">All</option>
-              <option value="1">Short</option>
-              <option value="2">Long</option>
+              <option value="all">all</option>
+              <option value="1">short</option>
+              <option value="2">long</option>
             </select>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default memo(function PostForAppFilter({
         {/* Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button type="button" onClick={closeModal} className="btn btn-sm btn-ghost">
-            Close
+            关闭
           </button>
           <button
             type="button"
@@ -346,7 +346,7 @@ export default memo(function PostForAppFilter({
             className="btn btn-sm btn-ghost"
           >
             <RotateCcw className="w-4 h-4 mr-1" />
-            Reset
+            重置
           </button>
           <button
             type="button"
@@ -357,7 +357,7 @@ export default memo(function PostForAppFilter({
             }}
             className="btn btn-sm bg-sky-500 hover:bg-sky-600 text-white border-none"
           >
-            Apply
+            应用
           </button>
         </div>
       </form>

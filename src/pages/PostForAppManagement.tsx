@@ -213,7 +213,7 @@ const PostForAppManagementInner = () => {
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          Post For App
+          应用帖子
         </h1>
 
         {/* header  */}
@@ -232,7 +232,7 @@ const PostForAppManagementInner = () => {
                   className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <Filter className="w-3 text-gray-600 dark:text-gray-400" />{" "}
-                  filters
+                  过滤器
                 </button>
 
                 <PostForAppFilter
@@ -247,7 +247,7 @@ const PostForAppManagementInner = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search posts..."
+                  placeholder="搜索帖子..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
@@ -287,7 +287,7 @@ const PostForAppManagementInner = () => {
                 ) : (
                   <Square className="w-4 h-4" />
                 )}
-                Select All Page
+                全选页面
               </button>
 
               <button
@@ -301,7 +301,7 @@ const PostForAppManagementInner = () => {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
                 <Users className="w-4 h-4" />
-                Sélectionner par plage
+                按范围选择
               </button>
 
               <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -316,14 +316,14 @@ const PostForAppManagementInner = () => {
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   <X className="w-4 h-4" />
-                  Deselect All
+                  取消全选
                 </button>
                 <button
                   onClick={openBulkEdit}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
-                  Bulk Edit ({selectedPosts.size})
+                  批量编辑 ({selectedPosts.size})
                 </button>
               </div>
             )}
@@ -340,35 +340,35 @@ const PostForAppManagementInner = () => {
                   <span className="sr-only">Select</span>
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  ID
+                  身份证
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Category
+                  类别
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Creator
+                  创造者
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Platform
+                  平台
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Checking
+                  检查中
                 </th>
 
                 <th scope="col" className="px-6 py-3">
-                  Activate
+                  激活
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Videos
+                  视频
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Images
+                  图片
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Date de création
+                 创建日期
                 </th>
                 <th scope="col" className="px-6 py-3 text-left">
-                  Actions
+                  操作
                 </th>
               </tr>
             </thead>
@@ -472,7 +472,7 @@ const PostForAppManagementInner = () => {
                         </div>
                       )}
                       {post.videos?.length === 0 && (
-                        <span className="text-xs text-gray-400">No video</span>
+                        <span className="text-xs text-gray-400">无视频</span>
                       )}
                     </div>
                   </td>
@@ -505,7 +505,7 @@ const PostForAppManagementInner = () => {
                         </div>
                       )}
                       {post.images?.length === 0 && (
-                        <span className="text-xs text-gray-400">No image</span>
+                        <span className="text-xs text-gray-400">无图片</span>
                       )}
                     </div>
                   </td>
@@ -518,7 +518,7 @@ const PostForAppManagementInner = () => {
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
-                      <span>Details</span>
+                      <span>详情</span>
                     </Link>
                   </td>
                 </tr>
@@ -559,7 +559,7 @@ const PostForAppManagementInner = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Sélectionner par plage de pages
+                  选择页面范围
                 </h2>
                 <button
                   onClick={() => {
@@ -576,7 +576,7 @@ const PostForAppManagementInner = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page de départ
+                      起始页
                     </label>
                     <input
                       type="number"
@@ -592,7 +592,7 @@ const PostForAppManagementInner = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page d'arrêt
+                      停止页
                     </label>
                     <input
                       type="number"
@@ -609,7 +609,7 @@ const PostForAppManagementInner = () => {
 
                 {data && (
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Total de pages disponibles : {Math.ceil(data.total / data.limit)}
+                    可用页面总数 : {Math.ceil(data.total / data.limit)}
                   </div>
                 )}
               </div>
@@ -626,7 +626,7 @@ const PostForAppManagementInner = () => {
                       </div>
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      {rangeProgress.current} / {rangeProgress.total} pages
+                      {rangeProgress.current} / {rangeProgress.total} 页面
                     </span>
                   </div>
                 )}
@@ -638,7 +638,7 @@ const PostForAppManagementInner = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={rangeLoading}
                 >
-                  Annuler
+                  取消
                 </button>
                 <button
                   onClick={selectPageRange}
@@ -648,12 +648,12 @@ const PostForAppManagementInner = () => {
                   {rangeLoading ? (
                     <>
                       <div className="loading loading-spinner loading-sm"></div>
-                      Chargement...
+                      加载中...
                     </>
                   ) : (
                     <>
                       <CheckSquare className="w-4 h-4" />
-                      Sélectionner la plage
+                      选择页面范围
                     </>
                   )}
                 </button>
@@ -682,15 +682,15 @@ function SendToWebApp() {
 
   const sendToWebapp = async () => {
     if (selectedIds.length === 0)
-      return toast.error("Select at least one platform");
+      return toast.error("至少选择一个平台");
     setLoading(true);
     try {
       await webAppPlateform(selectedIds);
-      toast.success("Envoyé avec succès vers le WebApp !");
+      toast.success("发送成功到 WebApp！");
       setWebappModalOpen(false);
       setSelectedIds([]);
     } catch (err) {
-      toast.error("Erreur lors de l'envoi vers WebApp");
+      toast.error("发送到 WebApp 时出错");
     } finally {
       setLoading(false);
     }
@@ -700,7 +700,7 @@ function SendToWebApp() {
     <>
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
-          <h3 className="font-bold text-lg">Select platforms to send</h3>
+          <h3 className="font-bold text-lg">选择要发送的平台</h3>
           <div className="max-h-60 overflow-auto mt-3">
             {plateforms?.map((p: any) => (
               <label
@@ -722,14 +722,14 @@ function SendToWebApp() {
               className="btn btn-outline"
               onClick={() => setWebappModalOpen(false)}
             >
-              Close
+              关闭
             </button>
             <button
               className="btn btn-primary"
               onClick={sendToWebapp}
               disabled={loading}
             >
-              {loading ? "Sending..." : "Send"}
+              {loading ? "发送中..." : "发送"}
             </button>
           </div>
         </div>

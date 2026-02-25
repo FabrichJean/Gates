@@ -60,7 +60,11 @@ function CheckingSuperadmin({
           <FiHexagon className="text-gray-500 dark:text-gray-400" />
         )}
         <span className="text-gray-700 dark:text-gray-300">
-          {checking === "null" ? "not ready" : checking}
+          {checking === "null" ? "未就绪" :
+            checking === "checked" ? "已验证" :
+              checking === "refused" ? "已拒绝" :
+                checking === "waiting for checking" ? "等待验证" :
+                  checking}
         </span>
       </div>
 

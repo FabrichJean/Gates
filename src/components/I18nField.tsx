@@ -63,16 +63,15 @@ const I18nField: React.FC<I18nFieldProps> = ({
           {label}
           {required && <span className="text-red-500">*</span>}
         </label>
-        
+
         <div className="flex items-center gap-2">
           {/* Completion badge */}
-          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-            getCompletionPercentage() === 100
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getCompletionPercentage() === 100
               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
               : getCompletionPercentage() > 0
-              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-          }`}>
+                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+            }`}>
             {getCompletionPercentage()}% traduit
           </span>
         </div>
@@ -87,11 +86,10 @@ const I18nField: React.FC<I18nFieldProps> = ({
               key={lang}
               type="button"
               onClick={() => setSelectedLang(lang)}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                selectedLang === lang
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${selectedLang === lang
                   ? 'bg-blue-500 text-white shadow-sm'
                   : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
+                }`}
             >
               <span className="text-base">{LANGUAGE_FLAGS[lang]}</span>
               <span>{LANGUAGE_NAMES[lang]}</span>
@@ -140,11 +138,10 @@ const I18nField: React.FC<I18nFieldProps> = ({
           {supportedLanguages.map((lang) => (
             <div
               key={lang}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${
-                isLanguageFilled(lang)
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${isLanguageFilled(lang)
                   ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
                   : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
-              }`}
+                }`}
             >
               <span>{LANGUAGE_FLAGS[lang]}</span>
               <span>{lang.toUpperCase()}</span>
@@ -156,8 +153,8 @@ const I18nField: React.FC<I18nFieldProps> = ({
 
       {/* Helper text */}
       <p className="text-xs text-gray-500 dark:text-gray-400">
-        Remplissez au moins la langue {LANGUAGE_NAMES[supportedLanguages[0]]} {required && '(obligatoire)'}.
-        Les autres langues sont optionnelles.
+        请至少填写语言 {LANGUAGE_NAMES[supportedLanguages[0]]} {required && '(obligatoire)'}.
+        其他语言是可选的。
       </p>
     </div>
   );

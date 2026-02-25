@@ -174,7 +174,7 @@ const Audios: React.FC = () => {
               className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-slate-800 text-white rounded-xl hover:bg-slate-800 dark:hover:bg-slate-700 transition-all duration-300 font-medium shadow-lg"
             >
               <FilePlus className="w-5 h-5" />
-              Ajouter un audio
+              添加音频
             </Link>
           </motion.div>
         ) : viewMode === "table" ? (
@@ -475,7 +475,7 @@ const Audios: React.FC = () => {
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-slate-800 text-white rounded-xl hover:bg-slate-800 dark:hover:bg-slate-700 transition-all duration-200 font-medium shadow-lg"
                       >
                         <Eye className="w-4 h-4" />
-                        Voir
+                        查看
                       </Link>
                       <Link
                         to={`/audios/${audio.id}/edit`}

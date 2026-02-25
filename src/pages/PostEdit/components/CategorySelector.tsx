@@ -48,7 +48,7 @@ export default function CategorySelector(props: {
     <>
       <div className="relative w-full" ref={categoryDropdownRef}>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Category:
+          分类:
         </label>
         <button
           type="button"
@@ -72,7 +72,7 @@ export default function CategorySelector(props: {
                   setSelectedOptions([cat.name]);
                   setSelectedCategory({ id: cat.id, name: cat.name });
                   const firstSub = filteredSubCategories[0];
-                  
+
                   setSelectedSubCategory(
                     firstSub
                       ? { id: firstSub.id, name: firstSub.name, categoryId: firstSub.category?.id ?? cat.id }
@@ -90,16 +90,15 @@ export default function CategorySelector(props: {
       </div>
 
       <div className="relative w-full mt-4" ref={subCategoryDropdownRef}>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sub-Category:</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">子分类:</label>
         <button
           type="button"
           onClick={() => selectedCategory && setSubOpen(!subOpen)}
           disabled={!selectedCategory}
-          className={`relative w-full border rounded-md pl-3 pr-10 py-2 text-left focus:outline-none text-sm ${
-            !selectedCategory
-              ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
-              : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          }`}
+          className={`relative w-full border rounded-md pl-3 pr-10 py-2 text-left focus:outline-none text-sm ${!selectedCategory
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+            : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            }`}
         >
           <span className="block truncate">{selectedSubCategory ? selectedSubCategory?.name : postSubCategoryName}</span>
         </button>
@@ -120,7 +119,7 @@ export default function CategorySelector(props: {
                 </div>
               ))
             ) : (
-              <div className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">No sub-categories found</div>
+              <div className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">未找到子分类</div>
             )}
           </div>
         )}

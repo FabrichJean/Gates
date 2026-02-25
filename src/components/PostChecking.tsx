@@ -37,12 +37,18 @@ export default function PostChecking({ post, index = 0, reFetch }: Props) {
         ) : (
           <FiHexagon className="text-gray-500 dark:text-gray-400" />
         )}
-        <span className="text-gray-700 dark:text-gray-300">{checking === "null" ? "not ready" : checking}</span>
+        <span className="text-gray-700 dark:text-gray-300">
+          {checking === "null" ? "未就绪" :
+            checking === "checked" || checking === "verified" ? "已验证" :
+              checking === "refused" ? "已拒绝" :
+                checking === "waiting for checking" ? "等待验证" :
+                  checking}
+        </span>
       </div>
 
       {/* Refuse modal (if needed) */}
       {showModal && (
-          <RefuseModal
+        <RefuseModal
           onClose={closeModal}
           onSubmit={async (comment: string) => {
             try {

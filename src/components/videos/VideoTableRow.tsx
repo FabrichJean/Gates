@@ -47,17 +47,17 @@ const VideoTableRow = ({
 
   const statusConfig = {
     uploaded: {
-      label: "Uploadé",
+      label: "上传",
       color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
       icon: <FaCheck className="w-3 h-3" />
     },
     waiting_upload: {
-      label: "En attente",
+      label: "等待上传",
       color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
       icon: <FiClock className="w-3 h-3" />
     },
     waiting_transcode: {
-      label: "Transcodage",
+      label: "转码",
       color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
       icon: <FiClock className="w-3 h-3" />
     }
@@ -142,7 +142,7 @@ const VideoTableRow = ({
             to={`/creators/${video?.creatorObj?.id}`}
             className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
           >
-            {video?.creatorObj?.name ?? video.creator ?? 'Unknown'}
+            {video?.creatorObj?.name ?? video.creator ?? '未知'}
           </Link>
         </div>
       </td>
@@ -172,7 +172,7 @@ const VideoTableRow = ({
         <div className="relative group">
           <img
             src={`${cdnS3(video?.s3_urls.coverUrl) || video?.public_urls?.cover_url || ''}?t=` + Date.now()}
-            alt="cover"
+            alt="封面"
             className="w-24 h-14 object-cover rounded-lg shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">

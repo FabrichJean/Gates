@@ -39,12 +39,12 @@ const ThemeToggle = () => {
   }, []);
 
   const themes = [
-    { value: "light", icon: Sun, label: "Light", color: "text-amber-500" },
-    { value: "dark", icon: Moon, label: "Dark", color: "text-indigo-400" },
+    { value: "light", icon: Sun, label: "光", color: "text-amber-500" },
+    { value: "dark", icon: Moon, label: "黑暗", color: "text-indigo-400" },
     {
       value: "system",
       icon: Monitor,
-      label: "System",
+      label: "系统",
       color: "text-purple-500",
     },
   ];

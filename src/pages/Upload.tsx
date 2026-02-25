@@ -129,7 +129,7 @@ export function TitlesForm({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
           <FileVideo className="w-5 h-5" />
-          Titles & Descriptions
+          标题和描述
         </h3>
 
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function TitlesForm({
             className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Sparkles className="w-4 h-4" />
-            Auto
+            自动
           </motion.button>
 
           {/* bouton Add Language */}
@@ -154,7 +154,7 @@ export function TitlesForm({
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Plus className="w-4 h-4" />
-            Add Language
+            添加语言
           </motion.button>
         </div>
       </div>
@@ -206,11 +206,11 @@ export function TitlesForm({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Title
+                    标题
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter video title"
+                    placeholder="输入视频标题"
                     value={c.title}
                     onChange={(e) => handleChange(i, "title", e.target.value)}
                     className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
@@ -221,10 +221,10 @@ export function TitlesForm({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description
+                  描述
                 </label>
                 <textarea
-                  placeholder="Enter video description"
+                  placeholder="输入视频描述"
                   value={c.description}
                   onChange={(e) =>
                     handleChange(i, "description", e.target.value)
@@ -244,16 +244,15 @@ export function TitlesForm({
         whileTap={{ scale: 0.98 }}
         onClick={submit}
         disabled={uploading}
-        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-          uploading
-            ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-            : "rounded-lg border shadow-lg hover:shadow-xl"
-        }`}
+        className={`w-full mt-6 flex items-center justify-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${uploading
+          ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+          : "rounded-lg border shadow-lg hover:shadow-xl"
+          }`}
       >
         {uploading ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Uploading... {progress}%</span>
+            <span>正在上传... {progress}%</span>
           </>
         ) : (
           <>
@@ -274,7 +273,7 @@ export function TitlesForm({
       <div className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
           <h3 className="font-bold text-lg mb-4">
-            Auto-fill titles & descriptions
+            自动生成标题和描述
           </h3>
 
           {/* champ select multiple language */}
@@ -332,11 +331,11 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-4">
             <label className="label">
-              <span className="label-text">Title</span>
+              <span className="label-text">标题</span>
             </label>
             <input
               type="text"
-              placeholder="Global title"
+              placeholder="全局标题"
               className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               value={autoTitle}
               onChange={(e) => setAutoTitle(e.target.value)}
@@ -345,10 +344,10 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-6">
             <label className="label">
-              <span className="label-text">Description</span>
+              <span className="label-text">描述</span>
             </label>
             <textarea
-              placeholder="Global description"
+              placeholder="全局描述"
               className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               rows={3}
               value={autoDesc}
@@ -358,11 +357,11 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-4">
             <label className="label">
-              <span className="label-text">Server</span>
+              <span className="label-text">服务器</span>
             </label>
             <input
               type="text"
-              placeholder="Global title"
+              placeholder="全局服务器名称"
               className="text-xs w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               value={server}
               onChange={(e) => setServer(e.target.value)}
@@ -374,10 +373,10 @@ export function TitlesForm({
               className="btn btn-ghost"
               onClick={() => setAutoOpen(false)}
             >
-              Cancel
+              取消
             </button>
             <button className="btn btn-primary" onClick={applyAuto}>
-              Apply
+              应用
             </button>
           </div>
         </div>
@@ -657,10 +656,10 @@ const Upload = () => {
             className="mb-8"
           >
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Upload Video
+              上传视频
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Upload and configure your video content
+              在此处上传新视频以与社区分享。
             </p>
           </motion.div>
           <div className="flex items-center gap-3">
@@ -671,14 +670,12 @@ const Upload = () => {
             <button
               type="button"
               onClick={() => setNeedVip((v) => !v)}
-              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
-              }`}
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                  needVip ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
 
@@ -692,20 +689,20 @@ const Upload = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
             <Tag className="w-5 h-5" />
-            Reference
+            参考信息
           </h2>
           <input
             type="text"
             value={ref || ""}
             onChange={(e) => setRef(e.currentTarget.value.trim())}
             className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
-            placeholder="Video reference"
+            placeholder="视频参考信息"
           />
         </div>
         {/* File Uploads */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <UploadBox
-            label="Cover Image"
+            label="封面图片"
             onClick={handleCoverClick}
             onDrop={(f) => handleFileChange(f, "cover")}
             preview={coverPreview}
@@ -717,7 +714,7 @@ const Upload = () => {
           />
 
           <UploadBox
-            label="Video File"
+            label="视频文件"
             onClick={handleVideoClick}
             onDrop={(f) => handleFileChange(f, "video")}
             preview={videoPreview}
@@ -741,13 +738,13 @@ const Upload = () => {
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  Category
+                  分类
                 </h2>
                 <CategoryAutoComplete onSelect={setCategory} />
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    SubCategory
+                    子分类
                   </label>
                   <SubCategoryAutoComplete
                     onSelect={setSubCategory}
@@ -759,13 +756,13 @@ const Upload = () => {
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  Platform
+                  平台
                 </h2>
                 <PlatformSelectComponent onSelect={setPlatform} />
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Video Type
+                    视频类型
                   </label>
                   <div className="relative">
                     <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -774,8 +771,8 @@ const Upload = () => {
                       value={videoType}
                       onChange={(e) => setVideoType(e.target.value)}
                     >
-                      <option value="short">Short Video</option>
-                      <option value="long">Long Video</option>
+                      <option value="short">短视频</option>
+                      <option value="long">长视频</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
@@ -794,7 +791,7 @@ const Upload = () => {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Uploading...
+                      上传中...
                     </span>
                     <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                       {progress}%
@@ -817,13 +814,13 @@ const Upload = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 h-max mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
             <User className="w-5 h-5" />
-            Creator & Tags
+            创建者 & 标签
           </h2>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Creator
+                创建者
               </label>
               <CreatorAutoComplete
                 value={creator}
@@ -840,7 +837,7 @@ const Upload = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Tags
+                标签
               </label>
               <div className="flex gap-3">
                 <div className="flex-1 relative">
@@ -858,7 +855,7 @@ const Upload = () => {
                         addTagByName(tagQuery);
                       }
                     }}
-                    placeholder="Type tag name or select suggestion..."
+                    placeholder="输入标签名称或选择建议..."
                     className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
                   />
                   <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />

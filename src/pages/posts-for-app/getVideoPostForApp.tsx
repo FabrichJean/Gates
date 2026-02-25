@@ -21,33 +21,33 @@ function VideoStatusBadge({ status, label }: { status: string; label: string }) 
       case 'verified':
       case 'checked':
         return {
-          icon: <CheckCircle className="w-3 h-3" />, 
+          icon: <CheckCircle className="w-3 h-3" />,
           bgColor: 'bg-green-500',
           textColor: 'text-white'
         };
       case 'pending':
         return {
-          icon: <Clock className="w-3 h-3" />, 
+          icon: <Clock className="w-3 h-3" />,
           bgColor: 'bg-yellow-500',
           textColor: 'text-white'
         };
       case 'working':
       case 'processing':
         return {
-          icon: <Loader2 className="w-3 h-3 animate-spin" />, 
+          icon: <Loader2 className="w-3 h-3 animate-spin" />,
           bgColor: 'bg-blue-500',
           textColor: 'text-white'
         };
       case 'rejected':
       case 'failed':
         return {
-          icon: <AlertTriangle className="w-3 h-3" />, 
+          icon: <AlertTriangle className="w-3 h-3" />,
           bgColor: 'bg-red-500',
           textColor: 'text-white'
         };
       default:
         return {
-          icon: <Clock className="w-3 h-3" />, 
+          icon: <Clock className="w-3 h-3" />,
           bgColor: 'bg-gray-500',
           textColor: 'text-white'
         };
@@ -70,7 +70,7 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
         <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
           <Film className="w-8 h-8 text-gray-400" />
         </div>
-        <p className="text-gray-500 dark:text-gray-400 text-center">Aucune vidéo disponible</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center">没有视频</p>
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Film className="w-5 h-5" />
-          Vidéos ({videos.length})
+          视频 ({videos.length})
         </h3>
 
         {/* Grille de vidéos */}
@@ -106,7 +106,7 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
                           <div class=\"w-full h-full flex items-center justify-center bg-gray-800\">
                             <div class=\"text-center text-gray-400\">
                               <svg class=\"w-12 h-12 mx-auto mb-2\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z\"></path></svg>
-                              <p class=\"text-sm\">Miniature indisponible</p>
+                              <p class=\"text-sm\">缩略图不可用</p>
                             </div>
                           </div>
                         `;
@@ -117,7 +117,7 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
                   <div className="w-full h-full flex items-center justify-center bg-gray-800">
                     <div className="text-center text-gray-400">
                       <Film className="w-12 h-12 mx-auto mb-2" />
-                      <p className="text-sm">Miniature indisponible</p>
+                      <p className="text-sm">缩略图不可用</p>
                     </div>
                   </div>
                 )}
@@ -145,18 +145,18 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
               <div className="p-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    Vidéo #{video.id}
+                    视频 #{video.id}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {video.sys_code || 'N/A'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span>Local: {video.local_mp4_path ? '✓' : '✗'}</span>
-                  <span>Cloud: {video.s3_urls?.hlsUrl ? '✓' : '✗'}</span>
+                  <span>本地: {video.local_mp4_path ? '✓' : '✗'}</span>
+                  <span>云: {video.s3_urls?.hlsUrl ? '✓' : '✗'}</span>
                 </div>
                 {/* Type editable in grid */}
-                  {/* Type editable */}
+                {/* Type editable */}
                 {typeof video.id === 'number' && (editable && onTypeChange) ? (
                   <div className="mt-2">
                     <label className="text-xs text-gray-700 dark:text-gray-300 mr-2">Type:</label>
@@ -165,13 +165,13 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
                       value={videoTypes && videoTypes[video.id] !== undefined ? videoTypes[video.id] : (video.type !== undefined ? String(video.type) : "1")}
                       onChange={e => onTypeChange(video.id, e.target.value)}
                     >
-                      <option value="1">Court</option>
-                      <option value="2">Long</option>
+                      <option value="1">短片</option>
+                      <option value="2">长片</option>
                     </select>
                   </div>
                 ) : (
                   <div className="mt-2 text-xs text-gray-700 dark:text-gray-300">
-                    Type: {String(video.type) === '2' ? 'Long' : 'Court'}
+                    类型: {String(video.type) === '2' ? '长片' : '短片'}
                   </div>
                 )}
               </div>
@@ -191,7 +191,7 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
               onClick={(e) => e.stopPropagation()}
             >
               <source src={selectedVideo.s3_urls?.hlsUrl || selectedVideo.public_urls?.local_mp4_url} type="video/mp4" />
-              Votre navigateur ne supporte pas la lecture vidéo.
+              您的浏览器不支持视频播放。
             </video>
 
             <button

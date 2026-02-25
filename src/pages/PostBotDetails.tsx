@@ -26,7 +26,7 @@ const PostBotDetails = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+                <div className="text-gray-600 dark:text-gray-400">加载中...</div>
             </div>
         );
     }
@@ -34,7 +34,7 @@ const PostBotDetails = () => {
     if (error || !post) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <div className="text-red-600 dark:text-red-400"> Post Not Found</div>
+                <div className="text-red-600 dark:text-red-400"> 未找到帖子</div>
             </div>
         );
     }
@@ -43,7 +43,7 @@ const PostBotDetails = () => {
         <div className="p-6">
             <div className="flex items-center justify-between flex-col md:flex-row mb-4">
                 <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-                    Post Details - POST-{String(post.id).padStart(3, "0")}
+                    帖子详情 - POST-{String(post.id).padStart(3, "0")}
                 </h1>
                 <PostChecking reFetch={reFetch} post={post} />
                 <div className="flex gap-2">
@@ -55,8 +55,8 @@ const PostBotDetails = () => {
                     >
                         <ArrowLeft size={16} />
                         <span className="sm:hidden">←</span>
-                        <span className="hidden sm:inline">back</span>
-                        <span className="sm:hidden">Back</span>
+                        <span className="hidden sm:inline">返回</span>
+                        <span className="sm:hidden">返回</span>
                     </button>
                     <button
                         onClick={handleModify}
@@ -91,7 +91,7 @@ const PostBotDetails = () => {
                                     d="M15 19l-7-7 7-7"
                                 />
                             </svg>
-                            prev
+                            上一条
                         </Link>
                     ) : (
                         <div
@@ -126,7 +126,7 @@ const PostBotDetails = () => {
     text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 
     hover:border-blue-300 dark:hover:border-blue-600 flex-shrink-0 min-w-[90px]"
                         >
-                            next
+                            下一条
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="h-4 w-4"
@@ -150,7 +150,7 @@ const PostBotDetails = () => {
     text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 
     flex-shrink-0 min-w-[90px] cursor-not-allowed opacity-50"
                         >
-                            next
+                            下一条
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="h-4 w-4"
@@ -172,13 +172,13 @@ const PostBotDetails = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Ref</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">编号</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             POST-{String(post?.id).padStart(3, "0")}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Platform</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">平台</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {post?.plateform.name}
                         </p>
@@ -188,7 +188,7 @@ const PostBotDetails = () => {
                         (post as any)?.creatorObj ? (
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Creator
+                                    创建者
                                 </p>
                                 <div className="flex items-center gap-3">
                                     <img
@@ -202,7 +202,7 @@ const PostBotDetails = () => {
                                     />
                                     <div>
                                         <p className="font-medium text-gray-900 dark:text-white">
-                                            <Link className="hover:text-blue-500" to={`/creators/`+post?.creatorObj?.id}>{(post)?.creatorObj?.name ?? post.creator ?? '-'}</Link>
+                                            <Link className="hover:text-blue-500" to={`/creators/` + post?.creatorObj?.id}>{(post)?.creatorObj?.name ?? post.creator ?? '-'}</Link>
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
                                             {(post as any)?.creatorObj.gender || ""}
@@ -213,7 +213,7 @@ const PostBotDetails = () => {
                         ) : post?.creator ? (
                             <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Creator
+                                    创建者
                                 </p>
                                 <p className="font-medium text-gray-900 dark:text-white">
                                     {post?.creator}
@@ -224,28 +224,28 @@ const PostBotDetails = () => {
                     {/* User / owner information (if provided by API) */}
 
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">User</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">用户</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {(post as any)?.user?.username}
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">分类</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {post?.postCategory?.name}
                         </p>
                     </div>
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Sub Category
+                            子分类
                         </p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {post?.postSubCategory?.name}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Duration</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">时长</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {post?.videos[0]
                                 ? `${Math.floor(post.videos[0].duration / 60)}:${String(
@@ -256,7 +256,7 @@ const PostBotDetails = () => {
                     </div>
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Verification
+                            验证
                         </p>
                         {post?.videos[0] ? (
                             <PostChecking index={0} reFetch={reFetch} post={post} />
@@ -264,27 +264,27 @@ const PostBotDetails = () => {
                             <span
                                 className={`px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300`}
                             >
-                                No video
+                                无视频
                             </span>
                         )}
                     </div>
                     <div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Published
+                            发布时间
                         </p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {new Date(post?.published_at).toLocaleDateString()}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Created</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">创建时间</p>
                         <p className="font-medium text-gray-900 dark:text-white">
                             {new Date(post?.createdAt).toLocaleDateString()}
                         </p>
                     </div>
                     {/* Tag Category chips */}
                     <div className="col-span-2 mt-2">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Tags</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">标签</p>
                         {Array.isArray((post as any)?.tagCategory) && (post as any)?.tagCategory.length > 0 ? (
                             <div className="flex flex-wrap gap-2 mt-1">
                                 {(post as any).tagCategory.map((tg: any) => (
@@ -298,7 +298,7 @@ const PostBotDetails = () => {
                                 ))}
                             </div>
                         ) : (
-                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">No tags</span>
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">无标签</span>
                         )}
                     </div>
                 </div>

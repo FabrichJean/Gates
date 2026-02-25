@@ -55,8 +55,8 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
     const f =
       query && categories.length > 0
         ? categories?.filter((cat) =>
-            cat.name.toLowerCase().includes(query.toLowerCase())
-          )
+          cat.name.toLowerCase().includes(query.toLowerCase())
+        )
         : categories;
 
     setFiltered(f);
@@ -95,7 +95,7 @@ const CategoryAutoComplete = ({ onSelect, defaultValue }: Props) => {
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        placeholder="Enter category..."
+        placeholder="输入类别..."
         className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg p-2 focus:ring-2 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-400 dark:focus:ring-blue-500 outline-none transition-all duration-300"
       />
 
