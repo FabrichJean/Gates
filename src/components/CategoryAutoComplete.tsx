@@ -9,6 +9,7 @@ export type Category = {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+  isDeleted: boolean;
   subCategoryCount: number;
   subcategories?: Partial<Category>[];
 };

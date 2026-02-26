@@ -9,6 +9,8 @@ import { getToken } from "../utils/storage";
 import toast from "react-hot-toast";
 import type { Category } from "../components/CategoryAutoComplete";
 import Pagination from "../components/Pagination";
+import { FaRegEye } from "react-icons/fa";
+import { CiBookmarkCheck } from "react-icons/ci";
 
 interface SubCategory {
   id: number;
@@ -19,10 +21,10 @@ interface SubCategory {
 }
 
 export default function CategoryManager() {
-  const { data: categories = [], loading: categoriesLoading, reFetch } = useCategory();
-
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const { data: categories = [], loading: categoriesLoading, reFetch } = useCategory(showDeleted);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
 
   // Pagination states
@@ -33,10 +35,11 @@ export default function CategoryManager() {
 
   // Load subcategories when a category is expanded
   const loadSubcategories = async (categoryId: number, forceReload = false) => {
-    if (subcategoriesMap[categoryId] && !forceReload) return; // Already loaded and not forced
+    if (subcategoriesMap[categoryId] && !forceReload) return; // Already loaded and not force
 
     try {
-      const res = await fetch(`${apiURL}/sub-categories?category_id=${categoryId}`, {
+      const url = `${apiURL}/sub-categories?category_id=${categoryId}&isDeleted=${showDeleted}`;
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       const data = await res.json();
@@ -318,23 +321,37 @@ export default function CategoryManager() {
           </div>
         </motion.div>
 
-        {/* Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6"
-        >
-          <div className="max-w-md">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="搜索分类..."
-              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </motion.div>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          {/* Search */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className=""
+          >
+            <div className="max-w-md">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="搜索分类..."
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </motion.div>
+
+
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            onClick={() => setShowDeleted(prev => !prev)}
+            className="px-4 py-2 cursor-pointer gap-3 flex items-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none"
+          >
+            <FaRegEye className="w-4 h-4 inline-block" /> {showDeleted ? "Show available" : "Show all deleted"}
+          </motion.button>
+
+        </div>
 
         {/* Categories List */}
         <motion.div
@@ -351,23 +368,26 @@ export default function CategoryManager() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 ${category.isDeleted ? "cursor-not-allowed border-red-200 dark:border-red-800" : "dark:border-gray-700 "} dark:border-gray-700 overflow-hidden`}
               >
                 {/* Category Header */}
                 <div className="p-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <button
-                        onClick={() => toggleCategory(category.id)}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                      >
-                        <motion.div
-                          animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
-                          transition={{ duration: 0.2 }}
+                      {!category.isDeleted && (
+                        <button
+                          onClick={() => toggleCategory(category.id)}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                         >
-                          <ChevronRight className="w-4 h-4 text-gray-500" />
-                        </motion.div>
-                      </button>
+
+                          <motion.div
+                            animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronRight className="w-4 h-4 text-gray-500" />
+                          </motion.div>
+                        </button>
+                      )}
 
                       <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -386,27 +406,46 @@ export default function CategoryManager() {
                     </div>
 
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        onClick={() => openSubCategoryModal(category.id)}
-                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
-                        title="添加子分类"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => openCategoryModal(category)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
-                        title="修改"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCategory(category.id)}
-                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors"
-                        title="删除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+
+                      {!category.isDeleted && (
+                        <button
+                          onClick={() => openSubCategoryModal(category.id)}
+                          className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
+                          title="添加子分类"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {!category.isDeleted && (
+                        <button
+                          onClick={() => openCategoryModal(category)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
+                          title="修改"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {!category.isDeleted && (
+                        <button
+                          onClick={() => handleDeleteCategory(category.id)}
+                          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                          title="删除"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {category.isDeleted && (
+                        <button
+                          // onClick={() => handleDeleteCategory(category.id)}
+                          className="cursor-pointer flex items-center gap-1 p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg transition-colors"
+                          title="激活"
+                        >
+                          <CiBookmarkCheck className="w-5 h-5" /> Activer
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -421,6 +460,12 @@ export default function CategoryManager() {
                       transition={{ duration: 0.2 }}
                       className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
                     >
+                      <div className="flex items-center gap-2 justify-end px-4 py-2">
+                        <span className="font-light text-sm">Sub category {`${`-->`}`}</span>
+                        <button className="font-light text-sm px-4 py-1 cursor-pointer gap-3 flex items-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none">
+                          <FaRegEye className="w-4 h-4 inline-block" /> {showDeleted ? " Show available" : "Show all deleted"}
+                        </button>
+                      </div>
                       <div className="p-4 space-y-2">
                         {(() => {
                           const subcategories = getSubcategoriesForCategory(category.id);
