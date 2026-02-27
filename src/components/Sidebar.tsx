@@ -10,6 +10,7 @@ import { BiLogoInternetExplorer } from "react-icons/bi";
 import { SiGoogledisplayandvideo360 } from "react-icons/si";
 import { FaSyncAlt } from "react-icons/fa";
 import RoleEnum from "../utils/roleEnum";
+import { useI18n } from '../context/I18nProvider';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -24,6 +25,7 @@ function Sidebar({
 }: SidebarProps) {
   const { data: user } = useAuthMe();
   const { logout } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -244,7 +246,7 @@ function Sidebar({
                 VMS
               </h1>
               <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 tracking-wider uppercase">
-                视频管理
+                {t('app.subtitle')}
               </p>
             </div>
           )}
@@ -283,7 +285,7 @@ function Sidebar({
                   <MdVerified className="text-blue-500 w-4 h-4 flex-shrink-0" />
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                  查看资料
+                  {t('profile.view')}
                   <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </p>
               </div>
@@ -297,7 +299,7 @@ function Sidebar({
         <NavLink
           to="/videos"
           name="videos"
-          label="视频"
+          label={t('nav.videos')}
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -318,7 +320,7 @@ function Sidebar({
         <NavLink
           to="/post-for-app"
           name="post-for-app"
-          label="应用程序帖子"
+          label={t('nav.post_for_app')}
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -338,7 +340,7 @@ function Sidebar({
         <NavLink
           to="/post"
           name="post"
-          label="帖子"
+          label={t('nav.post')}
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -358,7 +360,7 @@ function Sidebar({
         <NavLink
           to="/mangas"
           name="mangas"
-          label="漫画"
+          label={t('nav.mangas')}
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -378,7 +380,7 @@ function Sidebar({
         <NavLink
           to="/app-videos"
           name="app-videos"
-          label="应用视频"
+          label={t('nav.app_videos')}
           iconComponent={
             <svg
               className="w-5 h-5"
@@ -402,7 +404,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  机器人管理
+                  {t('sidebar.bot_management')}
                 </p>
               </div>
             )}
@@ -410,13 +412,13 @@ function Sidebar({
             <NavLink
               to="/bot-videos"
               name="bot-videos"
-              label="视频机器人"
+              label={t('nav.bot_videos')}
               icon={RiRobot2Line}
             />
             <NavLink
               to="/bot-posts"
               name="bot-posts"
-              label="发帖机器人"
+              label={t('nav.bot_posts')}
               icon={RiRobot2Line}
             />
           </>
@@ -428,7 +430,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  分类
+                  {t('sidebar.categories')}
                 </p>
               </div>
             )}
@@ -436,39 +438,39 @@ function Sidebar({
             <NavLink
               to="/category-manager"
               name="category-manager"
-              label="视频类别"
+              label={t('nav.category_manager')}
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/post-categories"
               name="post-categories"
-              label="帖子分类"
+              label={t('nav.post_categories')}
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/mangas-categories"
               name="mangas-categories"
-              label="漫画类别"
+              label={t('nav.mangas_categories')}
               icon={MdOutlineCategory}
             />
             <NavLink
               to="/tag-category"
               name="tag-category"
-              label="标签类别"
+              label={t('nav.tag_category')}
               icon={MdOutlineCategory}
             />
 
             <NavLink
               to="/audio-categories"
               name="audio-categories"
-              label="音频类别"
+              label={t('nav.audio_categories')}
               iconComponent={<Music className="w-5 h-5" />}
             />
 
             <NavLink
               to="/roman-category"
               name="roman-category"
-              label="罗马类别"
+              label={t('nav.roman_category')}
               icon={MdOutlineCategory}
             />
 
@@ -476,7 +478,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  预订
+                  {t('sidebar.content')}
                 </p>
               </div>
             )}
@@ -484,7 +486,7 @@ function Sidebar({
             <NavLink
               to="/audios"
               name="audios"
-              label="音频"
+              label={t('nav.audios')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -507,7 +509,7 @@ function Sidebar({
             <NavLink
               to="/romans"
               name="romans"
-              label="罗马人"
+              label={t('nav.romans')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -550,7 +552,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  管理
+                  {t('sidebar.management')}
                 </p>
               </div>
             )}
@@ -558,14 +560,14 @@ function Sidebar({
             <NavLink
               to="/plateform-relations"
               name="plateform-relations"
-              label="网页应用"
+              label={t('nav.plateform_relations')}
               icon={BiLogoInternetExplorer}
             />
 
             <NavLink
               to="/users"
               name="users"
-              label="用户"
+              label={t('nav.users')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -586,7 +588,7 @@ function Sidebar({
             <NavLink
               to="/archive"
               name="archive"
-              label="已屏蔽用户"
+              label={t('nav.archive')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -607,7 +609,7 @@ function Sidebar({
             <NavLink
               to="/creators"
               name="creators"
-              label="创作者"
+              label={t('nav.creators')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -629,7 +631,7 @@ function Sidebar({
             {!isCollapsed && (
               <div className="pt-4 pb-2">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-3">
-                  工具
+                  {t('sidebar.tools')}
                 </p>
               </div>
             )}
@@ -637,7 +639,7 @@ function Sidebar({
             <NavLink
               to="/settings"
               name="settings"
-              label="设置"
+              label={t('nav.settings')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -664,7 +666,7 @@ function Sidebar({
             <NavLink
               to="/conversion"
               name="conversion"
-              label="Excel转换"
+              label={t('nav.conversion')}
               iconComponent={
                 <svg
                   className="w-5 h-5"
@@ -702,7 +704,7 @@ function Sidebar({
           >
             <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
             {!isCollapsed && (
-              <span className="font-medium text-sm">登出</span>
+              <span className="font-medium text-sm">{t('auth.logout')}</span>
             )}
           </button>
         </div>
@@ -721,10 +723,10 @@ function Sidebar({
       >
         <div className="modal-box bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800">
           <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">
-            确认注销
+            {t('auth.logout_confirm_title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            你确定要退出登录吗？ 😞
+            {t('auth.logout_confirm_text')}
           </p>
           <div className="flex gap-3 justify-end">
             <button
@@ -735,7 +737,7 @@ function Sidebar({
                 hover:bg-gray-200 dark:hover:bg-gray-700
                 transition-all duration-200"
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button
               onClick={() => {
@@ -748,7 +750,7 @@ function Sidebar({
                 hover:from-red-600 hover:to-red-700
                 transition-all duration-200"
             >
-              登出
+              {t('auth.logout')}
             </button>
           </div>
         </div>

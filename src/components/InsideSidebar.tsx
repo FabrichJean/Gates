@@ -131,6 +131,9 @@ const OptionDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({
 
   return (
     <div className="relative flex items-center gap-2">
+      <div className="hidden sm:block">
+        <LanguageSwitcher />
+      </div>
       {/* Settings Button */}
       <Link to="/settings">
         <button
@@ -168,6 +171,7 @@ const OptionDisplayInline: React.FC<{ onLogoutRequest?: () => void }> = ({
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSwitcher from './LanguageSwitcher';
 import ProcessModal from "./ProcessModal";
 import { MdDynamicFeed } from "react-icons/md";
 import { useCardFlottant } from "../hooks/useCardFlottant";

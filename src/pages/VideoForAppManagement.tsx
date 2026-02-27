@@ -17,6 +17,7 @@ import type { BulkSyncProgress, BulkSyncResource } from "../components/BulkSyncT
 import { multipleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
+import { useI18n } from "../i18n";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
 
@@ -40,6 +41,8 @@ const VideoForAppManagement = () => {
     send,
     reFetch,
   } = ctx;
+
+  const { t } = useI18n();
 
   // Selection state
   const [selectedVideos, setSelectedVideos] = useState<Set<number>>(new Set());
@@ -514,7 +517,13 @@ const VideoForAppManagement = () => {
               modal?.showModal();
             }}
           >
-            过滤器
+            {t('filters.btn', {
+              default: {
+                en: 'filters',
+                zh: '过滤器',
+                fr: 'filtres'
+              }
+            })}
           </button>
           <VideoForAppFilter
             filters={filters}

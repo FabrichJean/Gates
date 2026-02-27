@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TranslatedText, SupportedLanguage } from '../types/i18n';
 import Markdown from 'react-markdown'
+import { useI18n } from '../context/I18nProvider';
 
 
 interface I18nTextProps {
@@ -36,22 +37,18 @@ const I18nText: React.FC<I18nTextProps> = ({
     return <Component className={className}>{content}</Component>;
   }
 
-  // Obtenir la langue du navigateur
-  const getBrowserLanguage = (): SupportedLanguage => {
-    const browserLang = navigator.language.split('-')[0].toLowerCase();
-    
-    // Vérifier si c'est une langue supportée
-    const supportedLangs: SupportedLanguage[] = ['en', 'fr', 'es', 'de', 'pt', 'ar', 'zh', 'ja', 'ko'];
-    if (supportedLangs.includes(browserLang as SupportedLanguage)) {
-      return browserLang as SupportedLanguage;
+  // Prefer the app-wide language from I18nProvider, fallback to navigator or provided fallbackLang
+  const { lang: appLang } = (() => {
+    try {
+      return useI18n();
+    } catch (e) {
+      return { lang: undefined } as any;
     }
-    
-    return fallbackLang;
-  };
+  })();
 
-  // Priorité: langue spécifiée > langue du navigateur > langue de fallback > première langue disponible
+  // Priorité: langue spécifiée > langue du provider > langue de fallback > première langue disponible
   const getDisplayText = (): string => {
-    const targetLang = defaultLang || getBrowserLanguage();
+    const targetLang = defaultLang || appLang || (typeof navigator !== 'undefined' ? navigator.language.split('-')[0].toLowerCase() : fallbackLang) as SupportedLanguage;
     
     // Essayer la langue cible
     if (content[targetLang]) {
@@ -74,9 +71,7 @@ const I18nText: React.FC<I18nTextProps> = ({
 
   const displayText = getDisplayText();
 
-  return <Component className={className}>
-    {displayText}
-    </Component>;
+  return <Component className={className}>{displayText}</Component>;
 };
 
 export default I18nText;

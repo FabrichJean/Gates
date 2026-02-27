@@ -15,6 +15,9 @@ export { I18nContentFields, I18nContentDisplay } from './components/I18nComponen
 // Hook
 export { useI18nState } from './hooks/useI18nState';
 
+// Provider & hooks
+export { I18nProvider, useI18n } from './context/I18nProvider';
+
 // Types
 export type {
   SupportedLanguage,
