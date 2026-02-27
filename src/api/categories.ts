@@ -25,9 +25,6 @@ export async function deleteCategoryApi(id: number) {
     })
 }
 
-
-
-
 export async function createSubCategoryApi(data : {name: string, category_id: number}) {
     return await axios.post(apiURL+'/sub-categories', data, {
         headers: {
@@ -46,6 +43,22 @@ export async function updateSubCategoryApi(id: number, data : {name: string, cat
 
 export async function deleteSubCategoryApi(id: number) {
     return await axios.delete(apiURL+'/sub-categories/'+id, {
+        headers: {
+            Authorization: `Bearer ${token()}`
+        }
+    })
+}
+
+export async function restoreCategoryApi(id: number) {
+    return await axios.put(apiURL+'/categories/'+id, { isDeleted: false }, {
+        headers: {
+            Authorization: `Bearer ${token()}`
+        }
+    })
+}
+
+export async function restoreSubCategoryApi(id: number) {
+    return await axios.put(apiURL+'/sub-categories/'+id, { isDeleted: false }, {
         headers: {
             Authorization: `Bearer ${token()}`
         }
