@@ -7,6 +7,7 @@ import { createCastegoryApi, deleteCategoryApi, createSubCategoryApi, updateSubC
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import toast from "react-hot-toast";
+import AnimatedAlert from "../components/AnimatedAlert";
 import type { Category } from "../components/CategoryAutoComplete";
 import Pagination from "../components/Pagination";
 import { FaRegEye } from "react-icons/fa";
@@ -89,6 +90,15 @@ export default function CategoryManager() {
   const [editingSubCategory, setEditingSubCategory] = useState<SubCategory | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
+  // AnimatedAlert state for delete confirmation (handles category or subcategory)
+  const [deleteAlert, setDeleteAlert] = useState<{
+    isOpen: boolean;
+    type?: "cat" | "sub";
+    id: number | null;
+    name?: string;
+    parentId?: number | null;
+  }>({ isOpen: false, type: "cat", id: null, name: "", parentId: null });
+
   // Form states
   const [categoryForm, setCategoryForm] = useState({ name: "" });
   const [subCategoryForm, setSubCategoryForm] = useState({
@@ -144,16 +154,45 @@ export default function CategoryManager() {
 
   const handleDeleteCategory = async (id: number) => {
     const category = categories.find((c) => c.id === id);
-    const confirmed = window.confirm(
-      `您确定要删除类别 "${category?.name}" 吗？此操作不可逆。`
-    );
+    setDeleteAlert({ isOpen: true, type: "cat", id, name: category?.name || "", parentId: null });
+  };
 
-    if (!confirmed) return;
+  const handleDeleteSubCategory = async (subCategoryId: number, categoryId: number, name?: string) => {
+    setDeleteAlert({ isOpen: true, type: "sub", id: subCategoryId, name: name || "", parentId: categoryId });
+  };
+
+  // Restore confirmation state (handles category or subcategory)
+  const [restoreAlert, setRestoreAlert] = useState<{
+    isOpen: boolean;
+    type?: "cat" | "sub";
+    id: number | null;
+    name?: string;
+    parentId?: number | null;
+  }>({ isOpen: false, type: "cat", id: null, name: "", parentId: null });
+
+  const confirmDelete = async () => {
+    if (!deleteAlert.id) return;
+    const id = deleteAlert.id;
+    const type = deleteAlert.type;
+    const parentId = deleteAlert.parentId;
+    setDeleteAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null });
 
     try {
-      await deleteCategoryApi(id);
-      toast.success("分类删除成功");
-      reFetch();
+      if (type === "sub") {
+        await deleteSubCategoryApi(id);
+        toast.success("子分类删除成功");
+        // update local subcategories map
+        if (parentId != null) {
+          setSubcategoriesMap(prev => ({
+            ...prev,
+            [parentId]: prev[parentId]?.filter(sub => sub.id !== id) || []
+          }));
+        }
+      } else {
+        await deleteCategoryApi(id);
+        toast.success("分类删除成功");
+        if (typeof reFetch === "function") reFetch();
+      }
     } catch (error) {
       toast.error("删除时出错");
       console.error(error);
@@ -161,10 +200,32 @@ export default function CategoryManager() {
   };
 
   const handleRestoreCategory = async (id: number) => {
+    const category = categories.find((c) => c.id === id);
+    setRestoreAlert({ isOpen: true, type: "cat", id, name: category?.name || "", parentId: null });
+  };
+
+  const handleRestoreSubCategory = async (subCategoryId: number, categoryId: number, name?: string) => {
+    setRestoreAlert({ isOpen: true, type: "sub", id: subCategoryId, name: name || "", parentId: categoryId });
+  };
+
+  const confirmRestore = async () => {
+    if (!restoreAlert.id) return;
+    const id = restoreAlert.id;
+    const type = restoreAlert.type;
+    const parentId = restoreAlert.parentId;
+    setRestoreAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null });
     try {
-      await restoreCategoryApi(id);
-      toast.success("分类已恢复");
-      if (typeof reFetch === "function") reFetch();
+      if (type === "sub") {
+        await restoreSubCategoryApi(id);
+        toast.success("子分类已恢复");
+        if (parentId != null) {
+          await loadSubcategories(parentId, true);
+        }
+      } else {
+        await restoreCategoryApi(id);
+        toast.success("分类已恢复");
+        if (typeof reFetch === "function") reFetch();
+      }
     } catch (error) {
       toast.error("恢复分类时出错");
       console.error(error);
@@ -221,39 +282,9 @@ export default function CategoryManager() {
     }
   };
 
-  const handleDeleteSubCategory = async (subCategoryId: number, categoryId: number) => {
-    const confirmed = window.confirm(
-      "您确定要删除此子分类吗？此操作不可逆。"
-    );
 
-    if (!confirmed) return;
 
-    try {
-      await deleteSubCategoryApi(subCategoryId);
-      toast.success("子分类删除成功");
 
-      // Mettre à jour l'état local
-      setSubcategoriesMap(prev => ({
-        ...prev,
-        [categoryId]: prev[categoryId]?.filter(sub => sub.id !== subCategoryId) || []
-      }));
-    } catch (error) {
-      toast.error("删除子分类时出错");
-      console.error(error);
-    }
-  };
-
-  const handleRestoreSubCategory = async (subCategoryId: number, categoryId: number) => {
-    try {
-      await restoreSubCategoryApi(subCategoryId);
-      toast.success("子分类已恢复");
-      // reload subcategories for this category
-      await loadSubcategories(categoryId, true);
-    } catch (error) {
-      toast.error("恢复子分类时出错");
-      console.error(error);
-    }
-  };
 
   // UI Handlers
   const openCategoryModal = (category?: Category) => {
@@ -413,7 +444,6 @@ export default function CategoryManager() {
                           onClick={() => toggleCategory(category.id)}
                           className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                         >
-
                           <motion.div
                             animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
                             transition={{ duration: 0.2 }}
@@ -424,11 +454,11 @@ export default function CategoryManager() {
                       )}
 
                       <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <Folder className={`w-5 h-5 ${category.isDeleted ? "text-red-600 dark:text-red-400" : "text-blue-600 dark:text-blue-400"}`} />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        <h3 className={`font-semibold ${category.isDeleted ? "text-red-600 dark:text-red-400/60" : "text-gray-900 dark:text-gray-100"} truncate`}>
                           {category.name}
                         </h3>
                       </div>
@@ -541,7 +571,7 @@ export default function CategoryManager() {
                                   )}
                                   {!sub.isDeleted && (
                                     <button
-                                      onClick={() => handleDeleteSubCategory(sub.id, category.id)}
+                                      onClick={() => handleDeleteSubCategory(sub.id, category.id, sub.name)}
                                       className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
                                       title="删除"
                                     >
@@ -550,13 +580,13 @@ export default function CategoryManager() {
                                   )}
 
                                   {sub.isDeleted && (
-                                  <button
-                                    onClick={() => handleRestoreSubCategory(sub.id, category.id)}
-                                    className="cursor-pointer flex items-center gap-1 p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg transition-colors"
-                                    title="激活"
-                                  >
-                                    <CiBookmarkCheck className="w-5 h-5" /> <span className="font-light text-sm">Restaurer</span>
-                                  </button>
+                                    <button
+                                      onClick={() => handleRestoreSubCategory(sub.id, category.id, sub.name)}
+                                      className="cursor-pointer flex items-center gap-1 p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg transition-colors"
+                                      title="激活"
+                                    >
+                                      <CiBookmarkCheck className="w-5 h-5" /> <span className="font-light text-sm">Restaurer</span>
+                                    </button>
                                   )}
                                 </div>
                               </motion.div>
@@ -784,6 +814,30 @@ export default function CategoryManager() {
           </motion.div>
         </>
       )}
+
+      {/* Animated delete confirmation */}
+      <AnimatedAlert
+        isOpen={deleteAlert.isOpen}
+        onClose={() => setDeleteAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null })}
+        title="确认删除"
+        message={`您确定要删除 "${deleteAlert.name}" 吗？此操作不可逆。`}
+        type="warning"
+        onConfirm={confirmDelete}
+        confirmText="删除"
+        cancelText="取消"
+      />
+
+      {/* Animated restore confirmation */}
+      <AnimatedAlert
+        isOpen={restoreAlert.isOpen}
+        onClose={() => setRestoreAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null })}
+        title="确认恢复"
+        message={`您确定要恢复 ${restoreAlert.type === "sub" ? "子分类" : "类别"} "${restoreAlert.name}" 吗？`}
+        type="success"
+        onConfirm={confirmRestore}
+        confirmText="恢复"
+        cancelText="取消"
+      />
     </div>
   );
 }
