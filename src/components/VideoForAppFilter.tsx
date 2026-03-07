@@ -12,6 +12,8 @@ export type TAppFilter = {
   categorySearch?: string;
   subcategory_id?: string;
   subcategorySearch?: string;
+  tag?: string;
+  tagSearch?: string;
   type?: string;
 };
 
@@ -75,6 +77,8 @@ export default function VideoForAppFilter({
         categorySearch: filters.categorySearch,
         subcategory_id: filters.subcategory_id,
         subcategorySearch: filters.subcategorySearch,
+        tag: filters.tag,
+        tagSearch: filters.tagSearch,
         isDeleted: filters.isDeleted,
         checking: filters.checking,
         type: filters.type,
@@ -127,6 +131,7 @@ export default function VideoForAppFilter({
       creator_id: filters.creator_id || undefined,
       category_id: filters.category_id || undefined,
       subcategory_id: filters.subcategory_id || undefined,
+        tag: filters.tagSearch || undefined,
       isDeleted: isDeletedValue,
       checking: checkingValue,
       type: filters.type ? parseInt(filters.type) : undefined,
@@ -389,6 +394,27 @@ export default function VideoForAppFilter({
               </div>
             )}
           </div>
+
+            {/* Tag searchable */}
+            <div className="relative">
+              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Tag</label>
+              <input
+                type="text"
+                placeholder="搜索标签..."
+                value={filters.tagSearch || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setHasInteracted(true);
+                  if (value === "") {
+                    handleChange("tagSearch", "");
+                    handleChange("tag", "");
+                  } else {
+                    handleChange("tagSearch", value);
+                  }
+                }}
+                className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+              />
+            </div>
         </div>
 
         <form method="dialog" className="pt-3 flex justify-end gap-3">
@@ -406,6 +432,8 @@ export default function VideoForAppFilter({
                 categorySearch: "",
                 subcategory_id: "",
                 subcategorySearch: "",
+                tag: "",
+                tagSearch: "",
               });
               setHasInteracted(false);
               setCategoryOpen(false);

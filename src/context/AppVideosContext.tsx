@@ -33,7 +33,11 @@ export const AppVideosProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchData = useCallback(() => {
     setLoading(true);
-    fetchVideoForAppList({ page, ...filters })
+    const params: Record<string, any> = { page, ...filters };
+    if (filters && filters.tagSearch) {
+      params.tag = filters.tagSearch;
+    }
+    fetchVideoForAppList(params)
       .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit }))
       .finally(() => setLoading(false));
   }, [page, filters]);
