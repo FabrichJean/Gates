@@ -397,7 +397,7 @@ export default function VideoForAppFilter({
 
             {/* Tag searchable */}
             <div className="relative">
-              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Tag</label>
+              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Tag <span className="font-medium text-sm">(by name)</span></label>
               <input
                 type="text"
                 placeholder="搜索标签..."
