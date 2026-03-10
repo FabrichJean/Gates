@@ -18,6 +18,7 @@ import { multipleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import TagCategoryVideoForApp from "../components/TagCategoryVideoForApp";
 import { useI18n } from "../i18n";
+import { buildVideoForAppListParams } from "../utils/videoForAppFilters";
 
 type CheckingStatus = 'ready' | 'not ready' | 'checked' | 'waiting for checking' | null;
 
@@ -317,7 +318,8 @@ const VideoForAppManagement = () => {
       // Fetch all pages in the range
       for (let currentPage = rangeSelection.startPage; currentPage <= rangeSelection.endPage; currentPage++) {
         try {
-          const response = await fetchVideoForAppList({ page: currentPage, ...filters });
+          const { params: queryParams } = buildVideoForAppListParams({ filters, page: currentPage });
+          const response = await fetchVideoForAppList(queryParams);
           const pageVideoIds = response.videos.map(v => v.id);
           allVideoIds.push(...pageVideoIds);
 

@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { toast } from "react-hot-toast";
 import UseCreators from "../hooks/useCreators";
 import CreatorAutoComplete from "./CreatorAutoComplete";
 import UseCategory from "../hooks/useCategory";
 import { UseSubCategoryReactive } from "../hooks/useSubCategory";
 import type { Category } from "../components/CategoryAutoComplete";
+import {
+  buildVideoForAppListParams,
+  finalizeDurationHhMmSsInput,
+} from "../utils/videoForAppFilters";
 
 export type TAppFilter = {
   creator_id: string;
@@ -15,6 +20,8 @@ export type TAppFilter = {
   tag?: string;
   tagSearch?: string;
   type?: string;
+  durationMin?: string;
+  durationMax?: string;
 };
 
 export default function VideoForAppFilter({
@@ -59,8 +66,13 @@ export default function VideoForAppFilter({
       const savedFilters = localStorage.getItem(storageKey);
       if (savedFilters) {
         const parsedFilters = JSON.parse(savedFilters);
+        const normalizedSavedFilters = {
+          ...parsedFilters,
+          durationMin: finalizeDurationHhMmSsInput(parsedFilters.durationMin || ""),
+          durationMax: finalizeDurationHhMmSsInput(parsedFilters.durationMax || ""),
+        };
         // Fusionner avec les filtres actuels pour éviter d'écraser les valeurs par défaut
-        setFilters((prev: any) => ({ ...prev, ...parsedFilters }));
+        setFilters((prev: any) => ({ ...prev, ...normalizedSavedFilters }));
       }
     } catch (error) {
       console.error("Erreur lors du chargement des filtres depuis localStorage:", error);
@@ -82,6 +94,8 @@ export default function VideoForAppFilter({
         isDeleted: filters.isDeleted,
         checking: filters.checking,
         type: filters.type,
+        durationMin: filters.durationMin,
+        durationMax: filters.durationMax,
       };
       localStorage.setItem(storageKey, JSON.stringify(filtersToSave));
     } catch (error) {
@@ -115,31 +129,51 @@ export default function VideoForAppFilter({
     });
   };
 
+  const normalizeDurationTimeValue = (value: string) => {
+    if (!value) {
+      return "";
+    }
+
+    if (/^\d{2}:\d{2}$/.test(value)) {
+      return `${value}:00`;
+    }
+
+    return value;
+  };
+
+  const handleDurationChange = (key: "durationMin" | "durationMax", value: string) => {
+    setHasInteracted(true);
+    handleChange(key, normalizeDurationTimeValue(value));
+  };
+
+  const handleDurationBlur = (key: "durationMin" | "durationMax") => {
+    handleChange(key, finalizeDurationHhMmSsInput(filters[key] || ""));
+  };
+
   // Soumission des filtres
   const submit = async () => {
-    // Map isDeleted to true/false
-    let isDeletedValue: boolean | undefined = undefined;
-    if (filters.isDeleted === "yes") isDeletedValue = true;
-    else if (filters.isDeleted === "no") isDeletedValue = false;
-    else isDeletedValue = undefined;
+    const { params: finalQuery, error } = buildVideoForAppListParams({
+      filters,
+      baseParams: params || {},
+      page: "1",
+      strictDuration: true,
+    });
 
-    let checkingValue: string | null | undefined = undefined;
-    if (filters.checking === "all" || filters.checking === "" || !filters.checking) checkingValue = undefined;
-    else checkingValue = filters.checking;
+    if (error === "duration_min_format") {
+      toast.error("La durée minimale doit être au format hh:mm:ss.");
+      return;
+    }
 
-    const data = {
-      creator_id: filters.creator_id || undefined,
-      category_id: filters.category_id || undefined,
-      subcategory_id: filters.subcategory_id || undefined,
-        tag: filters.tagSearch || undefined,
-      isDeleted: isDeletedValue,
-      checking: checkingValue,
-      type: filters.type ? parseInt(filters.type) : undefined,
-      category: filters.categorySearch || undefined,
-      subcategory: filters.subcategorySearch || undefined,
-    };
-    const safeParams = params || {};
-    const finalQuery = { ...safeParams, ...data, page: '1' };
+    if (error === "duration_max_format") {
+      toast.error("La durée maximale doit être au format hh:mm:ss.");
+      return;
+    }
+
+    if (error === "duration_range") {
+      toast.error("La durée minimale doit être inférieure ou égale à la durée maximale.");
+      return;
+    }
+
     try {
       const { fetchVideoForAppList } = await import("../api/videoForApp");
       const fetched = await fetchVideoForAppList(finalQuery);
@@ -244,6 +278,34 @@ export default function VideoForAppFilter({
               ))}
             </div>
           </div>
+          {/* <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">时长范围</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">最短时长</label>
+                <input
+                  type="time"
+                  step="1"
+                  value={filters.durationMin || ""}
+                  onChange={(e) => handleDurationChange("durationMin", e.target.value)}
+                  onBlur={() => handleDurationBlur("durationMin")}
+                  className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">最长时长</label>
+                <input
+                  type="time"
+                  step="1"
+                  value={filters.durationMax || ""}
+                  onChange={(e) => handleDurationChange("durationMax", e.target.value)}
+                  onBlur={() => handleDurationBlur("durationMax")}
+                  className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为毫秒。</p>
+          </div> */}
         </div>
 
 
@@ -395,26 +457,55 @@ export default function VideoForAppFilter({
             )}
           </div>
 
-            {/* Tag searchable */}
-            <div className="relative">
-              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Tag <span className="font-medium text-sm">(by name)</span></label>
-              <input
-                type="text"
-                placeholder="搜索标签..."
-                value={filters.tagSearch || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setHasInteracted(true);
-                  if (value === "") {
-                    handleChange("tagSearch", "");
-                    handleChange("tag", "");
-                  } else {
-                    handleChange("tagSearch", value);
-                  }
-                }}
-                className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
-              />
+          {/* Tag searchable */}
+          <div className="relative">
+            <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Tag <span className="font-medium text-sm">(by name)</span></label>
+            <input
+              type="text"
+              placeholder="搜索标签..."
+              value={filters.tagSearch || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setHasInteracted(true);
+                if (value === "") {
+                  handleChange("tagSearch", "");
+                  handleChange("tag", "");
+                } else {
+                  handleChange("tagSearch", value);
+                }
+              }}
+              className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+            />
+          </div>
+
+          <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">时长范围</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">最短时长</label>
+                <input
+                  type="time"
+                  step="1"
+                  value={filters.durationMin || ""}
+                  onChange={(e) => handleDurationChange("durationMin", e.target.value)}
+                  onBlur={() => handleDurationBlur("durationMin")}
+                  className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">最长时长</label>
+                <input
+                  type="time"
+                  step="1"
+                  value={filters.durationMax || ""}
+                  onChange={(e) => handleDurationChange("durationMax", e.target.value)}
+                  onBlur={() => handleDurationBlur("durationMax")}
+                  className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+                />
+              </div>
             </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为毫秒。</p>
+          </div>
         </div>
 
         <form method="dialog" className="pt-3 flex justify-end gap-3">
@@ -434,6 +525,8 @@ export default function VideoForAppFilter({
                 subcategorySearch: "",
                 tag: "",
                 tagSearch: "",
+                durationMin: "",
+                durationMax: "",
               });
               setHasInteracted(false);
               setCategoryOpen(false);

@@ -63,11 +63,25 @@ export interface VideoForAppListResponse {
   videos: VideoForApp[];
 }
 
-export async function fetchVideoForAppList(params: {
-  page?: number;
+export interface VideoForAppListParams {
+  page?: number | string;
   limit?: number;
   search?: string;
-}) {
+  creator_id?: number | string;
+  category_id?: number | string;
+  subcategory_id?: number | string;
+  tag?: string;
+  isDeleted?: boolean;
+  checking?: string;
+  type?: number | string;
+  category?: string;
+  subcategory?: string;
+  duration_min?: number;
+  duration_max?: number;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export async function fetchVideoForAppList(params: VideoForAppListParams) {
   const { data } = await axios.get<VideoForAppListResponse>(
     apiURL + "/videos-for-app",
     {
