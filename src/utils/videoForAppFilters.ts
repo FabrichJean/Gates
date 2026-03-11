@@ -234,11 +234,11 @@ export function buildVideoForAppListParams({
   }
 
   if (durationMinValue !== undefined && durationMinValue !== null) {
-    params.duration_min = durationMinValue;
+    params.seconde_min = Math.floor(durationMinValue / 1000);
   }
 
   if (durationMaxValue !== undefined && durationMaxValue !== null) {
-    params.duration_max = durationMaxValue;
+    params.seconde_max = Math.floor(durationMaxValue / 1000);
   }
 
   return { params };

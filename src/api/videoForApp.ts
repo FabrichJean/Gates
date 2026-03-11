@@ -76,8 +76,8 @@ export interface VideoForAppListParams {
   type?: number | string;
   category?: string;
   subcategory?: string;
-  duration_min?: number;
-  duration_max?: number;
+  seconde_min?: number;
+  seconde_max?: number;
   [key: string]: string | number | boolean | null | undefined;
 }
 

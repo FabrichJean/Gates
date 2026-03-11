@@ -304,7 +304,7 @@ export default function VideoForAppFilter({
                 />
               </div>
             </div>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为毫秒。</p>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为秒。</p>
           </div> */}
         </div>
 
@@ -504,7 +504,7 @@ export default function VideoForAppFilter({
                 />
               </div>
             </div>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为毫秒。</p>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为秒。</p>
           </div>
         </div>
 
