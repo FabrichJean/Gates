@@ -353,35 +353,35 @@ const PostForAppManagementInner = () => {
                 <th scope="col" className="px-6 py-3">
                   <span className="sr-only">Select</span>
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   身份证
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   类别
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   创造者
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   平台
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   检查中
                 </th>
 
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   激活
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   视频
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   图片
                 </th>
-                <th scope="col" className="px-6 py-3">
-                 创建日期
+                <th scope="col" className="px-6 py-3 text-nowrap">
+                  创建日期
                 </th>
-                <th scope="col" className="px-6 py-3 text-left">
+                <th scope="col" className="px-6 py-3 text-left text-nowrap">
                   操作
                 </th>
               </tr>
@@ -407,8 +407,9 @@ const PostForAppManagementInner = () => {
                     {post.id}
                   </th>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post?.postCategory?.name} / {post?.postSubCategory?.name}
+                    <span className="flex flex-col gap-1 px-2 py-1 text-xs text-nowrap font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
+                      {post?.postCategory?.name}
+                      <span className={`${post?.postSubCategory?.name ? 'text-left' : 'text-center'}`}>{post?.postSubCategory?.name ? post?.postSubCategory?.name : '-'}</span>
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -437,7 +438,7 @@ const PostForAppManagementInner = () => {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
+                    <span className="px-2 py-1 text-xs font-medium text-nowrap rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
                       {post.plateform.name}
                     </span>
                   </td>
@@ -540,12 +541,14 @@ const PostForAppManagementInner = () => {
             </tbody>
           </table>
 
-          <Pagination
-            totalItems={total}
-            pageSize={limit}
-            currentPage={page}
-            onPageChange={(p) => setPage(p)}
-          />
+          {searchTerm.length === 0 && (
+            <Pagination
+              totalItems={total}
+              pageSize={limit}
+              currentPage={page}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
 
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
