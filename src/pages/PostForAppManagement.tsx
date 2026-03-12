@@ -613,9 +613,7 @@ const PostForAppManagementInner = () => {
                       checked={!post.isDeleted}
                       className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                       onChange={
-                        user?.role === RoleEnum.SUPERADMIN
-                          ? () => activate(post.id)
-                          : undefined
+                        () => activate(post.id)
                       }
                     />
                   </td>
@@ -691,7 +689,7 @@ const PostForAppManagementInner = () => {
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
-                      <span>详情</span>
+                      <span className="text-nowrap">详情</span>
                     </Link>
                   </td>
                 </tr>

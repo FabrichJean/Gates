@@ -198,9 +198,7 @@ const VideoTableRow = ({
           checked={!video.isDeleted}
           className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
           onChange={
-            user?.role === RoleEnum.SUPERADMIN
-              ? () => onActivate(video.id)
-              : undefined
+            () => onActivate(video.id)
           }
         />
       </td>
