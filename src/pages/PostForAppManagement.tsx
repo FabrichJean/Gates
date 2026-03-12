@@ -70,7 +70,7 @@ const PostForAppManagementInner = () => {
   const selectAllPage = () => {
     setSelectedPosts(prev => {
       const newSelection = new Set(prev);
-      const currentPageIds = posts?.map(p => p.id) || [];
+      const currentPageIds = filteredPosts?.map(p => p.id) || [];
       const allSelected = currentPageIds.every(id => newSelection.has(id));
 
       if (allSelected) {
@@ -197,6 +197,20 @@ const PostForAppManagementInner = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
 
+  const filteredPosts = React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return posts;
+
+    return posts.filter((post: any) =>
+      Array.isArray(post?.titles) &&
+      post.titles.some(
+        (titleItem: any) =>
+          typeof titleItem?.title === "string" &&
+          titleItem.title.toLowerCase().includes(term),
+      ),
+    );
+  }, [posts, searchTerm]);
+
   // client-side filtering of current page
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("fr-FR");
@@ -282,7 +296,7 @@ const PostForAppManagementInner = () => {
                 onClick={selectAllPage}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
-                {posts?.length > 0 && posts.every(p => selectedPosts.has(p.id)) ? (
+                {filteredPosts?.length > 0 && filteredPosts.every(p => selectedPosts.has(p.id)) ? (
                   <CheckSquare className="w-4 h-4" />
                 ) : (
                   <Square className="w-4 h-4" />
@@ -373,7 +387,7 @@ const PostForAppManagementInner = () => {
               </tr>
             </thead>
             <tbody>
-              {posts?.map((post: any, idx: number) => (
+              {filteredPosts?.map((post: any, idx: number) => (
                 <tr
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
@@ -533,7 +547,7 @@ const PostForAppManagementInner = () => {
             onPageChange={(p) => setPage(p)}
           />
 
-          {posts.length === 0 && (
+          {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
                 ? "No posts found for this search"
