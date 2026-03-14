@@ -3,6 +3,9 @@ import BulkEditModal from "../components/BulkEditModal";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import React, { useState } from "react";
+import useBulkSelection from "../hooks/useBulkSelection";
+import BulkSelectionControls from "../components/PostForApp/BulkSelectionControls";
+import RangeSelectorModal from "../components/PostForApp/RangeSelectorModal";
 import UsePlateform from "../hooks/usePlateform";
 import PostForAppChecking from "../components/PostForApp/PostForAppChecking";
 import { useAuth } from "../hooks/useAuth";
@@ -27,18 +30,9 @@ const PostForAppManagementInner = () => {
   const [singleSyncOpenId, setSingleSyncOpenId] = useState<number | null>(null);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
-  // Selection state for bulk edit
-  const [selectedPosts, setSelectedPosts] = useState<Set<number>>(new Set());
+  // Selection state for bulk edit (moved to hook)
   const [showBulkEdit, setShowBulkEdit] = useState(false);
 
-  // Range selection state
-  const [showRangeSelector, setShowRangeSelector] = useState(false);
-  const [rangeSelection, setRangeSelection] = useState({
-    startPage: 1,
-    endPage: 1,
-  });
-  const [rangeLoading, setRangeLoading] = useState(false);
-  const [rangeProgress, setRangeProgress] = useState({ current: 0, total: 0 });
 
   const handleSingleSync = async (postId: number, isForce: boolean) => {
     setSingleSyncLoading(true);
@@ -54,116 +48,7 @@ const PostForAppManagementInner = () => {
     }
   };
 
-  // Selection handlers
-  const togglePostSelection = (postId: number) => {
-    setSelectedPosts(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(postId)) {
-        newSelection.delete(postId);
-      } else {
-        newSelection.add(postId);
-      }
-      return newSelection;
-    });
-  };
-
-  const selectAllPage = () => {
-    setSelectedPosts(prev => {
-      const newSelection = new Set(prev);
-      const currentPageIds = posts?.map(p => p.id) || [];
-      const allSelected = currentPageIds.every(id => newSelection.has(id));
-
-      if (allSelected) {
-        // If all are selected, deselect all on current page
-        currentPageIds.forEach(id => newSelection.delete(id));
-      } else {
-        // If not all are selected, select all on current page
-        currentPageIds.forEach(id => newSelection.add(id));
-      }
-
-      return newSelection;
-    });
-  };
-
-  const deselectAll = () => {
-    setSelectedPosts(new Set());
-  };
-
-  const selectPageRange = async () => {
-    if (rangeSelection.startPage > rangeSelection.endPage) {
-      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
-      return;
-    }
-
-    setRangeLoading(true);
-    setRangeProgress({ current: 0, total: rangeSelection.endPage - rangeSelection.startPage + 1 });
-    try {
-      const allPostIds: number[] = [];
-      const totalPages = Math.ceil((data?.total || 0) / (data?.limit || 20));
-
-      // Validate range
-      if (rangeSelection.endPage > totalPages) {
-        toast.error(`La page d'arrêt ne peut pas dépasser ${totalPages}`);
-        return;
-      }
-
-      // Normalize filters like in usePostForAppManagement
-      const normalizeBool = (val: any) => {
-        if (val === "yes") return true;
-        if (val === "no") return false;
-        return val;
-      };
-
-      const normalizedFilters = {
-        ...filters,
-        isDeleted: normalizeBool(filters.isDeleted),
-        processing: normalizeBool(filters.processing),
-        uploaded: normalizeBool(filters.uploaded),
-      };
-
-      // Remove any filter with value 'all' from the params
-      const apiFilters = Object.fromEntries(
-        Object.entries(normalizedFilters).filter(([k, v]) => v !== "all" && v !== "" && v !== undefined && v !== null)
-      );
-
-      // Fetch all pages in the range
-      for (let currentPage = rangeSelection.startPage; currentPage <= rangeSelection.endPage; currentPage++) {
-        try {
-          const response = await getPostsForApp({
-            ...apiFilters,
-            page: currentPage,
-            limit: data?.limit || 20
-          });
-          const pagePostIds = response.data.posts.map((p: any) => p.id);
-          allPostIds.push(...pagePostIds);
-
-          // Update progress
-          setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
-        } catch (error) {
-          console.error(`Erreur lors du chargement de la page ${currentPage}:`, error);
-          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
-          return;
-        }
-      }
-
-      // Update selection
-      setSelectedPosts(prev => {
-        const newSelection = new Set(prev);
-        allPostIds.forEach(id => newSelection.add(id));
-        return newSelection;
-      });
-
-      toast.success(`${allPostIds.length} posts sélectionnés sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
-      setShowRangeSelector(false);
-
-    } catch (error) {
-      console.error('Erreur lors de la sélection par plage:', error);
-      toast.error('Erreur lors de la sélection par plage');
-    } finally {
-      setRangeLoading(false);
-      setRangeProgress({ current: 0, total: 0 });
-    }
-  };
+  // Selection handlers are provided by useBulkSelection hook
 
   const openBulkEdit = () => {
     setShowBulkEdit(true);
@@ -173,11 +58,26 @@ const PostForAppManagementInner = () => {
     setShowBulkEdit(false);
   };
 
-  const { page, setPage, data, loading, reFetch, activate } =
-    usePostForAppContext();
+  const { page, setPage, data, loading, reFetch, activate } = usePostForAppContext();
 
   // filters are now centralized in context
   const { filters, setFilters } = usePostForAppContext();
+
+  // Bulk selection logic extracted to hook
+  const {
+    selectedPosts,
+    togglePostSelection,
+    selectAllPage,
+    deselectAll,
+    showRangeSelector,
+    openRangeSelector,
+    closeRangeSelector,
+    rangeSelection,
+    setRangeSelection,
+    rangeLoading,
+    rangeProgress,
+    selectPageRange,
+  } = useBulkSelection({ posts: data?.posts || [], page, data, filters, reFetch });
 
   // Update range selection when page changes
   React.useEffect(() => {
@@ -276,60 +176,16 @@ const PostForAppManagementInner = () => {
       {/* Bulk edit controls */}
       <div className="w-full mt-4 mb-4">
         <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={selectAllPage}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                {posts?.length > 0 && posts.every(p => selectedPosts.has(p.id)) ? (
-                  <CheckSquare className="w-4 h-4" />
-                ) : (
-                  <Square className="w-4 h-4" />
-                )}
-                全选页面
-              </button>
-
-              <button
-                onClick={() => {
-                  setRangeSelection({
-                    startPage: page,
-                    endPage: page,
-                  });
-                  setShowRangeSelector(true);
-                }}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                <Users className="w-4 h-4" />
-                按范围选择
-              </button>
-
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedPosts.size} selected
-              </span>
+              <BulkSelectionControls
+                posts={data?.posts || []}
+                selectedPosts={selectedPosts}
+                selectAllPage={selectAllPage}
+                openRangeSelector={openRangeSelector}
+                deselectAll={deselectAll}
+                openBulkEdit={openBulkEdit}
+              />
             </div>
-
-            {selectedPosts.size > 0 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={deselectAll}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  取消全选
-                </button>
-                <button
-                  onClick={openBulkEdit}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  批量编辑 ({selectedPosts.size})
-                </button>
-              </div>
-            )}
-          </div>
         </div>
-      </div>
 
       <div className="w-full mt-4">
         <div className="relative overflow-x-auto">
@@ -553,188 +409,18 @@ const PostForAppManagementInner = () => {
       />
 
       {/* Range Selection Modal */}
-      {showRangeSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  选择页面范围
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowRangeSelector(false);
-                    setRangeProgress({ current: 0, total: 0 });
-                  }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      起始页
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={rangeSelection.startPage}
-                      onChange={(e) => setRangeSelection(prev => ({
-                        ...prev,
-                        startPage: Math.max(1, parseInt(e.target.value) || 1)
-                      }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      停止页
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={rangeSelection.endPage}
-                      onChange={(e) => setRangeSelection(prev => ({
-                        ...prev,
-                        endPage: Math.max(1, parseInt(e.target.value) || 1)
-                      }))}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {data && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    可用页面总数 : {Math.ceil(data.total / data.limit)}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                {rangeLoading && rangeProgress.total > 0 && (
-                  <div className="flex-1 flex items-center gap-3">
-                    <div className="flex-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(rangeProgress.current / rangeProgress.total) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      {rangeProgress.current} / {rangeProgress.total} 页面
-                    </span>
-                  </div>
-                )}
-                <button
-                  onClick={() => {
-                    setShowRangeSelector(false);
-                    setRangeProgress({ current: 0, total: 0 });
-                  }}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  disabled={rangeLoading}
-                >
-                  取消
-                </button>
-                <button
-                  onClick={selectPageRange}
-                  disabled={rangeLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                  {rangeLoading ? (
-                    <>
-                      <div className="loading loading-spinner loading-sm"></div>
-                      加载中...
-                    </>
-                  ) : (
-                    <>
-                      <CheckSquare className="w-4 h-4" />
-                      选择页面范围
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <RangeSelectorModal
+        visible={showRangeSelector}
+        onClose={closeRangeSelector}
+        rangeSelection={rangeSelection}
+        setRangeSelection={setRangeSelection}
+        selectPageRange={selectPageRange}
+        rangeLoading={rangeLoading}
+        rangeProgress={rangeProgress}
+        data={data}
+      />
 
     </div>
-  );
-};
-
-// --- SendToWebApp component ---
-function SendToWebApp() {
-  const { data: plateforms } = UsePlateform();
-  const [webappModalOpen, setWebappModalOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const toggle = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-
-  const sendToWebapp = async () => {
-    if (selectedIds.length === 0)
-      return toast.error("至少选择一个平台");
-    setLoading(true);
-    try {
-      await webAppPlateform(selectedIds);
-      toast.success("发送成功到 WebApp！");
-      setWebappModalOpen(false);
-      setSelectedIds([]);
-    } catch (err) {
-      toast.error("发送到 WebApp 时出错");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
-        <div className="modal-box max-w-lg">
-          <h3 className="font-bold text-lg">选择要发送的平台</h3>
-          <div className="max-h-60 overflow-auto mt-3">
-            {plateforms?.map((p: any) => (
-              <label
-                key={p.id}
-                className="flex items-center gap-3 p-2 border-b"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(p.id)}
-                  onChange={() => toggle(p.id)}
-                  className="checkbox"
-                />
-                <span>{p.name}</span>
-              </label>
-            ))}
-          </div>
-          <div className="modal-action">
-            <button
-              className="btn btn-outline"
-              onClick={() => setWebappModalOpen(false)}
-            >
-              关闭
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={sendToWebapp}
-              disabled={loading}
-            >
-              {loading ? "发送中..." : "发送"}
-            </button>
-          </div>
-        </div>
-      </dialog>
-    </>
   );
 };
 
