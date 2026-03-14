@@ -567,7 +567,7 @@ const PostForAppManagementInner = () => {
                   <td className="px-6 py-4">
                     <span className="flex flex-col gap-1 px-2 py-1 text-xs text-nowrap font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
                       {post?.postCategory?.name}
-                      <span className={`${post?.postSubCategory?.name ? 'text-left' : 'text-center'}`}>{post?.postSubCategory?.name ? post?.postSubCategory?.name : '-'}</span>
+                      <span className={`${post?.postSubCategory?.name ? 'text-start' : 'text-center'}`}>{post?.postSubCategory?.name ? post?.postSubCategory?.name : '-'}</span>
                     </span>
                   </td>
                   <td className="px-6 py-4">

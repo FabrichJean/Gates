@@ -1,1 +1,0 @@
-Souhaitez-vous que j'ajoute l'autocomplétion des tags (liste depuis l'API) au lieu d'un simple champ texte ?
