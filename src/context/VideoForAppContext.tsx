@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import type { VideoForApp } from "../api/videoForApp";
 import { fetchVideoForAppList, activateVideoForApp } from "../api/videoForApp";
 import toast from "react-hot-toast";
+import { buildVideoForAppListParams } from "../utils/videoForAppFilters";
 
 interface VideoForAppContextType {
   page: number;
@@ -32,7 +33,8 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const fetchData = useCallback(() => {
     setLoading(true);
-    fetchVideoForAppList({ page, ...filters })
+    const { params } = buildVideoForAppListParams({ filters, page });
+    fetchVideoForAppList(params)
       .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit, page: res.page ?? page }))
       .finally(() => setLoading(false));    
   }, [page, filters]);

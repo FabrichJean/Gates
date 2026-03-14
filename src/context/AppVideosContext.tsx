@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import type { VideoForApp } from "../api/videoForApp";
 import { fetchVideoForAppList } from "../api/videoForApp";
+import { buildVideoForAppListParams } from "../utils/videoForAppFilters";
 
 interface AppVideosContextType {
   page: number;
@@ -33,7 +34,8 @@ export const AppVideosProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchData = useCallback(() => {
     setLoading(true);
-    fetchVideoForAppList({ page, ...filters })
+    const { params } = buildVideoForAppListParams({ filters, page });
+    fetchVideoForAppList(params)
       .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit }))
       .finally(() => setLoading(false));
   }, [page, filters]);

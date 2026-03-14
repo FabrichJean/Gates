@@ -20,6 +20,7 @@ import PostForAppFilter, {
   type TPostForAppFilter,
 } from "../components/PostForApp/PostForAppFilter";
 import { cdnS3 } from "../utils/cdn";
+import { TfiReload } from "react-icons/tfi";
 
 // Inner component consumes PostForAppContext
 const PostForAppManagementInner = () => {
@@ -70,7 +71,7 @@ const PostForAppManagementInner = () => {
   const selectAllPage = () => {
     setSelectedPosts(prev => {
       const newSelection = new Set(prev);
-      const currentPageIds = posts?.map(p => p.id) || [];
+      const currentPageIds = filteredPosts?.map(p => p.id) || [];
       const allSelected = currentPageIds.every(id => newSelection.has(id));
 
       if (allSelected) {
@@ -197,6 +198,162 @@ const PostForAppManagementInner = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
 
+  const [allPostsForSearch, setAllPostsForSearch] = useState<any[] | null>(null);
+  const [loadingAllPostsForSearch, setLoadingAllPostsForSearch] =
+    useState(false);
+  const [searchLoadingProgress, setSearchLoadingProgress] = useState({
+    current: 0,
+    total: 0,
+  });
+  const searchRequestIdRef = React.useRef(0);
+
+  const searchFilters = React.useMemo(() => {
+    const normalizeBool = (val: any) => {
+      if (val === "yes") return true;
+      if (val === "no") return false;
+      return val;
+    };
+
+    const normalizedFilters = {
+      ...filters,
+      isDeleted: normalizeBool(filters.isDeleted),
+      processing: normalizeBool(filters.processing),
+      uploaded: normalizeBool(filters.uploaded),
+    };
+
+    return Object.fromEntries(
+      Object.entries(normalizedFilters).filter(
+        ([, v]) => v !== "all" && v !== "" && v !== undefined && v !== null,
+      ),
+    );
+  }, [filters]);
+
+  const searchFiltersKey = React.useMemo(
+    () => JSON.stringify(searchFilters),
+    [searchFilters],
+  );
+
+  const loadAllPostsForSearch = React.useCallback(async () => {
+    const requestId = searchRequestIdRef.current + 1;
+    searchRequestIdRef.current = requestId;
+    setLoadingAllPostsForSearch(true);
+    setSearchLoadingProgress({ current: 0, total: 0 });
+
+    try {
+      const searchLimit = Math.max(data?.limit || 10, 100);
+      const firstResponse = await getPostsForApp({
+        ...searchFilters,
+        page: 1,
+        limit: searchLimit,
+      });
+
+      if (searchRequestIdRef.current !== requestId) return;
+
+      const firstData = firstResponse.data;
+      const firstPagePosts = firstData?.posts || [];
+      const totalPages =
+        Number(firstData?.pages) ||
+        Math.ceil(
+          (firstData?.total || firstPagePosts.length) /
+          (firstData?.limit || searchLimit),
+        ) ||
+        1;
+      setSearchLoadingProgress({ current: 1, total: totalPages });
+
+      const allPosts: any[] = [...firstPagePosts];
+      const pagesToFetch = Array.from(
+        { length: Math.max(0, totalPages - 1) },
+        (_, i) => i + 2,
+      );
+      const batchSize = 5;
+
+      for (let i = 0; i < pagesToFetch.length; i += batchSize) {
+        const pageBatch = pagesToFetch.slice(i, i + batchSize);
+        const responses = await Promise.all(
+          pageBatch.map((pageNumber) =>
+            getPostsForApp({
+              ...searchFilters,
+              page: pageNumber,
+              limit: searchLimit,
+            }),
+          ),
+        );
+
+        if (searchRequestIdRef.current !== requestId) return;
+
+        responses.forEach((response) => {
+          const pagePosts = response?.data?.posts || [];
+          allPosts.push(...pagePosts);
+        });
+        setSearchLoadingProgress((prev) => ({
+          ...prev,
+          current: Math.min(prev.total, prev.current + pageBatch.length),
+        }));
+      }
+
+      if (searchRequestIdRef.current !== requestId) return;
+      setAllPostsForSearch(allPosts);
+    } catch (error) {
+      console.error(
+        "Erreur lors du chargement de toutes les pages pour la recherche:",
+        error,
+      );
+      toast.error("Erreur lors de la recherche globale des titres");
+      if (searchRequestIdRef.current === requestId) {
+        setAllPostsForSearch([]);
+      }
+    } finally {
+      if (searchRequestIdRef.current === requestId) {
+        setLoadingAllPostsForSearch(false);
+      }
+    }
+  }, [data?.limit, searchFilters]);
+
+  React.useEffect(() => {
+    setAllPostsForSearch(null);
+    setSearchLoadingProgress({ current: 0, total: 0 });
+  }, [searchFiltersKey]);
+
+  React.useEffect(() => {
+    const term = searchTerm.trim();
+
+    if (!term) {
+      searchRequestIdRef.current += 1;
+      setLoadingAllPostsForSearch(false);
+      setSearchLoadingProgress({ current: 0, total: 0 });
+      return;
+    }
+
+    if (allPostsForSearch !== null || loadingAllPostsForSearch) return;
+
+    const timeoutId = window.setTimeout(() => {
+      loadAllPostsForSearch();
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    allPostsForSearch,
+    loadingAllPostsForSearch,
+    loadAllPostsForSearch,
+    searchTerm,
+  ]);
+
+  const filteredPosts = React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return posts;
+
+    const sourcePosts = allPostsForSearch || [];
+
+    return sourcePosts.filter((post: any) =>
+      Array.isArray(post?.titles) &&
+      post.titles.some(
+        (titleItem: any) =>
+          typeof titleItem?.title === "string" &&
+          titleItem.title.toLowerCase().includes(term),
+      ),
+    );
+  }, [allPostsForSearch, posts, searchTerm]);
+
   // client-side filtering of current page
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("fr-FR");
@@ -252,20 +409,35 @@ const PostForAppManagementInner = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center ">
+                  {searchTerm.trim().length === 0 ? (
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="cursor-pointer"
+                      aria-label="Effacer la recherche"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5 text-red-500 ">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                      </svg>
+                    </button>
+                  )}
+
                 </div>
               </div>
             </div>
@@ -282,7 +454,7 @@ const PostForAppManagementInner = () => {
                 onClick={selectAllPage}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
-                {posts?.length > 0 && posts.every(p => selectedPosts.has(p.id)) ? (
+                {filteredPosts?.length > 0 && filteredPosts.every(p => selectedPosts.has(p.id)) ? (
                   <CheckSquare className="w-4 h-4" />
                 ) : (
                   <Square className="w-4 h-4" />
@@ -339,41 +511,41 @@ const PostForAppManagementInner = () => {
                 <th scope="col" className="px-6 py-3">
                   <span className="sr-only">Select</span>
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   身份证
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   类别
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   创造者
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   平台
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   检查中
                 </th>
 
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   激活
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   视频
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th scope="col" className="px-6 py-3 text-nowrap">
                   图片
                 </th>
-                <th scope="col" className="px-6 py-3">
-                 创建日期
+                <th scope="col" className="px-6 py-3 text-nowrap">
+                  创建日期
                 </th>
-                <th scope="col" className="px-6 py-3 text-left">
+                <th scope="col" className="px-6 py-3 text-left text-nowrap">
                   操作
                 </th>
               </tr>
             </thead>
             <tbody>
-              {posts?.map((post: any, idx: number) => (
+              {filteredPosts?.map((post: any, idx: number) => (
                 <tr
                   key={post.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
@@ -393,8 +565,9 @@ const PostForAppManagementInner = () => {
                     {post.id}
                   </th>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
-                      {post?.postCategory?.name} / {post?.postSubCategory?.name}
+                    <span className="flex flex-col gap-1 px-2 py-1 text-xs text-nowrap font-medium rounded-full bg-gray-100/50 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300">
+                      {post?.postCategory?.name}
+                      <span className={`${post?.postSubCategory?.name ? 'text-start' : 'text-center'}`}>{post?.postSubCategory?.name ? post?.postSubCategory?.name : '-'}</span>
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -423,7 +596,7 @@ const PostForAppManagementInner = () => {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
+                    <span className="px-2 py-1 text-xs font-medium text-nowrap rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
                       {post.plateform.name}
                     </span>
                   </td>
@@ -440,9 +613,7 @@ const PostForAppManagementInner = () => {
                       checked={!post.isDeleted}
                       className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                       onChange={
-                        user?.role === RoleEnum.SUPERADMIN
-                          ? () => activate(post.id)
-                          : undefined
+                        () => activate(post.id)
                       }
                     />
                   </td>
@@ -518,7 +689,7 @@ const PostForAppManagementInner = () => {
                       className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                     >
                       <Eye className="w-4 h-4" />
-                      <span>详情</span>
+                      <span className="text-nowrap">详情</span>
                     </Link>
                   </td>
                 </tr>
@@ -526,14 +697,43 @@ const PostForAppManagementInner = () => {
             </tbody>
           </table>
 
-          <Pagination
-            totalItems={total}
-            pageSize={limit}
-            currentPage={page}
-            onPageChange={(p) => setPage(p)}
-          />
+          {searchTerm.length === 0 && (
+            <Pagination
+              totalItems={total}
+              pageSize={limit}
+              currentPage={page}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
 
-          {posts.length === 0 && (
+          {searchTerm.trim().length > 0 && loadingAllPostsForSearch && (
+            <div className="py-6">
+              <div className="max-w-lg mx-auto">
+                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  <span>Chargement de toutes les pages pour la recherche...</span>
+                  <span>
+                    {/* {searchLoadingProgress.current} / {searchLoadingProgress.total} */}
+                    <TfiReload className="h-5 w-5 animate-spin" />
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${searchLoadingProgress.total > 0
+                        ? (searchLoadingProgress.current /
+                          searchLoadingProgress.total) *
+                        100
+                        : 0
+                        }%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {filteredPosts.length === 0 && !loadingAllPostsForSearch && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
                 ? "No posts found for this search"
