@@ -15,6 +15,7 @@ export type TPostForAppFilter = {
   creator_id: number | string;
   user_id?: string;
   isDeleted?: string;
+  invalid?: boolean | string;
   processing?: string;
   uploaded?: string;
   videoType?: string;
@@ -291,6 +292,20 @@ export default memo(function PostForAppFilter({
             </div>
           </div>
 
+          {/* Invalid */}
+          <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={Boolean(localFilters.invalid)}
+                onChange={(e) => handleChange("invalid", e.target.checked)}
+                className="checkbox checkbox-sm accent-sky-400"
+              />
+              <span className="text-sm font-medium">无效</span>
+            </label>
+            <p className="text-xs text-slate-500 mt-2">勾选以仅显示标记为无效的条目（默认未勾选）</p>
+          </div>
+
           {/* Checking */}
           <div className="p-3 rounded-lg border bg-white/30 dark:bg-white/5 border-black/10 dark:border-white/10">
             <label className="text-sm font-medium mb-2 block">检查</label>
@@ -336,6 +351,7 @@ export default memo(function PostForAppFilter({
                 creator_id: "",
                 creatorSearch: "",
                 isDeleted: "",
+                  invalid: false,
                 uploaded: "all",
                 videoType: "all",
                 page: "1",
