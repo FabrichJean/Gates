@@ -7,6 +7,7 @@ import useBulkSelection from "../hooks/useBulkSelection";
 import BulkSelectionControls from "../components/PostForApp/BulkSelectionControls";
 import RangeSelectorModal from "../components/PostForApp/RangeSelectorModal";
 import UsePlateform from "../hooks/usePlateform";
+import EditCustom from "../components/PostForApp/EditCustom";
 import PostForAppChecking from "../components/PostForApp/PostForAppChecking";
 import { useAuth } from "../hooks/useAuth";
 import toast from "react-hot-toast";
@@ -58,6 +59,10 @@ const PostForAppManagementInner = () => {
     setShowBulkEdit(false);
   };
 
+  const [showEditCustom, setShowEditCustom] = useState(false);
+  const openEditCustom = () => setShowEditCustom(true);
+  const closeEditCustom = () => setShowEditCustom(false);
+
   const { page, setPage, data, loading, reFetch, activate } = usePostForAppContext();
 
   // filters are now centralized in context
@@ -66,6 +71,7 @@ const PostForAppManagementInner = () => {
   // Bulk selection logic extracted to hook
   const {
     selectedPosts,
+    selectedPostObjects,
     togglePostSelection,
     selectAllPage,
     deselectAll,
@@ -77,7 +83,7 @@ const PostForAppManagementInner = () => {
     rangeLoading,
     rangeProgress,
     selectPageRange,
-  } = useBulkSelection({ posts: data?.posts || [], page, data, filters, reFetch });
+  } = useBulkSelection({ posts: data?.posts || [], page, data, filters, reFetch }) as any;
 
   // Update range selection when page changes
   React.useEffect(() => {
@@ -183,6 +189,7 @@ const PostForAppManagementInner = () => {
                 openRangeSelector={openRangeSelector}
                 deselectAll={deselectAll}
                 openBulkEdit={openBulkEdit}
+                openEditCustom={openEditCustom}
               />
             </div>
         </div>
@@ -238,7 +245,7 @@ const PostForAppManagementInner = () => {
                     <input
                       type="checkbox"
                       checked={selectedPosts.has(post.id)}
-                      onChange={() => togglePostSelection(post.id)}
+                      onChange={() => togglePostSelection(post.id, post)}
                       className="checkbox checkbox-sm"
                     />
                   </td>
@@ -406,6 +413,15 @@ const PostForAppManagementInner = () => {
         onClose={closeBulkEdit}
         onSuccess={reFetch}
         onDeselectAll={deselectAll}
+      />
+
+      {/* Edit Custom Modal */}
+      {/* compute selected posts present in current data pages to show details */}
+      <EditCustom
+        isOpen={showEditCustom}
+        onClose={closeEditCustom}
+        selectedPosts={selectedPosts}
+        selectedPostList={Object.values(selectedPostObjects || {})}
       />
 
       {/* Range Selection Modal */}

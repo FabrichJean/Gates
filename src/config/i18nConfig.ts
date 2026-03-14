@@ -1,7 +1,7 @@
 import type { SupportedLanguage } from '../types/i18n';
 
 // Centralized i18n configuration for the app UI
-export const DEFAULT_UI_LANGUAGE: SupportedLanguage = 'en';
+export const DEFAULT_UI_LANGUAGE: SupportedLanguage = 'zh';
 
 // LocalStorage key used to persist selected UI language
 export const I18N_STORAGE_KEY = 'vms:lang';
