@@ -24,7 +24,7 @@ export interface I18nFieldProps {
   supportedLanguages?: SupportedLanguage[];
 }
 
-export const DEFAULT_LANGUAGES: SupportedLanguage[] = ['en', 'fr', 'zh', 'es', 'de', 'pt'];
+export const DEFAULT_LANGUAGES: SupportedLanguage[] = ['en', 'zh'];
 
 export const LANGUAGE_NAMES: Record<SupportedLanguage, string> = {
   en: 'English',

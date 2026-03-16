@@ -27,6 +27,8 @@ export const usePostForAppManagement = () => {
       category_id: "",
       sub_category_id: "",
       creator_id: "",
+      // invalid filter: boolean true/false. Default false (not invalid)
+      invalid: false,
       startDate: "",
       endDate: "",
       user_id: "",
@@ -94,6 +96,11 @@ export const usePostForAppManagement = () => {
               ? customFilters.isDeleted
               : filters.isDeleted,
           ),
+            invalid: normalizeBool(
+              customFilters && customFilters.invalid !== undefined
+                ? customFilters.invalid
+                : filters.invalid,
+            ),
           processing: normalizeBool(
             customFilters && customFilters.processing !== undefined
               ? customFilters.processing
