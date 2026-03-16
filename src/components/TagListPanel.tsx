@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Plus, Edit, Trash2, X, Save, Search } from "lucide-react";
 import Pagination from "../components/Pagination";
 import AnimatedAlert from "./AnimatedAlert";
+import { useI18n } from "../i18n";
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
   const [editingName, setEditingName] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
+  const { t } = useI18n();
 
   const filtered = useMemo(() => items.filter(it => it.name.toLowerCase().includes(searchTerm.toLowerCase())), [items, searchTerm]);
 
@@ -65,16 +67,16 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <input value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} placeholder="搜索..." className="w-full pl-8 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+            <input value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} placeholder={t("tag_list_panel.search.placeholder", "搜索...")} className="w-full pl-8 pr-8 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
           </div>
 
           <button onClick={handleAdd} disabled={!newName.trim()} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" /> 添加
+            <Plus className="w-3.5 h-3.5" /> {t("tag_list_panel.action.add", "添加")}
           </button>
         </div>
 
         <div className="mt-2">
-          <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={`New ${title} name...`} onKeyPress={(e) => e.key === 'Enter' && handleAdd()} className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+          <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("tag_list_panel.new_name_placeholder", "新 {title} 名称...").replace("{title}", title)} onKeyPress={(e) => e.key === 'Enter' && handleAdd()} className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
         </div>
       </div>
 
@@ -82,16 +84,25 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">加载中...</span>
+            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{t("common.loading", "加载中...")}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-sm text-gray-500 dark:text-gray-400">{searchTerm ? '未找到结果' : '暂无数据'}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {searchTerm
+                ? t("tag_list_panel.empty.search", "未找到结果")
+                : t("tag_list_panel.empty.default", "暂无数据")}
+            </p>
           </div>
         ) : (
           <>
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs text-gray-600 dark:text-gray-400">{filtered.length} of {items.length}{searchTerm && ' (搜索结果)'}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {t("tag_list_panel.count_summary", "{filtered} / {total}")
+                  .replace("{filtered}", String(filtered.length))
+                  .replace("{total}", String(items.length))}
+                {searchTerm ? t("tag_list_panel.count_suffix", " (搜索结果)") : ""}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -114,13 +125,13 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {editingId === category.id ? (
                         <>
-                          <button onClick={() => saveEdit(category.id)} className="p-1.5 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded transition-colors" title="保存"><Save className="w-3.5 h-3.5" /></button>
-                          <button onClick={cancelEdit} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors" title="取消"><X className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => saveEdit(category.id)} className="p-1.5 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded transition-colors" title={t("common.save", "保存")}><Save className="w-3.5 h-3.5" /></button>
+                          <button onClick={cancelEdit} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors" title={t("common.cancel", "取消")}><X className="w-3.5 h-3.5" /></button>
                         </>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(category)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors" title="编辑"><Edit className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => { setDeleteTarget({ id: category.id, name: category.name }); setAlertOpen(true); }} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title="删除"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => startEdit(category)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded transition-colors" title={t("tag_list_panel.action.edit", "编辑")}><Edit className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => { setDeleteTarget({ id: category.id, name: category.name }); setAlertOpen(true); }} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors" title={t("tag_list_panel.action.delete", "删除")}><Trash2 className="w-3.5 h-3.5" /></button>
                         </>
                       )}
                     </div>
@@ -142,11 +153,13 @@ export default function TagListPanel({ title, icon, items, loading, onCreate, on
       <AnimatedAlert
         isOpen={alertOpen}
         onClose={() => { setAlertOpen(false); setDeleteTarget(null); }}
-        title="确认删除"
-        message={deleteTarget ? `确定要删除 "${deleteTarget.name}" ? 该操作是不可逆的。` : "确定要删除吗？"}
+        title={t("tag_list_panel.alert.delete_title", "确认删除")}
+        message={deleteTarget
+          ? t("tag_list_panel.alert.delete_message", "确定要删除 \"{name}\" ? 该操作是不可逆的。").replace("{name}", deleteTarget.name)
+          : t("tag_list_panel.alert.delete_message_generic", "确定要删除吗？")}
         type="warning"
-        confirmText="删除"
-        cancelText="取消"
+        confirmText={t("tag_list_panel.action.delete", "删除")}
+        cancelText={t("common.cancel", "取消")}
         onConfirm={() => {
           if (!deleteTarget) return;
           // fire and forget; hook will refetch
