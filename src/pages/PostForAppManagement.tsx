@@ -50,117 +50,6 @@ const PostForAppManagementInner = () => {
     }
   };
 
-  // Selection handlers
-  const togglePostSelection = (postId: number) => {
-    setSelectedPosts(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(postId)) {
-        newSelection.delete(postId);
-      } else {
-        newSelection.add(postId);
-      }
-      return newSelection;
-    });
-  };
-
-  const selectAllPage = () => {
-    setSelectedPosts(prev => {
-      const newSelection = new Set(prev);
-      const currentPageIds = filteredPosts?.map(p => p.id) || [];
-      const allSelected = currentPageIds.every(id => newSelection.has(id));
-
-      if (allSelected) {
-        // If all are selected, deselect all on current page
-        currentPageIds.forEach(id => newSelection.delete(id));
-      } else {
-        // If not all are selected, select all on current page
-        currentPageIds.forEach(id => newSelection.add(id));
-      }
-
-      return newSelection;
-    });
-  };
-
-  const deselectAll = () => {
-    setSelectedPosts(new Set());
-  };
-
-  const selectPageRange = async () => {
-    if (rangeSelection.startPage > rangeSelection.endPage) {
-      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
-      return;
-    }
-
-    setRangeLoading(true);
-    setRangeProgress({ current: 0, total: rangeSelection.endPage - rangeSelection.startPage + 1 });
-    try {
-      const allPostIds: number[] = [];
-      const totalPages = Math.ceil((data?.total || 0) / (data?.limit || 20));
-
-      // Validate range
-      if (rangeSelection.endPage > totalPages) {
-        toast.error(`La page d'arrêt ne peut pas dépasser ${totalPages}`);
-        return;
-      }
-
-      // Normalize filters like in usePostForAppManagement
-      const normalizeBool = (val: any) => {
-        if (val === "yes") return true;
-        if (val === "no") return false;
-        return val;
-      };
-
-      const normalizedFilters = {
-        ...filters,
-        isDeleted: normalizeBool(filters.isDeleted),
-        processing: normalizeBool(filters.processing),
-        uploaded: normalizeBool(filters.uploaded),
-      };
-
-      // Remove any filter with value 'all' from the params
-      const apiFilters = Object.fromEntries(
-        Object.entries(normalizedFilters).filter(([k, v]) => v !== "all" && v !== "" && v !== undefined && v !== null)
-      );
-
-      // Fetch all pages in the range
-      for (let currentPage = rangeSelection.startPage; currentPage <= rangeSelection.endPage; currentPage++) {
-        try {
-          const response = await getPostsForApp({
-            ...apiFilters,
-            page: currentPage,
-            limit: data?.limit || 20
-          });
-          const pagePostIds = response.data.posts.map((p: any) => p.id);
-          allPostIds.push(...pagePostIds);
-
-          // Update progress
-          setRangeProgress(prev => ({ ...prev, current: prev.current + 1 }));
-        } catch (error) {
-          console.error(`Erreur lors du chargement de la page ${currentPage}:`, error);
-          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
-          return;
-        }
-      }
-
-      // Update selection
-      setSelectedPosts(prev => {
-        const newSelection = new Set(prev);
-        allPostIds.forEach(id => newSelection.add(id));
-        return newSelection;
-      });
-
-      toast.success(`${allPostIds.length} posts sélectionnés sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
-      setShowRangeSelector(false);
-
-    } catch (error) {
-      console.error('Erreur lors de la sélection par plage:', error);
-      toast.error('Erreur lors de la sélection par plage');
-    } finally {
-      setRangeLoading(false);
-      setRangeProgress({ current: 0, total: 0 });
-    }
-  };
-
   const openBulkEdit = () => {
     setShowBulkEdit(true);
   };
@@ -483,7 +372,7 @@ const PostForAppManagementInner = () => {
                     startPage: page,
                     endPage: page,
                   });
-                  setShowRangeSelector(true);
+                  openRangeSelector();
                 }}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
               >
