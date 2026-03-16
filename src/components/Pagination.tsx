@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useI18n } from "../i18n";
 
 interface PaginationProps {
   totalItems: number;
@@ -14,9 +15,10 @@ const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   onPageChange,
 }) => {
+  const { t } = useI18n();
 
-  console.log({totalItems, pageSize, currentPage});
-  
+  console.log({ totalItems, pageSize, currentPage });
+
   const [goToPage, setGoToPage] = useState("");
   const totalPages = Math.ceil(totalItems / pageSize);
   if (!totalItems || totalPages === 0) {
@@ -54,8 +56,9 @@ const Pagination: React.FC<PaginationProps> = ({
     <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
       {/* Info pages */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        <span className="font-medium text-gray-900 dark:text-gray-100">{totalItems}</span> 元素 • 页面{" "}
-        <span className="font-medium text-gray-900 dark:text-gray-100">{currentPage}</span> /{" "}
+        <span className="font-medium text-gray-900 dark:text-gray-100">{totalItems}</span> {t("pagination.items")}
+        <span className="mx-1">•</span>
+        {t("pagination.page")} <span className="font-medium text-gray-900 dark:text-gray-100">{currentPage}</span> /{" "}
         <span className="font-medium text-gray-900 dark:text-gray-100">{totalPages}</span>
       </div>
 
@@ -75,11 +78,10 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`min-w-8 h-8 px-2 rounded-md font-medium text-sm transition-colors duration-200 ${
-              page === currentPage
+            className={`min-w-8 h-8 px-2 rounded-md font-medium text-sm transition-colors duration-200 ${page === currentPage
                 ? "bg-blue-600 text-white border border-blue-600"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-transparent"
-            }`}
+              }`}
           >
             {page}
           </button>
@@ -103,7 +105,7 @@ const Pagination: React.FC<PaginationProps> = ({
             value={goToPage}
             onChange={(e) => setGoToPage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="前往..."
+            placeholder={t("pagination.goto_placeholder")}
             className="w-14 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors duration-200"
           />
           <button
@@ -111,7 +113,7 @@ const Pagination: React.FC<PaginationProps> = ({
             disabled={!goToPage || parseInt(goToPage) < 1 || parseInt(goToPage) > totalPages}
             className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors duration-200 font-medium"
           >
-            所有
+            {t("pagination.go")}
           </button>
         </div>
       </div>
