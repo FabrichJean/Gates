@@ -1,4 +1,4 @@
-import { FilePlus, Eye, Filter, Edit, CheckSquare, Square, Users, X } from "lucide-react";
+import { Eye, Filter } from "lucide-react";
 import BulkEditModal from "../components/BulkEditModal";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
@@ -92,6 +92,14 @@ const PostForAppManagementInner = () => {
       endPage: Math.max(page, prev.endPage)
     }));
   }, [page]);
+
+  const openRangeSelectorWithCurrentPage = () => {
+    setRangeSelection({
+      startPage: page,
+      endPage: page,
+    });
+    openRangeSelector();
+  };
 
   const posts = data?.posts || [];
   const total = data?.total || 0;
@@ -352,58 +360,15 @@ const PostForAppManagementInner = () => {
       {/* Bulk edit controls */}
       <div className="w-full mt-4 mb-4">
         <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={selectAllPage}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                {filteredPosts?.length > 0 && filteredPosts.every(p => selectedPosts.has(p.id)) ? (
-                  <CheckSquare className="w-4 h-4" />
-                ) : (
-                  <Square className="w-4 h-4" />
-                )}
-                全选页面
-              </button>
-
-              <button
-                onClick={() => {
-                  setRangeSelection({
-                    startPage: page,
-                    endPage: page,
-                  });
-                  openRangeSelector();
-                }}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                <Users className="w-4 h-4" />
-                按范围选择
-              </button>
-
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedPosts.size} selected
-              </span>
-            </div>
-
-            {selectedPosts.size > 0 && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={deselectAll}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  取消全选
-                </button>
-                <button
-                  onClick={openBulkEdit}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  批量编辑 ({selectedPosts.size})
-                </button>
-              </div>
-            )}
-          </div>
+          <BulkSelectionControls
+            posts={filteredPosts}
+            selectedPosts={selectedPosts}
+            selectAllPage={selectAllPage}
+            openRangeSelector={openRangeSelectorWithCurrentPage}
+            deselectAll={deselectAll}
+            openBulkEdit={openBulkEdit}
+            openEditCustom={openEditCustom}
+          />
         </div>
       </div>
 
@@ -517,7 +482,9 @@ const PostForAppManagementInner = () => {
                       checked={!post.isDeleted}
                       className="toggle bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 checked:bg-blue-300 dark:checked:bg-blue-500 checked:border-gray-300 dark:checked:border-gray-700 transition-colors duration-300 w-[2.5rem] h-[1.5rem] scale-[0.7] rounded-full"
                       onChange={
-                        () => activate(post.id)
+                        user?.role === RoleEnum.SUPERADMIN
+                          ? () => activate(post.id)
+                          : undefined
                       }
                     />
                   </td>
