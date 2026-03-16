@@ -7,6 +7,7 @@ import { getToken } from "../../utils/storage";
 import { apiURL } from "../../constant";
 import VideoPlayer from "../../components/VideoPlayer";
 import { cdnS3 } from "../../utils/cdn";
+import { useI18n } from "../../i18n";
 
 interface GetVideoPostProps {
   videos: VideoType[];
@@ -15,6 +16,7 @@ interface GetVideoPostProps {
 }
 
 const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
+  const { t } = useI18n();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [localVideos, setLocalVideos] = useState<VideoType[]>(videos || []);
   const [playingId, setPlayingId] = useState<number | null>(null);
@@ -28,12 +30,12 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
   const handleConvertMp4 = async () => {
     if (isConverting) return; // éviter double clic
 
-    const confirmed = window.confirm("Convertir la vidéo en MP4 ?");
+    const confirmed = window.confirm(t("posts.videos.convert_confirm"));
     if (!confirmed) return;
 
     try {
       setIsConverting(true);
-      toast.loading("Conversion MP4 en cours...", { id: "convert" });
+      toast.loading(t("posts.videos.convert_loading"), { id: "convert" });
 
       const res = await fetch(`${apiURL}/posts-bot/${idPost}/convert-m3u8`, {
         method: "POST",
@@ -44,16 +46,16 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
       });
 
       if (!res.ok) {
-        throw new Error("La conversion a échoué");
+        throw new Error(t("posts.videos.convert_failed"));
       }
 
-      toast.success("Conversion MP4 lancée !", { id: "convert" });
+      toast.success(t("posts.videos.convert_started"), { id: "convert" });
 
       // Rafraîchir les vidéos après la conversion
       reFetch && reFetch();
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Erreur lors de la conversion", { id: "convert" });
+      toast.error(err.message || t("posts.videos.convert_error"), { id: "convert" });
     } finally {
       setIsConverting(false);
     }
@@ -63,7 +65,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
     try {
       const res = await fetch(url);
       if (!res.ok) {
-        toast.error("Error downloading the file!");
+        toast.error(t("posts.videos.download_error_file"));
         return;
       }
 
@@ -83,11 +85,11 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
       a.remove();
       URL.revokeObjectURL(objectUrl);
 
-      toast.success("Téléchargement lancé !");
+      toast.success(t("posts.videos.download_started"));
 
     } catch (err) {
       console.error("Error downloading the MP4:", err);
-      toast.error("Error downloading the MP4");
+      toast.error(t("posts.videos.download_error"));
     }
   }
 
@@ -96,7 +98,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
       <div className="mt-6">
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Videos ({videos.length})
+            {t("posts.videos.title").replace("{count}", String(videos.length))}
 
             {/* Afficher le bouton si au moins une vidéo n'a pas encore de MP4 */}
             {hasVideoWithoutMp4 && (
@@ -105,7 +107,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
                 disabled={isConverting}
                 className="px-3 py-1 border border-green-500 cursor-pointer ml-4 text-green-500 rounded hover:bg-green-500 hover:text-white transition"
               >
-                {isConverting ? "Conversion..." : "Convert MP4"}
+                {isConverting ? t("posts.videos.converting") : t("posts.videos.convert_button")}
               </button>
             )}
           </p>
@@ -115,7 +117,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               <Video size={18} />
-              <span>Voir plus ({videos.length - 3})</span>
+              <span>{t("posts.videos.view_more").replace("{count}", String(videos.length - 3))}</span>
             </button>
           )}
         </div>
@@ -141,7 +143,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
                 )}
 
                 <div className="relative">
-                  <span className="absolute top-2 left-2 px-3 py-1 text-xs rounded-md bg-indigo-600 text-white z-10">{video.type === '1' ? 'short' : 'long'}</span>
+                  <span className="absolute top-2 left-2 px-3 py-1 text-xs rounded-md bg-indigo-600 text-white z-10">{video.type === '1' ? t("posts.videos.type_short") : t("posts.videos.type_long")}</span>
                   <VideoPlayer
                     videoUrls={{
                       hlsUrl: video.s3_urls?.hlsUrl,
@@ -164,7 +166,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
         <div className="modal-box max-w-6xl w-11/12 max-h-[90vh]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-2xl">
-              Videos ({videos.length})
+              {t("posts.videos.title").replace("{count}", String(videos.length))}
             </h3>
             <button
               onClick={() => setIsVideoModalOpen(false)}
@@ -186,16 +188,16 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
                 "";
 
               const handleDelete = async () => {
-                const confirmed = window.confirm("Supprimer cette vidéo ?");
+                const confirmed = window.confirm(t("posts.videos.delete_confirm"));
                 if (!confirmed) return;
                 try {
                   await deletePostVideo(video.id);
-                  toast.success("Vidéo supprimée");
+                  toast.success(t("posts.videos.delete_success"));
                   setLocalVideos((prev) => prev.filter((v) => v.id !== video.id));
                   reFetch && reFetch();
                 } catch (err) {
                   console.error(err);
-                  toast.error("Erreur lors de la suppression");
+                  toast.error(t("posts.videos.delete_error"));
                 }
               };
 
@@ -216,7 +218,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
                     {index + 1}/{localVideos.length}
                   </div>
                   <button
-                    title="Supprimer"
+                    title={t("posts.videos.delete_label")}
                     onClick={handleDelete}
                     className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
                   >
@@ -228,7 +230,7 @@ const GetVideoPost = ({ idPost, videos, reFetch }: GetVideoPostProps) => {
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button onClick={() => setIsVideoModalOpen(false)}>close</button>
+          <button onClick={() => setIsVideoModalOpen(false)}>{t("common.close")}</button>
         </form>
       </dialog>
     </>

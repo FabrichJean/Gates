@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
+import { useI18n } from "../i18n";
 
 type Language = {
   code: string;
@@ -9,6 +10,7 @@ type Language = {
 };
 
 const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: Language) => void, defaultValue?: Language }) => {
+  const { t } = useI18n();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [query, setQuery] = useState(defaultValue?.name || "");
   const [filtered, setFiltered] = useState<Language[]>([]);
@@ -73,7 +75,7 @@ const LanguageAutoComplete = ({ onSelect, defaultValue }: { onSelect?: (lang: La
           setShowDropdown(true);
         }}
         onFocus={() => setShowDropdown(true)}
-        placeholder="输入一种语言..."
+        placeholder={t("language.autocomplete.placeholder")}
         className="flex-1  border-b-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 outline-none p-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300"
       />
 

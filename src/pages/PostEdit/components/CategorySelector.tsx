@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "../../../i18n";
 
 type Category = { id: number; name: string };
 type SubCategory = { id: number; name: string; category: { id: number } };
@@ -21,6 +22,7 @@ export default function CategorySelector(props: {
   postCategoryName?: string;
   postSubCategoryName?: string;
 }) {
+  const { t } = useI18n();
   const {
     categories,
     selectedOptions,
@@ -48,7 +50,7 @@ export default function CategorySelector(props: {
     <>
       <div className="relative w-full" ref={categoryDropdownRef}>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          分类:
+          {t("posts.edit.category")}
         </label>
         <button
           type="button"
@@ -90,7 +92,7 @@ export default function CategorySelector(props: {
       </div>
 
       <div className="relative w-full mt-4" ref={subCategoryDropdownRef}>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">子分类:</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("posts.edit.subcategory")}</label>
         <button
           type="button"
           onClick={() => selectedCategory && setSubOpen(!subOpen)}
@@ -119,7 +121,7 @@ export default function CategorySelector(props: {
                 </div>
               ))
             ) : (
-              <div className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">未找到子分类</div>
+              <div className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">{t("posts.edit.subcategory_not_found")}</div>
             )}
           </div>
         )}

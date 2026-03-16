@@ -7,6 +7,7 @@ import RoleEnum from "../../utils/roleEnum";
 import BtnTranscodeComponent from "./BtnTranscodeComponent";
 import PostChecking from "../PostChecking";
 import SingleSyncModal from "../SingleSyncModal";
+import { useI18n } from "../../i18n";
 
 type PostManagementTableProps = {
   selectionMode: boolean;
@@ -41,6 +42,8 @@ export default function PostManagementTable({
   singleSyncLoading,
   handleSingleSync,
 }: PostManagementTableProps) {
+  const { t } = useI18n();
+
   return (
     <table className="w-full text-sm text-left border-t-3 border-blue-500 dark:border-blue-500 rtl:text-right text-gray-500 dark:text-gray-400">
       <thead className="text-xs text-gray-700 uppercase bg-blue-500/5 dark:bg-gray-700 dark:text-gray-400">
@@ -59,38 +62,38 @@ export default function PostManagementTable({
             </th>
           )}
           <th scope="col" className="px-6 py-3">
-            编号
+            {t("posts.table.id")}
           </th>
           <th scope="col" className="px-6 py-3">
-            类别
+            {t("posts.table.category")}
           </th>
           <th scope="col" className="px-6 py-3">
-            创建者
+            {t("posts.table.creator")}
           </th>
           <th scope="col" className="px-6 py-3">
-            用户
+            {t("posts.table.user")}
           </th>
           <th scope="col" className="px-6 py-3">
-            平台
+            {t("posts.table.platform")}
           </th>
           <th scope="col" className="px-6 py-3">
-            检查
+            {t("posts.table.check")}
           </th>
 
           <th scope="col" className="px-6 py-3">
-            激活
+            {t("posts.table.active")}
           </th>
           <th scope="col" className="px-6 py-3">
-            视频
+            {t("posts.table.video")}
           </th>
           <th scope="col" className="px-6 py-3">
-            图片
+            {t("posts.table.image")}
           </th>
           <th scope="col" className="px-6 py-3">
-            创建日期
+            {t("posts.table.created_at")}
           </th>
           <th scope="col" className="px-6 py-3 text-left">
-            操作
+            {t("posts.table.actions")}
           </th>
         </tr>
       </thead>
@@ -219,7 +222,7 @@ export default function PostManagementTable({
                     </div>
                   )}
                   {post.videos?.length === 0 && (
-                    <span className="text-xs text-gray-400">无视频</span>
+                    <span className="text-xs text-gray-400">{t("posts.table.no_video")}</span>
                   )}
                 </div>
               </td>
@@ -250,7 +253,7 @@ export default function PostManagementTable({
                     </div>
                   )}
                   {post.images?.length === 0 && (
-                    <span className="text-xs text-gray-400">无图片</span>
+                    <span className="text-xs text-gray-400">{t("posts.table.no_image")}</span>
                   )}
                 </div>
               </td>
@@ -276,7 +279,7 @@ export default function PostManagementTable({
                           }
                         >
                           <LiaSyncSolid className="w-3 h-3" />
-                          同步
+                          {t("posts.sync.action")}
                         </button>
 
                         <SingleSyncModal
@@ -285,7 +288,7 @@ export default function PostManagementTable({
                           onSubmit={(isForce) =>
                             handleSingleSync(post.id, isForce)
                           }
-                          title={`同步帖子 #${post.id}`}
+                          title={t("posts.sync.modal_title").replace("{id}", String(post.id))}
                         />
                       </>
                     )}
@@ -297,13 +300,13 @@ export default function PostManagementTable({
                     className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 underline"
                   >
                     <Eye className="w-4 h-4" />
-                    <span>Details</span>
+                    <span>{t("posts.details")}</span>
                   </Link>
                 )}
                 {selectionMode && (
                   <div className="flex items-center gap-3 px-4 py-3 text-sm text-gray-400 dark:text-gray-500">
                     <Eye className="w-4 h-4" />
-                    <span>Selection mode</span>
+                    <span>{t("posts.selection.mode")}</span>
                   </div>
                 )}
               </td>

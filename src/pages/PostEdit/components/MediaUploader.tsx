@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { cdnS3 } from "../../../utils/cdn";
+import { useI18n } from "../../../i18n";
 
 export default function MediaUploader(props: {
   images: any[];
@@ -22,17 +23,18 @@ export default function MediaUploader(props: {
   setDeletedVideoIds?: React.Dispatch<React.SetStateAction<number[]>>;
 }) {
   const { images, imageFields, handleImageChange, addImageField, removeImageField, setDeletedImageIds, setMedia } = props;
+  const { t } = useI18n();
 
   return (
     <>
       <div className="relative w-full">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">图片:</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{t("posts.edit.media.images_label")}</label>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {images?.map((image, index) => {
             const imageUrl = image.s3_urls?.imageUrl || image.public_urls?.local_image_url;
             const handleDelete = () => {
-              const confirmed = window.confirm("删除这张图片？");
+              const confirmed = window.confirm(t("posts.edit.media.delete_confirm"));
               if (!Boolean(confirmed)) return;
               // mark for deletion and remove locally; actual delete performed on update
               setDeletedImageIds((prev) => [...prev, image.id]);
@@ -43,7 +45,7 @@ export default function MediaUploader(props: {
               <div key={image.id} className="relative group">
                 <img src={cdnS3(imageUrl) || ""} alt={`image-${index}`} className="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow" />
                 <div className="absolute top-2 right-2 badge badge-neutral">{index + 1}/{images.length}</div>
-                <button type="button" title="删除" onClick={handleDelete} className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"><Trash2 size={16} /></button>
+                <button type="button" title={t("posts.edit.media.delete_button")} onClick={handleDelete} className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"><Trash2 size={16} /></button>
               </div>
             );
           })}
@@ -60,7 +62,7 @@ export default function MediaUploader(props: {
                   ) : (
                     <div className="text-center">
                       <svg className="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" /></svg>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">点击上传</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t("posts.edit.media.upload_click")}</p>
                     </div>
                   )}
                 </label>
@@ -75,7 +77,7 @@ export default function MediaUploader(props: {
           ))}
         </div>
 
-        <button type="button" onClick={addImageField} className="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200">+ 添加图片</button>
+        <button type="button" onClick={addImageField} className="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200">{t("posts.edit.media.add_image")}</button>
       </div>
     </>
   );

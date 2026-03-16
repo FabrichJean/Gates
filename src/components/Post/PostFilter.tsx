@@ -7,6 +7,7 @@ import { useUsers } from "../../hooks/useAuth";
 import { mapStatus, mapStatusProcessing, reverseStatus } from "../../utils/filter";
 import CreatorAutoComplete from "../CreatorAutoComplete";
 import type { Creator } from "../creators/CreatorList";
+import { useI18n } from "../../i18n";
 
 export type TPostFilter = {
     category_id: string;
@@ -40,6 +41,7 @@ export default function PostFilter({
     const { data: users } = useUsers("");
     const { data: categoriesResponse, loading: categoriesLoading, error: categoriesError } = useCategoryPost();
     const { data: subcat } = useSubCategoryPost(Number(filters?.category_id));
+    const { t } = useI18n();
 
     const [open, setOpen] = useState(false);
     const [subOpen, setSubOpen] = useState(false);
@@ -172,7 +174,7 @@ export default function PostFilter({
             <div className="flex flex-col gap-4 modal-box w-full max-w-lg sm:w-max h-[90vh] sm:h-auto overflow-auto p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div ref={categoryDropdownRef}>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">类别</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("posts.filter.category")}</label>
 
                         {categoriesError && (
                             <div className="mb-2 text-sm text-red-600 dark:text-red-400">
@@ -180,7 +182,7 @@ export default function PostFilter({
                                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
-                                    加载类别时出错： {String(categoriesError)}
+                                    {t("posts.filter.categories.error").replace("{error}", String(categoriesError))}
                                 </span>
                             </div>
                         )}
@@ -197,12 +199,12 @@ export default function PostFilter({
                             >
                                 <span className="block truncate">
                                     {categoriesLoading
-                                        ? "Chargement des catégories..."
+                                        ? t("posts.filter.categories.loading")
                                         : categoriesError
-                                            ? "Erreur lors du chargement"
+                                            ? t("posts.filter.categories.load_error")
                                             : selectedOptions.length
                                                 ? selectedOptions[0]
-                                                : "all"}
+                                                : t("common.all")}
                                 </span>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -214,11 +216,13 @@ export default function PostFilter({
                             {open && (
                                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                     {categoriesLoading ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">正在加载类别...</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">{t("posts.filter.categories.loading")}</div>
                                     ) : categoriesError ? (
-                                        <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">错误： {String(categoriesError)}</div>
+                                        <div className="py-2 pl-3 pr-9 text-red-500 dark:text-red-400">
+                                            {t("posts.filter.categories.error").replace("{error}", String(categoriesError))}
+                                        </div>
                                     ) : categoriesResponse?.categories?.length === 0 ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">没有可用类别</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">{t("posts.filter.categories.none")}</div>
                                     ) : (
                                         categoriesResponse?.categories?.map((c: any) => (
                                             <div
@@ -243,7 +247,7 @@ export default function PostFilter({
                     </div>
 
                     <div ref={subCategoryDropdownRef}>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">子类别</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("posts.filter.subcategory")}</label>
 
                         <div className="mt-1 relative w-full">
                             <button
@@ -257,8 +261,8 @@ export default function PostFilter({
                             >
                                 <span className="block truncate">{
                                     subcat?.subCategories && String(filters?.sub_category_id)
-                                        ? (subcat.subCategories.find((s: any) => String(s.id) === String(filters.sub_category_id))?.name || 'all')
-                                        : 'all'
+                                        ? (subcat.subCategories.find((s: any) => String(s.id) === String(filters.sub_category_id))?.name || t("common.all"))
+                                        : t("common.all")
                                 }</span>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -270,16 +274,16 @@ export default function PostFilter({
                             {subOpen && (
                                 <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm">
                                     {!filters?.category_id ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">请先选择一个类别</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">{t("posts.filter.subcategory.select_category_first")}</div>
                                     ) : !subcat?.subCategories || subcat.subCategories.length === 0 ? (
-                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">没有可用的子类别</div>
+                                        <div className="py-2 pl-3 pr-9 text-gray-500 dark:text-gray-400">{t("posts.filter.subcategory.none")}</div>
                                     ) : (
                                         <>
                                             <div
                                                 onClick={() => { handleChange('sub_category_id', ''); setSubOpen(false); }}
                                                 className="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-white dark:hover:bg-indigo-500"
                                             >
-                                                <span className={`block truncate ${filters.sub_category_id === '' ? "font-semibold" : ""}`}>all</span>
+                                                <span className={`block truncate ${filters.sub_category_id === '' ? "font-semibold" : ""}`}>{t("common.all")}</span>
                                             </div>
                                             {subcat.subCategories.map((c: any) => (
                                                 <div
@@ -306,24 +310,24 @@ export default function PostFilter({
 
                     <div>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
-                            创造者
+                            {t("posts.filter.creator")}
                         </label>
                         <CreatorAutoComplete
                             value={filters.creatorSearch || ""}
                             onChange={handleCreatorChange}
                             onSelect={handleCreatorSelect}
-                            placeholder="Search creator..."
+                            placeholder={t("posts.filter.creator.placeholder")}
                         />
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">用户</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("posts.filter.user")}</label>
                         <select
                             className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.user_id}
                             onChange={(e) => handleChange("user_id", e.target.value)}
                         >
-                            <option value=''>all</option>
+                            <option value=''>{t("common.all")}</option>
                             {users?.map((u, i) => (
                                 <option key={i} value={u.id}>{u.username}</option>
                             ))}
@@ -333,7 +337,7 @@ export default function PostFilter({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">开始日期</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("posts.filter.start_date")}</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -342,7 +346,7 @@ export default function PostFilter({
                         />
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">结束日期</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("posts.filter.end_date")}</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -354,11 +358,11 @@ export default function PostFilter({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                        { key: "isDeleted", label: "已删除" },
-                        { key: "processing", label: "视频已上传" },
-                    ].map(({ key, label }) => (
+                        { key: "isDeleted", labelKey: "posts.filter.deleted" },
+                        { key: "processing", labelKey: "posts.filter.uploaded" },
+                    ].map(({ key, labelKey }) => (
                         <div key={key} className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-                            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{label}</p>
+                            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{t(labelKey)}</p>
                             <div className="flex gap-3">
                                 {['all', 'yes', 'no'].map((option) => (
                                     <label key={option} className="flex items-center gap-1 cursor-pointer">
@@ -369,7 +373,9 @@ export default function PostFilter({
                                             checked={option === 'all' ? (filters[key as keyof typeof filters] === 'all' || filters[key as keyof typeof filters] === '') : filters[key as keyof typeof filters] === option}
                                             onChange={() => handleChange(key, option)}
                                         />
-                                        <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{option}</span>
+                                        <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                                            {option === "all" ? t("common.all") : option === "yes" ? t("common.yes") : t("common.no")}
+                                        </span>
                                     </label>
                                 ))}
                             </div>
@@ -378,7 +384,7 @@ export default function PostFilter({
                 </div>
 
                 <form method="dialog" className="pt-3 flex justify-end gap-3 sm:gap-3 sm:pt-3 sm:static fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t sm:border-t-0 sm:bg-transparent">
-                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">关闭</button>
+                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">{t("common.close")}</button>
 
                     <div
                         className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
@@ -400,12 +406,12 @@ export default function PostFilter({
                             await submit();
                         }}
                     >
-                        重置
+                        {t("common.reset")}
                     </div>
 
                     <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-none transition-colors duration-300"
                         onClick={(e) => { e.preventDefault(); submit(); closeModal(); }}>
-                        申请
+                        {t("common.apply")}
                     </button>
                 </form>
             </div>

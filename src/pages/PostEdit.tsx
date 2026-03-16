@@ -14,6 +14,7 @@ import CategorySelector from "./PostEdit/components/CategorySelector";
 import TitlesEditor from "./PostEdit/components/TitlesEditor";
 import MediaUploader from "./PostEdit/components/MediaUploader";
 import { deleteManyImages } from "../api/posts";
+import { useI18n } from "../i18n";
 
 type Language = {
   code: string;
@@ -23,6 +24,7 @@ type Language = {
 const PostEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const { data: post, loading, error } = UsePost(id);
 
@@ -230,7 +232,7 @@ const PostEdit = () => {
         (lang) => lang.code === selectedLanguageFromBackend.code
       );
       if (existingLanguage) {
-        toast.error("该语言已添加！");
+        toast.error(t("posts.edit.language_exists"));
         return;
       }
 
@@ -376,12 +378,12 @@ const PostEdit = () => {
         await updatePost(post?.id, payload);
       }
 
-      toast.success("帖子更新成功");
+      toast.success(t("posts.edit.update_success"));
       // navigate to post details or refresh
       navigate(`/post/${id}`);
     } catch (err) {
       console.error(err);
-      toast.error("更新帖子失败，请查看控制台了解详情。");
+      toast.error(t("posts.edit.update_error"));
     }
   };
 
@@ -390,7 +392,7 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">加载中...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -401,13 +403,13 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">
-            错误：{error.message}
+            {t("posts.edit.error_message").replace("{message}", error?.message || "")}
           </p>
           <button
             onClick={() => navigate("/post")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            返回
+            {t("common.back")}
           </button>
         </div>
       </div>
@@ -419,13 +421,13 @@ const PostEdit = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            未找到帖子
+            {t("posts.edit.not_found")}
           </p>
           <button
             onClick={() => navigate("/post")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            返回帖子列表
+            {t("posts.edit.back_to_list")}
           </button>
         </div>
       </div>
@@ -441,7 +443,7 @@ const PostEdit = () => {
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-              修改：POST-{String(post.id).padStart(3, "0")}
+              {t("posts.edit.title").replace("{id}", String(post.id).padStart(3, "0"))}
             </h2>
             <button
               onClick={() => navigate(`/post/${id}`)}
@@ -497,7 +499,7 @@ const PostEdit = () => {
 
             <div className="w-full mt-4">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                创建者（可选）
+                {t("posts.edit.creator_optional")}
               </label>
               <CreatorAutoComplete
                 value={creatorObj?.name}
@@ -509,7 +511,7 @@ const PostEdit = () => {
 
             <div className="w-full my-10">
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2 transition-colors duration-300">
-                Tags (catégorie)
+                {t("posts.edit.tags_category")}
               </label>
               <TagCategorySelector
                 selected={selectedTags}
@@ -538,14 +540,14 @@ const PostEdit = () => {
                 onClick={() => navigate(`/post/${id}`)}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                取消
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => navigate(`/post/edit-media/${id}`)}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                管理视频/封面 {">"}
+                {t("posts.edit.manage_media")} {">"}
               </button>
               <button
                 type="submit"
@@ -568,7 +570,7 @@ const PostEdit = () => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {updating ? "更新中..." : "更新"}
+                  {updating ? t("common.updating") : t("common.update")}
               </button>
             </div>
           </form>
@@ -580,12 +582,12 @@ const PostEdit = () => {
         <div className="fixed inset-0 bg-black/60 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              新标题
+              {t("posts.edit.new_title")}
             </h3>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                选择语言
+                {t("posts.edit.select_language")}
               </label>
               <div className="">
                 <LanguageAutoComplete
@@ -601,7 +603,7 @@ const PostEdit = () => {
                 onClick={handleCancelAddLanguage}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
               >
-                取消
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -609,7 +611,7 @@ const PostEdit = () => {
                 disabled={!selectedLanguageFromBackend}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors duration-200"
               >
-                添加标题
+                {t("posts.edit.add_title")}
               </button>
             </div>
           </div>

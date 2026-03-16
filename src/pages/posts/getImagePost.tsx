@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { deletePostImage } from "../../api/posts";
 import type { Image } from "../../hooks/usePost";
 import { cdnS3 } from "../../utils/cdn";
+import { useI18n } from "../../i18n";
 
 interface GetImagePostProps {
   images: Image[];
@@ -12,6 +13,7 @@ interface GetImagePostProps {
 }
 
 const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
+  const { t } = useI18n();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [localImages, setLocalImages] = useState<Image[]>(images || []);
 
@@ -20,7 +22,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
       <div className="mt-6">
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Images ({images.length})
+            {t("posts.images.title").replace("{count}", String(images.length))}
           </p>
           {images.length > 3 && (
             <button
@@ -28,7 +30,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               <Images size={18} />
-              <span>Voir plus ({images.length - 3})</span>
+              <span>{t("posts.images.view_more").replace("{count}", String(images.length - 3))}</span>
             </button>
           )}
         </div>
@@ -52,7 +54,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
         <div className="modal-box max-w-6xl w-11/12 max-h-[90vh]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-2xl">
-              Images ({images.length})
+              {t("posts.images.title").replace("{count}", String(images.length))}
             </h3>
             <button
               onClick={() => setIsModalOpen(false)}
@@ -66,18 +68,18 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
               {localImages.map((image, index) => {
                 const imageUrl = image.s3_urls.imageUrl || image.public_urls?.local_image_url;
                 const handleDelete = async () => {
-                  const confirmed = window.confirm("Supprimer cette image ?");
+                  const confirmed = window.confirm(t("posts.images.delete_confirm"));
                   if (!confirmed) return;
                   try {
                     await deletePostImage(image.id);
-                    toast.success("Image supprimée");
+                    toast.success(t("posts.images.delete_success"));
                     // remove from local list
                     setLocalImages((prev) => prev.filter((i) => i.id !== image.id));
                     // request parent re-fetch if provided
                     reFetch && reFetch();
                   } catch (err) {
                     console.error(err);
-                    toast.error("Erreur lors de la suppression");
+                    toast.error(t("posts.images.delete_error"));
                   }
                 };
 
@@ -92,7 +94,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
                       {index + 1}/{localImages.length}
                     </div>
                     <button
-                      title="Supprimer"
+                      title={t("posts.images.delete_label")}
                       onClick={handleDelete}
                       className="absolute top-2 left-2 p-2 rounded bg-red-600 text-white opacity-90 hover:opacity-100"
                     >
@@ -104,7 +106,7 @@ const GetImagePost = ({ images, reFetch }: GetImagePostProps) => {
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button onClick={() => setIsModalOpen(false)}>close</button>
+          <button onClick={() => setIsModalOpen(false)}>{t("common.close")}</button>
         </form>
       </dialog>
     </>

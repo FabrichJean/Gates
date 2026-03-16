@@ -9,6 +9,7 @@ import useCategoryPost from '../hooks/posts/useCategoryPost';
 import useSubCategoryPost from '../hooks/posts/useSubCategoryPost';
 import type { Creator } from './creators/CreatorList';
 import type { Category } from './CategoryAutoComplete';
+import { useI18n } from '../i18n';
 
 interface BulkEditData {
   creator: string | 'random' | null;
@@ -37,6 +38,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
   onSuccess,
   onDeselectAll,
 }) => {
+  const { t } = useI18n();
   const { items: availableTags } = usePostTagCategories();
   const { data: categoriesResponse } = useCategoryPost();
   const [bulkEditData, setBulkEditData] = useState<BulkEditData>({
@@ -53,6 +55,12 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
   const { data: subCategoriesResponse } = useSubCategoryPost(Number(bulkEditData.category?.id));
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
   const [bulkEditProgress, setBulkEditProgress] = useState({ current: 0, total: 0 });
+  const postItemLabel = (count: number) =>
+    count !== 1 ? t("posts.bulk_edit.post_plural") : t("posts.bulk_edit.post_singular");
+  const formatCountLabel = (key: string, count: number) =>
+    t(key)
+      .replace("{count}", String(count))
+      .replace("{item}", postItemLabel(count));
 
   const handleCreatorChange = useCallback((value: string | null) => {
     if (value === null || value === '') {
@@ -145,7 +153,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
       }
 
       if (Object.keys(updateData).length === 0) {
-        toast.error('No changes to apply');
+        toast.error(t("posts.bulk_edit.no_changes_to_apply"));
         setBulkEditLoading(false);
         return;
       }
@@ -168,7 +176,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
       clearInterval(progressInterval);
       setBulkEditProgress({ current: selectedPosts.size, total: selectedPosts.size });
 
-      toast.success(`Successfully updated ${selectedPosts.size} post${selectedPosts.size > 1 ? 's' : ''}`);
+      toast.success(formatCountLabel("posts.bulk_edit.success", selectedPosts.size));
       onSuccess();
       closeBulkEdit();
       onDeselectAll();
@@ -177,7 +185,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
       console.error('Bulk edit error:', error);
       setBulkEditLoading(false);
       setBulkEditProgress({ current: 0, total: 0 });
-      toast.error(error?.response?.data?.message || 'An error occurred during bulk edit');
+      toast.error(error?.response?.data?.message || t("posts.bulk_edit.error"));
     } finally {
       setBulkEditLoading(false);
     }
@@ -205,9 +213,9 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <Edit className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-xl text-white">Bulk Edit Posts</h3>
+              <h3 className="font-bold text-xl text-white">{t("posts.bulk_edit.title")}</h3>
               <p className="text-blue-100 text-sm mt-0.5">
-                {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''} selected
+                {formatCountLabel("posts.bulk_edit.selected_count", selectedPosts.size)}
               </p>
             </div>
           </div>
@@ -226,9 +234,9 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
           <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-medium mb-1">Apply changes to multiple posts</p>
+              <p className="font-medium mb-1">{t("posts.bulk_edit.info_title")}</p>
               <p className="text-blue-700 dark:text-blue-400">
-                Only fields you modify will be updated. Leave fields unchanged to keep their current values.
+                {t("posts.bulk_edit.info_desc")}
               </p>
             </div>
           </div>
@@ -238,14 +246,14 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
-                Creator Assignment
+                {t("posts.bulk_edit.creator_assignment")}
               </label>
               <div className="space-y-3">
                 <CreatorAutoComplete
                   value={bulkEditData.creator === 'random' ? '' : (bulkEditData.creator || '')}
                   onChange={handleCreatorChange}
                   onSelect={handleCreatorSelect}
-                  placeholder="Search or select a creator..."
+                  placeholder={t("posts.bulk_edit.creator_placeholder")}
                   disabled={bulkEditLoading || bulkEditData.creator === 'random'}
                 />
                 <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
@@ -261,7 +269,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                     disabled={bulkEditLoading}
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    Assign random creator to each post
+                    {t("posts.bulk_edit.creator_random")}
                   </span>
                 </label>
               </div>
@@ -273,7 +281,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
-                  Category
+                  {t("posts.bulk_edit.category")}
                 </label>
                 <select
                   value={bulkEditData.category?.id || ''}
@@ -291,7 +299,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading}
                 >
-                  <option value="">— No change —</option>
+                  <option value="">{t("posts.bulk_edit.no_change")}</option>
                   {categoriesResponse?.categories?.map((category: Category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -304,7 +312,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-indigo-600 rounded-full"></div>
-                  Subcategory
+                  {t("posts.bulk_edit.subcategory")}
                 </label>
                 <select
                   value={bulkEditData.subCategory?.id || ''}
@@ -322,7 +330,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading || !bulkEditData.category}
                 >
-                  <option value="">— No change —</option>
+                  <option value="">{t("posts.bulk_edit.no_change")}</option>
                   {bulkEditData.category && subCategoriesResponse?.subCategories?.map((subCategory: any) => (
                     <option key={subCategory.id} value={subCategory.id}>
                       {subCategory.name}
@@ -338,7 +346,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-green-600 rounded-full"></div>
-                  Activation Status
+                  {t("posts.bulk_edit.activation_status")}
                 </label>
                 <select
                   value={bulkEditData.isActive === null ? '' : bulkEditData.isActive.toString()}
@@ -349,9 +357,9 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading}
                 >
-                  <option value="">— No change —</option>
-                  <option value="true">✓ Activate</option>
-                  <option value="false">✗ Deactivate</option>
+                  <option value="">{t("posts.bulk_edit.no_change")}</option>
+                  <option value="true">{t("posts.bulk_edit.activate")}</option>
+                  <option value="false">{t("posts.bulk_edit.deactivate")}</option>
                 </select>
               </div>
 
@@ -359,7 +367,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                   <div className="w-1 h-5 bg-red-600 rounded-full"></div>
-                  Ban Status
+                  {t("posts.bulk_edit.ban_status")}
                 </label>
                 <select
                   value={bulkEditData.isBanned === null ? '' : bulkEditData.isBanned.toString()}
@@ -370,9 +378,9 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                   className="select select-bordered w-full bg-white dark:bg-gray-800"
                   disabled={bulkEditLoading}
                 >
-                  <option value="">— No change —</option>
-                  <option value="true">🚫 Ban</option>
-                  <option value="false">✓ Unban</option>
+                  <option value="">{t("posts.bulk_edit.no_change")}</option>
+                  <option value="true">{t("posts.bulk_edit.ban")}</option>
+                  <option value="false">{t("posts.bulk_edit.unban")}</option>
                 </select>
               </div>
             </div>
@@ -381,7 +389,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-purple-600 rounded-full"></div>
-                Review Status
+                {t("posts.bulk_edit.review_status")}
               </label>
               <select
                 value={bulkEditData.checking === null ? '' : bulkEditData.checking}
@@ -392,11 +400,11 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                 className="select select-bordered w-full bg-white dark:bg-gray-800"
                 disabled={bulkEditLoading}
               >
-                <option value="">— No change —</option>
-                <option value="null">⏸ Not Ready</option>
-                <option value="checked">✓ Checked</option>
-                <option value="waiting for checking">⏳ Waiting for Review</option>
-                <option value="refused">✗ Refused</option>
+                <option value="">{t("posts.bulk_edit.no_change")}</option>
+                <option value="null">{t("posts.bulk_edit.review.not_ready")}</option>
+                <option value="checked">{t("posts.bulk_edit.review.checked")}</option>
+                <option value="waiting for checking">{t("posts.bulk_edit.review.waiting")}</option>
+                <option value="refused">{t("posts.bulk_edit.review.refused")}</option>
               </select>
             </div>
 
@@ -404,7 +412,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
             <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
                 <div className="w-1 h-5 bg-amber-600 rounded-full"></div>
-                Tags Management
+                {t("posts.bulk_edit.tags_management")}
               </label>
               <label className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-amber-400 dark:hover:border-amber-600 transition-colors mb-3">
                 <input
@@ -415,7 +423,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                   disabled={bulkEditLoading}
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  Update tags for selected posts
+                  {t("posts.bulk_edit.tags_update")}
                 </span>
               </label>
               {bulkEditData.modifyTags && (
@@ -436,7 +444,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               <div className="flex items-center gap-3 mb-3">
                 <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                 <span className="font-semibold text-blue-900 dark:text-blue-100">
-                  Processing updates...
+                  {t("posts.bulk_edit.processing_updates")}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -451,7 +459,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-blue-700 dark:text-blue-400 mt-2">
-                Please wait while changes are applied to all selected posts
+                {t("posts.bulk_edit.processing_help")}
               </p>
             </div>
           )}
@@ -463,12 +471,12 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
             {hasChanges() ? (
               <span className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600" />
-                Changes ready to apply
+                {t("posts.bulk_edit.changes_ready")}
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600" />
-                No changes selected
+                {t("posts.bulk_edit.no_changes_selected")}
               </span>
             )}
           </div>
@@ -478,7 +486,7 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               onClick={closeBulkEdit}
               disabled={bulkEditLoading}
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border-0 shadow-lg disabled:opacity-50"
@@ -488,12 +496,12 @@ const BulkEditPostModal: React.FC<BulkEditPostModalProps> = ({
               {bulkEditLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
+                  {t("common.processing")}
                 </>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
-                  Apply to {selectedPosts.size} post{selectedPosts.size !== 1 ? 's' : ''}
+                  {formatCountLabel("posts.bulk_edit.apply_to", selectedPosts.size)}
                 </>
               )}
             </button>

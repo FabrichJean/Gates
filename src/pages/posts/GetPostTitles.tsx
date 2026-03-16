@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Languages } from "lucide-react";
 import { Eye } from "lucide-react";
 import type { PostTitle } from "../../hooks/usePost";
+import { useI18n } from "../../i18n";
 
 interface GetPostTitlesProps {
   postTitles: PostTitle[];
 }
 
 const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
+  const { t } = useI18n();
   const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>();
 
   useEffect(() => {
@@ -59,17 +61,17 @@ const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
         <button
           // @ts-ignore
           onClick={() => document.getElementById('modal-fhajl').showModal()}
-          aria-label="Voir le titre complet"
+          aria-label={t("posts.titles.view_full_label")}
           className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-sm hover:shadow-md transition-all"
         >
           <Eye className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-          <span className="text-xs text-gray-700 dark:text-gray-300">查看全部</span>
+          <span className="text-xs text-gray-700 dark:text-gray-300">{t("posts.titles.view_all")}</span>
         </button>
       </div>
       {/* Modal showing full title and description */}
       <dialog id={`modal-fhajl`} className="modal">
         <div className="modal-box max-w-2xl">
-          <h3 className="font-bold text-lg mb-2">完整内容</h3>
+          <h3 className="font-bold text-lg mb-2">{t("posts.titles.full_content")}</h3>
           <div className="mb-4">
             <h4 className="text-lg font-semibold mb-2">
               {(() => {
@@ -87,7 +89,7 @@ const GetPostTitles = ({ postTitles }: GetPostTitlesProps) => {
           <div className="modal-action">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
-              <button className="btn">关闭</button>
+              <button className="btn">{t("common.close")}</button>
             </form>
           </div>
         </div>

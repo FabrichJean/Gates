@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import usePostTagCategories from "../hooks/usePostTagCategories";
+import { useI18n } from "../i18n";
 
 interface Tag {
   id?: number;
@@ -18,6 +19,7 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
   setSelected, 
   allowCustomTag = true 
 }) => {
+  const { t } = useI18n();
   const { items, loading } = usePostTagCategories();
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -127,7 +129,7 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
   }, [highlightedIndex, isOpen]);
 
   if (loading) {
-    return <div className="text-gray-500 text-sm">Chargement des tags...</div>;
+    return <div className="text-gray-500 text-sm">{t("tags.loading")}</div>;
   }
 
   return (
@@ -143,14 +145,14 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
             #{tag.name}
             {tag.suggested && (
               <span className="ml-1 px-2 py-0.5 rounded-full bg-yellow-200 text-yellow-800 text-xs font-semibold border border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-800">
-                Suggéré
+                {t("tags.suggested")}
               </span>
             )}
             <button
               type="button"
               onClick={() => handleRemoveTag(tag)}
               className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5 transition"
-              aria-label={`Retirer ${tag.name}`}
+              aria-label={t("tags.remove").replace("{name}", tag.name)}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -171,7 +173,7 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={selected.length === 0 ? "Rechercher ou ajouter des tags..." : ""}
+          placeholder={selected.length === 0 ? t("tags.placeholder") : ""}
           className="flex-1 min-w-[150px] outline-none bg-transparent text-sm placeholder-gray-400 dark:placeholder-gray-500"
         />
       </div>
@@ -184,7 +186,7 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
         >
           {suggestions.length === 0 && !showCreateOption ? (
             <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-              Aucun tag trouvé
+              {t("tags.none")}
             </div>
           ) : (
             <ul>
@@ -208,7 +210,7 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                           </svg>
                           <span>
-                            Créer <span className="font-medium">#{tag.name}</span>
+                            {t("tags.create").replace("{name}", tag.name)}
                           </span>
                         </>
                       ) : (
@@ -232,9 +234,9 @@ const TagCategorySelector: React.FC<TagCategorySelectorProps> = ({
       {selected.length > 0 && (
         <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">
-            退格
+            {t("tags.backspace")}
           </kbd>{" "}
-          删除最后一个标签
+          {t("tags.remove_last")}
         </div>
       )}
     </div>

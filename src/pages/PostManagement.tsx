@@ -14,6 +14,7 @@ import PostFilter, { type TPostFilter } from "../components/Post/PostFilter";
 import BulkEditPostModal from "../components/BulkEditPostModal";
 import { mapStatusProcessing } from "../utils/filter";
 import PostManagementTable from "../components/Post/PostManagementTable";
+import { useI18n } from "../i18n";
 
 // Inner component consumes PostsContext
 const PostManagementInner = () => {
@@ -26,16 +27,17 @@ const PostManagementInner = () => {
     setSingleSyncLoading(true);
     try {
       await singleSync({ entity: "post", origin_id: postId, isForce });
-      toast.success("✅ 单帖同步执行");
+      toast.success(t("posts.single_sync.success"));
       setSingleSyncOpenId(null);
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ 单同步错误！");
+      toast.error(err?.response?.data?.message || t("posts.single_sync.error"));
     } finally {
       setSingleSyncLoading(false);
     }
   };
   const { page, setPage, data, loading, reFetch, activate } = usePostsContext();
+  const { t } = useI18n();
 
   // local state to hold filter UI and optionally filtered results
   const [filters, setFilters] = useState<TPostFilter>({
@@ -212,7 +214,7 @@ const PostManagementInner = () => {
   // Range selection function mirroring PostForApp
   const selectPageRange = async () => {
     if (rangeSelection.startPage > rangeSelection.endPage) {
-      toast.error("La page de départ doit être inférieure ou égale à la page d'arrêt");
+      toast.error(t("posts.range.invalid_range"));
       return;
     }
 
@@ -224,7 +226,11 @@ const PostManagementInner = () => {
       
       // Check if endPage exceeds available pages
       if (rangeSelection.endPage > totalPages) {
-        toast.error(`Page d'arrêt (${rangeSelection.endPage}) dépasse le nombre total de pages (${totalPages})`);
+        toast.error(
+          t("posts.range.end_page_exceeds")
+            .replace("{endPage}", String(rangeSelection.endPage))
+            .replace("{totalPages}", String(totalPages))
+        );
         setRangeLoading(false);
         return;
       }
@@ -292,7 +298,9 @@ const PostManagementInner = () => {
           
         } catch (error) {
           console.error(`Error fetching page ${currentPage}:`, error);
-          toast.error(`Erreur lors du chargement de la page ${currentPage}`);
+          toast.error(
+            t("posts.range.page_load_error").replace("{page}", String(currentPage))
+          );
         }
       }
 
@@ -300,12 +308,17 @@ const PostManagementInner = () => {
       setSelectedPosts(allPostIds);
       setSelectionMode(true);
       
-      toast.success(`${allPostIds.size} posts sélectionnés sur ${rangeSelection.endPage - rangeSelection.startPage + 1} page(s)`);
+      const pagesSelected = rangeSelection.endPage - rangeSelection.startPage + 1;
+      toast.success(
+        t("posts.range.selected_success")
+          .replace("{count}", String(allPostIds.size))
+          .replace("{pages}", String(pagesSelected))
+      );
       setShowRangeSelector(false);
       
     } catch (error) {
       console.error('Error in range selection:', error);
-      toast.error("Erreur lors de la sélection par plage");
+      toast.error(t("posts.range.error"));
     } finally {
       setRangeLoading(false);
       setRangeProgress({ current: 0, total: 0 });
@@ -361,13 +374,22 @@ const PostManagementInner = () => {
     )
   );
 
+  const bulkEditLabel = t("posts.bulk_edit.label")
+    .replace("{count}", String(visibleSelectedPosts.size))
+    .replace(
+      "{item}",
+      visibleSelectedPosts.size !== 1
+        ? t("posts.bulk_edit.post_plural")
+        : t("posts.bulk_edit.post_singular")
+    );
+
   if (loading) return <Loader />;
 
   return (
     <div className="h-screen w-full">
       <div className="">
         <h1 className="text-2xl font-bold text-gray-700 dark:text-blue-100">
-          帖子管理
+          {t("posts.management.title")}
         </h1>
 
         {/* header  */}
@@ -390,7 +412,7 @@ const PostManagementInner = () => {
                   className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                 >
                   <input type="checkbox" className="checkbox checkbox-sm pointer-events-none" />
-                  Select Posts
+                  {t("posts.selection.select_posts")}
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
@@ -399,7 +421,7 @@ const PostManagementInner = () => {
                     className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                   >
                     <X className="w-4 h-4" />
-                    Cancel
+                    {t("common.cancel")}
                   </button>
                   
                   <button
@@ -411,7 +433,7 @@ const PostManagementInner = () => {
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
-                    Select All Page
+                    {t("posts.selection.select_all_page")}
                   </button>
 
                   <button
@@ -425,11 +447,11 @@ const PostManagementInner = () => {
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                   >
                     <Users className="w-4 h-4" />
-                    Sélectionner par plage
+                    {t("posts.range.select")}
                   </button>
 
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {visibleSelectedPosts.size} selected
+                    {t("posts.selection.selected_count").replace("{count}", String(visibleSelectedPosts.size))}
                   </span>
                 </div>
               )}
@@ -441,7 +463,7 @@ const PostManagementInner = () => {
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   >
                     <X className="w-4 h-4" />
-                    Deselect All
+                    {t("posts.selection.deselect_all")}
                   </button>
                 </div>
               )}
@@ -453,7 +475,7 @@ const PostManagementInner = () => {
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-green-200 dark:border-green-700 bg-gradient-to-b from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 text-green-700 dark:text-green-300 font-medium text-sm hover:bg-green-100 dark:hover:bg-green-800 transition-all shadow-sm"
                 >
                   <Edit className="w-4 h-4" />
-                  Edit {visibleSelectedPosts.size} post{visibleSelectedPosts.size !== 1 ? 's' : ''}
+                  {bulkEditLabel}
                 </button>
               )}
 
@@ -468,7 +490,7 @@ const PostManagementInner = () => {
                   }}
                   className="input input-ghost hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> 过滤器
+                  <Filter className="w-3 text-gray-600 dark:text-gray-400" /> {t("common.filters")}
                 </button>
 
                 <PostFilter
@@ -492,25 +514,27 @@ const PostManagementInner = () => {
               {selectionMode && (
                 <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                    {visibleSelectedPosts.size} of {filteredPosts.length} selected
+                    {t("posts.selection.count_summary")
+                      .replace("{selected}", String(visibleSelectedPosts.size))
+                      .replace("{total}", String(filteredPosts.length))}
                   </div>
                   {visibleSelectedPosts.size > 0 && (
                     <button
                       onClick={handleDeselectAll}
                       className="text-xs text-blue-500 hover:text-blue-700 underline"
                     >
-                      Clear
+                      {t("posts.selection.clear")}
                     </button>
                   )}
                   <div className="text-xs text-blue-500 dark:text-blue-400 opacity-70">
-                    💡 Hold Shift to select range
+                    {t("posts.selection.shift_hint")}
                   </div>
                 </div>
               )}
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="搜索帖子..."
+                  placeholder={t("posts.search.placeholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
@@ -563,8 +587,8 @@ const PostManagementInner = () => {
           {filteredPosts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               {searchTerm
-                ? "No posts found for this search"
-                : "No posts available"}
+                ? t("posts.empty.search")
+                : t("posts.empty.default")}
             </div>
           )}
         </div>
@@ -586,7 +610,7 @@ const PostManagementInner = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Sélectionner par plage de pages
+                  {t("posts.range.title")}
                 </h2>
                 <button
                   onClick={() => {
@@ -603,7 +627,7 @@ const PostManagementInner = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page de départ
+                      {t("posts.range.start_page")}
                     </label>
                     <input
                       type="number"
@@ -619,7 +643,7 @@ const PostManagementInner = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Page d'arrêt
+                      {t("posts.range.end_page")}
                     </label>
                     <input
                       type="number"
@@ -636,7 +660,7 @@ const PostManagementInner = () => {
 
                 {data && (
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Total de pages disponibles : {Math.ceil(total / limit)}
+                    {t("posts.range.total_pages")} {Math.ceil(total / limit)}
                   </div>
                 )}
               </div>
@@ -653,7 +677,7 @@ const PostManagementInner = () => {
                       </div>
                     </div>
                     <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                      {rangeProgress.current} / {rangeProgress.total} pages
+                      {rangeProgress.current} / {rangeProgress.total} {t("posts.range.pages")}
                     </span>
                   </div>
                 )}
@@ -665,7 +689,7 @@ const PostManagementInner = () => {
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   disabled={rangeLoading}
                 >
-                  Annuler
+                  {t("common.cancel")}
                 </button>
                 <button
                   onClick={selectPageRange}
@@ -675,10 +699,10 @@ const PostManagementInner = () => {
                   {rangeLoading ? (
                     <>
                       <div className="loading loading-spinner loading-sm"></div>
-                      Sélection...
+                      {t("posts.range.loading")}
                     </>
                   ) : (
-                    'Sélectionner'
+                    t("posts.range.select_button")
                   )}
                 </button>
               </div>
@@ -699,6 +723,7 @@ const PostManagement = () => (
 // --- SendToWebApp component ---
 function SendToWebApp() {
   const { data: plateforms } = UsePlateform();
+  const { t } = useI18n();
   const [webappModalOpen, setWebappModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -711,15 +736,15 @@ function SendToWebApp() {
 
   const sendToWebapp = async () => {
     if (selectedIds.length === 0)
-      return toast.error("Select at least one platform");
+      return toast.error(t("posts.webapp.select_error"));
     setLoading(true);
     try {
       await webAppPlateform(selectedIds);
-      toast.success("Envoyé avec succès vers le WebApp !");
+      toast.success(t("posts.webapp.success"));
       setWebappModalOpen(false);
       setSelectedIds([]);
     } catch (err) {
-      toast.error("Erreur lors de l'envoi vers WebApp");
+      toast.error(t("posts.webapp.error"));
     } finally {
       setLoading(false);
     }
@@ -729,7 +754,7 @@ function SendToWebApp() {
     <>
       <dialog className={`modal ${webappModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box max-w-lg">
-          <h3 className="font-bold text-lg">选择要发送的平台</h3>
+          <h3 className="font-bold text-lg">{t("posts.webapp.select_title")}</h3>
           <div className="max-h-60 overflow-auto mt-3">
             {plateforms?.map((p: any) => (
               <label
@@ -751,14 +776,14 @@ function SendToWebApp() {
               className="btn btn-outline"
               onClick={() => setWebappModalOpen(false)}
             >
-              关闭
+              {t("common.close")}
             </button>
             <button
               className="btn btn-primary"
               onClick={sendToWebapp}
               disabled={loading}
             >
-              {loading ? "Sending..." : "Send"}
+              {loading ? t("common.sending") : t("common.send")}
             </button>
           </div>
         </div>

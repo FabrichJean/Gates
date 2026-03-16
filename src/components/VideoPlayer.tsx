@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ReactHlsPlayer from 'react-hls-player';
 import { Play, Loader2 } from 'lucide-react';
 import { useVideoPlayer, type VideoUrls } from '../hooks/useVideoPlayer';
+import { useI18n } from '../i18n';
 
 export interface VideoPlayerProps {
   videoUrls?: VideoUrls;
@@ -25,6 +26,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   autoPlay = true,
   isForApp = false
 }) => {
+  const { t } = useI18n();
   const { videoSrc, isLoading, isHls, error, playerRef } = useVideoPlayer({
     videoUrls,
     autoPlay,
@@ -95,7 +97,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       >
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="w-8 h-8 text-white animate-spin" />
-          <div className="text-white text-sm">Loading video...</div>
+          <div className="text-white text-sm">{t("video.player.loading")}</div>
         </div>
       </motion.div>
     );
@@ -112,12 +114,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         className={`flex items-center justify-center bg-black ${className}`}
       >
         <div className="text-center text-white">
-          <div className="text-red-400 mb-2">⚠️ Error loading video</div>
+          <div className="text-red-400 mb-2">{t("video.player.error_loading")}</div>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm"
           >
-            Retry
+            {t("common.retry")}
           </button>
         </div>
       </motion.div>
@@ -134,7 +136,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         transition={{ duration: 0.4, ease: "easeInOut" }}
         className={`flex items-center justify-center bg-black ${className}`}
       >
-        <div className="text-white">No video source available</div>
+        <div className="text-white">{t("video.player.no_source")}</div>
       </motion.div>
     );
   }

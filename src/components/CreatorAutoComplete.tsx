@@ -3,6 +3,7 @@ import UseCreators from "../hooks/useCreators";
 import type { Creator } from "./creators/CreatorList";
 import { Shuffle } from "lucide-react";
 import { cdnS3 } from "../utils/cdn";
+import { useI18n } from "../i18n";
 
 interface Props {
   /** value can be a free-text name or a Creator object for preselection */
@@ -27,6 +28,7 @@ const CreatorAutoComplete = ({
   isDefault,
   autoSuggest,
 }: Props) => {
+  const { t } = useI18n();
   const { data: creators } = UseCreators({ isAll: true });
   const [query, setQuery] = useState<string>(value ?? "");
   const [open, setOpen] = useState(false);
@@ -104,7 +106,7 @@ const CreatorAutoComplete = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
-                    无
+                    {t("common.none")}
                   </div>
                 )}
               </div>
@@ -141,13 +143,13 @@ const CreatorAutoComplete = ({
                   hasAutoSuggested.current = true;
                 }
               }}
-              placeholder={placeholder || "创作者名称 (可选)"}
+              placeholder={placeholder || t("creator.autocomplete.placeholder")}
               disabled={disabled}
               className={`flex-1 bg-transparent text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none ${disabled ? "opacity-60" : ""}`}
             />
             {(isDefault || isSuggested) && (
               <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full border border-blue-200 dark:border-blue-800 whitespace-nowrap">
-                {isDefault ? "默认" : "建议"}
+                {isDefault ? t("creator.autocomplete.badge_default") : t("creator.autocomplete.badge_suggested")}
               </span>
             )}
           </div>
@@ -157,7 +159,7 @@ const CreatorAutoComplete = ({
           onClick={handleSuggestRandom}
           disabled={disabled}
           className="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="随机建议创作者"
+          title={t("creator.autocomplete.random_title")}
         >
           <Shuffle className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
@@ -180,7 +182,7 @@ const CreatorAutoComplete = ({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
-                    无
+                    {t("common.none")}
                   </div>
                 )}
               </div>
