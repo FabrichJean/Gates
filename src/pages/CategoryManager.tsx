@@ -12,6 +12,7 @@ import type { Category } from "../components/CategoryAutoComplete";
 import Pagination from "../components/Pagination";
 import { FaRegEye } from "react-icons/fa";
 import { CiBookmarkCheck } from "react-icons/ci";
+import { useI18n } from "../i18n";
 
 interface SubCategory {
   id: number;
@@ -28,6 +29,8 @@ export default function CategoryManager() {
   const [showDeleted, setShowDeleted] = useState<{ type: 'cat' | 'sub', id: any } | null>(null);
   const { data: categories = [], loading: categoriesLoading, reFetch } = useCategory(showDeleted?.type === 'cat');
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
+
+  const { t } = useI18n();
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,19 +113,19 @@ export default function CategoryManager() {
   // Category CRUD
   const handleCreateCategory = async () => {
     if (!categoryForm.name.trim()) {
-      toast.error("名称必填");
+      toast.error(t("category_manager.toast.name_required", "名称必填"));
       return;
     }
 
     setSubmitting(true);
     try {
       await createCastegoryApi(categoryForm.name);
-      toast.success("分类创建成功");
+      toast.success(t("category_manager.toast.category_created", "分类创建成功"));
       setShowCategoryModal(false);
       setCategoryForm({ name: "" });
       reFetch();
     } catch (error) {
-      toast.error("创建时出错");
+      toast.error(t("category_manager.toast.category_create_error", "创建时出错"));
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -131,7 +134,7 @@ export default function CategoryManager() {
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !categoryForm.name.trim()) {
-      toast.error("名称必填");
+      toast.error(t("category_manager.toast.name_required", "名称必填"));
       return;
     }
 
@@ -139,13 +142,13 @@ export default function CategoryManager() {
     try {
       // Note: Assuming update API exists, if not we'll need to add it
       await updateCategoryApi(editingCategory.id, categoryForm.name); // This should be update API
-      toast.success("分类更新成功");
+      toast.success(t("category_manager.toast.category_updated", "分类更新成功"));
       setShowCategoryModal(false);
       setEditingCategory(null);
       setCategoryForm({ name: "" });
       reFetch();
     } catch (error) {
-      toast.error("更新时出错");
+      toast.error(t("category_manager.toast.category_update_error", "更新时出错"));
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -180,7 +183,7 @@ export default function CategoryManager() {
     try {
       if (type === "sub") {
         await deleteSubCategoryApi(id);
-        toast.success("子分类删除成功");
+        toast.success(t("category_manager.toast.subcategory_deleted", "子分类删除成功"));
         // update local subcategories map
         if (parentId != null) {
           setSubcategoriesMap(prev => ({
@@ -190,11 +193,11 @@ export default function CategoryManager() {
         }
       } else {
         await deleteCategoryApi(id);
-        toast.success("分类删除成功");
+        toast.success(t("category_manager.toast.category_deleted", "分类删除成功"));
         if (typeof reFetch === "function") reFetch();
       }
     } catch (error) {
-      toast.error("删除时出错");
+      toast.error(t("category_manager.toast.delete_error", "删除时出错"));
       console.error(error);
     }
   };
@@ -217,17 +220,17 @@ export default function CategoryManager() {
     try {
       if (type === "sub") {
         await restoreSubCategoryApi(id);
-        toast.success("子分类已恢复");
+        toast.success(t("category_manager.toast.subcategory_restored", "子分类已恢复"));
         if (parentId != null) {
           await loadSubcategories(parentId, true);
         }
       } else {
         await restoreCategoryApi(id);
-        toast.success("分类已恢复");
+        toast.success(t("category_manager.toast.category_restored", "分类已恢复"));
         if (typeof reFetch === "function") reFetch();
       }
     } catch (error) {
-      toast.error("恢复分类时出错");
+      toast.error(t("category_manager.toast.restore_error", "恢复分类时出错"));
       console.error(error);
     }
   };
@@ -235,21 +238,21 @@ export default function CategoryManager() {
   // CRUD pour les sous-catégories
   const handleCreateSubCategory = async () => {
     if (!subCategoryForm.name.trim()) {
-      toast.error("名称必填");
+      toast.error(t("category_manager.toast.name_required", "名称必填"));
       return;
     }
 
     setSubmitting(true);
     try {
       await createSubCategoryApi({ name: subCategoryForm.name, category_id: subCategoryForm.category_id });
-      toast.success("子分类创建成功");
+      toast.success(t("category_manager.toast.subcategory_created", "子分类创建成功"));
       setShowSubCategoryModal(false);
       setSubCategoryForm({ name: "", category_id: 0 });
 
       // Recharger les sous-catégories de cette catégorie
       await loadSubcategories(subCategoryForm.category_id, true); // Force reload
     } catch (error) {
-      toast.error("创建子分类时出错");
+      toast.error(t("category_manager.toast.subcategory_create_error", "创建子分类时出错"));
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -258,7 +261,7 @@ export default function CategoryManager() {
 
   const handleUpdateSubCategory = async () => {
     if (!editingSubCategory || !subCategoryForm.name.trim()) {
-      toast.error("名称必填");
+      toast.error(t("category_manager.toast.name_required", "名称必填"));
       return;
     }
 
@@ -267,7 +270,7 @@ export default function CategoryManager() {
 
     try {
       await updateSubCategoryApi(editingSubCategory.id, { name: subCategoryForm.name });
-      toast.success("子分类更新成功");
+      toast.success(t("category_manager.toast.subcategory_updated", "子分类更新成功"));
       setShowSubCategoryModal(false);
       setEditingSubCategory(null);
       setSubCategoryForm({ name: "", category_id: 0 });
@@ -275,7 +278,7 @@ export default function CategoryManager() {
       // Recharger les sous-catégories de cette catégorie
       await loadSubcategories(categoryId, true); // Force reload
     } catch (error) {
-      toast.error("更新子分类时出错");
+      toast.error(t("category_manager.toast.subcategory_update_error", "更新子分类时出错"));
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -341,12 +344,16 @@ export default function CategoryManager() {
 
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
 
+  const restoreTypeLabel = restoreAlert.type === "sub"
+    ? t("category_manager.subcategory.label", "子分类")
+    : t("category_manager.category.label", "类别");
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t("common.loading", "加载中...")}</p>
         </div>
       </div>
     );
@@ -365,10 +372,10 @@ export default function CategoryManager() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
                 <FolderTree className="w-8 h-8 text-blue-600" />
-                视频分类
+                {t("category_manager.title", "视频分类")}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                管理分类和子分类
+                {t("category_manager.subtitle", "管理分类和子分类")}
               </p>
             </div>
 
@@ -380,7 +387,7 @@ export default function CategoryManager() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:shadow"
               >
                 <Plus className="w-4 h-4" />
-                新建分类
+                {t("category_manager.action.new_category", "新建分类")}
               </motion.button>
             </div>
           </div>
@@ -399,7 +406,7 @@ export default function CategoryManager() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="搜索分类..."
+                placeholder={t("category_manager.search.placeholder", "搜索分类...")}
                 className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -413,7 +420,9 @@ export default function CategoryManager() {
             onClick={() => setShowDeleted(prev => prev?.type === 'cat' ? null : { type: 'cat', id: null })}
             className="px-4 py-2 cursor-pointer gap-3 flex items-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none"
           >
-            <FaRegEye className="w-4 h-4 inline-block" /> {showDeleted?.type === 'cat' ? "Show available" : "Show all deleted"}
+            <FaRegEye className="w-4 h-4 inline-block" /> {showDeleted?.type === 'cat'
+              ? t("category_manager.toggle.show_available", "Show available")
+              : t("category_manager.toggle.show_deleted", "Show all deleted")}
           </motion.button>
 
         </div>
@@ -465,7 +474,10 @@ export default function CategoryManager() {
 
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <Tag className="w-3.5 h-3.5" />
-                        <span>{category.subCategoryCount} 个子分类</span>
+                        <span>
+                          {t("category_manager.subcategory.count", "{count} 个子分类")
+                            .replace("{count}", String(category.subCategoryCount))}
+                        </span>
                       </div>
                     </div>
 
@@ -475,7 +487,7 @@ export default function CategoryManager() {
                         <button
                           onClick={() => openSubCategoryModal(category.id)}
                           className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
-                          title="添加子分类"
+                          title={t("category_manager.action.add_subcategory", "添加子分类")}
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -485,7 +497,7 @@ export default function CategoryManager() {
                         <button
                           onClick={() => openCategoryModal(category)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
-                          title="修改"
+                          title={t("category_manager.action.edit", "修改")}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -495,7 +507,7 @@ export default function CategoryManager() {
                         <button
                           onClick={() => handleDeleteCategory(category.id)}
                           className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition-colors"
-                          title="删除"
+                          title={t("category_manager.action.delete", "删除")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -505,9 +517,9 @@ export default function CategoryManager() {
                         <button
                           onClick={() => handleRestoreCategory(category.id)}
                           className="cursor-pointer flex items-center gap-1 p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg transition-colors"
-                          title="激活"
+                          title={t("category_manager.action.restore", "恢复")}
                         >
-                          <CiBookmarkCheck className="w-5 h-5" /> Restaurer
+                          <CiBookmarkCheck className="w-5 h-5" /> {t("category_manager.action.restore", "恢复")}
                         </button>
                       )}
                     </div>
@@ -525,12 +537,16 @@ export default function CategoryManager() {
                       className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
                     >
                       <div className="flex items-center gap-2 justify-end px-4 py-2">
-                        <span className="font-light text-sm">Sub category {`${`-->`}`}</span>
+                        <span className="font-light text-sm">
+                          {t("category_manager.subcategory.section_label", "Sub category")} {"-->"}
+                        </span>
                         <button
                           onClick={() => setShowDeleted(prev => prev?.type === 'sub' ? null : { type: 'sub', id: category.id })}
                           className="font-light text-sm px-4 py-1 cursor-pointer gap-3 flex items-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none"
                         >
-                          <FaRegEye className="w-4 h-4 inline-block" /> {(showDeleted?.type === 'sub' && showDeleted.id === category.id) ? " Show available" : "Show all deleted"}
+                          <FaRegEye className="w-4 h-4 inline-block" /> {(showDeleted?.type === 'sub' && showDeleted.id === category.id)
+                            ? t("category_manager.toggle.show_available", "Show available")
+                            : t("category_manager.toggle.show_deleted", "Show all deleted")}
                         </button>
                       </div>
                       <div className="p-4 space-y-2">
@@ -538,7 +554,7 @@ export default function CategoryManager() {
                           const subcategories = getSubcategoriesForCategory(category.id);
                           return subcategories.length === 0 ? (
                             <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                              无子分类
+                              {t("category_manager.subcategory.empty", "无子分类")}
                             </p>
                           ) : (
                             subcategories.map((sub) => (
@@ -564,7 +580,7 @@ export default function CategoryManager() {
                                     <button
                                       onClick={() => openSubCategoryModal(category.id, sub)}
                                       className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded transition-colors"
-                                      title="修改"
+                                      title={t("category_manager.action.edit", "修改")}
                                     >
                                       <Edit className="w-3.5 h-3.5" />
                                     </button>
@@ -573,7 +589,7 @@ export default function CategoryManager() {
                                     <button
                                       onClick={() => handleDeleteSubCategory(sub.id, category.id, sub.name)}
                                       className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded transition-colors"
-                                      title="删除"
+                                      title={t("category_manager.action.delete", "删除")}
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -583,9 +599,9 @@ export default function CategoryManager() {
                                     <button
                                       onClick={() => handleRestoreSubCategory(sub.id, category.id, sub.name)}
                                       className="cursor-pointer flex items-center gap-1 p-2 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg transition-colors"
-                                      title="激活"
+                                      title={t("category_manager.action.restore", "恢复")}
                                     >
-                                      <CiBookmarkCheck className="w-5 h-5" /> <span className="font-light text-sm">Restaurer</span>
+                                      <CiBookmarkCheck className="w-5 h-5" /> <span className="font-light text-sm">{t("category_manager.action.restore", "恢复")}</span>
                                     </button>
                                   )}
                                 </div>
@@ -605,7 +621,9 @@ export default function CategoryManager() {
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <FolderTree className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-600 dark:text-gray-400">
-                {searchTerm ? "未找到结果" : "无分类"}
+                {searchTerm
+                  ? t("category_manager.empty.search", "未找到结果")
+                  : t("category_manager.empty.default", "无分类")}
               </p>
             </div>
           )}
@@ -645,7 +663,9 @@ export default function CategoryManager() {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {editingCategory ? "修改分类" : "新建分类"}
+                  {editingCategory
+                    ? t("category_manager.modal.category.edit_title", "修改分类")
+                    : t("category_manager.modal.category.create_title", "新建分类")}
                 </h2>
                 <button
                   onClick={() => setShowCategoryModal(false)}
@@ -658,14 +678,14 @@ export default function CategoryManager() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    名称 <span className="text-red-500">*</span>
+                    {t("category_manager.field.name", "名称")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={categoryForm.name}
                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="分类名称"
+                    placeholder={t("category_manager.placeholder.category_name", "分类名称")}
                   />
                 </div>
               </div>
@@ -676,7 +696,7 @@ export default function CategoryManager() {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  取消
+                  {t("common.cancel", "取消")}
                 </button>
                 {/* {JSON.stringify(editingCategory)} */}
                 <button
@@ -687,12 +707,14 @@ export default function CategoryManager() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      保存中...
+                      {t("category_manager.action.saving", "保存中...")}
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingCategory ? "更新" : "创建"}
+                      {editingCategory
+                        ? t("common.update", "更新")
+                        : t("category_manager.action.create", "创建")}
                     </>
                   )}
                 </button>
@@ -719,8 +741,8 @@ export default function CategoryManager() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {editingSubCategory
-                    ? "修改子分类"
-                    : "新建子分类"}
+                    ? t("category_manager.modal.subcategory.edit_title", "修改子分类")
+                    : t("category_manager.modal.subcategory.create_title", "新建子分类")}
                 </h2>
                 <button
                   onClick={() => setShowSubCategoryModal(false)}
@@ -733,7 +755,7 @@ export default function CategoryManager() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    父分类 <span className="text-red-500">*</span>
+                    {t("category_manager.field.parent_category", "父分类")} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={subCategoryForm.category_id}
@@ -747,7 +769,9 @@ export default function CategoryManager() {
                     disabled={!!editingSubCategory || categoriesLoading}
                   >
                     <option value={0}>
-                      {categoriesLoading ? "加载分类中..." : "选择一个分类"}
+                      {categoriesLoading
+                        ? t("category_manager.select.loading_categories", "加载分类中...")
+                        : t("category_manager.select.choose_category", "选择一个分类")}
                     </option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
@@ -757,7 +781,8 @@ export default function CategoryManager() {
                     {/* Option de secours si la catégorie n'est pas dans la liste */}
                     {subCategoryForm.category_id !== 0 && !categories.find(cat => cat.id === subCategoryForm.category_id) && (
                       <option value={subCategoryForm.category_id}>
-                        分类 #{subCategoryForm.category_id} (未找到)
+                        {t("category_manager.select.category_not_found", "分类 #{id} (未找到)")
+                          .replace("{id}", String(subCategoryForm.category_id))}
                       </option>
                     )}
                   </select>
@@ -765,7 +790,7 @@ export default function CategoryManager() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    名称 <span className="text-red-500">*</span>
+                    {t("category_manager.field.name", "名称")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -774,7 +799,7 @@ export default function CategoryManager() {
                       setSubCategoryForm({ ...subCategoryForm, name: e.target.value })
                     }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="子分类名称"
+                    placeholder={t("category_manager.placeholder.subcategory_name", "子分类名称")}
                   />
                 </div>
               </div>
@@ -785,7 +810,7 @@ export default function CategoryManager() {
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   disabled={submitting}
                 >
-                  取消
+                  {t("common.cancel", "取消")}
                 </button>
                 <button
                   onClick={editingSubCategory ? handleUpdateSubCategory : handleCreateSubCategory}
@@ -800,12 +825,14 @@ export default function CategoryManager() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      保存中...
+                      {t("category_manager.action.saving", "保存中...")}
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      {editingSubCategory ? "更新" : "创建"}
+                      {editingSubCategory
+                        ? t("common.update", "更新")
+                        : t("category_manager.action.create", "创建")}
                     </>
                   )}
                 </button>
@@ -819,24 +846,27 @@ export default function CategoryManager() {
       <AnimatedAlert
         isOpen={deleteAlert.isOpen}
         onClose={() => setDeleteAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null })}
-        title="确认删除"
-        message={`您确定要删除 "${deleteAlert.name}" 吗？此操作不可逆。`}
+        title={t("category_manager.alert.delete_title", "确认删除")}
+        message={t("category_manager.alert.delete_message", "您确定要删除 \"{name}\" 吗？此操作不可逆。")
+          .replace("{name}", deleteAlert.name || "")}
         type="warning"
         onConfirm={confirmDelete}
-        confirmText="删除"
-        cancelText="取消"
+        confirmText={t("category_manager.action.delete", "删除")}
+        cancelText={t("common.cancel", "取消")}
       />
 
       {/* Animated restore confirmation */}
       <AnimatedAlert
         isOpen={restoreAlert.isOpen}
         onClose={() => setRestoreAlert({ isOpen: false, type: "cat", id: null, name: "", parentId: null })}
-        title="确认恢复"
-        message={`您确定要恢复 ${restoreAlert.type === "sub" ? "子分类" : "类别"} "${restoreAlert.name}" 吗？`}
+        title={t("category_manager.alert.restore_title", "确认恢复")}
+        message={t("category_manager.alert.restore_message", "您确定要恢复 {type} \"{name}\" 吗？")
+          .replace("{type}", restoreTypeLabel)
+          .replace("{name}", restoreAlert.name || "")}
         type="success"
         onConfirm={confirmRestore}
-        confirmText="恢复"
-        cancelText="取消"
+        confirmText={t("category_manager.action.restore", "恢复")}
+        cancelText={t("common.cancel", "取消")}
       />
     </div>
   );
