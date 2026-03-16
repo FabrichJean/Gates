@@ -42,6 +42,7 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import { BiUpload } from "react-icons/bi";
 import axios from "axios";
 import { translateServer } from "../constant";
+import { useI18n } from "../i18n";
 
 export type Couple = {
   language: any;
@@ -69,6 +70,7 @@ export function TitlesForm({
   coupleTitles,
   setCoupleTitles,
 }: Props) {
+  const { t } = useI18n();
   /* ---------- logique existante ---------- */
   const handleChange = (index: number, field: keyof Couple, value: string) => {
     const newCouples = [...coupleTitles];
@@ -129,7 +131,7 @@ export function TitlesForm({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
           <FileVideo className="w-5 h-5" />
-          标题和描述
+          {t("videos.upload.titles.title")}
         </h3>
 
         <div className="flex items-center gap-2">
@@ -142,7 +144,7 @@ export function TitlesForm({
             className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Sparkles className="w-4 h-4" />
-            自动
+            {t("videos.upload.titles.auto")}
           </motion.button>
 
           {/* bouton Add Language */}
@@ -154,7 +156,7 @@ export function TitlesForm({
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Plus className="w-4 h-4" />
-            添加语言
+            {t("videos.upload.titles.add_language")}
           </motion.button>
         </div>
       </div>
@@ -206,11 +208,11 @@ export function TitlesForm({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    标题
+                    {t("videos.upload.titles.title_label")}
                   </label>
                   <input
                     type="text"
-                    placeholder="输入视频标题"
+                    placeholder={t("videos.upload.titles.title_placeholder")}
                     value={c.title}
                     onChange={(e) => handleChange(i, "title", e.target.value)}
                     className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
@@ -221,10 +223,10 @@ export function TitlesForm({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  描述
+                  {t("videos.upload.titles.description_label")}
                 </label>
                 <textarea
-                  placeholder="输入视频描述"
+                  placeholder={t("videos.upload.titles.description_placeholder")}
                   value={c.description}
                   onChange={(e) =>
                     handleChange(i, "description", e.target.value)
@@ -252,12 +254,17 @@ export function TitlesForm({
         {uploading ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span>正在上传... {progress}%</span>
+            <span>
+              {t("videos.upload.progress.with_percent").replace(
+                "{progress}",
+                String(progress ?? 0)
+              )}
+            </span>
           </>
         ) : (
           <>
             <span className="text-lg">
-              {btnSubmit ? btnSubmit : "🚀 Upload Video"}
+              {btnSubmit ? btnSubmit : t("videos.upload.titles.submit_default")}
             </span>
           </>
         )}
@@ -273,7 +280,7 @@ export function TitlesForm({
       <div className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
           <h3 className="font-bold text-lg mb-4">
-            自动生成标题和描述
+            {t("videos.upload.auto.title")}
           </h3>
 
           {/* champ select multiple language */}
@@ -283,8 +290,11 @@ export function TitlesForm({
               <label className="label">
                 <span className="label-text">
                   {selectedLanguages.length === 0
-                    ? "All"
-                    : `(${selectedLanguages.length}) lang selected`}
+                    ? t("common.all")
+                    : t("videos.upload.auto.languages.selected").replace(
+                      "{count}",
+                      String(selectedLanguages.length)
+                    )}
                 </span>
               </label>
             </div>
@@ -331,11 +341,13 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-4">
             <label className="label">
-              <span className="label-text">标题</span>
+              <span className="label-text">
+                {t("videos.upload.auto.title_label")}
+              </span>
             </label>
             <input
               type="text"
-              placeholder="全局标题"
+              placeholder={t("videos.upload.auto.title_placeholder")}
               className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               value={autoTitle}
               onChange={(e) => setAutoTitle(e.target.value)}
@@ -344,10 +356,12 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-6">
             <label className="label">
-              <span className="label-text">描述</span>
+              <span className="label-text">
+                {t("videos.upload.auto.description_label")}
+              </span>
             </label>
             <textarea
-              placeholder="全局描述"
+              placeholder={t("videos.upload.auto.description_placeholder")}
               className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               rows={3}
               value={autoDesc}
@@ -357,11 +371,13 @@ export function TitlesForm({
 
           <div className="form-control w-full mb-4">
             <label className="label">
-              <span className="label-text">服务器</span>
+              <span className="label-text">
+                {t("videos.upload.auto.server_label")}
+              </span>
             </label>
             <input
               type="text"
-              placeholder="全局服务器名称"
+              placeholder={t("videos.upload.auto.server_placeholder")}
               className="text-xs w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
               value={server}
               onChange={(e) => setServer(e.target.value)}
@@ -373,10 +389,10 @@ export function TitlesForm({
               className="btn btn-ghost"
               onClick={() => setAutoOpen(false)}
             >
-              取消
+              {t("common.cancel")}
             </button>
             <button className="btn btn-primary" onClick={applyAuto}>
-              应用
+              {t("common.apply")}
             </button>
           </div>
         </div>
@@ -413,6 +429,7 @@ const Upload = () => {
   const { reFetch } = ctx;
   const { data: user } = useAuthMe();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const [state, dispatch] = useReducer(uploadReducer, initialUploadState);
   const { videoFile, coverFile, videoPreview, coverPreview } = state;
@@ -515,13 +532,13 @@ const Upload = () => {
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("video/")) handleFileChange(file, "video");
-    else toast.error("Only video files are accepted!");
+    else toast.error(t("videos.upload.errors.video_only"));
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) handleFileChange(file, "cover");
-    else toast.error("Only image files are accepted!");
+    else toast.error(t("videos.upload.errors.image_only"));
   };
 
   const handleCoverClick = () => coverInputRef.current?.click();
@@ -559,7 +576,7 @@ const Upload = () => {
 
   const handleSubmit = useCallback(async () => {
     if (!videoFile || !coverFile || !category || !ref) {
-      toast.error("Please fill in all required fields!");
+      toast.error(t("videos.upload.errors.required_fields"));
       return;
     }
 
@@ -612,13 +629,16 @@ const Upload = () => {
         }
       });
 
-      toast.success("✅ Upload successful!");
+      toast.success(t("videos.upload.success"));
       reFetch && reFetch();
       navigate("/videos");
     } catch (err: any) {
       console.error(err);
       toast.error(
-        "Upload error: " + (err.response?.data?.message || err.message)
+        t("videos.upload.errors.upload").replace(
+          "{message}",
+          String(err.response?.data?.message || err.message)
+        )
       );
     } finally {
       setUploading(false);
@@ -656,15 +676,15 @@ const Upload = () => {
             className="mb-8"
           >
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              上传视频
+              {t("videos.upload.title")}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              在此处上传新视频以与社区分享。
+              {t("videos.upload.subtitle")}
             </p>
           </motion.div>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              VIP
+              {t("videos.upload.vip_label")}
             </span>
 
             <button
@@ -680,7 +700,7 @@ const Upload = () => {
             </button>
 
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {needVip ? "true" : "false"}
+              {needVip ? t("common.true") : t("common.false")}
             </span>
           </div>
         </div>
@@ -689,39 +709,39 @@ const Upload = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
             <Tag className="w-5 h-5" />
-            参考信息
+            {t("videos.upload.reference.title")}
           </h2>
           <input
             type="text"
             value={ref || ""}
             onChange={(e) => setRef(e.currentTarget.value.trim())}
             className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
-            placeholder="视频参考信息"
+            placeholder={t("videos.upload.reference.placeholder")}
           />
         </div>
         {/* File Uploads */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <UploadBox
-            label="封面图片"
+            label={t("videos.upload.cover.label")}
             onClick={handleCoverClick}
             onDrop={(f) => handleFileChange(f, "cover")}
             preview={coverPreview}
             inputRef={coverInputRef}
             accept="image/*"
             onChange={handleCoverChange}
-            emptyMessage="Click or drag an image (PNG, JPG, WEBP, etc.)"
+            emptyMessage={t("videos.upload.cover.empty")}
             icon={<Image className="w-8 h-8" />}
           />
 
           <UploadBox
-            label="视频文件"
+            label={t("videos.upload.video.label")}
             onClick={handleVideoClick}
             onDrop={(f) => handleFileChange(f, "video")}
             preview={videoPreview}
             inputRef={videoInputRef}
             accept="video/*"
             onChange={handleVideoChange}
-            emptyMessage="Click or drag a video file"
+            emptyMessage={t("videos.upload.video.empty")}
             icon={<FileVideo className="w-8 h-8" />}
           />
         </div>
@@ -738,13 +758,13 @@ const Upload = () => {
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  分类
+                  {t("videos.upload.category.title")}
                 </h2>
                 <CategoryAutoComplete onSelect={setCategory} />
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    子分类
+                    {t("videos.upload.subcategory.label")}
                   </label>
                   <SubCategoryAutoComplete
                     onSelect={setSubCategory}
@@ -756,13 +776,13 @@ const Upload = () => {
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  平台
+                  {t("videos.upload.platform.title")}
                 </h2>
                 <PlatformSelectComponent onSelect={setPlatform} />
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    视频类型
+                    {t("videos.upload.video_type.label")}
                   </label>
                   <div className="relative">
                     <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -771,8 +791,8 @@ const Upload = () => {
                       value={videoType}
                       onChange={(e) => setVideoType(e.target.value)}
                     >
-                      <option value="short">短视频</option>
-                      <option value="long">长视频</option>
+                      <option value="short">{t("videos.type.short")}</option>
+                      <option value="long">{t("videos.type.long")}</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
@@ -791,7 +811,7 @@ const Upload = () => {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      上传中...
+                      {t("videos.upload.progress.label")}
                     </span>
                     <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                       {progress}%
@@ -814,13 +834,13 @@ const Upload = () => {
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800 h-max mb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
             <User className="w-5 h-5" />
-            创建者 & 标签
+            {t("videos.upload.creator_tags.title")}
           </h2>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                创建者
+                {t("videos.upload.creator.label")}
               </label>
               <CreatorAutoComplete
                 value={creator}
@@ -837,7 +857,7 @@ const Upload = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                标签
+                {t("videos.upload.tags.label")}
               </label>
               <div className="flex gap-3">
                 <div className="flex-1 relative">
@@ -855,7 +875,7 @@ const Upload = () => {
                         addTagByName(tagQuery);
                       }
                     }}
-                    placeholder="输入标签名称或选择建议..."
+                    placeholder={t("videos.upload.tags.placeholder")}
                     className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all duration-300"
                   />
                   <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -968,91 +988,97 @@ const UploadBox = ({
   onChange,
   emptyMessage,
   icon,
-}: UploadBoxProps) => (
-  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
-    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-      {accept.includes("video") ? (
-        <Film className="w-5 h-5" />
-      ) : (
-        <Image className="w-5 h-5" />
-      )}
-      {label}
-    </h3>
+}: UploadBoxProps) => {
+  const { t } = useI18n();
 
-    <div
-      onClick={onClick}
-      onDrop={(e) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files?.[0];
-        if (file) onDrop(file);
-      }}
-      onDragOver={(e) => e.preventDefault()}
-      className="relative border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer group"
-    >
-      <AnimatePresence mode="wait">
-        {preview ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="relative w-full"
-          >
-            {accept.includes("video") ? (
-              <video
-                src={preview}
-                controls
-                className="rounded-lg w-full max-h-56 object-cover"
-              />
-            ) : (
-              <img
-                src={preview}
-                alt="Preview"
-                className="rounded-lg object-cover w-full h-56 shadow-md"
-              />
-            )}
-            <motion.div
-              whileHover={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 transition-opacity duration-300"
-            >
-              <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                <BiUpload className="w-4 h-4" />
-                <span className="text-sm font-medium">Change File</span>
-              </div>
-            </motion.div>
-          </motion.div>
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+        {accept.includes("video") ? (
+          <Film className="w-5 h-5" />
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="mb-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-300">
-              {icon ||
-                (accept.includes("video") ? (
-                  <FileVideo className="w-12 h-12 mx-auto" />
-                ) : (
-                  <FileImage className="w-12 h-12 mx-auto" />
-                ))}
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-              {emptyMessage}
-            </p>
-            <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
-              or drag and drop here
-            </p>
-          </motion.div>
+          <Image className="w-5 h-5" />
         )}
-      </AnimatePresence>
+        {label}
+      </h3>
 
-      <input
-        type="file"
-        ref={inputRef}
-        accept={accept}
-        onChange={onChange}
-        className="hidden"
-      />
+      <div
+        onClick={onClick}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files?.[0];
+          if (file) onDrop(file);
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        className="relative border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 cursor-pointer group"
+      >
+        <AnimatePresence mode="wait">
+          {preview ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative w-full"
+            >
+              {accept.includes("video") ? (
+                <video
+                  src={preview}
+                  controls
+                  className="rounded-lg w-full max-h-56 object-cover"
+                />
+              ) : (
+                <img
+                  src={preview}
+                  alt={t("videos.upload.preview_alt")}
+                  className="rounded-lg object-cover w-full h-56 shadow-md"
+                />
+              )}
+              <motion.div
+                whileHover={{ opacity: 1 }}
+                className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 transition-opacity duration-300"
+              >
+                <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                  <BiUpload className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {t("videos.upload.change_file")}
+                  </span>
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <div className="mb-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-300">
+                {icon ||
+                  (accept.includes("video") ? (
+                    <FileVideo className="w-12 h-12 mx-auto" />
+                  ) : (
+                    <FileImage className="w-12 h-12 mx-auto" />
+                  ))}
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+                {emptyMessage}
+              </p>
+              <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
+                {t("videos.upload.drop_hint")}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <input
+          type="file"
+          ref={inputRef}
+          accept={accept}
+          onChange={onChange}
+          className="hidden"
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Upload;

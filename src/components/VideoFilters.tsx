@@ -6,6 +6,7 @@ import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, mapStatusProcessing, reverseStatus } from "../utils/filter";
 import CreatorAutoComplete from "./CreatorAutoComplete";
 import type { Creator } from "./creators/CreatorList";
+import { useI18n } from "../i18n";
 
 export type TFilter = {
     category_id: string;
@@ -32,6 +33,7 @@ export default function VideoFilters({
     onSubmit: (d: any) => void;
     scope?: "videos" | "bot";
 }) {
+    const { t } = useI18n();
     const { data: users } = useUsers("");
     const { data: cat } = UseCategory();
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
@@ -132,13 +134,13 @@ export default function VideoFilters({
                 {/* Sélections principales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">类别</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.category")}</label>
                         <select
                             className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.category_id}
                             onChange={(e) => handleChange("category_id", e.target.value)}
                         >
-                            <option value=''>所有</option>
+                            <option value=''>{t("common.all")}</option>
                             {cat?.map?.((c: any, i: number) => (
                                 <option key={i} value={c.id}>{c.name}</option>
                             ))}
@@ -146,13 +148,13 @@ export default function VideoFilters({
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">子类别</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.subcategory")}</label>
                         <select
                             className="select select-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.sub_category_id}
                             onChange={(e) => handleChange("sub_category_id", e.target.value)}
                         >
-                            <option value=''>all</option>
+                            <option value=''>{t("common.all")}</option>
                             {subcat?.SubCategorys?.map((c: any, i: number) => (
                                 <option key={i} value={c.id}>{c.name}</option>
                             ))}
@@ -160,13 +162,13 @@ export default function VideoFilters({
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">用户</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.user")}</label>
                         <select
                             className="select select-bordered w-full outline-none bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
                             value={filters.user_id}
                             onChange={(e) => handleChange("user_id", e.target.value)}
                         >
-                            <option value=''>all</option>
+                            <option value=''>{t("common.all")}</option>
                             {users?.map((u: any, i: number) => (
                                 <option key={i} value={u.id}>{u.username}</option>
                             ))}
@@ -175,12 +177,12 @@ export default function VideoFilters({
 
                     {/* Creator searchable */}
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Creator</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.creator")}</label>
                         <CreatorAutoComplete
                             value={filters.creatorSearch || ""}
                             onChange={handleCreatorChange}
                             onSelect={handleCreatorSelect}
-                            placeholder="Search creator..."
+                            placeholder={t("creator.autocomplete.placeholder")}
                         />
                     </div>
                 </div>
@@ -188,7 +190,7 @@ export default function VideoFilters({
                 {/* Filtres de date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">开始日期</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.start_date")}</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -197,7 +199,7 @@ export default function VideoFilters({
                         />
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">结束日期</label>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.end_date")}</label>
                         <input
                             type="date"
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
@@ -211,7 +213,7 @@ export default function VideoFilters({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Filtre Deleted */}
                     <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">已删除</p>
+                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{t("videos.filter.deleted")}</p>
                         <div className="flex gap-3">
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -221,7 +223,7 @@ export default function VideoFilters({
                                     checked={filters.isDeleted === "all" || filters.isDeleted === ""}
                                     onChange={() => handleChange("isDeleted", "all")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">all</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.all")}</span>
                             </label>
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -231,7 +233,7 @@ export default function VideoFilters({
                                     checked={filters.isDeleted === "yes"}
                                     onChange={() => handleChange("isDeleted", "yes")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">yes</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.yes")}</span>
                             </label>
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -241,14 +243,14 @@ export default function VideoFilters({
                                     checked={filters.isDeleted === "no"}
                                     onChange={() => handleChange("isDeleted", "no")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">no</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.no")}</span>
                             </label>
                         </div>
                     </div>
 
                     {/* Filtre Video Uploaded */}
                     <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
-                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">视频已上传</p>
+                        <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">{t("videos.filter.uploaded")}</p>
                         <div className="flex gap-3">
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -258,7 +260,7 @@ export default function VideoFilters({
                                     checked={filters.processing === "all" || filters.processing === ""}
                                     onChange={() => handleChange("processing", "all")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">all</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.all")}</span>
                             </label>
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -268,7 +270,7 @@ export default function VideoFilters({
                                     checked={filters.processing === "done"}
                                     onChange={() => handleChange("processing", "done")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">yes</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.yes")}</span>
                             </label>
                             <label className="flex items-center gap-1 cursor-pointer">
                                 <input
@@ -278,14 +280,14 @@ export default function VideoFilters({
                                     checked={filters.processing === "null"}
                                     onChange={() => handleChange("processing", "null")}
                                 />
-                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">no</span>
+                                <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.no")}</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
                 <form method="dialog" className="pt-3 flex justify-end gap-3">
-                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">关闭</button>
+                    <button className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">{t("common.close")}</button>
 
                     <div
                         className="btn btn-outline btn-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
@@ -305,7 +307,7 @@ export default function VideoFilters({
                             await submit();
                         }}
                     >
-                        重置
+                        {t("common.reset")}
                     </div>
 
                     <button
@@ -316,7 +318,7 @@ export default function VideoFilters({
                             closeModal();
                         }}
                     >
-                        应用
+                        {t("common.apply")}
                     </button>
                 </form>
             </div>

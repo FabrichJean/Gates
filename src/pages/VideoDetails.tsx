@@ -58,8 +58,10 @@ import SexyShortLoader from "../components/SexyShortLoader";
 import { apiURL, token } from "../constant";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { cdnS3 } from "../utils/cdn";
+import { useI18n } from "../i18n";
 
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
+  const { t } = useI18n();
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
@@ -98,10 +100,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const send = async (videoId: number) => {
     try {
       await sendProcessing(videoId);
-      toast.success("✅ 上传工作流已启动");
+      toast.success(t("videos.processing.workflow_started"));
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ 发送错误！");
+      toast.error(err?.response?.data?.message || t("videos.processing.send_error"));
     }
   };
 
@@ -118,10 +120,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     setSingleSyncLoading(true);
     try {
       await singleSync({ entity: "video", origin_id: video.id, isForce });
-      toast.success("✅ 单同步执行");
+      toast.success(t("videos.sync.success"));
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "❌ 单同步错误！");
+      toast.error(err?.response?.data?.message || t("videos.sync.error"));
     } finally {
       setSingleSyncLoading(false);
     }
@@ -135,7 +137,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           animate={{ opacity: 1, scale: 1 }}
           className="text-red-500 text-xl font-medium"
         >
-          未找到视频
+          {t("videos.details.not_found")}
         </motion.div>
       </div>
     );
@@ -237,7 +239,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                           }`}
                       >
-                        {video.type === "1" ? "短视频" : "长视频"}
+                        {video.type === "1" ? t("videos.type.short") : t("videos.type.long")}
                       </span>
                       {video?.plateform?.name && (
                         <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium">
@@ -282,7 +284,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                                 setShowCover(next);
                               }}
                               className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
-                              title={showCover ? "隐藏封面" : "显示封面"}
+                              title={showCover ? t("videos.cover.hide") : t("videos.cover.show")}
                             >
                               {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </button>
@@ -314,7 +316,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       <div className="flex items-center gap-2 mb-3">
                         <Tag className="w-4 h-4 text-gray-500" />
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          标签
+                          {t("videos.tags.label")}
                         </h3>
                       </div>
                       {Array.isArray((video as any)?.tagCategory) &&
@@ -336,7 +338,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </div>
                       ) : (
                         <span className="text-sm text-gray-500 dark:text-gray-400">
-                          无标签
+                          {t("videos.tags.none")}
                         </span>
                       )}
                     </div>
@@ -359,7 +361,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   {/* Actions Card */}
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                      操作
+                      {t("videos.actions.title")}
                     </h2>
 
                     <div className="space-y-3">
@@ -371,7 +373,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-transparent rounded-lg border transition-all duration-200 shadow-lg hover:shadow-lg"
                         >
                           <Edit3 className="w-4 h-4" />
-                          编辑视频
+                          {t("videos.actions.edit")}
                         </motion.button>
                       ) : (
                         <Link
@@ -379,7 +381,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:border-orange-300 dark:hover:border-orange-700 rounded-lg"
                         >
                           <Edit3 className="w-4 h-4" />
-                          再次触摸
+                          {t("videos.actions.touch_again")}
                         </Link>
                       )}
 
@@ -395,8 +397,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             onClick={() => {
                               if (video.checking !== "checked") {
                                 return alert.warning(
-                                  "我们需要检查这个视频",
-                                  "需要视频检查"
+                                  t("videos.processing.needs_check_title"),
+                                  t("videos.processing.needs_check_body")
                                 );
                               }
                               send(video.id);
@@ -411,18 +413,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             {video.processing === "working" ? (
                               <>
                                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                                处理中...
+                                {t("common.processing")}
                               </>
                             ) : video.upload_status === 1 &&
                               video.transfer_status === 1 ? (
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-green-500 rounded-full" />
-                                <span>已上传</span>
+                                <span>{t("videos.processing.uploaded")}</span>
                               </div>
                             ) : (
                               <>
                                 <Send className="w-4 h-4" />
-                                发送到处理
+                                {t("videos.processing.send_action")}
                               </>
                             )}
                           </motion.button>
@@ -435,7 +437,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               <X className="w-4 h-4" />
-                              取消
+                              {t("common.cancel")}
                             </motion.button>
                           )}
 
@@ -445,28 +447,29 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSingleSyncOpen(true)}
                             className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700`}>
-                            同步
+                            {t("videos.sync.action")}
                           </motion.button>
                           <SingleSyncModal
                             open={singleSyncOpen}
                             onClose={() => setSingleSyncOpen(false)}
                             onSubmit={handleSingleSync}
-                            title="同步这个视频"
+                            title={t("videos.sync.modal_title")}
                           />
                           <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={async () => {
                               const should = window.confirm(
-                                video.isBanned ? "您确定要取消禁止这个视频吗？" : "您确定要禁止这个视频吗？"
+                                video.isBanned ? t("videos.ban.confirm_unban") : t("videos.ban.confirm_ban")
                               );
                               if (!should) return;
                               try {
-                                await updateBannedStatus(video.id, !video.isBanned);
-                                toast.success(`视频${!video.isBanned ? '禁止' : '取消禁止'}成功`);
+                                const nextIsBanned = !video.isBanned;
+                                await updateBannedStatus(video.id, nextIsBanned);
+                                toast.success(nextIsBanned ? t("videos.ban.success_ban") : t("videos.ban.success_unban"));
                                 reFetch();
                               } catch (error: any) {
-                                toast.error(error?.response?.data?.message || '更新禁止状态失败');
+                                toast.error(error?.response?.data?.message || t("videos.ban.error"));
                               }
                             }}
                             className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${video.isBanned
@@ -474,7 +477,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
                               }`}
                           >
-                            {video.isBanned ? "取消禁止视频" : "禁止视频"}
+                            {video.isBanned ? t("videos.ban.action_unban") : t("videos.ban.action_ban")}
                           </motion.button>
                         </>
                       )}
@@ -492,7 +495,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               }`}
                           >
                             <ChevronLeft className="w-4 h-4" />
-                            上一个
+                            {t("videos.nav.prev")}
                           </Link>
                         </motion.div>
 
@@ -507,7 +510,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
                               }`}
                           >
-                            下一个
+                            {t("videos.nav.next")}
                             <ChevronRight className="w-4 h-4" />
                           </Link>
                         </motion.div>
@@ -519,7 +522,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200"
                         >
                           <Film className="w-4 h-4" />
-                          返回视频
+                          {t("videos.nav.back_to_videos")}
                         </Link>
                       </motion.div>
                     </div>
@@ -532,7 +535,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       <div className="flex items-center gap-2 mb-3">
                         <Globe className="w-4 h-4 text-gray-500" />
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          类别
+                          {t("videos.details.category_label")}
                         </h3>
                       </div>
                       <div className="text-sm">
@@ -552,7 +555,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         <div className="flex items-center gap-2 mb-3">
                           <Globe className="w-4 h-4 text-gray-500" />
                           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            CDN播放URL
+                            {t("videos.details.cdn_play_url")}
                           </h3>
                         </div>
                         <a
@@ -571,7 +574,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         <div className="flex items-center gap-2 mb-3">
                           <Globe className="w-4 h-4 text-gray-500" />
                           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            CDN封面URL
+                            {t("videos.details.cdn_cover_url")}
                           </h3>
                         </div>
                         <a
@@ -605,6 +608,7 @@ function EditVideo({
   video: TVideo;
   onSubmit: (newCoverUrl?: string) => void;
 }) {
+  const { t } = useI18n();
   const ctx = useVideosContext();
   if (!ctx) return null;
 
@@ -762,7 +766,7 @@ function EditVideo({
       });
 
       reFetchVideos();
-      toast.success("✅ 视频更新成功！");
+      toast.success(t("videos.edit.update_success"));
 
       const newCoverUrl = coverFile
         ? res.data?.public_urls?.cover_url || video.public_urls.cover_url
@@ -770,7 +774,12 @@ function EditVideo({
       onSubmit(newCoverUrl);
     } catch (err: any) {
       console.error(err);
-      toast.error("错误: " + (err.response?.data?.message || err.message));
+      toast.error(
+        t("videos.edit.update_error").replace(
+          "{message}",
+          err.response?.data?.message || err.message || ""
+        )
+      );
     } finally {
       setUploading(false);
       setProgress(0);
@@ -819,16 +828,16 @@ function EditVideo({
             className="mb-8"
           >
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              编辑视频
+              {t("videos.edit.title")}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              更新视频信息和设置
+              {t("videos.edit.subtitle")}
             </p>
           </motion.div>
 
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              VIP
+              {t("videos.edit.vip")}
             </span>
 
             <button
@@ -846,7 +855,7 @@ function EditVideo({
               to={`/touch/video/${video.id}`}
               className="underline"
             >
-              使用视频编辑
+              {t("videos.edit.use_touch_editor")}
             </Link>
           </div>
 
@@ -864,7 +873,7 @@ function EditVideo({
             <div className="bg-white flex-1 dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
                 <Image className="w-5 h-5" />
-                封面图片
+                {t("videos.edit.cover_title")}
               </h2>
 
               <div
@@ -891,7 +900,7 @@ function EditVideo({
                         <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-lg flex items-center gap-2">
                           <Upload className="w-4 h-4" />
                           <span className="text-sm font-medium">
-                            更改图片
+                            {t("videos.edit.cover_change")}
                           </span>
                         </div>
                       </motion.div>
@@ -904,10 +913,10 @@ function EditVideo({
                     >
                       <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-3" />
                       <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-                        点击上传封面图片
+                        {t("videos.edit.cover_upload")}
                       </p>
                       <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
-                        PNG、JPG、WEBP 最多10MB
+                        {t("videos.edit.cover_hint")}
                       </p>
                     </motion.div>
                   )}
@@ -927,14 +936,14 @@ function EditVideo({
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
                 <Film className="w-5 h-5" />
-                基本信息
+                {t("videos.edit.basic_info")}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Category */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    类别
+                    {t("videos.edit.category")}
                   </label>
                   <CategoryAutoComplete
                     defaultValue={category}
@@ -945,7 +954,7 @@ function EditVideo({
                 {/* Sub Category */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    子类别
+                    {t("videos.edit.subcategory")}
                   </label>
                   <SubCategoryAutoComplete
                     categoryId={category?.id}
@@ -957,7 +966,7 @@ function EditVideo({
                 {/* Creator */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    创建者（可选）
+                    {t("videos.edit.creator_optional")}
                   </label>
                   <CreatorAutoComplete
                     value={creator}
@@ -969,7 +978,7 @@ function EditVideo({
                 {/* Duration */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    时长（毫秒）
+                    {t("videos.edit.duration_ms")}
                   </label>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -987,7 +996,7 @@ function EditVideo({
                 {/* Platform */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    平台
+                    {t("videos.edit.platform")}
                   </label>
                   <PlatformSelectComponent
                     defaultValue={platform}
@@ -998,7 +1007,7 @@ function EditVideo({
                 {/* Video Type */}
                 <div>
                   <label className="block text-gray-700 dark:text-gray-300 font-medium mb-3 transition-colors duration-300">
-                    视频类型
+                    {t("videos.edit.type")}
                   </label>
                   <div className="relative">
                     <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -1007,8 +1016,8 @@ function EditVideo({
                       value={videoType}
                       onChange={(e) => setVideoType(e.target.value)}
                     >
-                      <option value="short">短视频</option>
-                      <option value="long">长视频</option>
+                      <option value="short">{t("videos.type.short")}</option>
+                      <option value="long">{t("videos.type.long")}</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
@@ -1020,7 +1029,7 @@ function EditVideo({
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
               <Tag className="w-5 h-5" />
-              标签
+              {t("videos.tags.label")}
             </h2>
 
             <div className="space-y-4">
@@ -1042,7 +1051,7 @@ function EditVideo({
                           setShowPostTagDropdown(false);
                         }
                       }}
-                      placeholder="输入标签名称或选择建议..."
+                      placeholder={t("videos.edit.tags_placeholder")}
                       className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-lg p-3 pr-10 outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300"
                     />
                     <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1111,7 +1120,7 @@ function EditVideo({
                         className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
                       >
                         <X className="w-3 h-3" />
-                      </button>
+                      </button>+
                     </motion.span>
                   ))}
                 </AnimatePresence>
@@ -1131,7 +1140,7 @@ function EditVideo({
                 <div className="flex items-center gap-2">
                   {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
                   <Save className="w-4 h-4" />
-                  更新视频
+                  {t("videos.edit.update_button")}
                 </div>
               }
               coupleTitles={coupleTitles}

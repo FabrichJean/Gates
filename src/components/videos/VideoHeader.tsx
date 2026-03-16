@@ -90,7 +90,7 @@ const VideoHeader = ({
           >
             <span className="grow text-left text-gray-600 dark:text-gray-300">{t("common.search")}</span>
             <kbd className="kbd kbd-sm font-mono opacity-50 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-              <span className="me-1 text-sm">⌘</span>K
+              <span className="me-1 text-sm">⌘</span>
             </kbd>
           </button>
         </div>

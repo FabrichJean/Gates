@@ -4,12 +4,14 @@ import { getToken } from "../utils/storage";
 import type { TVideo } from "../hooks/useVideos";
 import { useNavigate } from "react-router-dom";
 import { cdnS3 } from "../utils/cdn";
+import { useI18n } from "../i18n";
 
 type SearchModalProps = {
   scope?: "videos" | "bot";
 };
 
 export default function SearchModal({ scope = "videos" }: SearchModalProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [videos, setVideos] = useState<TVideo[]>([]);
 
@@ -71,14 +73,14 @@ export default function SearchModal({ scope = "videos" }: SearchModalProps) {
             id="search-input"
             type="text"
             autoComplete="off"
-            placeholder="输入以搜索..."
+            placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent focus:outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
           />
           {videos.length > 0 && (
             <span className="badge badge-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700">
-              {videos.length} 结果
+              {t("search.results_count").replace("{count}", String(videos.length))}
             </span>
           )}
         </label>
@@ -112,11 +114,11 @@ export default function SearchModal({ scope = "videos" }: SearchModalProps) {
 
         <div className="flex gap-2 justify-between w-full modal-action">
           <span className="py-2 text-sm opacity-50 text-center text-gray-500 dark:text-gray-400">
-            按 ESC 退出
+            {t("search.esc_hint")}
           </span>
           <form method="dialog">
             <button className="btn bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
-              关闭
+              {t("common.close")}
             </button>
           </form>
         </div>
