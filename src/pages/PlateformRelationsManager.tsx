@@ -55,6 +55,7 @@ import {
   clearTagCategoriesFromPlateformApi,
 } from "../api/plateformTagCategory";
 import { createTagCategoryApi } from "../api/tagCategory";
+import { useI18n } from "../i18n";
 
 
 // Local types
@@ -133,12 +134,24 @@ export default function PlateformRelationsManager() {
   const [platformVideoSyncUrl, setPlatformVideoSyncUrl] = useState("");
   const [platformPostSyncUrl, setPlatformPostSyncUrl] = useState("");
 
+  const { t } = useI18n();
+
+  const formatMessage = (key: string, vars?: Record<string, string>) => {
+    let message = t(key);
+    if (!vars) return message;
+    Object.entries(vars).forEach(([token, value]) => {
+      message = message.replace(`{${token}}`, value);
+    });
+    return message;
+  };
+
   const fetchPlatforms = async () => {
     reFetchPlateform();
   };
 
   const handleSavePlatform = async () => {
-    if (!platformName.trim()) return toast.error("Enter a platform name");
+    if (!platformName.trim())
+      return toast.error(t("WebApp_Relations_Manager.toast.platform_name_required"));
     const isValidUrl = (u: string) => {
       if (!u) return true;
       try {
@@ -150,9 +163,9 @@ export default function PlateformRelationsManager() {
     };
 
     if (!isValidUrl(platformVideoSyncUrl))
-      return toast.error("Invalid Video sync URL");
+      return toast.error(t("WebApp_Relations_Manager.toast.invalid_video_sync_url"));
     if (!isValidUrl(platformPostSyncUrl))
-      return toast.error("Invalid Post sync URL");
+      return toast.error(t("WebApp_Relations_Manager.toast.invalid_post_sync_url"));
     try {
       const payload: {
         name: string;
@@ -166,10 +179,10 @@ export default function PlateformRelationsManager() {
 
       if (editingPlatform) {
         await updatePlateformApi(editingPlatform.id, payload);
-        toast.success("Platform updated");
+        toast.success(t("WebApp_Relations_Manager.toast.platform_updated"));
       } else {
         await createPlateformApi(payload);
-        toast.success("Platform created");
+        toast.success(t("WebApp_Relations_Manager.toast.platform_created"));
       }
 
       setPlatformModalOpen(false);
@@ -179,20 +192,20 @@ export default function PlateformRelationsManager() {
       setEditingPlatform(null);
       fetchPlatforms();
     } catch {
-      toast.error("Error saving platform");
+      toast.error(t("WebApp_Relations_Manager.toast.platform_save_error"));
     }
   };
   const handleDeletePlatform = (id: number) => {
     openConfirm({
-      title: "Delete platform",
-      message: "Are you sure you want to delete this platform?",
+      title: t("WebApp_Relations_Manager.confirm.delete_platform_title"),
+      message: t("WebApp_Relations_Manager.confirm.delete_platform_message"),
       type: "error",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      confirmText: t("common.delete"),
+      cancelText: t("common.cancel"),
       onConfirm: async () => {
         try {
           await deletePlateformApi(id);
-          toast.success("Platform deleted");
+          toast.success(t("WebApp_Relations_Manager.toast.platform_deleted"));
           if (selectedPlateform === id) {
             setSelectedPlateform(null);
             setCatRelations([]);
@@ -201,7 +214,7 @@ export default function PlateformRelationsManager() {
           }
           fetchPlatforms();
         } catch {
-          toast.error("Error deleting platform");
+          toast.error(t("WebApp_Relations_Manager.toast.platform_delete_error"));
         }
       },
     });
@@ -335,7 +348,7 @@ export default function PlateformRelationsManager() {
           setCreatorRelations([]);
         }
       } catch {
-        toast.error("Error loading relations");
+        toast.error(t("WebApp_Relations_Manager.toast.relations_load_error"));
       }
     },
     [relationMode]
@@ -360,48 +373,53 @@ export default function PlateformRelationsManager() {
   const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
 
   const handleAddCategory = async (categoryId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await addCategoryToPlateformApi(selectedPlateform, categoryId);
-      toast.success("Category linked");
+      toast.success(t("WebApp_Relations_Manager.toast.category_linked"));
       reFetchCategories();
       fetchRelations(selectedPlateform);
       // setCategoryModalOpen(false);
     } catch {
-      toast.error("Error adding category");
+      toast.error(t("WebApp_Relations_Manager.toast.category_link_error"));
     }
   };
 
   // tag category linking handler
   const handleAddTagCategory = async (categoryId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await addTagCategoryToPlateformApi(selectedPlateform, categoryId);
-      toast.success("Tag category linked");
+      toast.success(t("WebApp_Relations_Manager.toast.tag_category_linked"));
       reFetchCategoriesTag();
       fetchRelations(selectedPlateform);
       // setCategoryModalOpen(false);
     } catch {
-      toast.error("Error adding tag category");
+      toast.error(t("WebApp_Relations_Manager.toast.tag_category_link_error"));
     }
   };
 
   const handleAddPostCategory = async (categoryId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await addPostCategoryToPlateformApi(selectedPlateform, categoryId);
-      toast.success("Post Category linked");
+      toast.success(t("WebApp_Relations_Manager.toast.post_category_linked"));
       reFetchPostCategories?.();
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error adding post category");
+      toast.error(t("WebApp_Relations_Manager.toast.post_category_link_error"));
     }
   };
 
 
   const handleCreateAndLinkCategory = async (name: string) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
-    if (!name.trim()) return toast.error("Name required");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
+    if (!name.trim())
+      return toast.error(t("WebApp_Relations_Manager.toast.name_required"));
     try {
       const res = await createCastegoryApi(name.trim());
       const newCat = res.data;
@@ -417,8 +435,10 @@ export default function PlateformRelationsManager() {
   };
 
   const handleCreateAndLinkTagCategory = async (name: string) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
-    if (!name.trim()) return toast.error("Name required");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
+    if (!name.trim())
+      return toast.error(t("WebApp_Relations_Manager.toast.name_required"));
     try {
       const res = await createTagCategoryApi({ name: name.trim() });
       const newTagCat = res.data;
@@ -431,8 +451,10 @@ export default function PlateformRelationsManager() {
   };
 
   const handleCreateAndLinkPostCategory = async (name: string) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
-    if (!name.trim()) return toast.error("Name required");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
+    if (!name.trim())
+      return toast.error(t("WebApp_Relations_Manager.toast.name_required"));
     try {
       const res = await createPostCategoryApi(name.trim());
       const newCat = res.data;
@@ -447,25 +469,27 @@ export default function PlateformRelationsManager() {
   };
 
   const handleAddSubcategory = async (subId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await createPlateformSubCategoryApi(selectedPlateform, subId);
-      toast.success("Subcategory linked");
+      toast.success(t("WebApp_Relations_Manager.toast.subcategory_linked"));
       fetchRelations(selectedPlateform);
 
     } catch {
-      toast.error("Error adding subcategory");
+      toast.error(t("WebApp_Relations_Manager.toast.subcategory_link_error"));
     }
   };
 
   const handleAddPostSubcategory = async (subId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await createPlateformPostSubCategoryApi(selectedPlateform, subId);
-      toast.success("Post subcategory linked");
+      toast.success(t("WebApp_Relations_Manager.toast.post_subcategory_linked"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error adding post subcategory");
+      toast.error(t("WebApp_Relations_Manager.toast.post_subcategory_link_error"));
     }
   };
 
@@ -473,10 +497,10 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return;
     try {
       await removeCategoryFromPlateformApi(selectedPlateform, categoryId);
-      toast.success("Category removed");
+      toast.success(t("WebApp_Relations_Manager.toast.category_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing category");
+      toast.error(t("WebApp_Relations_Manager.toast.category_remove_error"));
     }
   };
 
@@ -484,10 +508,10 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return;
     try {
       await removeTagCategoryFromPlateformApi(selectedPlateform, categoryId);
-      toast.success("Tag category removed");
+      toast.success(t("WebApp_Relations_Manager.toast.tag_category_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing tag category");
+      toast.error(t("WebApp_Relations_Manager.toast.tag_category_remove_error"));
     }
   };
 
@@ -495,46 +519,46 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return;
     try {
       await removePostCategoryFromPlateformApi(selectedPlateform, categoryId);
-      toast.success("Post Category removed");
+      toast.success(t("WebApp_Relations_Manager.toast.post_category_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing post category");
+      toast.error(t("WebApp_Relations_Manager.toast.post_category_remove_error"));
     }
   };
 
   const handleRemoveSubcategory = async (relationId: number) => {
     try {
       await deletePlateformSubCategoryApi(relationId);
-      toast.success("Subcategory removed");
+      toast.success(t("WebApp_Relations_Manager.toast.subcategory_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing subcategory");
+      toast.error(t("WebApp_Relations_Manager.toast.subcategory_remove_error"));
     }
   };
 
   const handleRemovePostSubcategory = async (relationId: number) => {
     try {
       await deletePlateformPostSubCategoryApi(relationId);
-      toast.success("Post subcategory removed");
+      toast.success(t("WebApp_Relations_Manager.toast.post_subcategory_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing post subcategory");
+      toast.error(t("WebApp_Relations_Manager.toast.post_subcategory_remove_error"));
     }
   };
 
   const handleClearCategories = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear categories",
-      message: "Remove all categories from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_categories_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_categories_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           await clearCategoriesFromPlateformApi(selectedPlateform);
-          toast.success("All categories removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_categories_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing categories");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_categories_error"));
         }
       },
     });
@@ -543,16 +567,16 @@ export default function PlateformRelationsManager() {
   const handleClearTagCategories = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear tag categories",
-      message: "Remove all tag categories from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_tag_categories_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_tag_categories_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           await clearTagCategoriesFromPlateformApi(selectedPlateform);
-          toast.success("All tag categories removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_tag_categories_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing Tag categories");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_tag_categories_error"));
         }
       },
     });
@@ -562,16 +586,16 @@ export default function PlateformRelationsManager() {
   const handleClearSubCategories = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear subcategories",
-      message: "Remove all subcategories from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_subcategories_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_subcategories_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           await clearSubCategoriesFromPlateformApi(selectedPlateform);
-          toast.success("All categories removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_subcategories_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing categories");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_subcategories_error"));
         }
       },
     });
@@ -581,16 +605,16 @@ export default function PlateformRelationsManager() {
   const handleClearPostCategories = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear post categories",
-      message: "Remove all post categories from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_post_categories_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_post_categories_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           await clearPostCategoriesFromPlateformApi(selectedPlateform);
-          toast.success("All post categories removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_post_categories_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing post categories");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_post_categories_error"));
         }
       },
     });
@@ -599,17 +623,17 @@ export default function PlateformRelationsManager() {
   const handleClearPostSubCategories = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear post subcategories",
-      message: "Remove all post subcategories from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_post_subcategories_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_post_subcategories_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           // new clear endpoint for post subcategories
           await clearPostSubCategoriesFromPlateformApi(selectedPlateform);
-          toast.success("All post subcategories removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_post_subcategories_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing post subcategories");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_post_subcategories_error"));
         }
       },
     });
@@ -635,24 +659,25 @@ export default function PlateformRelationsManager() {
     confirmText?: string;
     cancelText?: string;
   }) => {
-    setAlertTitle(opts.title ?? "Are you sure?");
+    setAlertTitle(opts.title ?? t("common.confirm_title"));
     setAlertMessage(opts.message);
     setAlertType(opts.type ?? "warning");
     setAlertOnConfirm(() => opts.onConfirm);
-    setAlertConfirmText(opts.confirmText ?? "OK");
-    setAlertCancelText(opts.cancelText ?? "Cancel");
+    setAlertConfirmText(opts.confirmText ?? t("common.ok"));
+    setAlertCancelText(opts.cancelText ?? t("common.cancel"));
     setAlertOpen(true);
   };
 
   const handleAddCreator = async (creatorId: number) => {
-    if (!selectedPlateform) return toast.error("Select a platform first");
+    if (!selectedPlateform)
+      return toast.error(t("WebApp_Relations_Manager.toast.select_platform_first"));
     try {
       await addCreatorToPlateformApi(selectedPlateform, creatorId);
-      toast.success("Creator linked");
+      toast.success(t("WebApp_Relations_Manager.toast.creator_linked"));
       reFetchCreators?.();
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error adding creator");
+      toast.error(t("WebApp_Relations_Manager.toast.creator_link_error"));
     }
   };
 
@@ -660,26 +685,26 @@ export default function PlateformRelationsManager() {
     if (!selectedPlateform) return;
     try {
       await removeCreatorFromPlateformApi(selectedPlateform, creatorId);
-      toast.success("Creator removed");
+      toast.success(t("WebApp_Relations_Manager.toast.creator_removed"));
       fetchRelations(selectedPlateform);
     } catch {
-      toast.error("Error removing creator");
+      toast.error(t("WebApp_Relations_Manager.toast.creator_remove_error"));
     }
   };
 
   const handleClearCreators = () => {
     if (!selectedPlateform) return;
     openConfirm({
-      title: "Clear creators",
-      message: "Remove all creators from this platform?",
+      title: t("WebApp_Relations_Manager.confirm.clear_creators_title"),
+      message: t("WebApp_Relations_Manager.confirm.clear_creators_message"),
       type: "warning",
       onConfirm: async () => {
         try {
           await clearCreatorsFromPlateformApi(selectedPlateform);
-          toast.success("All creators removed");
+          toast.success(t("WebApp_Relations_Manager.toast.all_creators_removed"));
           fetchRelations(selectedPlateform);
         } catch {
-          toast.error("Error clearing creators");
+          toast.error(t("WebApp_Relations_Manager.toast.clear_creators_error"));
         }
       },
     });
@@ -730,7 +755,7 @@ export default function PlateformRelationsManager() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto text-gray-900 dark:text-gray-100">
       <h1 className="text-2xl font-semibold mb-6 text-start">
-        🧩 WebApp Relations Manager
+        🧩 {t(`WebApp_Relations_Manager.title`)}
       </h1>
 
       <div className="flex flex-col gap-6">
@@ -738,7 +763,7 @@ export default function PlateformRelationsManager() {
         <div className="w-full bg-white dark:bg-gray-800 shadow rounded-xl p-4 text-gray-900 dark:text-gray-100">
           <div className="flex justify-between items-end mb-4 flex-wrap gap-3">
             <h2 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-              WebApps
+              {t(`WebApp_Relations_Manager.title.sub_title`)}
             </h2>
             <button
               onClick={() => {
@@ -765,16 +790,16 @@ export default function PlateformRelationsManager() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span>add</span>
+              <span>{t(`WebApp_Relations_Manager.button_add`)}</span>
             </button>
           </div>
           <div className="flex flex-col gap-3 max-h-[70vh] overflow-auto">
             {plateforms?.map((p: Platform) => {
               const isSelected = selectedPlateform === p.id;
               return (
-                <div key={p.id} className={`w-full`}> 
+                <div key={p.id} className={`w-full`}>
                   <div
-                  onClick={() => setSelectedPlateform(p.id)}
+                    onClick={() => setSelectedPlateform(p.id)}
                     className={`flex items-center justify-between p-3 rounded-lg transition-shadow border cursor-pointer ${isSelected ? 'border-indigo-300 bg-indigo-50 shadow-md' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'} hover:shadow-sm`}>
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 flex items-center justify-center text-indigo-700 dark:text-indigo-200 font-semibold">
@@ -785,9 +810,13 @@ export default function PlateformRelationsManager() {
                         <button
                           onClick={() => setSelectedPlateform(p.id)}
                           className="text-left w-full cursor-pointer"
-                          aria-label={`Select ${p.name}`}>
+                          aria-label={formatMessage("WebApp_Relations_Manager.platform.aria_select", { name: p.name ?? "" })}>
                           <div className={`text-sm font-medium truncate ${isSelected ? 'text-indigo-700' : 'text-gray-800 dark:text-gray-100'}`}>{p.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.video_sync_url || p.post_sync_url ? 'sync configured' : 'no sync configured'}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {p.video_sync_url || p.post_sync_url
+                              ? t("WebApp_Relations_Manager.platform.sync_configured")
+                              : t("WebApp_Relations_Manager.platform.sync_not_configured")}
+                          </div>
                         </button>
                       </div>
                     </div>
@@ -801,7 +830,7 @@ export default function PlateformRelationsManager() {
                           setPlatformPostSyncUrl(p.post_sync_url ?? "");
                           setPlatformModalOpen(true);
                         }}
-                        aria-label={`Edit ${p.name}`}
+                          aria-label={formatMessage("WebApp_Relations_Manager.platform.aria_edit", { name: p.name ?? "" })}
                         className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487 18.55 2.8a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
@@ -810,7 +839,7 @@ export default function PlateformRelationsManager() {
 
                       <button
                         onClick={() => handleDeletePlatform(p.id)}
-                        aria-label={`Delete ${p.name}`}
+                          aria-label={formatMessage("WebApp_Relations_Manager.platform.aria_delete", { name: p.name ?? "" })}
                         className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/10 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9M6 7h12M9 7V4h6v3" />
@@ -827,11 +856,11 @@ export default function PlateformRelationsManager() {
           <dialog className={`modal ${platformModalOpen ? "modal-open" : ""}`}>
             <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
               <h3 className="font-bold text-lg mb-3">
-                {editingPlatform ? "Edit WebApp" : "Add WebApp"}
+                {editingPlatform ? `${t(`WebApp_Relations_Manager.edit_web_app`)}` : `${t(`WebApp_Relations_Manager.add_web_app`)}`}
               </h3>
               <input
                 type="text"
-                placeholder="WebApp name"
+                placeholder={`${t(`WebApp_Relations_Manager.form_name`)}`}
                 className="input w-full mb-3 bg-white border border-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 maxLength={20}
                 value={platformName}
@@ -840,7 +869,7 @@ export default function PlateformRelationsManager() {
               />
               <input
                 type="text"
-                placeholder="Video sync URL"
+                placeholder={`${t(`WebApp_Relations_Manager.form_video_sync_url`)}`}
                 className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 value={platformVideoSyncUrl}
                 onChange={(e) => setPlatformVideoSyncUrl(e.target.value)}
@@ -848,7 +877,7 @@ export default function PlateformRelationsManager() {
               />
               <input
                 type="text"
-                placeholder="Post sync URL"
+                placeholder={`${t(`WebApp_Relations_Manager.form_post_sync_url`)}`}
                 className="input  border border-gray-300 w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 value={platformPostSyncUrl}
                 onChange={(e) => setPlatformPostSyncUrl(e.target.value)}
@@ -859,13 +888,13 @@ export default function PlateformRelationsManager() {
                   onClick={() => setPlatformModalOpen(false)}
                   className="px-3 py-1 rounded-sm bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-400 dark:hover:bg-gray-500"
                 >
-                  Close
+                  {t(`WebApp_Relations_Manager.form_btn_close`)}
                 </button>
                 <button
                   onClick={handleSavePlatform}
                   className="px-3 py-1 rounded-sm bg-blue-600 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-500"
                 >
-                  {editingPlatform ? "Save" : "+ Add"}
+                  {editingPlatform ? t(`WebApp_Relations_Manager.button_save`) : t(`WebApp_Relations_Manager.button_add`)}
                 </button>
               </div>
             </div>
@@ -887,7 +916,7 @@ export default function PlateformRelationsManager() {
                     }`}
                   onClick={() => setRelationMode("video")}
                 >
-                  Video
+                  {t("WebApp_Relations_Manager.tabs.video")}
                 </button>
                 <button
                   type="button"
@@ -895,7 +924,7 @@ export default function PlateformRelationsManager() {
                     }`}
                   onClick={() => setRelationMode("post")}
                 >
-                  Post
+                  {t("WebApp_Relations_Manager.tabs.post")}
                 </button>
               </div>
               <div className="border border-slate-100 dark:border-gray-700 mb-5"></div>
@@ -903,7 +932,7 @@ export default function PlateformRelationsManager() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
                   <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    Linked Categories
+                    {t("WebApp_Relations_Manager.sections.linked_categories")}
                   </legend>
 
                   <div className="flex flex-wrap gap-2 justify-between">
@@ -926,7 +955,9 @@ export default function PlateformRelationsManager() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
                       <span>
-                        link {relationMode === "post" ? "Post Category" : "Category"}
+                        {relationMode === "post"
+                          ? t("WebApp_Relations_Manager.actions.link_post_category")
+                          : t("WebApp_Relations_Manager.actions.link_category")}
                       </span>
                     </button>
 
@@ -953,14 +984,14 @@ export default function PlateformRelationsManager() {
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
                         />
                       </svg>
-                      <span>Clear All</span>
+                      <span>{t("WebApp_Relations_Manager.actions.clear_all")}</span>
                     </button>
                   </div>
 
                   <div className="flex items-center gap-2 my-3">
                     <input
                       type="text"
-                      placeholder="Filter linked categories..."
+                      placeholder={t("WebApp_Relations_Manager.placeholders.filter_linked_categories")}
                       className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       value={linkedCatFilter}
                       onChange={(e) => {
@@ -977,15 +1008,15 @@ export default function PlateformRelationsManager() {
                       }}
                       className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     >
-                      <option value={5}>5 / page</option>
-                      <option value={10}>10 / page</option>
-                      <option value={20}>20 / page</option>
+                      <option value={5}>{formatMessage("pagination.per_page", { count: "5" })}</option>
+                      <option value={10}>{formatMessage("pagination.per_page", { count: "10" })}</option>
+                      <option value={20}>{formatMessage("pagination.per_page", { count: "20" })}</option>
                     </select>
                   </div>
 
                   {catRelations.length === 0 ? (
                     <p className="text-gray-500 dark:text-gray-400">
-                      No categories linked
+                      {t("WebApp_Relations_Manager.empty.no_categories_linked")}
                     </p>
                   ) : (
                     (() => {
@@ -995,29 +1026,31 @@ export default function PlateformRelationsManager() {
                       return (
                         <>
                           {pageItems.map((c) => (
-                                <RelationListItem
-                                  key={c.id}
-                                  id={c.id}
-                                  name={c.name ?? ""}
-                                  onRemove={() =>
-                                    openConfirm({
-                                      title: "Remove category",
-                                      message: `Remove category \"${c.name ?? ""}\" from this platform?`,
-                                      type: "warning",
-                                      confirmText: "Remove",
-                                      cancelText: "Cancel",
-                                      onConfirm: async () => {
-                                        if (relationMode === "post")
-                                          await handleRemovePostCategory(c.id);
-                                        else await handleRemoveCategory(c.id);
-                                      },
-                                    })
-                                  }
-                                  styleType="card"
-                                />
+                            <RelationListItem
+                              key={c.id}
+                              id={c.id}
+                              name={c.name ?? ""}
+                              onRemove={() =>
+                                openConfirm({
+                                      title: t("WebApp_Relations_Manager.confirm.remove_category_title"),
+                                      message: formatMessage("WebApp_Relations_Manager.confirm.remove_category_message", {
+                                        name: c.name ?? "",
+                                      }),
+                                  type: "warning",
+                                      confirmText: t("common.remove"),
+                                      cancelText: t("common.cancel"),
+                                  onConfirm: async () => {
+                                    if (relationMode === "post")
+                                      await handleRemovePostCategory(c.id);
+                                    else await handleRemoveCategory(c.id);
+                                  },
+                                })
+                              }
+                              styleType="card"
+                            />
                           ))}
 
-                            <div className="mt-2">
+                          <div className="mt-2">
                             <Pagination
                               totalItems={filtered.length}
                               pageSize={linkedCatPerPage}
@@ -1034,7 +1067,7 @@ export default function PlateformRelationsManager() {
 
                 <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
                   <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    Linked Subcategories
+                    {t("WebApp_Relations_Manager.sections.linked_subcategories")}
                   </legend>
 
                   <div className="flex gap-2 flex-wrap justify-between">
@@ -1061,10 +1094,9 @@ export default function PlateformRelationsManager() {
                         />
                       </svg>
                       <span>
-                        link{" "}
                         {relationMode === "post"
-                          ? "Post Subcategory"
-                          : "Subcategory"}
+                          ? t("WebApp_Relations_Manager.actions.link_post_subcategory")
+                          : t("WebApp_Relations_Manager.actions.link_subcategory")}
                       </span>
                     </button>
 
@@ -1091,12 +1123,14 @@ export default function PlateformRelationsManager() {
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
                         />
                       </svg>
-                      <span>Clear All</span>
+                      <span>{t("WebApp_Relations_Manager.actions.clear_all")}</span>
                     </button>
                   </div>
 
                   {subcatRelations?.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">No subcategories linked</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {t("WebApp_Relations_Manager.empty.no_subcategories_linked")}
+                    </p>
                   ) : (
                     (() => {
                       const filtered = (subcatRelations ?? []).filter((s) => (s.name ?? "").toLowerCase().includes(linkedSubcatFilter.toLowerCase()));
@@ -1112,11 +1146,13 @@ export default function PlateformRelationsManager() {
                               onRemove={() => {
                                 if (!s.relationId) return;
                                 openConfirm({
-                                  title: "Remove subcategory",
-                                  message: `Remove subcategory \"${s.name ?? ""}\" from this platform?`,
+                                  title: t("WebApp_Relations_Manager.confirm.remove_subcategory_title"),
+                                  message: formatMessage("WebApp_Relations_Manager.confirm.remove_subcategory_message", {
+                                    name: s.name ?? "",
+                                  }),
                                   type: "warning",
-                                  confirmText: "Remove",
-                                  cancelText: "Cancel",
+                                  confirmText: t("common.remove"),
+                                  cancelText: t("common.cancel"),
                                   onConfirm: async () => {
                                     if (relationMode === "post")
                                       await handleRemovePostSubcategory(s.relationId!);
@@ -1148,7 +1184,7 @@ export default function PlateformRelationsManager() {
                   relationMode === "video" && (
                     <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
                       <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                        Linked Tag Category
+                        {t("WebApp_Relations_Manager.sections.linked_tag_categories")}
                       </legend>
 
                       <div className="flex gap-2 flex-wrap justify-between">
@@ -1170,7 +1206,7 @@ export default function PlateformRelationsManager() {
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                           </svg>
-                          <span>Link tag category</span>
+                          <span>{t("WebApp_Relations_Manager.actions.link_tag_category")}</span>
                         </button>
 
                         <button
@@ -1192,54 +1228,56 @@ export default function PlateformRelationsManager() {
                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
                             />
                           </svg>
-                          <span>Clear All</span>
+                          <span>{t("WebApp_Relations_Manager.actions.clear_all")}</span>
                         </button>
                       </div>
 
-                          <div className="flex items-center gap-2 my-3">
-                            <input
-                              type="text"
-                              placeholder="Filter linked tag categories..."
-                              className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                              value={linkedTagCatFilter}
-                              onChange={(e) => {
-                                setLinkedTagCatFilter(e.target.value);
-                                setLinkedTagCatPage(1);
-                              }}
-                            />
+                      <div className="flex items-center gap-2 my-3">
+                        <input
+                          type="text"
+                              placeholder={t("WebApp_Relations_Manager.placeholders.filter_linked_tag_categories")}
+                          className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          value={linkedTagCatFilter}
+                          onChange={(e) => {
+                            setLinkedTagCatFilter(e.target.value);
+                            setLinkedTagCatPage(1);
+                          }}
+                        />
 
-                            <select
-                              value={linkedTagCatPerPage}
-                              onChange={(e) => {
-                                setLinkedTagCatPerPage(Number(e.target.value));
-                                setLinkedTagCatPage(1);
-                              }}
-                              className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                            >
-                              <option value={5}>5 / page</option>
-                              <option value={10}>10 / page</option>
-                              <option value={20}>20 / page</option>
-                            </select>
-                          </div>
+                        <select
+                          value={linkedTagCatPerPage}
+                          onChange={(e) => {
+                            setLinkedTagCatPerPage(Number(e.target.value));
+                            setLinkedTagCatPage(1);
+                          }}
+                          className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        >
+                              <option value={5}>{formatMessage("pagination.per_page", { count: "5" })}</option>
+                              <option value={10}>{formatMessage("pagination.per_page", { count: "10" })}</option>
+                              <option value={20}>{formatMessage("pagination.per_page", { count: "20" })}</option>
+                        </select>
+                      </div>
 
-                          {(() => {
-                            const filtered = (tagCatRelations ?? []).filter((t) => (t.name ?? "").toLowerCase().includes(linkedTagCatFilter.toLowerCase()));
-                            const start = (linkedTagCatPage - 1) * linkedTagCatPerPage;
-                            const pageItems = filtered.slice(start, start + linkedTagCatPerPage);
-                            return (
-                              <>
-                                {pageItems.map((tc) => (
+                      {(() => {
+                        const filtered = (tagCatRelations ?? []).filter((t) => (t.name ?? "").toLowerCase().includes(linkedTagCatFilter.toLowerCase()));
+                        const start = (linkedTagCatPage - 1) * linkedTagCatPerPage;
+                        const pageItems = filtered.slice(start, start + linkedTagCatPerPage);
+                        return (
+                          <>
+                            {pageItems.map((tc) => (
                               <RelationListItem
                                 key={tc.id}
                                 id={tc.id}
                                 name={tc.name ?? ""}
                                 onRemove={() =>
                                   openConfirm({
-                                    title: "Remove tag category",
-                                    message: `Remove tag category \"${tc.name ?? ""}\" from this platform?`,
+                                    title: t("WebApp_Relations_Manager.confirm.remove_tag_category_title"),
+                                    message: formatMessage("WebApp_Relations_Manager.confirm.remove_tag_category_message", {
+                                      name: tc.name ?? "",
+                                    }),
                                     type: "warning",
-                                    confirmText: "Remove",
-                                    cancelText: "Cancel",
+                                    confirmText: t("common.remove"),
+                                    cancelText: t("common.cancel"),
                                     onConfirm: async () => {
                                       await handleRemoveTagCategory(tc.id);
                                     },
@@ -1266,7 +1304,7 @@ export default function PlateformRelationsManager() {
                 }
                 <fieldset className="flex flex-col gap-3 rounded-lg border border-gray-300 dark:border-gray-600 p-3">
                   <legend className="font-medium px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                    Linked Creators
+                    {t("WebApp_Relations_Manager.sections.linked_creators")}
                   </legend>
 
                   <div className="flex gap-2 flex-wrap mb-3 justify-between">
@@ -1288,7 +1326,7 @@ export default function PlateformRelationsManager() {
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
-                      <span>link Creator</span>
+                      <span>{t("WebApp_Relations_Manager.actions.link_creator")}</span>
                     </button>
 
                     <button
@@ -1310,14 +1348,14 @@ export default function PlateformRelationsManager() {
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
                         />
                       </svg>
-                      <span>Clear All</span>
+                      <span>{t("WebApp_Relations_Manager.actions.clear_all")}</span>
                     </button>
                   </div>
 
                   <div className="flex items-center gap-2 my-3">
                     <input
                       type="text"
-                      placeholder="Filter linked creators..."
+                      placeholder={t("WebApp_Relations_Manager.placeholders.filter_linked_creators")}
                       className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       value={linkedCreatorFilter}
                       onChange={(e) => {
@@ -1334,14 +1372,16 @@ export default function PlateformRelationsManager() {
                       }}
                       className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     >
-                      <option value={5}>5 / page</option>
-                      <option value={10}>10 / page</option>
-                      <option value={20}>20 / page</option>
+                      <option value={5}>{formatMessage("pagination.per_page", { count: "5" })}</option>
+                      <option value={10}>{formatMessage("pagination.per_page", { count: "10" })}</option>
+                      <option value={20}>{formatMessage("pagination.per_page", { count: "20" })}</option>
                     </select>
                   </div>
 
                   {creatorRelations.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400">No creators linked</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {t("WebApp_Relations_Manager.empty.no_creators_linked")}
+                    </p>
                   ) : (
                     (() => {
                       const filtered = creatorRelations.filter((c) => (c.name ?? "").toLowerCase().includes(linkedCreatorFilter.toLowerCase()));
@@ -1356,11 +1396,13 @@ export default function PlateformRelationsManager() {
                               name={c.name ?? ""}
                               onRemove={() =>
                                 openConfirm({
-                                  title: "Remove creator",
-                                  message: `Remove creator \"${c.name ?? ""}\" from this platform?`,
+                                  title: t("WebApp_Relations_Manager.confirm.remove_creator_title"),
+                                  message: formatMessage("WebApp_Relations_Manager.confirm.remove_creator_message", {
+                                    name: c.name ?? "",
+                                  }),
                                   type: "warning",
-                                  confirmText: "Remove",
-                                  cancelText: "Cancel",
+                                  confirmText: t("common.remove"),
+                                  cancelText: t("common.cancel"),
                                   onConfirm: async () => {
                                     await handleRemoveCreator(Number(c.id));
                                   },
@@ -1389,7 +1431,7 @@ export default function PlateformRelationsManager() {
             </>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
-              Select a platform to manage its relations.
+              {t(`WebApp_Relations_Manager.select_platform`)}
             </div>
           )}
         </div>
@@ -1401,10 +1443,18 @@ export default function PlateformRelationsManager() {
         className={`modal ${categoryModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Category</h3>
+          <h3 className="font-bold text-lg mb-3">
+            {relationMode === "post"
+              ? t("WebApp_Relations_Manager.modal.add_post_category_title")
+              : t("WebApp_Relations_Manager.modal.add_category_title")}
+          </h3>
           <input
             type="text"
-            placeholder="Search category..."
+            placeholder={
+              relationMode === "post"
+                ? t("WebApp_Relations_Manager.placeholders.search_post_category")
+                : t("WebApp_Relations_Manager.placeholders.search_category")
+            }
             className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -1416,7 +1466,7 @@ export default function PlateformRelationsManager() {
           <div className="flex items-center gap-2 mb-3">
             <input
               type="text"
-              placeholder="Filter..."
+              placeholder={t("common.filter_placeholder")}
               className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={categoryModalFilter}
               onChange={(e) => {
@@ -1432,9 +1482,9 @@ export default function PlateformRelationsManager() {
               }}
               className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
-              <option value={6}>6 / page</option>
-              <option value={12}>12 / page</option>
-              <option value={24}>24 / page</option>
+              <option value={6}>{formatMessage("pagination.per_page", { count: "6" })}</option>
+              <option value={12}>{formatMessage("pagination.per_page", { count: "12" })}</option>
+              <option value={24}>{formatMessage("pagination.per_page", { count: "24" })}</option>
             </select>
           </div>
 
@@ -1446,13 +1496,15 @@ export default function PlateformRelationsManager() {
                 return (
                   <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                     <span className="italic text-gray-500 dark:text-gray-400">
-                      Create new {relationMode === "post" ? "post category" : "category"} "{search}"
+                      {relationMode === "post"
+                        ? formatMessage("WebApp_Relations_Manager.actions.create_new_post_category", { name: search })
+                        : formatMessage("WebApp_Relations_Manager.actions.create_new_category", { name: search })}
                     </span>
                     <button
                       onClick={() => (relationMode === "post" ? handleCreateAndLinkPostCategory(search) : handleCreateAndLinkCategory(search))}
                       className="btn btn-xs btn-success"
                     >
-                      Create & Link
+                      {t("WebApp_Relations_Manager.actions.create_and_link")}
                     </button>
                   </div>
                 );
@@ -1488,7 +1540,7 @@ export default function PlateformRelationsManager() {
               onClick={() => setCategoryModalOpen(false)}
               className="btn btn-outline"
             >
-              Close
+              {t("common.close")}
             </button>
           </div>
         </div>
@@ -1500,10 +1552,12 @@ export default function PlateformRelationsManager() {
         className={`modal ${creatorModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Link Creator</h3>
+          <h3 className="font-bold text-lg mb-3">
+            {t("WebApp_Relations_Manager.modal.link_creator_title")}
+          </h3>
           <input
             type="text"
-            placeholder="Search creator..."
+            placeholder={t("WebApp_Relations_Manager.placeholders.search_creator")}
             className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -1511,7 +1565,7 @@ export default function PlateformRelationsManager() {
           <div className="flex items-center gap-2 mb-3">
             <input
               type="text"
-              placeholder="Filter..."
+              placeholder={t("common.filter_placeholder")}
               className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={categoryModalFilter}
               onChange={(e) => {
@@ -1527,9 +1581,9 @@ export default function PlateformRelationsManager() {
               }}
               className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
-              <option value={6}>6 / page</option>
-              <option value={12}>12 / page</option>
-              <option value={24}>24 / page</option>
+              <option value={6}>{formatMessage("pagination.per_page", { count: "6" })}</option>
+              <option value={12}>{formatMessage("pagination.per_page", { count: "12" })}</option>
+              <option value={24}>{formatMessage("pagination.per_page", { count: "24" })}</option>
             </select>
           </div>
 
@@ -1541,7 +1595,9 @@ export default function PlateformRelationsManager() {
               if (filtered.length === 0 && search.trim() !== "") {
                 return (
                   <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                    <span className="italic text-gray-500 dark:text-gray-400">No creator</span>
+                    <span className="italic text-gray-500 dark:text-gray-400">
+                      {t("WebApp_Relations_Manager.empty.no_creator")}
+                    </span>
                   </div>
                 );
               }
@@ -1582,7 +1638,7 @@ export default function PlateformRelationsManager() {
               onClick={() => setCreatorModalOpen(false)}
               className="btn btn-outline"
             >
-              Close
+              {t("common.close")}
             </button>
           </div>
         </div>
@@ -1594,10 +1650,14 @@ export default function PlateformRelationsManager() {
         className={`modal ${subCategoryModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Subcategory</h3>
+          <h3 className="font-bold text-lg mb-3">
+            {relationMode === "post"
+              ? t("WebApp_Relations_Manager.modal.add_post_subcategory_title")
+              : t("WebApp_Relations_Manager.modal.add_subcategory_title")}
+          </h3>
           <input
             type="text"
-            placeholder="Search subcategory..."
+            placeholder={t("WebApp_Relations_Manager.placeholders.search_subcategory")}
             className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -1605,7 +1665,7 @@ export default function PlateformRelationsManager() {
           <div className="flex items-center gap-2 mb-3">
             <input
               type="text"
-              placeholder="Filter..."
+              placeholder={t("common.filter_placeholder")}
               className="input input-sm border w-full max-w-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={subcatModalFilter}
               onChange={(e) => {
@@ -1621,9 +1681,9 @@ export default function PlateformRelationsManager() {
               }}
               className="select select-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
-              <option value={6}>6 / page</option>
-              <option value={12}>12 / page</option>
-              <option value={24}>24 / page</option>
+              <option value={6}>{formatMessage("pagination.per_page", { count: "6" })}</option>
+              <option value={12}>{formatMessage("pagination.per_page", { count: "12" })}</option>
+              <option value={24}>{formatMessage("pagination.per_page", { count: "24" })}</option>
             </select>
           </div>
 
@@ -1634,7 +1694,9 @@ export default function PlateformRelationsManager() {
               if (combined.length === 0 && search.trim() !== "") {
                 return (
                   <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-                    <span className="italic text-gray-500 dark:text-gray-400">no subcategory</span>
+                    <span className="italic text-gray-500 dark:text-gray-400">
+                      {t("WebApp_Relations_Manager.empty.no_subcategory")}
+                    </span>
                   </div>
                 );
               }
@@ -1669,7 +1731,7 @@ export default function PlateformRelationsManager() {
               onClick={() => setSubCategoryModalOpen(false)}
               className="btn btn-outline"
             >
-              Close
+              {t("common.close")}
             </button>
           </div>
         </div>
@@ -1681,10 +1743,12 @@ export default function PlateformRelationsManager() {
         className={`modal ${tagCatModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-          <h3 className="font-bold text-lg mb-3">Add Tag Category</h3>
+          <h3 className="font-bold text-lg mb-3">
+            {t("WebApp_Relations_Manager.modal.add_tag_category_title")}
+          </h3>
           <input
             type="text"
-            placeholder="Search category..."
+            placeholder={t("WebApp_Relations_Manager.placeholders.search_category")}
             className="input input-bordered w-full mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -1693,39 +1757,39 @@ export default function PlateformRelationsManager() {
             {filteredTagCategories?.length === 0 && search.trim() !== "" ? (
               <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                 <span className="italic text-gray-500 dark:text-gray-400">
-                  Create new Tag category "{search}"
+                  {formatMessage("WebApp_Relations_Manager.actions.create_new_tag_category", { name: search })}
                 </span>
                 <button
                   onClick={() => handleCreateAndLinkTagCategory(search)}
                   className="btn btn-xs btn-success"
                 >
-                  Create & Link
+                  {t("WebApp_Relations_Manager.actions.create_and_link")}
                 </button>
               </div>
             ) : (
               <>
-                  {(() => {
-                    const start = (tagCatPage - 1) * itemsPerPage;
-                    const pageItems = (filteredTagCategories ?? []).slice(
-                      start,
-                      start + itemsPerPage
-                    );
-                    return pageItems.map((tagCat) => {
-                      const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
+                {(() => {
+                  const start = (tagCatPage - 1) * itemsPerPage;
+                  const pageItems = (filteredTagCategories ?? []).slice(
+                    start,
+                    start + itemsPerPage
+                  );
+                  return pageItems.map((tagCat) => {
+                    const isLinked = tagCatRelations.some((rc) => rc.name === tagCat.name);
 
-                      return (
-                        <RelationListItem
-                          key={tagCat.id}
-                          id={tagCat.id}
-                          name={tagCat.name ?? ""}
-                          linked={isLinked}
-                          onAdd={!isLinked ? () => handleAddTagCategory(tagCat.id) : undefined}
-                          styleType="pill"
-                          variant="tag"
-                        />
-                      );
-                    });
-                  })()}
+                    return (
+                      <RelationListItem
+                        key={tagCat.id}
+                        id={tagCat.id}
+                        name={tagCat.name ?? ""}
+                        linked={isLinked}
+                        onAdd={!isLinked ? () => handleAddTagCategory(tagCat.id) : undefined}
+                        styleType="pill"
+                        variant="tag"
+                      />
+                    );
+                  });
+                })()}
 
                 <div className="mt-2">
                   <Pagination
@@ -1743,7 +1807,7 @@ export default function PlateformRelationsManager() {
               onClick={() => setTagCatModalOpen(false)}
               className="text-red-500 dark:text-pink-500 rounded-lg cursor-pointer bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
             >
-              Close
+              {t("common.close")}
             </button>
           </div>
         </div>
