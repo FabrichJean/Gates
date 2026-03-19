@@ -144,6 +144,8 @@ export const useVideoForAppBulkEdit = ({
         let errorCount = 0;
 
         try {
+            const creatorId = bulkEditData.creator_id.trim();
+
             for (const videoId of selectedVideos) {
                 try {
                     const updateData: any = {};
@@ -167,6 +169,7 @@ export const useVideoForAppBulkEdit = ({
 
                     if (bulkEditData.category) updateData.category = bulkEditData.category;
                     if (bulkEditData.subcategory) updateData.subcategory = bulkEditData.subcategory;
+                    if (creatorId) updateData.creator_id = Number(creatorId);
                     if (bulkEditData.isActive !== null) updateData.isDeleted = !bulkEditData.isActive;
                     if (bulkEditData.checking !== null) updateData.checking = bulkEditData.checking;
                     if (bulkEditData.isBanned !== null) updateData.isBanned = bulkEditData.isBanned;
