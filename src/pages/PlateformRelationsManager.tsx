@@ -742,7 +742,6 @@ export default function PlateformRelationsManager() {
             </h2>
             <button
               onClick={() => {
-
                 setEditingPlatform(null);
                 setPlatformName("");
                 setPlatformVideoSyncUrl("");
