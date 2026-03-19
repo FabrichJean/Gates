@@ -619,6 +619,16 @@
   "WebApp_Relations_Manager.toast.creator_removed": "创作者已移除",
   "WebApp_Relations_Manager.toast.creator_remove_error": "移除创作者时出错",
   "WebApp_Relations_Manager.toast.all_creators_removed": "已移除所有创作者",
-  "WebApp_Relations_Manager.toast.clear_creators_error": "清空创作者时出错"
-
+  "WebApp_Relations_Manager.toast.clear_creators_error": "清空创作者时出错",
+  "SystemSettings.loading": "正在加载设置...",
+  "SystemSettings.title": "系统设置",
+  "SystemSettings.fields.system_code": "系统代码",
+  "SystemSettings.fields.mp4_storage_path": "MP4 存储路径",
+  "SystemSettings.fields.image_storage_path": "图片存储路径",
+  "SystemSettings.fields.cdn_url": "CDN 网址",
+  "SystemSettings.fields.server_url": "服务器网址",
+  "SystemSettings.button.save": "保存",
+  "SystemSettings.button.saving": "正在保存...",
+  "SystemSettings.toast.saved": "✅ 设置已保存！",
+  "SystemSettings.toast.save_error": "❌ 保存时出错"
 }

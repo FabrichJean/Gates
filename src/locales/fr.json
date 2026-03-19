@@ -618,5 +618,16 @@
   "WebApp_Relations_Manager.toast.creator_removed": "Créateur retiré",
   "WebApp_Relations_Manager.toast.creator_remove_error": "Erreur lors du retrait du créateur",
   "WebApp_Relations_Manager.toast.all_creators_removed": "Tous les créateurs ont été supprimés",
-  "WebApp_Relations_Manager.toast.clear_creators_error": "Erreur lors de la suppression des créateurs"
+  "WebApp_Relations_Manager.toast.clear_creators_error": "Erreur lors de la suppression des créateurs",
+  "SystemSettings.loading": "Chargement des paramètres...",
+  "SystemSettings.title": "Paramètres système",
+  "SystemSettings.fields.system_code": "Code système",
+  "SystemSettings.fields.mp4_storage_path": "Chemin de stockage MP4",
+  "SystemSettings.fields.image_storage_path": "Chemin de stockage des images",
+  "SystemSettings.fields.cdn_url": "URL CDN",
+  "SystemSettings.fields.server_url": "URL du serveur",
+  "SystemSettings.button.save": "Enregistrer",
+  "SystemSettings.button.saving": "Enregistrement...",
+  "SystemSettings.toast.saved": "✅ Paramètres enregistrés !",
+  "SystemSettings.toast.save_error": "❌ Erreur lors de l'enregistrement"
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { saveSettings } from "../api/settings";
 import { useSettings } from "../hooks/useSettings";
+import { useI18n } from "../i18n";
 
 type Settings = {
   system_code: string;
@@ -13,6 +14,7 @@ type Settings = {
 
 export default function SystemSettings() {
   const { data, reFetch } = useSettings();
+  const { t } = useI18n();
 
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,30 +36,61 @@ export default function SystemSettings() {
     setLoading(true);
     try {
       await saveSettings(settings);
-      toast.success("✅ 已保存的设置 !");
+      toast.success(t("SystemSettings.toast.saved"));
       reFetch();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      toast.error("❌ 保存时出错");
+      toast.error(t("SystemSettings.toast.save_error"));
     } finally {
       setLoading(false);
     }
   };
 
-  if (!settings) return <div className="text-gray-600 dark:text-gray-400 transition-colors duration-300">正在加载设置...</div>;
+  if (!settings) {
+    return (
+      <div className="text-gray-600 dark:text-gray-400 transition-colors duration-300">
+        {t("SystemSettings.loading")}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-md p-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300 shadow-sm dark:shadow-gray-900">
       <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 transition-colors duration-300">
-        ⚙️ 系统设置
+        ⚙️ {t("SystemSettings.title")}
       </h1>
 
       <div className="space-y-5">
-        <SettingField label="系统代码" name="system_code" value={settings.system_code} onChange={handleChange} />
-        <SettingField label="MP4 存储路径" name="mp4_storage_path" value={settings.mp4_storage_path} onChange={handleChange} />
-        <SettingField label="图片存储路径" name="image_storage_path" value={settings.image_storage_path} onChange={handleChange} />
-        <SettingField label="CDN 网址" name="cdn_url" value={settings.cdn_url} onChange={handleChange} />
-        <SettingField label="服务器网址" name="server_url" value={settings.server_url} onChange={handleChange} />
+        <SettingField
+          label={t("SystemSettings.fields.system_code")}
+          name="system_code"
+          value={settings.system_code}
+          onChange={handleChange}
+        />
+        <SettingField
+          label={t("SystemSettings.fields.mp4_storage_path")}
+          name="mp4_storage_path"
+          value={settings.mp4_storage_path}
+          onChange={handleChange}
+        />
+        <SettingField
+          label={t("SystemSettings.fields.image_storage_path")}
+          name="image_storage_path"
+          value={settings.image_storage_path}
+          onChange={handleChange}
+        />
+        <SettingField
+          label={t("SystemSettings.fields.cdn_url")}
+          name="cdn_url"
+          value={settings.cdn_url}
+          onChange={handleChange}
+        />
+        <SettingField
+          label={t("SystemSettings.fields.server_url")}
+          name="server_url"
+          value={settings.server_url}
+          onChange={handleChange}
+        />
       </div>
 
       <div className="mt-8 flex justify-end">
@@ -67,7 +100,7 @@ export default function SystemSettings() {
           className={`px-6 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium 
           transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
         >
-          {loading ? "💾 正在保存..." : "💾 保存"}
+          {loading ? `💾 ${t("SystemSettings.button.saving")}` : `💾 ${t("SystemSettings.button.save")}`}
         </button>
       </div>
     </div>

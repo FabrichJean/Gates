@@ -618,7 +618,16 @@
   "WebApp_Relations_Manager.toast.creator_removed": "Creator removed",
   "WebApp_Relations_Manager.toast.creator_remove_error": "Error removing creator",
   "WebApp_Relations_Manager.toast.all_creators_removed": "All creators removed",
-  "WebApp_Relations_Manager.toast.clear_creators_error": "Error clearing creators"
-
-
+  "WebApp_Relations_Manager.toast.clear_creators_error": "Error clearing creators",
+  "SystemSettings.loading": "Loading settings...",
+  "SystemSettings.title": "System Settings",
+  "SystemSettings.fields.system_code": "System code",
+  "SystemSettings.fields.mp4_storage_path": "MP4 storage path",
+  "SystemSettings.fields.image_storage_path": "Image storage path",
+  "SystemSettings.fields.cdn_url": "CDN URL",
+  "SystemSettings.fields.server_url": "Server URL",
+  "SystemSettings.button.save": "Save",
+  "SystemSettings.button.saving": "Saving...",
+  "SystemSettings.toast.saved": "✅ Settings saved!",
+  "SystemSettings.toast.save_error": "❌ Error while saving"
 }
