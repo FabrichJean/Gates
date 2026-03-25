@@ -16,6 +16,7 @@ import { getCreatorsForBulkSync } from "../api/creators";
 import { multipleSync } from "../api/videos";
 import { getAllPlateformsApi } from "../api/plateforms";
 import type { Plateform } from "../types/post";
+import { useI18n } from "../i18n";
 
 const Synchronisation = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -25,6 +26,7 @@ const Synchronisation = () => {
   );
 
   const { data: syncErrors, loading, error, reFetch } = useSyncErrors();
+  const { t } = useI18n();
 
   const [processingAll, setProcessingAll] = useState(false);
   const [processedCount, setProcessedCount] = useState(0);
@@ -70,6 +72,33 @@ const Synchronisation = () => {
   }, []);
 
   const { show } = useCardFlottant();
+
+  const formatMessage = (key: string, vars?: Record<string, string>) => {
+    let message = t(key);
+    if (!vars) return message;
+    Object.entries(vars).forEach(([token, value]) => {
+      message = message.replace(`{${token}}`, value);
+    });
+    return message;
+  };
+
+  const getEntityLabel = (entity?: SyncEntity | string) => {
+    if (!entity) return "";
+    switch (entity) {
+      case "video":
+        return t("sync.entity.video");
+      case "post":
+        return t("sync.entity.post");
+      case "video_for_app":
+        return t("sync.entity.video_for_app");
+      case "post_for_app":
+        return t("sync.entity.post_for_app");
+      case "creators":
+        return t("sync.entity.creators");
+      default:
+        return String(entity);
+    }
+  };
 
   const handleOpenFor = (id?: number) => {
     setSelectedRow(() => id || null);
@@ -463,7 +492,7 @@ const Synchronisation = () => {
       const processed = resources.length;
       const errors: Array<{ resourceId: number; error: string }> = resources.map(resource => ({
         resourceId: resource.id,
-        error: error?.response?.data?.message || error?.message || "Batch sync failed"
+        error: error?.response?.data?.message || error?.message || t("sync.bulk_status.errors.batch_failed")
       }));
 
       setBulkSyncProgress(prev => ({
@@ -548,7 +577,9 @@ const Synchronisation = () => {
       <div className="w-full h-full flex flex-col">
         {/* view error process */}
         <div className="w-full flex justify-between gap-2 items-center">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4">Synchronisation</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mb-4">
+            {t("sync.title")}
+          </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setBulkSyncOpen(true)}
@@ -556,7 +587,7 @@ const Synchronisation = () => {
             >
               <FaTasks />
               <span className="md:inline hidden text-green-600 dark:text-green-400">
-                Bulk Sync Tracking
+                {t("sync.actions.bulk_tracking")}
               </span>
             </button>
             <button
@@ -565,7 +596,7 @@ const Synchronisation = () => {
             >
               <FaSyncAlt />
               <span className="md:inline hidden text-gray-600 dark:text-gray-400 ">
-                Launch Synchronisation
+                {t("sync.actions.launch")}
               </span>
             </button>
             <button
@@ -599,11 +630,19 @@ const Synchronisation = () => {
               disabled={processingAll || loading}
               className=" rounded-lg cursor-pointer flex items-center justify-center gap-2 px-2 py-2 text-nowrap font-medium text-sm border border-gray-200 dark:border-gray-700 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-800 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
             >
-              Retry all errors
+              {t("sync.actions.retry_all_errors")}
             </button>
             {processingAll && (
               <div className="text-sm text-gray-600 dark:text-gray-300">
-                {processedCount}/{totalToProcess} processed{currentItem ? ` — current: ${currentItem}` : ''}
+                {formatMessage("sync.processing.count", {
+                  processed: String(processedCount),
+                  total: String(totalToProcess),
+                })}
+                {currentItem
+                  ? formatMessage("sync.processing.current", {
+                      current: String(currentItem),
+                    })
+                  : ""}
               </div>
             )}
           </div>
@@ -617,14 +656,14 @@ const Synchronisation = () => {
                 }`}
               onClick={() => setActiveTab("errorList")}
             >
-              Error List
+              {t("sync.tabs.error_list")}
             </button>
             <button
               className={`tab tab-bordered ${activeTab === "bulkSync" ? "tab-active" : ""
                 }`}
               onClick={() => setActiveTab("bulkSync")}
             >
-              Bulk Sync Status
+              {t("sync.tabs.bulk_status")}
             </button>
           </div>
 
@@ -636,7 +675,7 @@ const Synchronisation = () => {
                 checked={onlyUnresolved}
                 onChange={(e) => setOnlyUnresolved(e.target.checked)}
               />
-              <span className="cursor-pointer">Only unresolved</span>
+              <span className="cursor-pointer">{t("sync.filters.only_unresolved")}</span>
             </label>
           </div>
         </div>
@@ -644,37 +683,40 @@ const Synchronisation = () => {
         {/* Tab Content */}
         {activeTab === "firstTab" ? (
           <div className="w-full flex flex-col mt-6">
-            <h2 className="font-bold pb-2 text-blue-400">First Tab Content</h2>
+            <h2 className="font-bold pb-2 text-blue-400">
+              {t("sync.first_tab.title")}
+            </h2>
             <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default p-6">
               <div className="text-center text-gray-500">
                 <h3 className="text-lg font-medium mb-2">
-                  Welcome to First Tab
+                  {t("sync.first_tab.welcome_title")}
                 </h3>
                 <p>
-                  This is the content for the first tab. You can add any content
-                  here.
+                  {t("sync.first_tab.welcome_body")}
                 </p>
               </div>
             </div>
           </div>
         ) : activeTab === "bulkSync" ? (
           <div className="w-full flex flex-col mt-6">
-            <h2 className="font-bold pb-2 text-green-400">Bulk Sync Status</h2>
+            <h2 className="font-bold pb-2 text-green-400">
+              {t("sync.bulk_status.title")}
+            </h2>
             <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default p-6">
               {bulkSyncProgress.total === 0 ? (
                 <div className="text-center text-gray-500">
                   <h3 className="text-lg font-medium mb-2">
-                    No Bulk Sync in Progress
+                    {t("sync.bulk_status.empty_title")}
                   </h3>
                   <p className="mb-4">
-                    Start a bulk synchronization to track progress here.
+                    {t("sync.bulk_status.empty_body")}
                   </p>
                   <button
                     onClick={() => setBulkSyncOpen(true)}
                     className="flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                   >
                     <FaTasks className="w-4 h-4" />
-                    Start Bulk Sync
+                    {t("sync.bulk_status.start_bulk")}
                   </button>
                 </div>
               ) : (
@@ -685,25 +727,33 @@ const Synchronisation = () => {
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {bulkSyncProgress.processed}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Processed</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("sync.bulk_status.metrics.processed")}
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
                       <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                         {bulkSyncProgress.total}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("sync.bulk_status.metrics.total")}
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                         {bulkSyncProgress.succeeded}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Succeeded</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("sync.bulk_status.metrics.succeeded")}
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                         {bulkSyncProgress.failed}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Failed</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("sync.bulk_status.metrics.failed")}
+                      </div>
                     </div>
                   </div>
 
@@ -713,7 +763,7 @@ const Synchronisation = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h5 className="font-medium text-gray-800 dark:text-gray-200">
-                            Current Status
+                            {t("sync.bulk_status.current_status.title")}
                           </h5>
                           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
                             bulkSyncProgress.isRunning 
@@ -723,19 +773,19 @@ const Synchronisation = () => {
                             {bulkSyncProgress.isRunning ? (
                               <>
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                Processing
+                                {t("sync.bulk_status.current_status.processing")}
                               </>
                             ) : (
                               <>
                                 <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                                Idle
+                                {t("sync.bulk_status.current_status.idle")}
                               </>
                             )}
                           </span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                           <div>
-                            <span className="font-medium">Current Entity:</span>
+                            <span className="font-medium">{t("sync.bulk_status.current_status.entity_label")}</span>
                             <div className={`inline-flex items-center gap-1 ml-2 px-2 py-1 rounded text-xs font-medium ${
                               currentEntity === "video" 
                                 ? "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
@@ -743,17 +793,17 @@ const Synchronisation = () => {
                                 ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
                                 : "bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300"
                             }`}>
-                              {currentEntity === "video_for_app" ? "Videos For App" : currentEntity.charAt(0).toUpperCase() + currentEntity.slice(1)}
+                              {getEntityLabel(currentEntity)}
                             </div>
                           </div>
                           <div>
-                            <span className="font-medium">Current Page:</span>
+                            <span className="font-medium">{t("sync.bulk_status.current_status.page_label")}</span>
                             <span className="ml-2 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs">
                               {currentPage}
                             </span>
                           </div>
                           <div>
-                            <span className="font-medium">Items per Page:</span>
+                            <span className="font-medium">{t("sync.bulk_status.current_status.items_per_page_label")}</span>
                             <span className="ml-2 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs">
                               {currentLimit}
                             </span>
@@ -768,14 +818,14 @@ const Synchronisation = () => {
                               className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                             >
                               <FaArrowLeft className="w-3 h-3" />
-                              Prev
+                              {t("sync.pagination.prev")}
                             </button>
                           )}
                           <button
                             onClick={() => handleStartBulkSync([currentEntity], false, currentPage + 1, currentLimit, false, undefined, undefined)}
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors flex items-center gap-1"
                           >
-                            Next
+                            {t("sync.pagination.next")}
                             <FaArrowRight className="w-3 h-3" />
                           </button>
                         </div>
@@ -792,7 +842,15 @@ const Synchronisation = () => {
                       />
                     </div>
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                      {Math.round(bulkSyncProgress.total > 0 ? (bulkSyncProgress.processed / bulkSyncProgress.total) * 100 : 0)}% Complete
+                      {formatMessage("sync.bulk_status.progress_complete", {
+                        percent: String(
+                          Math.round(
+                            bulkSyncProgress.total > 0
+                              ? (bulkSyncProgress.processed / bulkSyncProgress.total) * 100
+                              : 0
+                          )
+                        ),
+                      })}
                     </div>
                   </div>
 
@@ -800,14 +858,14 @@ const Synchronisation = () => {
                   {bulkSyncProgress.currentItem && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                       <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-3">
-                        Currently Processing:
+                        {t("sync.bulk_status.current_item.title")}
                       </h5>
                       <div className="flex items-center gap-4">
                         {bulkSyncProgress.currentItem.cover && (
                           <div className="flex-shrink-0">
                             <img
                               src={bulkSyncProgress.currentItem.cover}
-                              alt={bulkSyncProgress.currentItem.title || "Cover"}
+                              alt={bulkSyncProgress.currentItem.title || t("sync.bulk_status.current_item.cover_alt")}
                               className="w-12 h-12 object-cover rounded-lg border border-blue-200 dark:border-blue-700"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -818,10 +876,10 @@ const Synchronisation = () => {
                         )}
                         <div className="flex-1">
                           <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                            {bulkSyncProgress.currentItem.title || "Untitled"}
+                            {bulkSyncProgress.currentItem.title || t("sync.bulk_status.current_item.untitled")}
                           </div>
                           <div className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                            ID: {bulkSyncProgress.currentItem.id}
+                            {t("sync.bulk_status.current_item.id_label")} {bulkSyncProgress.currentItem.id}
                             {bulkSyncProgress.currentItem.source && (
                               <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
                                 bulkSyncProgress.currentItem.source === 'video' 
@@ -832,7 +890,7 @@ const Synchronisation = () => {
                                   ? 'bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300'
                                   : 'bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'
                               }`}>
-                                {bulkSyncProgress.currentItem.source.toUpperCase().replace('_', ' ')}
+                                {getEntityLabel(bulkSyncProgress.currentItem.source)}
                               </span>
                             )}
                           </div>
@@ -854,11 +912,11 @@ const Synchronisation = () => {
                     }`}>
                       {bulkSyncProgress.isRunning 
                         ? bulkSyncProgress.isPaused 
-                          ? "Paused" 
-                          : "Running..."
+                          ? t("sync.bulk_status.state.paused")
+                          : t("sync.bulk_status.state.running")
                         : bulkSyncProgress.processed === bulkSyncProgress.total && bulkSyncProgress.total > 0
-                          ? "Completed"
-                          : "Stopped"
+                          ? t("sync.bulk_status.state.completed")
+                          : t("sync.bulk_status.state.stopped")
                       }
                     </div>
                   </div>
@@ -867,13 +925,15 @@ const Synchronisation = () => {
                   {bulkSyncProgress.errors.length > 0 && (
                     <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                       <h5 className="font-medium text-red-600 dark:text-red-400 mb-3">
-                        Recent Errors ({bulkSyncProgress.errors.length})
+                        {formatMessage("sync.bulk_status.errors.title", {
+                          count: String(bulkSyncProgress.errors.length),
+                        })}
                       </h5>
                       <div className="max-h-32 overflow-y-auto space-y-2">
                         {bulkSyncProgress.errors.slice(-5).map((error, index) => (
                           <div key={index} className="text-sm border-l-2 border-red-400 pl-2">
                             <div className="font-medium text-red-700 dark:text-red-300">
-                              Resource ID: {error.resourceId}
+                              {t("sync.bulk_status.errors.resource_id")}: {error.resourceId}
                             </div>
                             <div className="text-red-600 dark:text-red-400 text-xs">
                               {error.error}
@@ -882,7 +942,9 @@ const Synchronisation = () => {
                         ))}
                         {bulkSyncProgress.errors.length > 5 && (
                           <div className="text-xs text-gray-500 text-center">
-                            ... and {bulkSyncProgress.errors.length - 5} more errors
+                            {formatMessage("sync.bulk_status.errors.more", {
+                              count: String(bulkSyncProgress.errors.length - 5),
+                            })}
                           </div>
                         )}
                       </div>
@@ -895,7 +957,7 @@ const Synchronisation = () => {
                       onClick={() => setBulkSyncOpen(true)}
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                     >
-                      View Details
+                      {t("sync.bulk_status.actions.view_details")}
                     </button>
                     {!bulkSyncProgress.isRunning && bulkSyncProgress.processed > 0 && (
                       <button
@@ -912,7 +974,7 @@ const Synchronisation = () => {
                         })}
                         className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
                       >
-                        Clear Status
+                        {t("sync.bulk_status.actions.clear_status")}
                       </button>
                     )}
                   </div>
@@ -922,10 +984,12 @@ const Synchronisation = () => {
                     <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h5 className="font-medium text-gray-800 dark:text-gray-200">
-                          Session Statistics
+                          {t("sync.bulk_status.session.title")}
                         </h5>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {bulkSyncProgress.pageStats.length} pages processed
+                          {formatMessage("sync.bulk_status.session.pages_processed", {
+                            count: String(bulkSyncProgress.pageStats.length),
+                          })}
                         </div>
                       </div>
                       
@@ -935,19 +999,25 @@ const Synchronisation = () => {
                           <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                             {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Items</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {t("sync.bulk_status.session.total_items")}
+                          </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-green-600 dark:text-green-400">
                             {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0)}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Success</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {t("sync.bulk_status.session.total_success")}
+                          </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-red-600 dark:text-red-400">
                             {bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.failed, 0)}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Total Failed</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {t("sync.bulk_status.session.total_failed")}
+                          </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
@@ -955,13 +1025,15 @@ const Synchronisation = () => {
                               ? Math.round((bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.succeeded, 0) / bulkSyncProgress.pageStats.reduce((sum, stat) => sum + stat.processed, 0)) * 100)
                               : 0}%
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">Success Rate</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {t("sync.bulk_status.session.success_rate")}
+                          </div>
                         </div>
                       </div>
 
                       {/* Individual Page Stats */}
                       <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Pages Breakdown
+                        {t("sync.bulk_status.session.pages_breakdown")}
                       </h6>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {bulkSyncProgress.pageStats.map((stat, index) => (
@@ -969,7 +1041,9 @@ const Synchronisation = () => {
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                  Page {stat.page}
+                                  {formatMessage("sync.bulk_status.session.page_label", {
+                                    page: String(stat.page),
+                                  })}
                                 </span>
                                 <span className={`px-2 py-1 rounded text-xs font-medium ${
                                   stat.entity === 'video' 
@@ -980,7 +1054,7 @@ const Synchronisation = () => {
                                     ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                     : 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
                                 }`}>
-                                  {stat.entity.toUpperCase()}
+                                  {getEntityLabel(stat.entity)}
                                 </span>
                               </div>
                               <div className={`w-3 h-3 rounded-full ${
@@ -992,28 +1066,35 @@ const Synchronisation = () => {
                                 <div className="font-medium text-blue-600 dark:text-blue-400">
                                   {stat.processed}
                                 </div>
-                                <div className="text-xs text-gray-500">Items</div>
+                                <div className="text-xs text-gray-500">
+                                  {t("sync.bulk_status.session.items_label")}
+                                </div>
                               </div>
                               <div className="text-center">
                                 <div className="font-medium text-green-600 dark:text-green-400">
                                   {stat.succeeded}
                                 </div>
-                                <div className="text-xs text-gray-500">Success</div>
+                                <div className="text-xs text-gray-500">
+                                  {t("sync.bulk_status.session.success_label")}
+                                </div>
                               </div>
                               <div className="text-center">
                                 <div className="font-medium text-red-600 dark:text-red-400">
                                   {stat.failed}
                                 </div>
-                                <div className="text-xs text-gray-500">Failed</div>
+                                <div className="text-xs text-gray-500">
+                                  {t("sync.bulk_status.session.failed_label")}
+                                </div>
                               </div>
                             </div>
                             <div className="mt-2 text-xs text-center text-gray-500">
-                              {stat.duration 
-                                ? `Duration: ${(stat.duration / 1000).toFixed(1)}s`
-                                : stat.endTime 
-                                  ? 'Completed' 
-                                  : 'Processing...'
-                              }
+                              {stat.duration
+                                ? formatMessage("sync.bulk_status.session.duration", {
+                                    seconds: (stat.duration / 1000).toFixed(1),
+                                  })
+                                : stat.endTime
+                                  ? t("sync.bulk_status.session.completed")
+                                  : t("sync.bulk_status.session.processing")}
                             </div>
                             {stat.processed > 0 && (
                               <div className="mt-2">
@@ -1024,7 +1105,9 @@ const Synchronisation = () => {
                                   />
                                 </div>
                                 <div className="text-xs text-center mt-1 text-gray-500">
-                                  {Math.round((stat.succeeded / stat.processed) * 100)}% success rate
+                                  {formatMessage("sync.bulk_status.session.success_rate_value", {
+                                    percent: String(Math.round((stat.succeeded / stat.processed) * 100)),
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -1039,7 +1122,9 @@ const Synchronisation = () => {
           </div>
         ) : (
           <div className="w-full flex flex-col mt-6">
-            <h2 className="font-bold pb-2 text-pink-400">Error List</h2>
+            <h2 className="font-bold pb-2 text-pink-400">
+              {t("sync.error_list.title")}
+            </h2>
 
             <div className="relative bg-neutral-primary-soft shadow-xs rounded-base border border-default">
               <div className="max-h-[60vh] overflow-auto">
@@ -1047,28 +1132,28 @@ const Synchronisation = () => {
                   <thead className="text-sm text-body text-white dark:text-white bg-slate-500 dark:bg-slate-800 border-b border-default no-scrollbar sticky top-0 z-20">
                     <tr>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        ID
+                        {t("sync.error_list.table.id")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Entity
+                        {t("sync.error_list.table.entity")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Platform
+                        {t("sync.error_list.table.platform")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Origin ID
+                        {t("sync.error_list.table.origin_id")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Source ID
+                        {t("sync.error_list.table.source_id")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Resolved
+                        {t("sync.error_list.table.resolved")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Created
+                        {t("sync.error_list.table.created")}
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
-                        Action
+                        {t("sync.error_list.table.action")}
                       </th>
                     </tr>
                   </thead>
@@ -1078,7 +1163,7 @@ const Synchronisation = () => {
                         <td colSpan={8} className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center">
                             <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="ml-2">Loading errors...</span>
+                            <span className="ml-2">{t("sync.error_list.loading")}</span>
                           </div>
                         </td>
                       </tr>
@@ -1088,12 +1173,14 @@ const Synchronisation = () => {
                           colSpan={8}
                           className="px-6 py-4 text-center text-red-500"
                         >
-                          Error loading sync errors: {error.message}
+                          {formatMessage("sync.error_list.error_loading", {
+                            message: error.message,
+                          })}
                           <button
                             onClick={reFetch}
                             className="ml-2 px-2 py-1 bg-brand-600 text-white rounded text-sm hover:bg-brand-700"
                           >
-                            Retry
+                            {t("common.retry")}
                           </button>
                         </td>
                       </tr>
@@ -1103,7 +1190,7 @@ const Synchronisation = () => {
                           colSpan={8}
                           className="px-6 py-4 text-center text-gray-500"
                         >
-                          No sync errors found
+                          {t("sync.error_list.empty")}
                         </td>
                       </tr>
                     ) : (
@@ -1113,7 +1200,7 @@ const Synchronisation = () => {
                           className="bg-neutral-primary border-b border-default"
                         >
                           <td className="px-4 py-3">{row.id}</td>
-                          <td className="px-4 py-3">{row.entity}</td>
+                          <td className="px-4 py-3">{getEntityLabel(row.entity)}</td>
                           <td className="px-4 py-3">
                             {row.plateform?.name ?? row.plateform_id}
                           </td>
@@ -1142,11 +1229,11 @@ const Synchronisation = () => {
                           <td className="px-4 py-3">
                             {row.resolved ? (
                               <span className="text-green-600 font-medium">
-                                Resolved
+                                {t("sync.error_list.resolved")}
                               </span>
                             ) : (
                               <span className="text-yellow-600 font-medium">
-                                Pending
+                                {t("sync.error_list.pending")}
                               </span>
                             )}
                           </td>
@@ -1161,7 +1248,7 @@ const Synchronisation = () => {
                               className={`btn btn-xs btn-primary ${row.resolved ? "btn-disabled" : ""}`}
                               onClick={() => handleOpenFor(row.id)}
                             >
-                              retry
+                              {t("sync.error_list.action.retry")}
                             </button>
                           </td>
                         </tr>
@@ -1178,7 +1265,11 @@ const Synchronisation = () => {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           rowLabel={selectedRow}
-          title={selectedRow ? `Sync: ${selectedRow}` : "Select an option"}
+          title={
+            selectedRow
+              ? formatMessage("sync.modal.title_with_id", { id: String(selectedRow) })
+              : t("sync.modal.title_select_option")
+          }
           onSubmit={handleSubmit}
         />}
         <WaterProgressModal
