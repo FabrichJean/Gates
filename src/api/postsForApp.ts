@@ -29,7 +29,7 @@ export async function getPostsForApp(params?: any) {
 
 // Delete a post image by postId and imageId
 export async function deletePostForAppImage(imageId: number | string) {
-  return await axios.delete(`${apiURL}/post-images/${imageId}`, {
+  return await axios.delete(`${apiURL}/posts-for-app/delete-image/${imageId}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 }
