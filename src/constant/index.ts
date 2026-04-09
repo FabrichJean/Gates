@@ -1,5 +1,7 @@
-export const server = "http://192.168.1.97:3000";
-export const apiURL = server + "/api/v1";
+import config from "../config/environment";
+
+export const server = import.meta.env.VITE_API_URL?.replace(/\/api.*/, '') || "http://0.0.0.0:3000";
+export const apiURL = config.apiUrl;
 export const token = () => localStorage.getItem("authToken") || "";
 
 export const SENDING_STORAGE_KEY = "vms:sending_videos";

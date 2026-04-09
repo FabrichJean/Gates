@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:check": "tsc -b && vite build",
+    "build": "node scripts/build-env-selector.js",
+    "build:raw": "vite build",
+    "build:cn": "node scripts/build-env-selector.js --cn",
+    "build:yd": "node scripts/build-env-selector.js --yd",
+    "build:check": "tsc -b && node scripts/build-env-selector.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync": "git checkout master && git pull origin master && git checkout $npm_config_branch && git merge master"

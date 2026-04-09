@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import TitlesEditor from "../../pages/PostEdit/components/TitlesEditor";
 import useUpdatePostForApp from "../../hooks/useUpdatePostForApp";
 import toast from "react-hot-toast";
+import config from "../../config/environment";
 
-const OLLAMA_URL = "http://192.168.1.97:11434/api/generate";
-const OLLAMA_MODEL = "dolphin3";
+const OLLAMA_URL = config.ollama.apiUrl;
+const OLLAMA_MODEL = config.ollama.model;
 
 function buildDescriptionPrompt(title: string, language: string): string {
   return `You are a blogger of sex social media writer. Your task is to write a HIGH SEXUAL attractive description for a post.
