@@ -12,6 +12,8 @@ interface AppConfig {
     name: string;
     version: string;
     environment: 'development' | 'production' | 'staging';
+    region?: 'cn' | 'yd';
+    defaultUiLanguage?: string;
   };
   features: {
     ollamaSuggestions: boolean;
@@ -32,6 +34,8 @@ export const config: AppConfig = {
     name: import.meta.env.VITE_APP_NAME || 'VMS Front',
     version: import.meta.env.VITE_APP_VERSION || '1.0.0',
     environment: (import.meta.env.VITE_ENVIRONMENT || 'development') as 'development' | 'production' | 'staging',
+    region: (import.meta.env.VITE_REGION as 'cn' | 'yd') || undefined,
+    defaultUiLanguage: import.meta.env.VITE_DEFAULT_UI_LANGUAGE || undefined,
   },
 
   features: {
