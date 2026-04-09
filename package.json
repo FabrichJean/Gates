@@ -10,6 +10,9 @@
     "build:cn": "node scripts/build-env-selector.js --cn",
     "build:yd": "node scripts/build-env-selector.js --yd",
     "build:check": "tsc -b && node scripts/build-env-selector.js",
+    "deploy": "node scripts/deploy.js",
+    "deploy:cn": "node scripts/deploy.js cn",
+    "deploy:yd": "node scripts/deploy.js yd",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync": "git checkout master && git pull origin master && git checkout $npm_config_branch && git merge master"

@@ -519,7 +519,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
         </dialog>
 
         {/* Breadcrumb Navigation */}
-        <Breadcrumb />
+        {/* <Breadcrumb /> */}
 
         <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
           {children}
