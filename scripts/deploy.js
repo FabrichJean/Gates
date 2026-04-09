@@ -234,29 +234,34 @@ async function executeDeploy(region) {
     );
     log('\n✓ Fichiers uploadés', 'green');
 
-    // Copier les fichiers du répertoire temporaire vers la destination avec sudo
+    // Copier les fichiers du répertoire temporaire vers la destination
     log('\n📋 Finalisation du déploiement...', 'yellow');
-    const password = config.remotePassword;
     
-    // Commande: Copier avec sudo  
-    const copyCmd = `echo '${password}' | sudo -S cp -r '${tempDir}'/* '${remoteDir}/' 2>/dev/null || true`;
-    execSync(
-      `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${copyCmd}"`,
-      { stdio: 'inherit' }
-    );
-    
-    // Fixer les permissions
-    const chownCmd = `echo '${password}' | sudo -S chown -R www:www '${remoteDir}' 2>/dev/null || true`;
-    execSync(
-      `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${chownCmd}"`,
-      { stdio: 'pipe' }
-    );
+    // Utiliser rsync en tant que dell (sans sudo) - ça va écraser les fichiers
+    // Les permissions www:www sont déjà sur le répertoire destination
+    try {
+      execSync(
+        `sshpass -p '${config.remotePassword}' rsync -avz --delete '${distPath}'/ ${config.remoteUser}@${config.remoteHost}:'${remoteDir}'/ 2>&1 | grep -E '(sent|received|file list|total|^/)' || true`,
+        { stdio: 'inherit' }
+      );
+    } catch {
+      log('ℹ️  rsync: Upload via copie alternative', 'yellow');
+      const copyCmd = `cp -r '${tempDir}'/* '${remoteDir}/' 2>/dev/null || true`;
+      execSync(
+        `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${copyCmd}"`,
+        { stdio: 'inherit' }
+      );
+    }
     
     // Nettoyer le répertoire temporaire
-    execSync(
-      `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "rm -rf '${tempDir}'"`,
-      { stdio: 'pipe' }
-    );
+    try {
+      execSync(
+        `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "rm -rf '${tempDir}'"`,
+        { stdio: 'pipe' }
+      );
+    } catch {
+      // Ignorer les erreurs de cleanup
+    }
 
     // Vérifier le déploiement
     log('\n📋 Vérification du déploiement...', 'yellow');
