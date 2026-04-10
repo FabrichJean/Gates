@@ -19,7 +19,6 @@ export default function SystemSettings() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🧠 On initialise les settings uniquement quand data arrive
   useEffect(() => {
     if (data?.settings) {
       setSettings(data.settings);
@@ -38,7 +37,6 @@ export default function SystemSettings() {
       await saveSettings(settings);
       toast.success(t("SystemSettings.toast.saved"));
       reFetch();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast.error(t("SystemSettings.toast.save_error"));
     } finally {
@@ -48,59 +46,52 @@ export default function SystemSettings() {
 
   if (!settings) {
     return (
-      <div className="text-gray-600 dark:text-gray-400 transition-colors duration-300">
+      <div className="text-sm text-gray-500 dark:text-gray-400">
         {t("SystemSettings.loading")}
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl w-full bg-white dark:bg-gray-800 rounded-md p-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300 shadow-sm dark:shadow-gray-900">
-      <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6 transition-colors duration-300">
-        ⚙️ {t("SystemSettings.title")}
-      </h1>
+    <div className="space-y-4">
+      <SettingField
+        label={t("SystemSettings.fields.system_code")}
+        name="system_code"
+        value={settings.system_code}
+        onChange={handleChange}
+      />
+      <SettingField
+        label={t("SystemSettings.fields.mp4_storage_path")}
+        name="mp4_storage_path"
+        value={settings.mp4_storage_path}
+        onChange={handleChange}
+      />
+      <SettingField
+        label={t("SystemSettings.fields.image_storage_path")}
+        name="image_storage_path"
+        value={settings.image_storage_path}
+        onChange={handleChange}
+      />
+      <SettingField
+        label={t("SystemSettings.fields.cdn_url")}
+        name="cdn_url"
+        value={settings.cdn_url}
+        onChange={handleChange}
+      />
+      <SettingField
+        label={t("SystemSettings.fields.server_url")}
+        name="server_url"
+        value={settings.server_url}
+        onChange={handleChange}
+      />
 
-      <div className="space-y-5">
-        <SettingField
-          label={t("SystemSettings.fields.system_code")}
-          name="system_code"
-          value={settings.system_code}
-          onChange={handleChange}
-        />
-        <SettingField
-          label={t("SystemSettings.fields.mp4_storage_path")}
-          name="mp4_storage_path"
-          value={settings.mp4_storage_path}
-          onChange={handleChange}
-        />
-        <SettingField
-          label={t("SystemSettings.fields.image_storage_path")}
-          name="image_storage_path"
-          value={settings.image_storage_path}
-          onChange={handleChange}
-        />
-        <SettingField
-          label={t("SystemSettings.fields.cdn_url")}
-          name="cdn_url"
-          value={settings.cdn_url}
-          onChange={handleChange}
-        />
-        <SettingField
-          label={t("SystemSettings.fields.server_url")}
-          name="server_url"
-          value={settings.server_url}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="mt-8 flex justify-end">
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
         <button
           onClick={submit}
           disabled={loading}
-          className={`px-6 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium 
-          transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+          className="px-3 py-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white dark:text-gray-900 text-sm font-medium rounded transition disabled:cursor-not-allowed"
         >
-          {loading ? `💾 ${t("SystemSettings.button.saving")}` : `💾 ${t("SystemSettings.button.save")}`}
+          {loading ? 'Enregistrement...' : 'Enregistrer'}
         </button>
       </div>
     </div>
@@ -119,14 +110,16 @@ function SettingField({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <div className="flex flex-col">
-      <label className="text-gray-700 dark:text-gray-300 font-medium mb-1 transition-colors duration-300">{label}</label>
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-900 dark:text-white">
+        {label}
+      </label>
       <input
         type="text"
         name={name}
         value={value}
         onChange={onChange}
-        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md px-3 py-2 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors duration-300"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
       />
     </div>
   );
