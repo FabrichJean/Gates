@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Shield, Globe, Copy, Check } from "lucide-react";
+import { X, Shield, Globe, Copy, Check, Search } from "lucide-react";
 import { type Domain } from "../api/domains";
 
 interface DomainDetailsModalProps {
@@ -16,6 +16,7 @@ export default function DomainDetailsModal({
 }: DomainDetailsModalProps) {
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"sources" | "urls">("sources");
+  const [urlSearch, setUrlSearch] = useState("");
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -43,6 +44,11 @@ export default function DomainDetailsModal({
     },
     {} as Record<string, any>
   );
+
+  // Filtrer les URLs
+  const filteredUrls = domain.urls?.filter((url) =>
+    url.toLowerCase().includes(urlSearch.toLowerCase())
+  ) || [];
 
   return (
     <AnimatePresence>
@@ -177,34 +183,55 @@ export default function DomainDetailsModal({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="space-y-2"
+                      className="space-y-4"
                     >
+                      {/* Search Bar */}
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+                        <input
+                          type="text"
+                          placeholder="Rechercher une URL..."
+                          value={urlSearch}
+                          onChange={(e) => setUrlSearch(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 outline-none transition"
+                        />
+                      </div>
+
+                      {/* URLs List */}
                       {domain.urls && domain.urls.length > 0 ? (
                         <div className="max-h-96 overflow-y-auto space-y-2">
-                          {domain.urls.map((url, idx) => (
-                            <motion.div
-                              key={idx}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: idx * 0.02 }}
-                              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 group hover:border-gray-300 dark:hover:border-gray-600 transition"
-                            >
-                              <code className="text-xs text-gray-600 dark:text-gray-300 font-mono truncate">
-                                {url}
-                              </code>
-                              <button
-                                onClick={() => copyToClipboard(url)}
-                                className="ml-2 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition flex-shrink-0"
-                                title="Copier l'URL"
+                          {filteredUrls.length > 0 ? (
+                            filteredUrls.map((url, idx) => (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.02 }}
+                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 group hover:border-gray-300 dark:hover:border-gray-600 transition"
                               >
-                                {copiedUrl === url ? (
-                                  <Check className="w-4 h-4 text-green-500" />
-                                ) : (
-                                  <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                                )}
-                              </button>
-                            </motion.div>
-                          ))}
+                                <code className="text-xs text-gray-600 dark:text-gray-300 font-mono truncate">
+                                  {url}
+                                </code>
+                                <button
+                                  onClick={() => copyToClipboard(url)}
+                                  className="ml-2 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition flex-shrink-0"
+                                  title="Copier l'URL"
+                                >
+                                  {copiedUrl === url ? (
+                                    <Check className="w-4 h-4 text-green-500" />
+                                  ) : (
+                                    <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                  )}
+                                </button>
+                              </motion.div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Aucune URL ne correspond à votre recherche
+                              </p>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-8">
