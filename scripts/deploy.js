@@ -5,6 +5,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.join(__dirname, '..');
@@ -36,6 +37,43 @@ function loadRegionConfigs() {
 
 const DEPLOY_SERVICE_URL = process.env.DEPLOY_SERVICE_URL || 'http://192.168.1.97:9000';
 const regionConfigs = loadRegionConfigs();
+
+function getCurrentBranch() {
+  try {
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: projectRoot })
+      .toString()
+      .trim();
+    return branch;
+  } catch (error) {
+    return null;
+  }
+}
+
+function checkBranchBeforeDeploy() {
+  const currentBranch = getCurrentBranch();
+  
+  if (!currentBranch) {
+    console.warn('Avertissement: Impossible de déterminer la branche Git actuelle.');
+    return true;
+  }
+
+  if (currentBranch !== 'master') {
+    console.error('\n' + '='.repeat(70));
+    console.error('ERREUR: Vous n\'êtes pas sur la branche master!');
+    console.error(`Branche actuelle: ${currentBranch}`);
+    console.error('='.repeat(70));
+    console.error('\nPour déployer en production, vous devez être sur la branche master.');
+    console.error('Commandes recommandées:');
+    console.error('  git checkout master');
+    console.error('  git pull origin master');
+    console.error('\nOu utilisez: FORCE_DEPLOY=1 npm run deploy:${region} pour forcer.');
+    console.error('='.repeat(70) + '\n');
+    
+    return false;
+  }
+
+  return true;
+}
 
 function sendDeployEvent(region) {
   return new Promise((resolve, reject) => {
@@ -262,6 +300,18 @@ async function deployRegion(region) {
   console.log('\n' + '='.repeat(70));
   console.log(`  DÉPLOIEMENT ${region.toUpperCase()}`);
   console.log('='.repeat(70) + '\n');
+
+  // Vérifier la branche avant de déployer
+  const currentBranch = getCurrentBranch();
+  console.log(`Branche Git actuelle: ${currentBranch || 'Impossible à déterminer'}`);
+
+  if (!checkBranchBeforeDeploy()) {
+    const forceDeployEnv = process.env.FORCE_DEPLOY;
+    if (forceDeployEnv !== '1' && forceDeployEnv !== 'true') {
+      process.exit(1);
+    }
+    console.log('Avertissement: Déploiement forcé (FORCE_DEPLOY=1)\n');
+  }
 
   const config = regionConfigs[region];
   if (!config) {
