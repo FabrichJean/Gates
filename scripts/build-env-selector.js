@@ -98,7 +98,7 @@ async function showMenu() {
   }
 
   if (yd) {
-    log(`  ${optionNum}. 🌍 YD (Monde)`, 'green');
+    log(`  ${optionNum}. 🌍 YD (YD)`, 'green');
     log(`     Fichier: .env.prod-yd\n`, 'blue');
     options.push({ num: optionNum, env: 'yd', path: envYd });
     optionNum++;

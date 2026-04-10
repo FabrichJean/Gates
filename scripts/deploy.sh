@@ -174,7 +174,7 @@ show_menu() {
     echo -e "  ${GREEN}1. CN (Chine)${NC}"
     echo -e "     Destination: ${REMOTE_DIR_CN}"
     echo ""
-    echo -e "  ${GREEN}2.  YD (Monde)${NC}"
+    echo -e "  ${GREEN}2.  YD (YD)${NC}"
     echo -e "     Destination: ${REMOTE_DIR_YD}"
     echo ""
     
@@ -185,7 +185,7 @@ show_menu() {
             deploy "cn" "Chine" "./dist" "$REMOTE_DIR_CN"
             ;;
         2)
-            deploy "yd" "Monde" "./dist" "$REMOTE_DIR_YD"
+            deploy "yd" "YD" "./dist" "$REMOTE_DIR_YD"
             ;;
         q|Q)
             log_warning "Déploiement annulé"
@@ -206,7 +206,7 @@ main() {
                 deploy "cn" "Chine" "./dist" "$REMOTE_DIR_CN"
                 ;;
             yd)
-                deploy "yd" "Monde" "./dist" "$REMOTE_DIR_YD"
+                deploy "yd" "YD" "./dist" "$REMOTE_DIR_YD"
                 ;;
             *)
                 log_error "Région invalide: $1"

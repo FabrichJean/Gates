@@ -3,7 +3,7 @@ import type { SupportedLanguage } from '../types/i18n';
 // Centralized i18n configuration for the app UI
 // Language is set via environment variable based on region:
 // - CN (Chine): VITE_DEFAULT_UI_LANGUAGE=zh
-// - YD (Monde): VITE_DEFAULT_UI_LANGUAGE=en
+// - YD (YD): VITE_DEFAULT_UI_LANGUAGE=en
 const getDefaultLanguage = (): SupportedLanguage => {
   const lang = import.meta.env.VITE_DEFAULT_UI_LANGUAGE as SupportedLanguage;
   return lang || 'en';

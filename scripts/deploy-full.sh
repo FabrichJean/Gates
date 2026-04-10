@@ -86,7 +86,7 @@ if [ "$REGION" = "yd" ] || [ "$REGION" = "both" ]; then
     
     STEP=$((STEP+1))
     echo -e "${YELLOW}[${STEP}/5] Déploiement YD...${NC}"
-    deploy_region "yd" "Monde 🌍"
+    deploy_region "yd" "YD 🌍"
     echo ""
 fi
 

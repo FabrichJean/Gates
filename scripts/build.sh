@@ -73,7 +73,7 @@ show_menu() {
     fi
     
     if [ $YD_EXISTS -eq 1 ]; then
-        echo -e "  ${GREEN}$option. 🌍 YD (Monde)${NC}"
+        echo -e "  ${GREEN}$option. 🌍 YD (YD)${NC}"
         echo -e "     Fichier: .env.prod-yd\n"
     else
         echo -e "  ${RED}✗ YD - Fichier .env.prod-yd manquant${NC}"

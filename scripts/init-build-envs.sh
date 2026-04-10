@@ -36,12 +36,12 @@ else
     echo -e "${GREEN}✓ $CN_FILE existe déjà$NC"
 fi
 
-# YD (Monde)
+# YD (YD)
 YD_FILE="$PROJECT_ROOT/.env.prod-yd"
 if [ ! -f "$YD_FILE" ]; then
     echo -e "${YELLOW}Création de $YD_FILE...${NC}"
     cat > "$YD_FILE" << 'EOF'
-# Production Environment Configuration - YD (Monde)
+# Production Environment Configuration - YD (YD)
 VITE_API_URL=http://192.168.1.97:7000/api/v1
 VITE_AUTH_TIMEOUT=3600000
 VITE_OLLAMA_API_URL=http://192.168.1.97:11434/api/generate
