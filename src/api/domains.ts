@@ -54,3 +54,31 @@ export const updateDomain = async (
   );
   return response.data;
 };
+
+export type ReplacementProgress = {
+  status: "starting" | "scanning" | "updating" | "model_completed" | "completed" | "error";
+  message: string;
+  totalModels: number;
+  currentModel: number;
+  modelName: string;
+  modelProgress: number;
+  updatedSoFar: number;
+  replacementsSoFar: number;
+  timestamp: string;
+};
+
+export const replaceDomain = async (
+  oldDomain: string,
+  newDomain: string
+): Promise<{ success: boolean; message: string; notification: string }> => {
+  const response = await axios.post(
+    `${apiURL}/admin/domains/replace`,
+    { oldDomain, newDomain },
+    {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+      },
+    }
+  );
+  return response.data;
+};

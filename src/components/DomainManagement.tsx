@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "../i18n";
 import { getAllDomains, updateDomain, type Domain, type Statistics } from "../api/domains";
-import EditDomainModal from "./EditDomainModal";
+import ReplaceDomainModal from "./ReplaceDomainModal";
 import DomainDetailsModal from "./DomainDetailsModal";
 
 export default function DomainManagement() {
@@ -23,7 +23,7 @@ export default function DomainManagement() {
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [detailsDomain, setDetailsDomain] = useState<Domain | null>(null);
 
@@ -49,13 +49,13 @@ export default function DomainManagement() {
     }
   };
 
-  const openEditModal = (domain: Domain) => {
+  const openReplaceModal = (domain: Domain) => {
     setSelectedDomain(domain);
-    setIsModalOpen(true);
+    setIsReplaceModalOpen(true);
   };
 
-  const closeEditModal = () => {
-    setIsModalOpen(false);
+  const closeReplaceModal = () => {
+    setIsReplaceModalOpen(false);
     setSelectedDomain(null);
   };
 
@@ -69,22 +69,8 @@ export default function DomainManagement() {
     setDetailsDomain(null);
   };
 
-  const handleSaveDomain = async (updatedDomain: Domain) => {
-    try {
-      setLoading(true);
-      await updateDomain(updatedDomain.domain, updatedDomain);
-
-      setDomains(
-        domains.map((d) =>
-          d.domain === updatedDomain.domain ? updatedDomain : d
-        )
-      );
-      toast.success("Domaine mise à jour");
-    } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
-    } finally {
-      setLoading(false);
-    }
+  const handleRefreshDomains = async () => {
+    await loadDomains();
   };
 
   const getProtocolIcon = (protocol: string) => {
@@ -226,22 +212,6 @@ export default function DomainManagement() {
                       </span>
                     </div>
 
-                    {/* {domain.sources.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {domain.sources.map((source, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2.5 py-1 rounded-md"
-                          >
-                            <Activity className="w-3 h-3" />
-                            {source.model}.{source.column}
-                            <span className="text-gray-400 dark:text-gray-500">
-                              ({source.occurrences})
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-                    )} */}
                   </div>
 
                   <button
@@ -254,7 +224,7 @@ export default function DomainManagement() {
                   </button>
 
                   <button
-                    onClick={() => openEditModal(domain)}
+                    onClick={() => openReplaceModal(domain)}
                     disabled={loading}
                     className="ml-2 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition disabled:opacity-50 flex-shrink-0"
                   >
@@ -269,12 +239,11 @@ export default function DomainManagement() {
       </div>
 
       {selectedDomain && (
-        <EditDomainModal
-          domain={selectedDomain}
-          open={isModalOpen}
-          loading={loading}
-          onSave={handleSaveDomain}
-          onClose={closeEditModal}
+        <ReplaceDomainModal
+          domain={selectedDomain.domain}
+          open={isReplaceModalOpen}
+          onClose={closeReplaceModal}
+          onSuccess={handleRefreshDomains}
         />
       )}
 
