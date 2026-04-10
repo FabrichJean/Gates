@@ -13,6 +13,12 @@
     "deploy": "node scripts/deploy.js",
     "deploy:cn": "node scripts/deploy.js cn",
     "deploy:yd": "node scripts/deploy.js yd",
+    "deploy:service": "node scripts/deploy-cli.js",
+    "deploy:service:cn": "node scripts/deploy-cli.js cn",
+    "deploy:service:yd": "node scripts/deploy-cli.js yd",
+    "deploy:service:both": "node scripts/deploy-cli.js both",
+    "deploy:server": "node scripts/deploy-http-server.js",
+    "deploy:test:server": "node scripts/test-deploy-streaming.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync": "git checkout master && git pull origin master && git checkout $npm_config_branch && git merge master"

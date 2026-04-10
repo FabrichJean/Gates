@@ -1,329 +1,304 @@
 #!/usr/bin/env node
 
-/**
- * Script de déploiement pour envoyer les builds vers un serveur distant
- * Utilisation:
- *   npm run deploy              (menu interactif)
- *   npm run deploy:cn           (déployer CN directement)
- *   npm run deploy:yd           (déployer YD directement)
- *   node scripts/deploy.js cn   (déployer CN)
- *   node scripts/deploy.js yd   (déployer YD)
- */
-
+import readline from 'readline';
+import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
-import readline from 'readline';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.join(__dirname, '..');
 
-// Configuration
-const config = {
-  remoteUser: 'dell',
-  remoteHost: '192.168.1.97',
-  remotePassword: 'dellserver123',
-  regions: {
-    cn: {
-      name: 'CN',
-      emoji: '🇨🇳',
-      remoteDir: '/www/wwwroot/cn_vms_front.com',
-    },
-    yd: {
-      name: 'YD',
-      emoji: '🌍',
-      remoteDir: '/www/wwwroot/vms-front.com',
-    },
-  },
-};
+// Charger les configurations des régions depuis .env.prod-*
+function loadRegionConfigs() {
+  const configs = {};
+  const regions = ['cn', 'yd'];
 
-// Couleurs
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-  red: '\x1b[31m',
-};
+  regions.forEach((region) => {
+    const envFile = path.join(projectRoot, `.env.prod-${region}`);
+    if (fs.existsSync(envFile)) {
+      const content = fs.readFileSync(envFile, 'utf-8');
+      const config = {};
 
-function log(message, color = 'reset') {
-  console.log(`${colors[color]}${message}${colors.reset}`);
-}
+      content.split('\n').forEach((line) => {
+        const match = line.match(/^([^=]+)=(.*)$/);
+        if (match) {
+          config[match[1].trim()] = match[2].trim();
+        }
+      });
 
-function logSection(title) {
-  log(`\n${'═'.repeat(78)}`, 'cyan');
-  log(`  ${title}`, 'cyan');
-  log(`${'═'.repeat(78)}\n`, 'cyan');
-}
-
-// Vérifier si sshpass est installé
-function checkSshpass() {
-  try {
-    execSync('which sshpass', { stdio: 'ignore' });
-    log('✓ sshpass disponible', 'green');
-    return true;
-  } catch {
-    log('❌ sshpass n\'est pas installé', 'red');
-    log('\nInstallation (macOS):', 'yellow');
-    log('  brew install hudochenkov/sshpass/sshpass', 'blue');
-    log('\nInstallation (Linux):', 'yellow');
-    log('  sudo apt-get install sshpass', 'blue');
-    return false;
-  }
-}
-
-// Vérifier si dist existe
-function checkDist() {
-  const distPath = path.resolve(__dirname, '..', 'dist');
-  if (!fs.existsSync(distPath)) {
-    log(`❌ Répertoire dist/ non trouvé: ${distPath}`, 'red');
-    log('Veuillez d\'abord compiler: npm run build:cn ou npm run build:yd', 'yellow');
-    return false;
-  }
-
-  const indexPath = path.join(distPath, 'index.html');
-  if (!fs.existsSync(indexPath)) {
-    log(`❌ Fichier index.html manquant dans dist/`, 'red');
-    return false;
-  }
-
-  log('✓ dist/ détecté et valide', 'green');
-  return true;
-}
-
-// Obtenir la commande SSH base
-function getSshCmd() {
-  return `sshpass -p '${config.remotePassword}' ssh -o PubkeyAuthentication=no`;
-}
-
-// Obtenir la taille du dossier
-function getFolderSize(folderPath) {
-  try {
-    const result = execSync(`du -sh "${folderPath}"`, { encoding: 'utf-8' });
-    return result.split('\t')[0].trim();
-  } catch {
-    return 'N/A';
-  }
-}
-
-// Compter les fichiers
-function getFileCount(folderPath) {
-  try {
-    const result = execSync(`find "${folderPath}" -type f | wc -l`, {
-      encoding: 'utf-8',
-    });
-    return parseInt(result.trim());
-  } catch {
-    return 0;
-  }
-}
-
-// Menu interactif
-async function showMenu() {
-  logSection('🌍 SÉLECTION DE LA RÉGION DE DÉPLOIEMENT');
-
-  log('Régions disponibles:\n', 'bright');
-  log(`  ${config.regions.cn.emoji} 1. ${config.regions.cn.name}`, 'green');
-  log(`     Destination: ${config.regions.cn.remoteDir}\n`, 'blue');
-  log(`  ${config.regions.yd.emoji} 2. ${config.regions.yd.name}`, 'green');
-  log(`     Destination: ${config.regions.yd.remoteDir}\n`, 'blue');
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+      configs[region] = config;
+    }
   });
 
+  return configs;
+}
+
+const DEPLOY_SERVICE_URL = process.env.DEPLOY_SERVICE_URL || 'http://192.168.1.97:9000';
+const regionConfigs = loadRegionConfigs();
+
+function sendDeployEvent(region) {
+  return new Promise((resolve, reject) => {
+    const config = regionConfigs[region];
+    if (!config) {
+      reject(new Error(`Configuration non trouvée pour la région: ${region}`));
+      return;
+    }
+
+    // Utiliser le VITE_SERVER de la configuration régionale pour le service
+    const serviceUrl = config.VITE_SERVER;
+    const endpoint = `${serviceUrl}/api/v1/deploy/${region}`;
+    const url = new URL(endpoint);
+
+    const options = {
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': 0,
+        Accept: 'text/event-stream',
+      },
+      timeout: 3600000, // 1 hour timeout for long deployments
+    };
+
+    console.log(options);
+    
+
+    const req = http.request(options, (res) => {
+      let buffer = '';
+
+      // Afficher les événements en streaming
+      res.on('data', (chunk) => {
+        buffer += chunk.toString();
+
+        // Traiter les événements SSE complets
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // Garder la dernière ligne incomplète
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const jsonData = JSON.parse(line.substring(6));
+              handleStreamEvent(jsonData);
+            } catch (e) {
+              // Ignorer les lignes qui ne sont pas du JSON valide
+            }
+          }
+        }
+      });
+
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({
+            status: 'success',
+            statusCode: res.statusCode,
+          });
+        } else {
+          reject(new Error(`HTTP ${res.statusCode}`));
+        }
+      });
+
+      res.on('error', (error) => {
+        reject(error);
+      });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Timeout: Déploiement trop long'));
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.end();
+  });
+}
+
+function handleStreamEvent(event) {
+  const timestamp = new Date().toLocaleTimeString('fr-FR');
+
+  switch (event.type) {
+    case 'deployment_started':
+      console.log(`\n[${timestamp}] ⏳ Déploiement démarré`);
+      console.log(`    Région: ${event.region.toUpperCase()}`);
+      break;
+
+    case 'deployment_progress':
+      if (event.step) {
+        console.log(`\n[${timestamp}] 📍 Étape: ${event.step.toUpperCase()}`);
+      }
+      if (event.output) {
+        console.log(`    ${event.output}`);
+      }
+      if (event.percentage !== undefined) {
+        const bar = generateProgressBar(event.percentage);
+        console.log(`    Progression: ${bar} ${event.percentage}%`);
+      }
+      break;
+
+    case 'deployment_step_completed':
+      console.log(`[${timestamp}] ✓ ${event.step} complété (${event.duration}s)`);
+      break;
+
+    case 'deployment_completed':
+      console.log(`\n[${timestamp}] ✅ Déploiement réussi!`);
+      console.log(`    Durée totale: ${event.duration}s`);
+      console.log(`    Région: ${event.region.toUpperCase()}`);
+      break;
+
+    case 'deployment_error':
+      console.error(`\n[${timestamp}] ❌ Erreur de déploiement`);
+      console.error(`    ${event.error}`);
+      if (event.step) {
+        console.error(`    Étape échouée: ${event.step}`);
+      }
+      break;
+
+    case 'deployment_warning':
+      console.warn(`\n[${timestamp}] ⚠️  Avertissement: ${event.message}`);
+      break;
+
+    default:
+      if (event.message) {
+        console.log(`[${timestamp}] ℹ️  ${event.message}`);
+      }
+  }
+}
+
+function generateProgressBar(percentage, width = 30) {
+  const filled = Math.round((percentage / 100) * width);
+  const empty = width - filled;
+  const bar = '█'.repeat(filled) + '░'.repeat(empty);
+  return `[${bar}]`;
+}
+
+function showMenu() {
   return new Promise((resolve) => {
-    rl.question('Choisir un numéro (1-2) ou \'q\' pour quitter: ', (answer) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    console.log('\n' + '='.repeat(70));
+    console.log('  SÉLECTION DE LA RÉGION DE DÉPLOIEMENT');
+    console.log('='.repeat(70) + '\n');
+
+    console.log('Régions disponibles:\n');
+
+    Object.entries(regionConfigs).forEach(([key, config], index) => {
+      const apiUrl = config.VITE_API_URL || 'N/A';
+      const language = config.VITE_DEFAULT_UI_LANGUAGE || 'N/A';
+      console.log(
+        `  ${index + 1}. ${key.toUpperCase()} - API: ${apiUrl} - Langue: ${language}`
+      );
+    });
+
+    console.log('  3. Les deux régions\n');
+
+    rl.question('Choisir un numéro (1-3) ou "q" pour quitter: ', (answer) => {
       rl.close();
 
-      if (answer.toLowerCase() === 'q') {
-        log('\n❌ Déploiement annulé', 'yellow');
-        process.exit(0);
+      const regions = Object.keys(regionConfigs);
+
+      switch (answer.trim().toLowerCase()) {
+        case '1':
+          resolve(regions[0]);
+          break;
+        case '2':
+          resolve(regions[1]);
+          break;
+        case '3':
+          resolve('both');
+          break;
+        case 'q':
+          console.log('Annulé.');
+          process.exit(0);
+          break;
+        default:
+          console.log('Choix invalide. Réessayez.');
+          resolve(showMenu());
+          break;
       }
-
-      let region = null;
-      if (answer === '1') region = 'cn';
-      else if (answer === '2') region = 'yd';
-
-      if (!region) {
-        log('\n❌ Choix invalide', 'red');
-        process.exit(1);
-      }
-
-      resolve(region);
     });
   });
 }
 
-// Confirmer le déploiement
-async function confirmDeploy(region) {
-  const regionConfig = config.regions[region];
-  const distPath = path.resolve(__dirname, '..', 'dist');
-  const size = getFolderSize(distPath);
-  const fileCount = getFileCount(distPath);
-
-  logSection(`DÉPLOIEMENT - ${regionConfig.name}`);
-
-  log(`  Serveur: ${config.remoteUser}@${config.remoteHost}`, 'blue');
-  log(`  Région: ${regionConfig.name} (${region.toUpperCase()})`, 'blue');
-  log(`  Source: ./dist`, 'blue');
-  log(`  Destination: ${regionConfig.remoteDir}`, 'blue');
-  log(`  Taille: ${size}`, 'blue');
-  log(`  Fichiers: ${fileCount}\n`, 'blue');
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question('Continuer avec le déploiement? (y/n) ', (answer) => {
-      rl.close();
-
-      if (answer.toLowerCase() !== 'y') {
-        log('\n⚠️  Déploiement annulé', 'yellow');
-        process.exit(0);
-      }
-
-      resolve(true);
-    });
-  });
-}
-
-// Exécuter le déploiement
-async function executeDeploy(region) {
-  const regionConfig = config.regions[region];
-  const distPath = path.resolve(__dirname, '..', 'dist');
-  const remoteDir = regionConfig.remoteDir;
-
-  log('\n📋 Préparation du serveur distant...', 'yellow');
-
-  try {
-    // Créer le répertoire distant si nécessaire
-    const mkdirCmd = `[ -d '${remoteDir}' ] || (mkdir -p '${remoteDir}' && echo 'Créé par dell')`;
-    try {
-      execSync(
-        `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${mkdirCmd}"`,
-        { stdio: 'pipe' }
-      );
-    } catch {
-      // Le répertoire existe probablement déjà
-    }
-    log('✓ Répertoire distant vérifié', 'green');
-
-    // Upload des fichiers vers un répertoire temporaire
-    log('\n📋 Upload des fichiers en cours...', 'yellow');
-    log('⏳ Cela peut prendre quelques minutes...\n', 'yellow');
-
-    const tempDir = `/tmp/vms_deploy_${Date.now()}`;
-    
-    // Créer le répertoire temporaire
-    execSync(
-      `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "mkdir -p '${tempDir}'"`,
-      { stdio: 'pipe' }
-    );
-
-    // Upload vers le répertoire temporaire
-    execSync(
-      `sshpass -p '${config.remotePassword}' scp -o PubkeyAuthentication=no -r '${distPath}'/* ${config.remoteUser}@${config.remoteHost}:'${tempDir}/'`,
-      { stdio: 'inherit' }
-    );
-    log('\n✓ Fichiers uploadés', 'green');
-
-    // Copier les fichiers du répertoire temporaire vers la destination
-    log('\n📋 Finalisation du déploiement...', 'yellow');
-    
-    // Utiliser rsync en tant que dell (sans sudo) - ça va écraser les fichiers
-    // Les permissions www:www sont déjà sur le répertoire destination
-    try {
-      execSync(
-        `sshpass -p '${config.remotePassword}' rsync -avz --delete '${distPath}'/ ${config.remoteUser}@${config.remoteHost}:'${remoteDir}'/ 2>&1 | grep -E '(sent|received|file list|total|^/)' || true`,
-        { stdio: 'inherit' }
-      );
-    } catch {
-      log('ℹ️  rsync: Upload via copie alternative', 'yellow');
-      const copyCmd = `cp -r '${tempDir}'/* '${remoteDir}/' 2>/dev/null || true`;
-      execSync(
-        `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${copyCmd}"`,
-        { stdio: 'inherit' }
-      );
-    }
-    
-    // Nettoyer le répertoire temporaire
-    try {
-      execSync(
-        `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "rm -rf '${tempDir}'"`,
-        { stdio: 'pipe' }
-      );
-    } catch {
-      // Ignorer les erreurs de cleanup
-    }
-
-    // Vérifier le déploiement
-    log('\n📋 Vérification du déploiement...', 'yellow');
-    const verifyCmd = `if [ -f '${remoteDir}/index.html' ]; then echo 'Fichier index.html détecté'; echo 'Nombre de fichiers: '\$(find '${remoteDir}' -type f | wc -l); else echo 'ERREUR: index.html manquant'; exit 1; fi`;
-    execSync(
-      `${getSshCmd()} ${config.remoteUser}@${config.remoteHost} "${verifyCmd}"`,
-      { stdio: 'inherit' }
-    );
-
-    logSection('✅ DÉPLOIEMENT RÉUSSI');
-    log(`Région: ${regionConfig.emoji} ${regionConfig.name}`, 'green');
-    log(`Destination: ${remoteDir}`, 'green');
-    log('');
-  } catch (error) {
-    logSection('❌ ERREUR LORS DU DÉPLOIEMENT');
-    log(`Région: ${regionConfig.name}`, 'red');
-    log(`Destination: ${remoteDir}`, 'red');
-    log(`\nErreur: ${error.message}`, 'red');
-    log('\nConseil:', 'yellow');
-    log('  1. Vérifiez la connexion réseau', 'yellow');
-    log('  2. Vérifiez les identifiants SSH', 'yellow');
-    log('  3. Vérifiez que le répertoire existe sur le serveur', 'yellow');
-    log('  4. Vérifiez les permissions sur le serveur', 'yellow');
-    process.exit(1);
-  }
-}
-
-// Point d'entrée principal
 async function main() {
+  if (Object.keys(regionConfigs).length === 0) {
+    console.error('Erreur: Aucune configuration de région trouvée.');
+    console.error('Vérifiez les fichiers .env.prod-cn et .env.prod-yd');
+    process.exit(1);
+  }
+
   const args = process.argv.slice(2);
+  let region = args[0];
 
-  // Vérifier les dépendances
-  if (!checkSshpass()) {
-    process.exit(1);
-  }
-
-  if (!checkDist()) {
-    process.exit(1);
-  }
-
-  let region = null;
-  let autoConfirm = false;
-
-  if (args.length > 0) {
-    region = args[0];
-    if (!config.regions[region]) {
-      log(`❌ Région invalide: ${region}`, 'red');
-      log('Régions disponibles: cn, yd', 'yellow');
-      process.exit(1);
-    }
-    autoConfirm = true;  // Auto-confirm when region is specified
-  } else {
+  if (!region) {
     region = await showMenu();
   }
 
-  if (!autoConfirm) {
-    await confirmDeploy(region);
+  region = region.toLowerCase();
+
+  if (region === 'both') {
+    console.log('\n' + '='.repeat(70));
+    console.log('  DÉPLOIEMENT DES DEUX RÉGIONS');
+    console.log('='.repeat(70));
+
+    for (const reg of Object.keys(regionConfigs)) {
+      await deployRegion(reg);
+    }
+  } else if (Object.keys(regionConfigs).includes(region)) {
+    await deployRegion(region);
+  } else {
+    console.log(`Région invalide: ${region}`);
+    console.log(`Régions valides: ${Object.keys(regionConfigs).join(', ')}, both`);
+    process.exit(1);
   }
-  await executeDeploy(region);
+}
+
+async function deployRegion(region) {
+  console.log('\n' + '='.repeat(70));
+  console.log(`  DÉPLOIEMENT ${region.toUpperCase()}`);
+  console.log('='.repeat(70) + '\n');
+
+  const config = regionConfigs[region];
+  if (!config) {
+    throw new Error(`Configuration non trouvée pour la région: ${region}`);
+  }
+
+  console.log('Configuration de la région:');
+  console.log(`  - URL API de l'app: ${config.VITE_API_URL}`);
+  console.log(`  - Langue: ${config.VITE_DEFAULT_UI_LANGUAGE}`);
+  console.log(`  - Code région: ${config.VITE_REGION}`);
+  console.log('\nService de déploiement:');
+  console.log(`  - URL: ${config.VITE_SERVER}`);
+  console.log('\n' + '='.repeat(70));
+  console.log('  PROGRESSION DU DÉPLOIEMENT');
+  console.log('='.repeat(70));
+
+  try {
+    await sendDeployEvent(region);
+
+    console.log('\n' + '='.repeat(70));
+    console.log('Déploiement terminé. Consultez les logs ci-dessus pour les détails.');
+    console.log('='.repeat(70) + '\n');
+  } catch (error) {
+    console.error('\n' + '='.repeat(70));
+    console.error('ERREUR: Impossible de contacter le service de déploiement');
+    console.error(`Service URL: ${config.VITE_SERVER}`);
+    console.error(`Région: ${region.toUpperCase()}`);
+    console.error(`Endpoint: POST ${config.VITE_SERVER}/api/v1/deploy/${region}`);
+    console.error(`Message: ${error.message}`);
+    console.error('='.repeat(70) + '\n');
+    process.exit(1);
+  }
 }
 
 main().catch((error) => {
-  log(`\n❌ Erreur: ${error.message}`, 'red');
+  console.error('Erreur:', error.message);
   process.exit(1);
 });
