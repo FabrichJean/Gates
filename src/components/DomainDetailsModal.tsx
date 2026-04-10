@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Shield, Globe, Copy, Check, Search } from "lucide-react";
+import { X, Shield, Globe, Copy, Check, Search, ExternalLink } from "lucide-react";
 import { type Domain } from "../api/domains";
 
 interface DomainDetailsModalProps {
@@ -22,6 +22,10 @@ export default function DomainDetailsModal({
     navigator.clipboard.writeText(text);
     setCopiedUrl(text);
     setTimeout(() => setCopiedUrl(null), 2000);
+  };
+
+  const openUrl = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const getProtocolIcon = (protocol: string) => {
@@ -209,9 +213,16 @@ export default function DomainDetailsModal({
                                 transition={{ delay: idx * 0.02 }}
                                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 group hover:border-gray-300 dark:hover:border-gray-600 transition"
                               >
-                                <code className="text-xs text-gray-600 dark:text-gray-300 font-mono truncate">
-                                  {url}
-                                </code>
+                                <button
+                                  onClick={() => openUrl(url)}
+                                  className="flex items-center gap-2 flex-1 text-left hover:text-gray-900 dark:hover:text-gray-100 transition cursor-pointer hover:underline"
+                                  title="Ouvrir le lien"
+                                >
+                                  <code className="text-xs text-gray-600 dark:text-gray-300 font-mono truncate">
+                                    {url}
+                                  </code>
+                                  <ExternalLink className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition" />
+                                </button>
                                 <button
                                   onClick={() => copyToClipboard(url)}
                                   className="ml-2 p-1.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition flex-shrink-0"
