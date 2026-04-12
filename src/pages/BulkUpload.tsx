@@ -441,8 +441,14 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
 
   const isCoverPaired = (imageId: string) => videoPairs.some((p) => p.coverId === imageId);
   const getCoverForVideo = (videoId: string) => videoPairs.find((p) => p.videoId === videoId)?.coverId;
-
-  const availableCoverImages = images.filter((i) => !isCoverPaired(i.id));
+  
+  // Memoize to ensure consistency
+  const getAvailableCoverImages = (excludeVideoId?: string) => {
+    return images.filter((i) => {
+      const paired = isCoverPaired(i.id);
+      return !paired;
+    });
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 mb-4">
@@ -487,7 +493,7 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                   {/* Cover Selector Button */}
                   <button
                     onClick={() => setOpenCoverSelector(isOpen ? null : video.id)}
-                    className={`flex-shrink-0 w-20 h-14 rounded border-2 transition ${
+                    className={`flex-shrink-0 w-20 h-14 rounded border-2 transition overflow-hidden bg-gray-200 dark:bg-gray-700 ${
                       pairedCover
                         ? "border-green-300 dark:border-green-700"
                         : "border-dashed border-gray-300 dark:border-gray-600"
@@ -497,7 +503,10 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                       <img
                         src={pairedCover.preview}
                         alt="cover"
-                        className="w-full h-full object-cover rounded"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
@@ -527,10 +536,10 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                       className="border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-3"
                     >
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        Sélectionner une cover ({availableCoverImages.length} disponible{availableCoverImages.length !== 1 ? "s" : ""})
+                        Sélectionner une cover ({getAvailableCoverImages().length} disponible{getAvailableCoverImages().length !== 1 ? "s" : ""})
                       </p>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                        {availableCoverImages.map((cover) => (
+                        {getAvailableCoverImages().map((cover) => (
                           <motion.button
                             key={cover.id}
                             whileHover={{ scale: 1.05 }}
@@ -539,12 +548,15 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                               onPair(video.id, cover.id);
                               setOpenCoverSelector(null);
                             }}
-                            className="relative aspect-square rounded border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 overflow-hidden transition group"
+                            className="relative aspect-square rounded border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 overflow-hidden transition group bg-gray-200 dark:bg-gray-700"
                           >
                             <img
                               src={cover.preview}
                               alt={cover.name}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                               <span className="text-white text-xs font-medium">Ajouter</span>
