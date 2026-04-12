@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Film,
@@ -450,6 +450,21 @@ const BulkUpload = () => {
           </div>
         )}
 
+        {/* Pairing Interface */}
+        {videos.length > 0 && images.length > 0 && (
+          <PairingInterface
+            videos={videos}
+            images={images}
+            mediaFiles={mediaFiles}
+            unpairedVideos={unpairedVideos}
+            pairedVideos={pairedVideos}
+            videoPairs={videoPairs}
+            onPair={pairMedias}
+            onUnpair={unpairMedia}
+            videoPreviewMap={Object.fromEntries(videos.map((v) => [v.id, v.preview]))}
+          />
+        )}
+
         {/* Metadata Section */}
         {mediaFiles.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -635,21 +650,6 @@ const BulkUpload = () => {
           </div>
         )}
 
-        {/* Pairing Interface */}
-        {videos.length > 0 && images.length > 0 && (
-          <PairingInterface
-            videos={videos}
-            images={images}
-            mediaFiles={mediaFiles}
-            unpairedVideos={unpairedVideos}
-            pairedVideos={pairedVideos}
-            videoPairs={videoPairs}
-            onPair={pairMedias}
-            onUnpair={unpairMedia}
-            videoPreviewMap={Object.fromEntries(videos.map((v) => [v.id, v.preview]))}
-          />
-        )}
-
         {/* Metadata Summary */}
         {mediaFiles.length > 0 && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
@@ -754,6 +754,7 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
 }) => {
   const [openCoverSelector, setOpenCoverSelector] = useState<string | null>(null);
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+  const videoPreviewMapRef = useRef<Record<string, string>>({});
 
   const isCoverPaired = (imageId: string) => videoPairs.some((p) => p.coverId === imageId);
   const getCoverForVideo = (videoId: string) => videoPairs.find((p) => p.videoId === videoId)?.coverId;
@@ -766,11 +767,26 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
     });
   };
 
-  // Force video reload when preview changes
+  // Update the ref whenever videoPreviewMap changes
   useEffect(() => {
-    Object.values(videoRefs.current).forEach((video) => {
+    videoPreviewMapRef.current = videoPreviewMap;
+  }, [videoPreviewMap]);
+
+  // Force video reload when videos array length changes (new uploads)
+  useEffect(() => {
+    Object.entries(videoRefs.current).forEach(([videoId, video]) => {
       if (video && video.src) {
         video.load();
+      }
+    });
+  }, [videos.length]);
+
+  // Ensure videos load their src when component mounts or videos change
+  useEffect(() => {
+    videos.forEach((video) => {
+      const videoEl = videoRefs.current[video.id];
+      if (videoEl && !videoEl.src) {
+        videoEl.src = video.preview;
       }
     });
   }, [videos]);
@@ -804,17 +820,30 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                   <div className="relative flex-shrink-0">
                     <div className="w-24 h-16 bg-gray-300 dark:bg-gray-600 rounded overflow-hidden border border-blue-200 dark:border-blue-900 cursor-pointer group">
                       <video 
+                        key={`video-${video.id}`}
                         ref={(el) => {
-                          if (el) videoRefs.current[video.id] = el;
+                          if (el) {
+                            videoRefs.current[video.id] = el;
+                            if (!el.src) {
+                              el.src = video.preview;
+                            }
+                          }
                         }}
                         src={video.preview}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover bg-gray-300 dark:bg-gray-600"
                         muted
+                        playsInline
                         crossOrigin="anonymous"
                         preload="metadata"
                         onLoadedMetadata={(e) => {
-                          const video = e.currentTarget as HTMLVideoElement;
-                          video.currentTime = 1;
+                          const videoEl = e.currentTarget as HTMLVideoElement;
+                          videoEl.currentTime = 1;
+                        }}
+                        onCanPlay={(e) => {
+                          const videoEl = e.currentTarget as HTMLVideoElement;
+                          if (videoEl.currentTime === 0) {
+                            videoEl.currentTime = 1;
+                          }
                         }}
                       />
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition" />
@@ -850,10 +879,12 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                   >
                     {pairedCover ? (
                       <img
+                        key={`cover-display-${pairedCover.id}`}
                         src={pairedCover.preview}
                         alt="cover"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover bg-gray-200 dark:bg-gray-700"
                         crossOrigin="anonymous"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
@@ -902,11 +933,13 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                             className="relative aspect-square rounded border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 overflow-hidden transition group bg-gray-200 dark:bg-gray-700"
                           >
                             <img
-                              key={`cover-${cover.id}`}
+                              key={`cover-grid-${cover.id}`}
                               src={cover.preview}
                               alt={cover.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover bg-gray-200 dark:bg-gray-700"
                               crossOrigin="anonymous"
+                              decoding="async"
+                              loading="lazy"
                               onError={(e) => {
                                 e.currentTarget.style.display = "none";
                               }}
