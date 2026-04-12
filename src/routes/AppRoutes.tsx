@@ -5,6 +5,7 @@ import { BotVideosProvider } from "../context/BotVideosContext";
 import { AudiosProvider } from "../context/AudiosContext";
 import Login from "../pages/Login";
 import Upload from "../pages/Upload";
+import BulkUpload from "../pages/BulkUpload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Profil from "../pages/Profil";
@@ -278,6 +279,7 @@ const AppRoutes = () => {
                   <Routes>
                     <Route path="" element={<VideosManagment />} />
                     <Route path="upload" element={<Upload />} />
+                    <Route path="bulk-upload" element={<BulkUpload />} />
                     <Route path=":id" element={<VideoDetails />} />
                     <Route path="touch/:id" element={<TouchVideo />} />
                   </Routes>
