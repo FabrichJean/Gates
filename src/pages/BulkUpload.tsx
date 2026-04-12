@@ -10,6 +10,11 @@ import {
   ImageIcon,
   Link2,
   Trash2,
+  Globe,
+  User,
+  Tag,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useI18n } from "../i18n";
@@ -17,6 +22,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuthMe } from "../hooks/useAuth";
 import { useVideosContext } from "../context/VideosContext";
 import { Md5 } from "ts-md5";
+import CategoryAutoComplete from "../components/CategoryAutoComplete";
+import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
+import PlatformSelectComponent from "../components/PlatformSelectComponent";
+import CreatorAutoComplete from "../components/CreatorAutoComplete";
+import useVideoTagCategories from "../hooks/useVideoTagCategories";
 
 export type MediaFile = {
   id: string;
@@ -31,6 +41,14 @@ export type BulkVideoItem = {
   id: string;
   videoId?: string;
   coverId?: string;
+  categoryId?: number;
+  subCategoryId?: number;
+  platformId?: number;
+  creatorId?: number;
+  creatorName?: string;
+  videoType?: "short" | "long";
+  tags?: { id: string; name: string }[];
+  titles?: { en?: string; fr?: string; zh?: string };
 };
 
 type BulkUploadState = {
@@ -58,6 +76,19 @@ const BulkUpload = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [ref, setRef] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const [category, setCategory] = useState<any | null>(null);
+  const [subCategory, setSubCategory] = useState<any | null>(null);
+  const [platform, setPlatform] = useState<any | null>(null);
+  const [creator, setCreator] = useState<string | null>(null);
+  const [creatorId, setCreatorId] = useState<number | null>(null);
+  const [videoType, setVideoType] = useState<"short" | "long">("short");
+  const [selectedTags, setSelectedTags] = useState<{ id: string; name: string }[]>([]);
+  const [tagQuery, setTagQuery] = useState("");
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [videoTitles, setVideoTitles] = useState<Record<string, { en?: string; fr?: string; zh?: string }>>({});
+
+  const { items: tagSuggestions } = useVideoTagCategories();
 
   useEffect(() => {
     if (user?.id && user?.username) {
@@ -178,6 +209,13 @@ const BulkUpload = () => {
           id: generateMediaId(),
           videoId,
           coverId: imageId,
+          categoryId: category?.id,
+          subCategoryId: subCategory?.id,
+          platformId: platform?.id,
+          creatorId,
+          creatorName: creator,
+          videoType,
+          tags: selectedTags,
         },
       ],
     }));
@@ -189,6 +227,33 @@ const BulkUpload = () => {
     setState((prev) => ({
       ...prev,
       videoPairs: prev.videoPairs.filter((p) => p.id !== pairId),
+    }));
+  };
+
+  const addTag = (tag: { id: string; name: string }) => {
+    if (!selectedTags.some((t) => t.id === tag.id)) {
+      setSelectedTags([...selectedTags, tag]);
+      setTagQuery("");
+      setShowTagDropdown(false);
+    }
+  };
+
+  const removeTag = (tagId: string) => {
+    setSelectedTags(selectedTags.filter((t) => t.id !== tagId));
+  };
+
+  const addTagByName = async (name: string) => {
+    if (name.trim() === "") return;
+    const newTag = { id: Date.now().toString(), name: name.trim() };
+    addTag(newTag);
+  };
+
+  const updateVideoMetadata = (videoId: string, metadata: Partial<BulkVideoItem>) => {
+    setState((prev) => ({
+      ...prev,
+      videoPairs: prev.videoPairs.map((p) =>
+        p.videoId === videoId ? { ...p, ...metadata } : p
+      ),
     }));
   };
 
@@ -385,6 +450,191 @@ const BulkUpload = () => {
           </div>
         )}
 
+        {/* Metadata Section */}
+        {mediaFiles.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Category & Platform */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-blue-600" />
+                {t("videos.upload.category.title")}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <CategoryAutoComplete 
+                    onSelect={(cat: any) => {
+                      setCategory(cat);
+                      setSubCategory(null);
+                    }} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t("videos.upload.subcategory.label")}
+                  </label>
+                  <SubCategoryAutoComplete
+                    onSelect={(sub: any) => setSubCategory(sub)}
+                    categoryId={category?.id}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Platform & Video Type */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-purple-600" />
+                {t("videos.upload.platform.title")}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <PlatformSelectComponent 
+                    onSelect={(plat: any) => setPlatform(plat)} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t("videos.upload.video_type.label")}
+                  </label>
+                  <div className="relative">
+                    <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <select
+                      className="w-full appearance-none pl-10 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg p-3 outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all"
+                      value={videoType}
+                      onChange={(e) => setVideoType(e.target.value as "short" | "long")}
+                    >
+                      <option value="short">{t("videos.type.short")}</option>
+                      <option value="long">{t("videos.type.long")}</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Creator & Tags Section */}
+        {mediaFiles.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <User className="w-4 h-4 text-green-600" />
+              {t("videos.upload.creator_tags.title")}
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("videos.upload.creator.label")}
+                </label>
+                <CreatorAutoComplete
+                  value={creator}
+                  onChange={(v: string | null) => {
+                    setCreator(v);
+                    setCreatorId(null);
+                  }}
+                  onSelect={(c: any) => {
+                    setCreator(c?.name ?? null);
+                    setCreatorId(c?.id ?? null);
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("videos.upload.tags.label")}
+                </label>
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={tagQuery}
+                        onChange={(e) => {
+                          setTagQuery(e.target.value);
+                          setShowTagDropdown(true);
+                        }}
+                        onFocus={() => setShowTagDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addTagByName(tagQuery);
+                          }
+                        }}
+                        placeholder={t("videos.upload.tags.placeholder")}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 transition-all"
+                      />
+                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="button"
+                      onClick={() => addTagByName(tagQuery)}
+                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition flex items-center gap-2 flex-shrink-0"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </motion.button>
+                  </div>
+
+                  <AnimatePresence>
+                    {showTagDropdown && tagSuggestions && tagSuggestions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto"
+                      >
+                        {tagSuggestions.map((tag: any, idx: number) => (
+                          <motion.button
+                            key={tag.id || idx}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              addTag(tag);
+                              setShowTagDropdown(false);
+                            }}
+                            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-300 text-sm first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {tag.name}
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <AnimatePresence>
+                    {selectedTags.map((tag) => (
+                      <motion.span
+                        key={tag.id}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full text-xs font-medium text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                      >
+                        <Tag className="w-3 h-3" />
+                        <span>{tag.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag.id)}
+                          className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 transition"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </motion.span>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Pairing Interface */}
         {videos.length > 0 && images.length > 0 && (
           <PairingInterface
@@ -398,6 +648,56 @@ const BulkUpload = () => {
             onUnpair={unpairMedia}
             videoPreviewMap={Object.fromEntries(videos.map((v) => [v.id, v.preview]))}
           />
+        )}
+
+        {/* Metadata Summary */}
+        {mediaFiles.length > 0 && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-3">
+              Résumé des métadonnées
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              {category && (
+                <div className="bg-white dark:bg-gray-800 rounded p-2">
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">Catégorie</p>
+                  <p className="text-gray-900 dark:text-white truncate">{category.name}</p>
+                </div>
+              )}
+              {platform && (
+                <div className="bg-white dark:bg-gray-800 rounded p-2">
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">Plateforme</p>
+                  <p className="text-gray-900 dark:text-white truncate">{platform.name}</p>
+                </div>
+              )}
+              {creator && (
+                <div className="bg-white dark:bg-gray-800 rounded p-2">
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">Créateur</p>
+                  <p className="text-gray-900 dark:text-white truncate">{creator}</p>
+                </div>
+              )}
+              <div className="bg-white dark:bg-gray-800 rounded p-2">
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Type</p>
+                <p className="text-gray-900 dark:text-white truncate">
+                  {videoType === "short" ? "Court" : "Long"}
+                </p>
+              </div>
+              {selectedTags.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded p-2 col-span-2 md:col-span-4">
+                  <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">Tags ({selectedTags.length})</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="inline-block bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Actions */}
