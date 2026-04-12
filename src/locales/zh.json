@@ -171,6 +171,7 @@
   "videos.upload.bulk.subtitle": "上传视频和图像，然后将它们配对在一起。",
   "videos.upload.bulk.videos": "视频",
   "videos.upload.bulk.covers": "封面",
+  "videos.upload.bulk.unpaired": "未配对",
   "videos.upload.bulk.add_video": "添加视频",
   "videos.upload.bulk.empty_message": "暂未添加任何视频",
   "videos.upload.bulk.add_hint": "点击上方按钮开始添加视频",

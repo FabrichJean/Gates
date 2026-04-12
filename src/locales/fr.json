@@ -170,6 +170,7 @@
   "videos.upload.bulk.subtitle": "Téléversez les vidéos et images, puis associez-les ensemble.",
   "videos.upload.bulk.videos": "Vidéos",
   "videos.upload.bulk.covers": "Couvertures",
+  "videos.upload.bulk.unpaired": "non appairées",
   "videos.upload.bulk.add_video": "Ajouter une vidéo",
   "videos.upload.bulk.empty_message": "Aucune vidéo ajoutée pour le moment",
   "videos.upload.bulk.add_hint": "Cliquez sur le bouton ci-dessus pour commencer à ajouter des vidéos",
