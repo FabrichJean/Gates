@@ -272,30 +272,6 @@ const BulkUpload = () => {
               className="hidden"
             />
           </div>
-
-          {/* Stats */}
-          {mediaFiles.length > 0 && (
-            <div className="mt-6 grid grid-cols-3 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {mediaFiles.length}
-                </p>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
-                <p className="text-xs text-blue-600 dark:text-blue-400">Vidéos</p>
-                <p className="text-xl font-bold text-blue-900 dark:text-blue-300">
-                  {videos.length}
-                </p>
-              </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
-                <p className="text-xs text-purple-600 dark:text-purple-400">Covers</p>
-                <p className="text-xl font-bold text-purple-900 dark:text-purple-300">
-                  {images.length}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Media Lists */}
@@ -475,25 +451,35 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
               >
                 {/* Video Row */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700">
-                  {/* Video Preview */}
-                  <div className="w-20 h-14 bg-gray-300 dark:bg-gray-600 rounded overflow-hidden flex-shrink-0">
-                    <video src={video.preview} className="w-full h-full object-cover" muted />
+                  {/* Video Preview - Larger */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-24 h-16 bg-gray-300 dark:bg-gray-600 rounded overflow-hidden border border-blue-200 dark:border-blue-900">
+                      <video src={video.preview} className="w-full h-full object-cover" muted />
+                    </div>
+                    <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded">
+                      ▶
+                    </div>
                   </div>
 
                   {/* Video Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                      {video.name.slice(0, 40)}
+                      {video.name.slice(0, 35)}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {(video.file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
 
+                  {/* Pairing Indicator */}
+                  <div className="flex-shrink-0">
+                    <ArrowRight className={`w-4 h-4 ${pairedCover ? 'text-green-600' : 'text-gray-300 dark:text-gray-600'}`} />
+                  </div>
+
                   {/* Cover Selector Button */}
                   <button
                     onClick={() => setOpenCoverSelector(isOpen ? null : video.id)}
-                    className={`flex-shrink-0 w-20 h-14 rounded border-2 transition overflow-hidden bg-gray-200 dark:bg-gray-700 ${
+                    className={`flex-shrink-0 w-24 h-16 rounded border-2 transition overflow-hidden bg-gray-200 dark:bg-gray-700 ${
                       pairedCover
                         ? "border-green-300 dark:border-green-700"
                         : "border-dashed border-gray-300 dark:border-gray-600"
@@ -509,8 +495,9 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                        <Image className="w-4 h-4" />
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500 flex-col gap-1">
+                        <Image className="w-5 h-5" />
+                        <span className="text-xs">+</span>
                       </div>
                     )}
                   </button>
@@ -519,7 +506,7 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                   {pairedCover && (
                     <button
                       onClick={() => onUnpair(videoPairs.find((p) => p.videoId === video.id)?.id || "")}
-                      className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                      className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </button>
