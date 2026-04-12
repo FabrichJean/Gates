@@ -27,6 +27,7 @@ import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import useVideoTagCategories from "../hooks/useVideoTagCategories";
+import { uploadVideoBulk } from "../api/videos";
 
 export type MediaFile = {
   id: string;
@@ -41,6 +42,7 @@ export type BulkVideoItem = {
   id: string;
   videoId?: string;
   coverId?: string;
+  ref?: string;
   categoryId?: number;
   subCategoryId?: number;
   platformId?: number;
@@ -74,7 +76,6 @@ const BulkUpload = () => {
   const { mediaFiles, videoPairs } = state;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [ref, setRef] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const [category, setCategory] = useState<any | null>(null);
@@ -87,17 +88,22 @@ const BulkUpload = () => {
   const [tagQuery, setTagQuery] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [videoTitles, setVideoTitles] = useState<Record<string, { en?: string; fr?: string; zh?: string }>>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUploadIndex, setCurrentUploadIndex] = useState(0);
 
   const { items: tagSuggestions } = useVideoTagCategories();
 
-  useEffect(() => {
-    if (user?.id && user?.username) {
-      const hash = Md5.hashStr(
-        user.id.toString() + Date.now().toString()
-      ).slice(0, 8);
-      setRef(user.username.slice(0, 3) + hash);
+  // Filter tag suggestions based on query
+  const filteredTagSuggestions = useMemo(() => {
+    if (!tagQuery.trim()) {
+      return tagSuggestions || [];
     }
-  }, [user]);
+    const query = tagQuery.toLowerCase();
+    return (tagSuggestions || []).filter((tag: any) =>
+      tag.name.toLowerCase().includes(query)
+    );
+  }, [tagQuery, tagSuggestions]);
 
   useEffect(() => {
     return () => {
@@ -201,6 +207,13 @@ const BulkUpload = () => {
       return;
     }
 
+    const generateVideoRef = () => {
+      const hash = Md5.hashStr(
+        videoId + Date.now().toString()
+      ).slice(0, 8);
+      return (user?.username?.slice(0, 3) ?? "vid") + hash;
+    };
+
     setState((prev) => ({
       ...prev,
       videoPairs: [
@@ -209,6 +222,7 @@ const BulkUpload = () => {
           id: generateMediaId(),
           videoId,
           coverId: imageId,
+          ref: generateVideoRef(),
           categoryId: category?.id,
           subCategoryId: subCategory?.id,
           platformId: platform?.id,
@@ -268,6 +282,13 @@ const BulkUpload = () => {
   useEffect(() => {
     const getFileNameWithoutExt = (name: string) => name.split('.').slice(0, -1).join('.');
     
+    const generateVideoRef = (videoId: string) => {
+      const hash = Md5.hashStr(
+        videoId + Date.now().toString()
+      ).slice(0, 8);
+      return (user?.username?.slice(0, 3) ?? "vid") + hash;
+    };
+
     const newPairs: BulkVideoItem[] = [];
     const pairedImageIds = new Set(videoPairs.map((p) => p.coverId).filter(Boolean));
     const pairedVideoIds = new Set(videoPairs.map((p) => p.videoId).filter(Boolean));
@@ -287,6 +308,7 @@ const BulkUpload = () => {
           id: generateMediaId(),
           videoId: video.id,
           coverId: matchingImage.id,
+          ref: generateVideoRef(video.id),
         });
         pairedImageIds.add(matchingImage.id);
       }
@@ -299,6 +321,122 @@ const BulkUpload = () => {
       }));
     }
   }, [mediaFiles.length]);
+
+  const handleBulkUpload = useCallback(async () => {
+    if (!category || videoPairs.length === 0) {
+      toast.error(t("videos.upload.errors.required_fields"));
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setUploadProgress(0);
+      setCurrentUploadIndex(0);
+
+      const uploadedCount = videoPairs.length;
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < videoPairs.length; i++) {
+        const pair = videoPairs[i];
+        setCurrentUploadIndex(i + 1);
+
+        const videoMedia = mediaFiles.find((m) => m.id === pair.videoId);
+        const coverMedia = mediaFiles.find((m) => m.id === pair.coverId);
+
+        if (!videoMedia || !coverMedia) {
+          errorCount++;
+          continue;
+        }
+
+        try {
+          const tagData = selectedTags.map((tag) => ({
+            id: typeof tag.id === "string" && tag.id.startsWith("temp_") ? undefined : tag.id,
+            name: tag.name,
+          }));
+
+          await uploadVideoBulk(
+            videoMedia.file,
+            coverMedia.file,
+            category.id,
+            subCategory?.id,
+            platform?.id,
+            creatorId,
+            creator,
+            pair.ref || "",
+            pair.titles || {},
+            videoType === "short",
+            tagData,
+            (progressEvent) => {
+              if (progressEvent.total) {
+                const fileProgress = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
+                const overallProgress = Math.round(
+                  ((i + fileProgress / 100) * 100) / videoPairs.length
+                );
+                setUploadProgress(overallProgress);
+              }
+            }
+          );
+
+          successCount++;
+          toast.success(
+            t("videos.upload.bulk.upload_success")
+              .replace("{name}", videoMedia.name)
+              .replace("{current}", String(i + 1))
+              .replace("{total}", String(uploadedCount))
+          );
+        } catch (err: any) {
+          errorCount++;
+          toast.error(
+            t("videos.upload.errors.upload")
+              .replace(
+                "{message}",
+                String(err.response?.data?.message || err.message)
+              )
+              .replace("{name}", videoMedia.name)
+          );
+        }
+      }
+
+      setUploadProgress(100);
+
+      if (successCount === uploadedCount) {
+        toast.success(
+          t("videos.upload.bulk.all_success").replace("{count}", String(successCount))
+        );
+        reFetch && reFetch();
+        setTimeout(() => navigate("/videos"), 1500);
+      } else {
+        toast.error(
+          t("videos.upload.bulk.partial_error")
+            .replace("{success}", String(successCount))
+            .replace("{error}", String(errorCount))
+        );
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(t("videos.upload.errors.upload_failed"));
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setCurrentUploadIndex(0);
+    }
+  }, [
+    category,
+    videoPairs,
+    mediaFiles,
+    selectedTags,
+    videoType,
+    subCategory,
+    platform,
+    creatorId,
+    creator,
+    navigate,
+    reFetch,
+    t,
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -321,20 +459,6 @@ const BulkUpload = () => {
             {t("videos.upload.bulk.subtitle")}
           </p>
         </motion.div>
-
-        {/* Reference Input */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Référence
-          </label>
-          <input
-            type="text"
-            value={ref || ""}
-            onChange={(e) => setRef(e.currentTarget.value.trim())}
-            className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={t("videos.upload.reference.placeholder")}
-          />
-        </div>
 
         {/* Upload Zone */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
@@ -593,30 +717,36 @@ const BulkUpload = () => {
                   </div>
 
                   <AnimatePresence>
-                    {showTagDropdown && tagSuggestions && tagSuggestions.length > 0 && (
+                    {showTagDropdown && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-48 overflow-y-auto"
                       >
-                        {tagSuggestions.map((tag: any, idx: number) => (
-                          <motion.button
-                            key={tag.id || idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                            type="button"
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              addTag(tag);
-                              setShowTagDropdown(false);
-                            }}
-                            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-300 text-sm first:rounded-t-lg last:rounded-b-lg"
-                          >
-                            {tag.name}
-                          </motion.button>
-                        ))}
+                        {filteredTagSuggestions && filteredTagSuggestions?.length > 0 ? (
+                          filteredTagSuggestions?.map((tag: any, idx: number) => (
+                            <motion.button
+                              key={tag.id || idx}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                addTag(tag);
+                                setShowTagDropdown(false);
+                              }}
+                              className="w-full px-4 py-2.5 text-left hover:bg-blue-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-300 text-sm first:rounded-t-lg last:rounded-b-lg"
+                            >
+                              {tag.name}
+                            </motion.button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-center text-xs text-gray-500 dark:text-gray-400">
+                            {tagQuery.trim() ? "Aucun tag ne correspond" : "Commencez à taper pour filtrer"}
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -700,24 +830,65 @@ const BulkUpload = () => {
           </div>
         )}
 
+        {/* Upload Progress */}
+        <AnimatePresence>
+          {isUploading && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-6"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Upload en cours
+                </h3>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {currentUploadIndex} / {videoPairs.length}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                <motion.div
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                {uploadProgress}%
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Actions */}
         {mediaFiles.length > 0 && (
           <div className="flex gap-3 justify-end">
             <button
               onClick={() => navigate("/videos")}
-              className="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              disabled={isUploading}
+              className="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("common.cancel")}
             </button>
             <button
-              disabled={pairedVideos.length === 0}
+              onClick={handleBulkUpload}
+              disabled={pairedVideos.length === 0 || isUploading}
               className={`px-5 py-2.5 rounded-lg font-medium transition ${
-                pairedVideos.length === 0
+                pairedVideos.length === 0 || isUploading
                   ? "bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}
             >
-              Continuer ({pairedVideos.length})
+              {isUploading ? (
+                <>
+                  <span className="inline-block mr-2">⏳</span>
+                  Upload en cours...
+                </>
+              ) : (
+                `Continuer (${pairedVideos.length})`
+              )}
             </button>
           </div>
         )}
