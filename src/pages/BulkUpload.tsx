@@ -199,6 +199,42 @@ const BulkUpload = () => {
   );
   const pairedVideos = videoPairs.filter((p) => p.videoId);
 
+  // Auto-pair videos and images with same filename
+  useEffect(() => {
+    const getFileNameWithoutExt = (name: string) => name.split('.').slice(0, -1).join('.');
+    
+    const newPairs: BulkVideoItem[] = [];
+    const pairedImageIds = new Set(videoPairs.map((p) => p.coverId).filter(Boolean));
+    const pairedVideoIds = new Set(videoPairs.map((p) => p.videoId).filter(Boolean));
+
+    videos.forEach((video) => {
+      if (pairedVideoIds.has(video.id)) return; // Already paired
+      
+      const videoNameWithoutExt = getFileNameWithoutExt(video.name);
+      const matchingImage = images.find((img) => {
+        if (pairedImageIds.has(img.id)) return false; // Already paired
+        const imgNameWithoutExt = getFileNameWithoutExt(img.name);
+        return videoNameWithoutExt === imgNameWithoutExt;
+      });
+
+      if (matchingImage) {
+        newPairs.push({
+          id: generateMediaId(),
+          videoId: video.id,
+          coverId: matchingImage.id,
+        });
+        pairedImageIds.add(matchingImage.id);
+      }
+    });
+
+    if (newPairs.length > 0) {
+      setState((prev) => ({
+        ...prev,
+        videoPairs: [...prev.videoPairs, ...newPairs],
+      }));
+    }
+  }, [mediaFiles.length]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <motion.div
@@ -360,6 +396,7 @@ const BulkUpload = () => {
             videoPairs={videoPairs}
             onPair={pairMedias}
             onUnpair={unpairMedia}
+            videoPreviewMap={Object.fromEntries(videos.map((v) => [v.id, v.preview]))}
           />
         )}
 
@@ -401,6 +438,7 @@ type PairingInterfaceProps = {
   videoPairs: BulkVideoItem[];
   onPair: (videoId: string, imageId: string) => void;
   onUnpair: (pairId: string) => void;
+  videoPreviewMap?: Record<string, string>;
 };
 
 const PairingInterface: React.FC<PairingInterfaceProps> = ({
@@ -412,8 +450,10 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
   videoPairs,
   onPair,
   onUnpair,
+  videoPreviewMap = {},
 }) => {
   const [openCoverSelector, setOpenCoverSelector] = useState<string | null>(null);
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
   const isCoverPaired = (imageId: string) => videoPairs.some((p) => p.coverId === imageId);
   const getCoverForVideo = (videoId: string) => videoPairs.find((p) => p.videoId === videoId)?.coverId;
@@ -425,6 +465,15 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
       return !paired;
     });
   };
+
+  // Force video reload when preview changes
+  useEffect(() => {
+    Object.values(videoRefs.current).forEach((video) => {
+      if (video && video.src) {
+        video.load();
+      }
+    });
+  }, [videos]);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 mb-4">
@@ -453,10 +502,24 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700">
                   {/* Video Preview - Larger */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-24 h-16 bg-gray-300 dark:bg-gray-600 rounded overflow-hidden border border-blue-200 dark:border-blue-900">
-                      <video src={video.preview} className="w-full h-full object-cover" muted />
+                    <div className="w-24 h-16 bg-gray-300 dark:bg-gray-600 rounded overflow-hidden border border-blue-200 dark:border-blue-900 cursor-pointer group">
+                      <video 
+                        ref={(el) => {
+                          if (el) videoRefs.current[video.id] = el;
+                        }}
+                        src={video.preview}
+                        className="w-full h-full object-cover"
+                        muted
+                        crossOrigin="anonymous"
+                        preload="metadata"
+                        onLoadedMetadata={(e) => {
+                          const video = e.currentTarget as HTMLVideoElement;
+                          video.currentTime = 1;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition" />
                     </div>
-                    <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded">
+                    <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded shadow-md z-10">
                       ▶
                     </div>
                   </div>
@@ -490,6 +553,7 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                         src={pairedCover.preview}
                         alt="cover"
                         className="w-full h-full object-cover"
+                        crossOrigin="anonymous"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
@@ -538,9 +602,11 @@ const PairingInterface: React.FC<PairingInterfaceProps> = ({
                             className="relative aspect-square rounded border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 overflow-hidden transition group bg-gray-200 dark:bg-gray-700"
                           >
                             <img
+                              key={`cover-${cover.id}`}
                               src={cover.preview}
                               alt={cover.name}
                               className="w-full h-full object-cover"
+                              crossOrigin="anonymous"
                               onError={(e) => {
                                 e.currentTarget.style.display = "none";
                               }}
