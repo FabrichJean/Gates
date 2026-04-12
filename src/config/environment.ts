@@ -22,7 +22,7 @@ interface AppConfig {
 }
 
 export const config: AppConfig = {
-  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  apiUrl: import.meta.env.VITE_API_URL || 'http://192.168.1.191:3000/api',
   authTimeout: parseInt(import.meta.env.VITE_AUTH_TIMEOUT || '3600000', 10),
   
   ollama: {

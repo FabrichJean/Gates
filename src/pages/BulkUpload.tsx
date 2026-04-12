@@ -780,56 +780,6 @@ const BulkUpload = () => {
           </div>
         )}
 
-        {/* Metadata Summary */}
-        {mediaFiles.length > 0 && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
-            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-3">
-              Résumé des métadonnées
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-              {category && (
-                <div className="bg-white dark:bg-gray-800 rounded p-2">
-                  <p className="text-gray-600 dark:text-gray-400 font-medium">Catégorie</p>
-                  <p className="text-gray-900 dark:text-white truncate">{category.name}</p>
-                </div>
-              )}
-              {platform && (
-                <div className="bg-white dark:bg-gray-800 rounded p-2">
-                  <p className="text-gray-600 dark:text-gray-400 font-medium">Plateforme</p>
-                  <p className="text-gray-900 dark:text-white truncate">{platform.name}</p>
-                </div>
-              )}
-              {creator && (
-                <div className="bg-white dark:bg-gray-800 rounded p-2">
-                  <p className="text-gray-600 dark:text-gray-400 font-medium">Créateur</p>
-                  <p className="text-gray-900 dark:text-white truncate">{creator}</p>
-                </div>
-              )}
-              <div className="bg-white dark:bg-gray-800 rounded p-2">
-                <p className="text-gray-600 dark:text-gray-400 font-medium">Type</p>
-                <p className="text-gray-900 dark:text-white truncate">
-                  {videoType === "short" ? "Court" : "Long"}
-                </p>
-              </div>
-              {selectedTags.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded p-2 col-span-2 md:col-span-4">
-                  <p className="text-gray-600 dark:text-gray-400 font-medium mb-1">Tags ({selectedTags.length})</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedTags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="inline-block bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Upload Progress */}
         <AnimatePresence>
           {isUploading && (
