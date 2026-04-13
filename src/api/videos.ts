@@ -202,3 +202,39 @@ export async function getVideosForBulkSync(page: number = 1, limit: number = 50,
         params
     });
 }
+
+export async function uploadVideoBulk(
+    videoFile: File,
+    coverFile: File,
+    categoryId: number,
+    subCategoryId: number | undefined,
+    platformId: number | undefined,
+    creatorId: number | undefined,
+    creator: string | undefined,
+    ref: string,
+    titles: any,
+    isShort: boolean,
+    tags: any,
+    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
+): Promise<any> {
+    const formData = new FormData();
+    formData.append("video", videoFile);
+    formData.append("cover", coverFile);
+    formData.append("category_id", String(categoryId));
+    if (subCategoryId) formData.append("sub_category_id", String(subCategoryId));
+    if (platformId) formData.append("plateform_id", String(platformId));
+    if (creatorId) formData.append("creator_id", String(creatorId));
+    else if (creator) formData.append("creator", String(creator));
+    formData.append("ref", String(ref));
+    formData.append("titles", JSON.stringify(titles || []));
+    formData.append("isShort", String(isShort));
+    formData.append("tagCategory", JSON.stringify(tags || []));
+
+    return await axios.post(apiURL + "/videos/upload", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${getToken()}`,
+        },
+        onUploadProgress,
+    });
+}

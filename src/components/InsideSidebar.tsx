@@ -55,6 +55,20 @@ const CreateNewDropdown: React.FC = () => {
             </span>
           </button>
 
+          {/* Bulk Upload Videos */}
+          <button
+            onClick={() => navigate("/videos/bulk-upload")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left
+              hover:bg-blue-50 dark:hover:bg-blue-900/20
+              transition-all duration-200 ease-out group/item
+              border-t border-gray-100 dark:border-gray-700"
+          >
+            <Video className="w-5 h-5 text-cyan-500 dark:text-cyan-400 transition-transform duration-300 group-hover/item:scale-110" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              批量上传视频
+            </span>
+          </button>
+
           {/* New Post */}
           <button
             onClick={() => navigate("/post/upload")}
