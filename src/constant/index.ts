@@ -1,6 +1,7 @@
 import config from "../config/environment";
 
-export const server = import.meta.env.VITE_API_URL?.replace(/\/api.*/, '') || "http://0.0.0.0:3000";
+export const server = import.meta.env.VITE_API_URL?.replace(/\/api.*/, '') || "http://192.168.1.48:3000";
+
 export const apiURL = config.apiUrl;
 export const token = () => localStorage.getItem("authToken") || "";
 
