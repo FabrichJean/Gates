@@ -83,6 +83,7 @@ import RomansManagement from "../pages/romans/RomansManagement";
 import RomanUpload from "../pages/romans/romanUpload";
 import { PostForAppProvider } from "../context/PostForAppContext";
 import { PostForAppSocketProvider } from "../context/PostForAppSocketContext";
+import { Explorer } from "../pages/Explorer";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -284,6 +285,16 @@ const AppRoutes = () => {
                     <Route path="touch/:id" element={<TouchVideo />} />
                   </Routes>
                 </VideosProvider>
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explorer"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <Explorer />
               </InsideSidebar>
             </ProtectedRoute>
           }
