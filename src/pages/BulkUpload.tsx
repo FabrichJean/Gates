@@ -229,7 +229,9 @@ const BulkUpload = () => {
           creatorId,
           creatorName: creator,
           videoType,
-          tags: selectedTags,
+          tags: selectedTags
+            .filter((tag): tag is { id: string; name: string } => typeof tag.id === "string")
+            .map((tag) => ({ id: tag.id, name: tag.name })),
         },
       ],
     }));
