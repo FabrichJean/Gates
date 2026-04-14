@@ -84,7 +84,7 @@ const BulkUpload = () => {
   const [creator, setCreator] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<number | null>(null);
   const [videoType, setVideoType] = useState<"short" | "long">("short");
-  const [selectedTags, setSelectedTags] = useState<{ id: string; name: string }[]>([]);
+  const [selectedTags, setSelectedTags] = useState<{ id?: string; name: string }[]>([]);
   const [tagQuery, setTagQuery] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [videoTitles, setVideoTitles] = useState<Record<string, { en?: string; fr?: string; zh?: string }>>({});
@@ -229,7 +229,9 @@ const BulkUpload = () => {
           creatorId,
           creatorName: creator,
           videoType,
-          tags: selectedTags,
+          tags: selectedTags
+            .filter((tag): tag is { id: string; name: string } => typeof tag.id === "string")
+            .map((tag) => ({ id: tag.id, name: tag.name })),
         },
       ],
     }));
@@ -244,7 +246,7 @@ const BulkUpload = () => {
     }));
   };
 
-  const addTag = (tag: { id: string; name: string }) => {
+  const addTag = (tag: { id?: string; name: string }) => {
     if (!selectedTags.some((t) => t.id === tag.id)) {
       setSelectedTags([...selectedTags, tag]);
       setTagQuery("");
@@ -258,7 +260,7 @@ const BulkUpload = () => {
 
   const addTagByName = async (name: string) => {
     if (name.trim() === "") return;
-    const newTag = { id: Date.now().toString(), name: name.trim() };
+    const newTag = { name: name.trim() };
     addTag(newTag);
   };
 
