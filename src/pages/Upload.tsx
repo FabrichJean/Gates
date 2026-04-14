@@ -43,6 +43,9 @@ import { BiUpload } from "react-icons/bi";
 import axios from "axios";
 import { translateServer } from "../constant";
 import { useI18n } from "../i18n";
+import UploadChoiceModal, {
+  type UploadChoice,
+} from "../components/videos/upload.modal.confirmation";
 
 export type Couple = {
   language: any;
@@ -435,6 +438,8 @@ const Upload = () => {
   const { videoFile, coverFile, videoPreview, coverPreview } = state;
 
   const [needVip, setNeedVip] = useState<boolean>(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [uploadChoice, setUploadChoice] = useState<UploadChoice>("simple");
 
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -621,7 +626,7 @@ const Upload = () => {
       setUploading(true);
       setProgress(0);
 
-      await uploadVideo(fd, (progressEvent) => {
+      await uploadVideo(fd, uploadChoice, (progressEvent) => {
         if (progressEvent.total) {
           setProgress(
             Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -657,8 +662,22 @@ const Upload = () => {
     platform,
     videoType,
     selectedTagCategories,
+    uploadChoice,
     reFetch,
   ]);
+
+  const handleOpenConfirm = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setConfirmOpen(false);
+  };
+
+  const handleConfirmUpload = () => {
+    setConfirmOpen(false);
+    void handleSubmit();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 transition-all duration-300">
@@ -957,10 +976,18 @@ const Upload = () => {
             setCoupleTitles={setCoupleTitles}
             progress={progress}
             uploading={uploading}
-            handleSubmit={handleSubmit}
+            handleSubmit={handleOpenConfirm}
           />
         </motion.div>
       </motion.div>
+      <UploadChoiceModal
+        open={confirmOpen}
+        choice={uploadChoice}
+        onChoiceChange={setUploadChoice}
+        onConfirm={handleConfirmUpload}
+        onClose={handleCloseConfirm}
+        uploading={uploading}
+      />
     </div>
   );
 };
