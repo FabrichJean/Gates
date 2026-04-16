@@ -56,7 +56,6 @@ class FilesAPI {
       const formData = new FormData();
       
       formData.append('file', data.file);
-      formData.append('user_id', data.user_id.toString());
       
       if (data.target_user) {
         formData.append('target_user', data.target_user.toString());

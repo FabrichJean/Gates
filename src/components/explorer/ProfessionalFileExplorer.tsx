@@ -228,7 +228,7 @@ export const ProfessionalFileExplorer: React.FC = () => {
       {/* Upload Modal */}
       {showUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center h-full bg-black/50 p-1 bg-opacity-30 overflow-auto">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-[60%] h-full overflow-auto">
+          <div className="rounded-lg shadow-lg w-[60%] h-max overflow-auto">
             <button
               className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
               onClick={() => setShowUpload(false)}

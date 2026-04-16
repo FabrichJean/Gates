@@ -8,7 +8,6 @@ import type { UploadFileRequest } from '../../types/file';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface FileUploadProps {
-  userId: number;
   currentPath: string;
   targetUserId?: number;
   onUploadComplete?: (files: any[]) => void;
@@ -275,7 +274,6 @@ const StatusBadge: React.FC<{ type: 'error' | 'success'; message: string; onDism
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const FileUpload: React.FC<FileUploadProps> = ({
-  userId,
   currentPath,
   targetUserId,
   onUploadComplete,
@@ -324,7 +322,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       return {
         file,
         node_path: nodePath,
-        user_id: userId,
         tags: tags.length ? tags : undefined,
         comment: comment.trim() || undefined,
         ...(recipientId ? { target_user: parseInt(recipientId, 10) } : {}),
@@ -340,7 +337,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     } catch (err) {
       onUploadError?.(err instanceof Error ? err.message : 'Upload failed');
     }
-  }, [selectedFiles, currentPath, userId, tags, comment, recipientId, uploadMultipleFiles, onUploadComplete, onUploadError, clearAll]);
+  }, [selectedFiles, currentPath, tags, comment, recipientId, uploadMultipleFiles, onUploadComplete, onUploadError, clearAll]);
 
   const canUpload = selectedFiles.length > 0 && !uploadState.isLoading;
   const totalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
@@ -392,17 +389,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="flex items-center gap-1 text-[10px] font-medium text-slate-600 mb-1">
-                  <Icon name="user" size={10} />
-                  Uploader
-                </label>
-                <div className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-600">
-                  {userId}
-                </div>
-              </div>
-              <div>
-                <label className="flex items-center gap-1 text-[10px] font-medium text-slate-600 mb-1">
                   <Icon name="arrowRight" size={10} />
-                  Recipient
+                  User
                 </label>
                 <input
                   type="number"

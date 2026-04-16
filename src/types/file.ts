@@ -49,7 +49,6 @@ export interface UpdateFileRequest {
 
 export interface UploadFileRequest {
   file: File;
-  user_id: number;
   target_user?: number;
   tags?: string[];
   comment?: string;
