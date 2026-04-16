@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth, useAuthMe } from "../hooks/useAuth";
-import { LogOut, X, ChevronRight, Music } from "lucide-react";
+import { LogOut, X, ChevronRight, Music, Folder } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useParticles from "../hooks/useParticles";
 import { MdOutlineCategory, MdDynamicFeed, MdVerified } from "react-icons/md";
@@ -396,6 +396,13 @@ function Sidebar({
               />
             </svg>
           }
+        />
+
+        <NavLink
+          to="/explorer"
+          name="explorer"
+          label={t('nav.explorer')}
+          icon={Folder}
         />
 
         {user?.role === RoleEnum.SUPERADMIN && (
