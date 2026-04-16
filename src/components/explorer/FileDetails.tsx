@@ -220,7 +220,7 @@ const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: str
   
   if (isImageFile(file.node_path || '') && file.public_url && !imageError) {
     return (
-      <div className="relative w-full aspect-video bg-slate-100 rounded-lg overflow-hidden group">
+      <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
         <img 
           src={file.public_url} 
           alt={file.node_path}
@@ -236,13 +236,51 @@ const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: str
     );
   }
 
+  // Video preview
+  const videoExts = ['mp4', 'mov', 'webm', 'ogg', 'mkv', ".mp3"];
+  const ext = (file.node_path || '').split('.').pop()?.toLowerCase() || '';
+  if (videoExts.includes(ext) && file.public_url) {
+    return (
+      <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
+        <video
+          src={file.public_url}
+          controls
+          className="w-full h-full object-cover"
+          poster={undefined}
+        />
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <span className="text-xs text-white font-medium truncate">{file.node_path}</span>
+          <span className="text-xs text-white/80">{formatSize(file.size)}</span>
+        </div>
+      </div>
+    );
+  }
+  
+    // Iframe preview for other formats with public_url
+    if (file.public_url) {
+      return (
+        <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
+          <iframe
+            src={file.public_url}
+            title={file.node_path}
+            className="w-full h-full border-0"
+            allowFullScreen
+          />
+          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <span className="text-xs text-white font-medium truncate">{file.node_path}</span>
+            <span className="text-xs text-white/80">{formatSize(file.size)}</span>
+          </div>
+        </div>
+      );
+    }
+
   // Generic file icon preview
   return (
     <div className={`
       w-full aspect-video rounded-lg border-2 border-dashed 
       flex flex-col items-center justify-center gap-3
       ${type.color.replace('text-', 'border-').replace('bg-', '')}
-      bg-gradient-to-br from-slate-50 to-white
+      bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800
     `}>
       <div className={`
         w-16 h-16 rounded-2xl flex items-center justify-center
@@ -252,8 +290,8 @@ const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: str
         <Icon name={type.icon} size={32} />
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-slate-700">{file.node_path?.split('/').pop()}</p>
-        <p className="text-xs text-slate-500 mt-0.5">{formatSize(file.size)}</p>
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{file.node_path?.split('/').pop()}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{formatSize(file.size)}</p>
       </div>
     </div>
   );
@@ -348,7 +386,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
     navigator.clipboard.writeText(text);
   };
 
-  // Download handler using public_url (direct link, avoids CORS)
+  // Download handler using public_url
   const handleDownload = useMemo(() => {
     if (!file.public_url) return undefined;
     return () => {
@@ -363,23 +401,23 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
 
   return (
     <div className={`
-      bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden
+      bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden
       w-full
       ${className}
     `}>
       {/* Preview Section */}
-      <div className="relative">
+  <div className="relative">
         <FilePreview file={file} type={fileType} />
         
         {/* Overlay Actions */}
-        <div className="absolute top-3 right-3 flex gap-2">
+  <div className="absolute top-3 right-3 flex gap-2">
           {(file.public_url) && (
             <button
               onClick={handleDownload}
               className="
-                p-2 rounded-lg bg-white/90 backdrop-blur-sm shadow-sm
-                text-slate-600 hover:text-blue-600 hover:bg-white
-                border border-slate-200 hover:border-blue-200
+                p-2 rounded-lg bg-white/90 dark:bg-slate-800/80 backdrop-blur-sm shadow-sm
+                text-slate-600 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-slate-700
+                border border-slate-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-400
                 transition-all duration-150
               "
               title="Download"
@@ -392,9 +430,9 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
             <button
               onClick={onShare}
               className="
-                p-2 rounded-lg bg-white/90 backdrop-blur-sm shadow-sm
-                text-slate-600 hover:text-emerald-600 hover:bg-white
-                border border-slate-200 hover:border-emerald-200
+                p-2 rounded-lg bg-white/90 dark:bg-slate-800/80 backdrop-blur-sm shadow-sm
+                text-slate-600 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-700
+                border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-400
                 transition-all duration-150
               "
               title="Share"
@@ -406,11 +444,11 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
       </div>
 
       {/* Content Section */}
-      <div className="p-4 space-y-1">
+  <div className="p-4 space-y-1">
         {/* File Name Header */}
-        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+  <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-slate-800 truncate" title={filename}>
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 truncate" title={filename}>
               {filename}
             </h2>
             <div className="flex items-center gap-2 mt-1">
@@ -420,7 +458,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               `}>
                 {fileType.type}
               </span>
-              <span className="text-xs text-slate-500">{formatSize(file.size)}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{formatSize(file.size)}</span>
             </div>
           </div>
           
@@ -429,7 +467,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
             {file.public_url && (
               <button
                 onClick={() => copyToClipboard(file.public_url!)}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 title="Copy link"
               >
                 <Icon name="link" size={16} />
@@ -438,7 +476,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
             {onDelete && (
               <button
                 onClick={onDelete}
-                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                 title="Delete"
               >
                 <Icon name="trash" size={16} />
@@ -448,18 +486,18 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
         </div>
 
         {/* Details Grid */}
-        <div className="space-y-0.5">
+  <div className="space-y-0.5">
           {/* Owner */}
           {file.user && (
             <div className="flex items-start gap-3 py-2">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
                 <Icon name="user" size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Owner</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-sm text-slate-800 font-medium">{file.user.username}</span>
-                  <span className="text-xs text-slate-400">(ID: {file.user.id})</span>
+                  <span className="text-sm text-slate-800 dark:text-slate-100 font-medium">{file.user.username}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">(ID: {file.user.id})</span>
                 </div>
               </div>
             </div>
@@ -468,14 +506,14 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
           {/* Target User */}
           {file.targetUser && (
             <div className="flex items-start gap-3 py-2">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 dark:text-blue-400">
                 <Icon name="user" size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Shared With</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-sm text-slate-800 font-medium">{file.targetUser.username}</span>
-                  <span className="text-xs text-slate-400">(ID: {file.targetUser.id})</span>
+                  <span className="text-sm text-slate-800 dark:text-slate-100 font-medium">{file.targetUser.username}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">(ID: {file.targetUser.id})</span>
                 </div>
               </div>
             </div>
@@ -485,19 +523,19 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
           <div className="grid grid-cols-2 gap-4 py-2">
             {file.createdAt && (
               <div className="flex items-start gap-2">
-                <Icon name="calendar" size={14} className="text-slate-400 mt-0.5" />
+                <Icon name="calendar" size={14} className="text-slate-400 dark:text-slate-500 mt-0.5" />
                 <div>
-                  <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Created</p>
-                  <p className="text-xs text-slate-700 mt-0.5">{formatDate(file.createdAt)}</p>
+                  <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Created</p>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 mt-0.5">{formatDate(file.createdAt)}</p>
                 </div>
               </div>
             )}
             {file.updatedAt && file.updatedAt !== file.createdAt && (
               <div className="flex items-start gap-2">
-                <Icon name="calendar" size={14} className="text-slate-400 mt-0.5" />
+                <Icon name="calendar" size={14} className="text-slate-400 dark:text-slate-500 mt-0.5" />
                 <div>
-                  <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Modified</p>
-                  <p className="text-xs text-slate-700 mt-0.5">{formatDate(file.updatedAt)}</p>
+                  <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modified</p>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 mt-0.5">{formatDate(file.updatedAt)}</p>
                 </div>
               </div>
             )}
@@ -506,11 +544,11 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
           {/* Tags */}
           {file.tags && file.tags.length > 0 && (
             <div className="flex items-start gap-3 py-2">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
                 <Icon name="tag" size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                   Tags ({file.tags.length})
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -525,12 +563,12 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
           {/* Comment */}
           {file.comment && (
             <div className="flex items-start gap-3 py-2">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500">
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
                 <Icon name="message" size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Comment</p>
-                <p className="text-sm text-slate-700 mt-0.5 whitespace-pre-wrap">{file.comment}</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Comment</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200 mt-0.5 whitespace-pre-wrap">{file.comment}</p>
               </div>
             </div>
           )}
@@ -538,17 +576,17 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
           {/* Public URL */}
           {file.public_url && (
             <div className="flex items-start gap-3 py-2 group">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">
+              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
                 <Icon name="link" size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Public Link</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Public Link</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <a 
                     href={file.public_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:text-blue-700 hover:underline truncate flex items-center gap-1"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline truncate flex items-center gap-1"
                   >
                     {file.public_url.replace(/^https?:\/\//, '')}
                     <Icon name="external" size={12} />
@@ -557,7 +595,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               </div>
               <button
                 onClick={() => copyToClipboard(file.public_url!)}
-                className="flex-shrink-0 p-1.5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 transition-all"
+                className="flex-shrink-0 p-1.5 rounded text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 opacity-0 group-hover:opacity-100 transition-all"
               >
                 <Icon name="copy" size={14} />
               </button>
@@ -568,15 +606,15 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
 
       {/* Footer Actions */}
       {(onDownload || onShare || onDelete) && (
-        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+  <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {(onDownload || file.public_url) && (
               <button
                 onClick={onDownload || handleDownload}
                 className="
                   flex items-center gap-2 px-3 py-1.5 text-sm font-medium
-                  text-slate-700 bg-white border border-slate-200 rounded-lg
-                  hover:border-slate-300 hover:bg-slate-50
+                  text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg
+                  hover:border-slate-300 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700
                   transition-all duration-150
                 "
                 disabled={!(onDownload || file.public_url)}
@@ -590,8 +628,8 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
                 onClick={onShare}
                 className="
                   flex items-center gap-2 px-3 py-1.5 text-sm font-medium
-                  text-slate-700 bg-white border border-slate-200 rounded-lg
-                  hover:border-slate-300 hover:bg-slate-50
+                  text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg
+                  hover:border-slate-300 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700
                   transition-all duration-150
                 "
               >
@@ -606,7 +644,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               onClick={onDelete}
               className="
                 flex items-center gap-2 px-3 py-1.5 text-sm font-medium
-                text-red-600 hover:text-red-700 hover:bg-red-50
+                text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30
                 rounded-lg transition-all duration-150
               "
             >
