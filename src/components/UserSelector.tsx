@@ -180,7 +180,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   placeholder = 'Search user...',
   disabled = false,
   className = '',
-  maxHeight = 320,
+  maxHeight = 200,
   showValidationBadge = true,
   allowClear = true,
 }) => {
@@ -305,14 +305,14 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   return (
     <div 
       ref={containerRef}
-  className={`relative w-full ${className}`}
+  className={`relative w-max ${className}`}
       onKeyDown={handleKeyDown}
     >
       {/* Trigger / Input Field */}
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={`
-          relative flex items-center gap-3 w-full px-3 py-2.5
+          relative flex items-center gap-3 w-full px-3 py-1
           bg-white dark:bg-gray-800 border rounded-lg cursor-pointer
           transition-all duration-200 ease-out
           ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-gray-800' : 'hover:border-slate-400 dark:hover:border-gray-600'}

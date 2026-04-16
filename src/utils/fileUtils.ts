@@ -351,7 +351,6 @@ export function validateFileUpload(file: File): {
   isValid: boolean;
   error?: string;
 } {
-  const maxSize = 100 * 1024 * 1024; // 100MB
   const allowedTypes = [
     'image/*',
     'video/*',

@@ -33,7 +33,13 @@ export function useFiles(query: FileListQuery = {}) {
     query.target_user,
     query.search,
     query.sortBy,
-    query.sortOrder
+    query.sortOrder,
+    query.createdAfter,
+    query.createdBefore,
+    query.updatedAfter,
+    query.updatedBefore,
+    query.createdOnDate,
+    query.updatedOnDate
   ]);
 
   const fetchFiles = useCallback(async () => {

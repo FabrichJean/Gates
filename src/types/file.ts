@@ -63,8 +63,14 @@ export interface FileListQuery {
   user_id?: number;
   target_user?: number;
   search?: string;
-  sortBy?: 'createdAt' | 'updatedAt' | 'id' | 'node_path' | 'size';
-  sortOrder?: 'ASC' | 'DESC';
+  sortBy?: "createdAt" | "updatedAt" | "id" | "node_path" | "size";
+  sortOrder?: "ASC" | "DESC";
+  createdAfter?: string;
+  createdBefore?: string;
+  updatedAfter?: string;
+  updatedBefore?: string;
+  createdOnDate?: string;
+  updatedOnDate?: string;
 }
 
 export interface Pagination {
@@ -91,7 +97,7 @@ export interface ApiResponse<T> {
 export interface FileTreeNode {
   id: string;
   name: string;
-  type: 'file' | 'folder';
+  type: "file" | "folder";
   extension?: string;
   size?: number;
   modified?: string;
@@ -113,13 +119,20 @@ export interface FileExplorerState {
   currentDrive: DriveInfo | null;
   pathStack: string[];
   selectedFiles: Set<string>;
-  viewMode: 'grid' | 'list';
+  viewMode: "grid" | "list";
   searchQuery: string;
   isLoading: boolean;
   error: string | null;
 }
 
-export type FileAction = 'cut' | 'copy' | 'paste' | 'delete' | 'rename' | 'upload' | 'download';
+export type FileAction =
+  | "cut"
+  | "copy"
+  | "paste"
+  | "delete"
+  | "rename"
+  | "upload"
+  | "download";
 
 export interface FileContextMenuAction {
   id: FileAction;
