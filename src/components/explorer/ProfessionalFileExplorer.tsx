@@ -13,7 +13,6 @@ export const ProfessionalFileExplorer: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState(new Set<string>(['']));
   const [showUpload, setShowUpload] = useState(false);
   // TODO: Replace with actual user id from context/auth
-  const userId = 1;
   const { uploadFile } = useFileOperations();
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -75,7 +74,6 @@ export const ProfessionalFileExplorer: React.FC = () => {
     try {
       await uploadFile({
         file: voidFile,
-        user_id: userId,
         node_path: folderPath + '/'+voidFile.name, // trailing slash to indicate folder
         tags: ['folder'],
         comment: 'Virtual folder',
@@ -239,7 +237,6 @@ export const ProfessionalFileExplorer: React.FC = () => {
               </svg>
             </button>
             <FileUpload
-              userId={userId}
               onUploadComplete={() => {
                 setShowUpload(false);
                 refetch();
