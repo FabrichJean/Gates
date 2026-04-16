@@ -305,7 +305,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full ${className}`}
+  className={`relative w-full ${className}`}
       onKeyDown={handleKeyDown}
     >
       {/* Trigger / Input Field */}
@@ -313,12 +313,12 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={`
           relative flex items-center gap-3 w-full px-3 py-2.5
-          bg-white border rounded-lg cursor-pointer
+          bg-white dark:bg-gray-800 border rounded-lg cursor-pointer
           transition-all duration-200 ease-out
-          ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'hover:border-slate-400'}
+          ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-gray-800' : 'hover:border-slate-400 dark:hover:border-gray-600'}
           ${isOpen 
-            ? 'border-blue-500 ring-2 ring-blue-100 shadow-sm' 
-            : 'border-slate-200'
+            ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-100 dark:ring-blue-900 shadow-sm' 
+            : 'border-slate-200 dark:border-gray-700'
           }
         `}
       >
@@ -327,7 +327,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
             <UserAvatar username={selectedUser.username} size="md" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-800 truncate">
+                <span className="text-sm font-medium text-slate-800 dark:text-gray-100 truncate">
                   {selectedUser.username}
                 </span>
                 {showValidationBadge && (
@@ -337,7 +337,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
                   />
                 )}
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400">
                 <Icon name="mail" size={12} />
                 <span className="truncate">{selectedUser.email}</span>
               </div>
@@ -354,17 +354,17 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           </>
         ) : (
           <>
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
               <Icon name="user" size={16} className="text-slate-400" />
             </div>
-            <span className="flex-1 text-sm text-slate-400">{placeholder}</span>
+            <span className="flex-1 text-sm text-slate-400 dark:text-gray-500">{placeholder}</span>
           </>
         )}
 
         <Icon 
           name="chevronDown" 
           size={16} 
-          className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-slate-400 dark:text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </div>
 
@@ -373,18 +373,18 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
         <div 
           className="
             absolute z-50 w-full mt-1
-            bg-white border border-slate-200 rounded-lg shadow-lg
+            bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg shadow-lg
             animate-in fade-in slide-in-from-top-1 duration-150
           "
           style={{ maxHeight }}
         >
           {/* Search Header */}
-          <div className="sticky top-0 bg-white border-b border-slate-100 p-2 z-10">
+          <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-slate-100 dark:border-gray-700 p-2 z-10">
             <div className="relative">
               <Icon 
                 name="search" 
                 size={16} 
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" 
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500" 
               />
               <input
                 ref={inputRef}
@@ -394,9 +394,9 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
                 placeholder="Search by name, email, or role..."
                 className="
                   w-full pl-9 pr-3 py-2 text-sm
-                  bg-slate-50 border border-slate-200 rounded-md
-                  placeholder:text-slate-400
-                  focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                  bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-md
+                  placeholder:text-slate-400 dark:placeholder:text-gray-500
+                  focus:outline-none focus:bg-white dark:focus:bg-gray-800 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900
                   transition-all duration-150
                 "
                 autoFocus
@@ -405,7 +405,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
                 <button
                   type="button"
                   onClick={() => { setSearchQuery(''); inputRef.current?.focus(); }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-200 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   <Icon name="close" size={14} />
                 </button>
@@ -414,14 +414,14 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
 
             {/* Results count */}
             <div className="flex items-center justify-between mt-2 px-1">
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-500 dark:text-gray-400">
                 {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} found
               </span>
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-[11px] text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   Clear search
                 </button>
@@ -437,11 +437,11 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           >
             {filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                  <Icon name="search" size={20} className="text-slate-400" />
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                  <Icon name="search" size={20} className="text-slate-400 dark:text-gray-500" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">No users found</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-sm font-medium text-slate-700 dark:text-gray-100">No users found</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
                   Try adjusting your search terms
                 </p>
               </div>
@@ -460,17 +460,17 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
                       w-full flex items-center gap-3 px-3 py-2.5 rounded-md
                       text-left transition-all duration-100
                       ${isHighlighted || isSelected
-                        ? 'bg-blue-50 border border-blue-100' 
-                        : 'hover:bg-slate-50 border border-transparent'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-400' 
+                        : 'hover:bg-slate-50 dark:hover:bg-gray-800 border border-transparent'
                       }
-                      ${isSelected ? 'ring-1 ring-blue-200' : ''}
+                      ${isSelected ? 'ring-1 ring-blue-200 dark:ring-blue-400' : ''}
                     `}
                   >
                     <UserAvatar username={user.username} size="md" />
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-medium truncate ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>
+                        <span className={`text-sm font-medium truncate ${isSelected ? 'text-blue-900 dark:text-blue-200' : 'text-slate-800 dark:text-gray-100'}`}>
                           {user.username}
                         </span>
                         {showValidationBadge && (
@@ -485,8 +485,8 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-slate-500 truncate">{user.email}</span>
-                        <span className="text-slate-300">·</span>
+                        <span className="text-xs text-slate-500 dark:text-gray-400 truncate">{user.email}</span>
+                        <span className="text-slate-300 dark:text-gray-600">·</span>
                         <RoleBadge role={user.role} />
                       </div>
                     </div>
@@ -497,8 +497,8 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 px-3 py-2 rounded-b-lg">
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
+          <div className="sticky bottom-0 bg-slate-50 dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-3 py-2 rounded-b-lg">
+            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-gray-400">
               <span>Use ↑↓ to navigate, Enter to select</span>
               <span className="hidden sm:inline">ESC to close</span>
             </div>
