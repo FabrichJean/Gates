@@ -150,7 +150,7 @@ export const ProfessionalFileExplorer: React.FC = () => {
         : folderPath + "/" + newFolderName.trim();
     }
     // Upload a void file (empty blob) with special tag 'folder'
-    const voidFile = new File([""], "_", { type: "application/x-empty" });
+    const voidFile = new File([""], ".void", { type: "application/x-empty" });
     try {
       await uploadFile({
         file: voidFile,
