@@ -26,6 +26,7 @@ export interface FileRecord {
   updatedAt: string;
   media?: Media;
   user?: User;
+  public_url: string;
   targetUser?: User | null;
 }
 

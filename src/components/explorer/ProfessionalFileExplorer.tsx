@@ -5,6 +5,7 @@ import { useFiles } from '../../hooks/useFiles';
 import { useFileExplorer } from '../../hooks/useFileExplorer';
 import { buildFileTree, findNodeByPath, getBreadcrumbPath, getFileIcon, formatFileSize, formatDate } from '../../utils/fileTreeUtils';
 import type { FileTreeNode } from '../../utils/fileTreeUtils';
+import FileDetails from './FileDetails';
 
 export const ProfessionalFileExplorer: React.FC = () => {
   const { searchQuery, setSearchQuery, viewMode, setViewMode, selectedFiles, toggleFileSelection, clearSelection } = useFileExplorer();
@@ -18,6 +19,9 @@ export const ProfessionalFileExplorer: React.FC = () => {
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderLoading, setNewFolderLoading] = useState(false);
   const [newFolderError, setNewFolderError] = useState('');
+  // File details modal state
+  const [detailsFile, setDetailsFile] = useState<any | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Build file tree from files
   const fileTree = useMemo(() => buildFileTree(files), [files]);
@@ -40,6 +44,13 @@ export const ProfessionalFileExplorer: React.FC = () => {
       toggleFileSelection(fileNode.fileRecord.id.toString());
     }
   }, [toggleFileSelection]);
+
+  const handleFileDoubleClick = useCallback((fileNode: FileTreeNode) => {
+    if (fileNode.fileRecord) {
+      setDetailsFile(fileNode.fileRecord);
+      setShowDetailsModal(true);
+    }
+  }, []);
 
   const toggleFolderExpansion = useCallback((folderPath: string, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -279,38 +290,59 @@ export const ProfessionalFileExplorer: React.FC = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
-        {isLoading && (
-          <div className="flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
+      <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 h-full overflow-auto">
+          {isLoading && (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          )}
 
-        {error && (
-          <div className="flex items-center justify-center h-32 text-red-600 dark:text-red-400">
-            <p>Error loading files: {error.message}</p>
-          </div>
-        )}
+          {error && (
+            <div className="flex items-center justify-center h-32 text-red-600 dark:text-red-400">
+              <p>Error loading files: {error.message}</p>
+            </div>
+          )}
 
-        {!isLoading && !error && (
-          <div className="h-full overflow-auto">
-            {viewMode === 'grid' ? (
-              <FileGridView 
-                node={currentNode}
-                onFolderClick={handleFolderClick}
-                onFileClick={handleFileClick}
-                selectedFiles={selectedFiles}
-              />
-            ) : (
-              <FileListView 
-                node={currentNode}
-                onFolderClick={handleFolderClick}
-                onFileClick={handleFileClick}
-                selectedFiles={selectedFiles}
-                expandedFolders={expandedFolders}
-                onToggleExpansion={toggleFolderExpansion}
-              />
-            )}
+          {!isLoading && !error && (
+            <div className="h-full overflow-auto">
+              {viewMode === 'grid' ? (
+                <FileGridView 
+                  node={currentNode}
+                  onFolderClick={handleFolderClick}
+                  onFileClick={handleFileClick}
+                  onFileDoubleClick={handleFileDoubleClick}
+                  selectedFiles={selectedFiles}
+                />
+              ) : (
+                <FileListView 
+                  node={currentNode}
+                  onFolderClick={handleFolderClick}
+                  onFileClick={handleFileClick}
+                  onFileDoubleClick={handleFileDoubleClick}
+                  selectedFiles={selectedFiles}
+                  expandedFolders={expandedFolders}
+                  onToggleExpansion={toggleFolderExpansion}
+                />
+              )}
+            </div>
+          )}
+        </div>
+        {/* File Details Modal */}
+        {showDetailsModal && detailsFile && (
+          <div className="fixed inset-0 h-full w-full z-50 flex items-center justify-center bg-black/50 bg-opacity-30">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-[50%] h-full relative overflow-auto">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                onClick={() => { setShowDetailsModal(false); setDetailsFile(null); }}
+                aria-label="Close file details modal"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <FileDetails file={detailsFile}/>
+            </div>
           </div>
         )}
       </div>
@@ -336,8 +368,9 @@ const FileGridView: React.FC<{
   node: FileTreeNode;
   onFolderClick: (path: string) => void;
   onFileClick: (node: FileTreeNode) => void;
+  onFileDoubleClick: (node: FileTreeNode) => void;
   selectedFiles: Set<string>;
-}> = ({ node, onFolderClick, onFileClick, selectedFiles }) => {
+}> = ({ node, onFolderClick, onFileClick, onFileDoubleClick, selectedFiles }) => {
   return (
     <div className="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
       {node.children.map((child) => {
@@ -352,7 +385,7 @@ const FileGridView: React.FC<{
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
             onClick={() => child.type === 'folder' ? onFolderClick(child.path) : onFileClick(child)}
-            onDoubleClick={() => child.type === 'folder' ? onFolderClick(child.path) : undefined}
+            onDoubleClick={() => child.type === 'folder' ? onFolderClick(child.path) : onFileDoubleClick(child)}
           >
             <div className="text-2xl mb-2">
               {getFileIcon(child.type, child.extension)}
@@ -379,10 +412,11 @@ const FileListView: React.FC<{
   node: FileTreeNode;
   onFolderClick: (path: string) => void;
   onFileClick: (node: FileTreeNode) => void;
+  onFileDoubleClick: (node: FileTreeNode) => void;
   selectedFiles: Set<string>;
   expandedFolders: Set<string>;
   onToggleExpansion: (path: string, event: React.MouseEvent) => void;
-}> = ({ node, onFolderClick, onFileClick, selectedFiles, expandedFolders, onToggleExpansion }) => {
+}> = ({ node, onFolderClick, onFileClick, onFileDoubleClick, selectedFiles, expandedFolders, onToggleExpansion }) => {
   return (
     <div className="divide-y divide-gray-200 dark:divide-gray-700">
       {/* Header */}
@@ -405,6 +439,7 @@ const FileListView: React.FC<{
                 isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
               }`}
               onClick={() => child.type === 'folder' ? onFolderClick(child.path) : onFileClick(child)}
+              onDoubleClick={() => child.type === 'folder' ? onFolderClick(child.path) : onFileDoubleClick(child)}
             >
               <div className="col-span-6 flex items-center space-x-3 min-w-0">
                 <div className="flex items-center space-x-1">
