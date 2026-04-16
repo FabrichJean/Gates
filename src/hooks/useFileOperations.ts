@@ -35,6 +35,8 @@ export function useFileOperations() {
    */
   const uploadFile = useCallback(async (request: UploadFileRequest): Promise<FileRecord | null> => {
     // Validate file first
+    console.log(request);
+    
     const validation = validateFileUpload(request.file);
     if (!validation.isValid) {
       setUploadState({
@@ -47,7 +49,7 @@ export function useFileOperations() {
 
     setUploadState({ isLoading: true, error: null, success: false });
 
-    try {
+    try {      
       const response = await filesAPI.uploadFile(request);
       
       setUploadState({

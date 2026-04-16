@@ -53,8 +53,7 @@ export interface UploadFileRequest {
   target_user?: number;
   tags?: string[];
   comment?: string;
-  local_path?: string;
-  s3_path?: string;
+  node_path?: string;
 }
 
 export interface FileListQuery {

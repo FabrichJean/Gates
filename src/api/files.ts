@@ -70,12 +70,8 @@ class FilesAPI {
         formData.append('comment', data.comment);
       }
       
-      if (data.local_path) {
-        formData.append('local_path', data.local_path);
-      }
-      
-      if (data.s3_path) {
-        formData.append('s3_path', data.s3_path);
+      if (data.node_path) {
+        formData.append('node_path', data.node_path);
       }
 
       const response = await api.post('/files/upload', formData, {

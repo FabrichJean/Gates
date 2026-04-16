@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useFileOperations } from '../../hooks/useFileOperations';
+import { FileUpload } from './FileUpload';
 import { useFiles } from '../../hooks/useFiles';
 import { useFileExplorer } from '../../hooks/useFileExplorer';
 import { buildFileTree, findNodeByPath, getBreadcrumbPath, getFileIcon, formatFileSize, formatDate } from '../../utils/fileTreeUtils';
@@ -9,6 +11,14 @@ export const ProfessionalFileExplorer: React.FC = () => {
   const { files, isLoading, error, refetch } = useFiles({ search: searchQuery });
   const [currentPath, setCurrentPath] = useState('');
   const [expandedFolders, setExpandedFolders] = useState(new Set<string>(['']));
+  const [showUpload, setShowUpload] = useState(false);
+  // TODO: Replace with actual user id from context/auth
+  const userId = 1;
+  const { uploadFile } = useFileOperations();
+  const [showNewFolder, setShowNewFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderLoading, setNewFolderLoading] = useState(false);
+  const [newFolderError, setNewFolderError] = useState('');
 
   // Build file tree from files
   const fileTree = useMemo(() => buildFileTree(files), [files]);
@@ -44,6 +54,42 @@ export const ProfessionalFileExplorer: React.FC = () => {
       return newSet;
     });
   }, []);
+
+  // Folder creation handler
+  async function handleCreateFolder() {
+    setNewFolderError('');
+    if (!newFolderName.trim()) {
+      setNewFolderError('Folder name is required');
+      return;
+    }
+    setNewFolderLoading(true);
+    // Compose folder path
+    let folderPath = currentPath;
+    if (!folderPath || folderPath === '' || folderPath === '/') {
+      folderPath = newFolderName.trim();
+    } else {
+      folderPath = folderPath.endsWith('/') ? folderPath + newFolderName.trim() : folderPath + '/' + newFolderName.trim();
+    }
+    // Upload a void file (empty blob) with special tag 'folder'
+    const voidFile = new File([''], '.void', { type: 'application/x-empty' });
+    try {
+      await uploadFile({
+        file: voidFile,
+        user_id: userId,
+        node_path: folderPath + '/'+voidFile.name, // trailing slash to indicate folder
+        tags: ['folder'],
+        comment: 'Virtual folder',
+      });
+      setShowNewFolder(false);
+      setNewFolderName('');
+      setNewFolderError('');
+      refetch();
+    } catch (err) {
+      setNewFolderError(err instanceof Error ? err.message : 'Failed to create folder');
+    } finally {
+      setNewFolderLoading(false);
+    }
+  }
 
   return (
     <div className="h-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex flex-col">
@@ -113,7 +159,97 @@ export const ProfessionalFileExplorer: React.FC = () => {
             </svg>
           </div>
 
+          {/* New Folder Button */}
+          <button
+            onClick={() => setShowNewFolder(true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-gray-200 text-gray-700 text-xs font-medium hover:bg-gray-300 transition-colors"
+            title="Create new folder"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7V6a2 2 0 012-2h2m4 0h6a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M9 3v4m6-4v4" />
+            </svg>
+            New Folder
+          </button>
+
+          {/* Upload Button */}
+      {/* New Folder Modal */}
+      {showNewFolder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-xs relative">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+              onClick={() => { setShowNewFolder(false); setNewFolderName(''); setNewFolderError(''); }}
+              aria-label="Close new folder modal"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Create New Folder</h2>
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={e => setNewFolderName(e.target.value)}
+              placeholder="Folder name"
+              className="w-full px-3 py-2 mb-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+              disabled={newFolderLoading}
+              onKeyDown={e => { if (e.key === 'Enter') handleCreateFolder(); }}
+            />
+            {newFolderError && <div className="text-xs text-red-600 mb-2">{newFolderError}</div>}
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-200 text-gray-700 hover:bg-gray-300"
+                onClick={() => { setShowNewFolder(false); setNewFolderName(''); setNewFolderError(''); }}
+                disabled={newFolderLoading}
+              >Cancel</button>
+              <button
+                className="px-3 py-1.5 rounded-md text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                onClick={handleCreateFolder}
+                disabled={newFolderLoading || !newFolderName.trim()}
+              >{newFolderLoading ? 'Creating...' : 'Create'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+          <button
+            onClick={() => setShowUpload(true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors"
+            title="Upload files"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+            </svg>
+            Upload
+          </button>
+
           {/* View Mode Toggle */}
+      {/* Upload Modal */}
+      {showUpload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center h-full bg-black/50 p-1 bg-opacity-30 overflow-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-[60%] h-full overflow-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+              onClick={() => setShowUpload(false)}
+              aria-label="Close upload modal"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <FileUpload
+              userId={userId}
+              onUploadComplete={() => {
+                setShowUpload(false);
+                refetch();
+              }}
+              onUploadError={() => {}}
+              currentPath={currentPath}
+            />
+          </div>
+        </div>
+      )}
           <div className="flex items-center bg-gray-200 dark:bg-gray-600 rounded-md p-0.5">
             <button
               onClick={() => setViewMode('grid')}

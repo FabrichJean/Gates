@@ -363,7 +363,8 @@ export function validateFileUpload(file: File): {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'text/*',
     'application/zip',
-    'application/x-rar-compressed'
+    'application/x-rar-compressed',
+    'application/x-empty'
   ];
   
   if (file.size > maxSize) {
