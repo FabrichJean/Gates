@@ -367,13 +367,6 @@ export function validateFileUpload(file: File): {
     'application/x-empty'
   ];
   
-  if (file.size > maxSize) {
-    return {
-      isValid: false,
-      error: `File size must be less than ${formatFileSize(maxSize)}`
-    };
-  }
-  
   const isTypeAllowed = allowedTypes.some(type => {
     if (type.endsWith('*')) {
       return file.type.startsWith(type.slice(0, -1));

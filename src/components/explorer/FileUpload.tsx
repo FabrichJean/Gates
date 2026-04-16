@@ -444,9 +444,7 @@ const CompactDropZone: React.FC<DropZoneProps> = ({
         <p className="text-xs font-medium text-slate-700 dark:text-gray-100">
           {isDragActive ? "Drop here" : "Drop files or click"}
         </p>
-        <p className="text-[10px] text-slate-500 dark:text-gray-400">
-          Max 100MB
-        </p>
+        {/* No file size limit */}
       </div>
     </div>
   );

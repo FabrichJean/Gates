@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import UserSelector, { type User } from '../UserSelector';
 import { useFileOperations } from '../../hooks/useFileOperations';
 import { FileUpload } from './FileUpload';
 import { useFiles } from '../../hooks/useFiles';
@@ -6,10 +7,32 @@ import { useFileExplorer } from '../../hooks/useFileExplorer';
 import { buildFileTree, findNodeByPath, getBreadcrumbPath, getFileIcon, formatFileSize, formatDate } from '../../utils/fileTreeUtils';
 import type { FileTreeNode } from '../../utils/fileTreeUtils';
 import FileDetails from './FileDetails';
+import { useAuthMe, useUsers } from '../../hooks/useAuth';
+import RoleEnum from '../../utils/roleEnum';
 
 export const ProfessionalFileExplorer: React.FC = () => {
   const { searchQuery, setSearchQuery, viewMode, setViewMode, selectedFiles, toggleFileSelection, clearSelection } = useFileExplorer();
-  const { files, isLoading, error, refetch } = useFiles({ search: searchQuery });
+  // User filter state
+
+  const { data: user } = useAuthMe();
+  const { data: users } = useUsers('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(() => {
+    if (user && user.role !== RoleEnum.SUPERADMIN) {
+      return user;
+    }
+    return null;
+  });
+
+  // Keep selectedUser in sync if user changes (e.g., after login)
+  useEffect(() => {
+    if (user && user.role !== RoleEnum.SUPERADMIN) {
+      setSelectedUser(user);
+    } else if (user && user.role === RoleEnum.SUPERADMIN) {
+      setSelectedUser(null);
+    }
+  }, [user]);
+
+  const { files, isLoading, error, refetch } = useFiles({ search: searchQuery, target_user: selectedUser?.id });
   const [currentPath, setCurrentPath] = useState('');
   const [expandedFolders, setExpandedFolders] = useState(new Set<string>(['']));
   const [showUpload, setShowUpload] = useState(false);
@@ -151,6 +174,7 @@ export const ProfessionalFileExplorer: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-3">
+
           {/* Search */}
           <div className="relative">
             <input
@@ -167,6 +191,18 @@ export const ProfessionalFileExplorer: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
+
+          {/* User Filter */}
+          {user?.role === RoleEnum.SUPERADMIN ? <div className="w-max">
+            <UserSelector
+              users={users}
+              selectedUserId={selectedUser?.id ?? null}
+              onSelect={setSelectedUser}
+              placeholder="Filter by user..."
+              allowClear
+              showValidationBadge={false}
+            />
+          </div> : null}
 
           {/* New Folder Button */}
           <button
