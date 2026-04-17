@@ -10,6 +10,7 @@ import {
   Settings,
   Plus,
   Video,
+  Folder,
 } from "lucide-react";
 
 // Create New Dropdown Component
@@ -122,6 +123,20 @@ const CreateNewDropdown: React.FC = () => {
               新罗马
             </span>
           </button>
+
+          {/* File Explorer */}
+          <button
+            onClick={() => navigate("/explorer")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left
+              hover:bg-green-50 dark:hover:bg-green-900/20
+              transition-all duration-200 ease-out group/item
+              border-t border-gray-100 dark:border-gray-700"
+          >
+            <Folder className="w-5 h-5 text-green-500 dark:text-green-400 transition-transform duration-300 group-hover/item:scale-110" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              文件浏览器
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -220,6 +235,7 @@ const Breadcrumb: React.FC = () => {
     "/convertion": "转换",
     "/touch-video": "触摸视频",
     "/app-videos": "应用视频",
+    "/explorer": "文件浏览器",
     "/mangas": "漫画",
     // "/romans": "罗马",
     "/post": "帖子",
