@@ -34,9 +34,7 @@ export function useFileOperations() {
    * Upload a single file
    */
   const uploadFile = useCallback(async (request: UploadFileRequest): Promise<FileRecord | null> => {
-    // Validate file first
-    console.log(request);
-    
+    // Validate file first    
     const validation = validateFileUpload(request.file);
     if (!validation.isValid) {
       setUploadState({
