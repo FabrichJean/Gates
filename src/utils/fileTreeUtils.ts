@@ -68,6 +68,9 @@ export function buildFileTree(files: FileRecord[]): FileTreeNode {
     
     // Add the file
     const fileName = pathParts[pathParts.length - 1];
+    if (fileName === '.void') {
+      continue;
+    }
     const filePath = file.node_path;
     const parentPath = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : '';
     

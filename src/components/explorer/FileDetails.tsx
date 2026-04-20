@@ -11,119 +11,125 @@ export interface FileDetailsProps {
   onDownload?: () => void;
   onShare?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Icon System
 // ───────────────────────────────────────────────────────────────────────────────
 
-const Icon: React.FC<{ name: string; className?: string; size?: number }> = ({ 
-  name, className = '', size = 16 
+const Icon: React.FC<{ name: string; className?: string; size?: number }> = ({
+  name, className = '', size = 16
 }) => {
   const icons: Record<string, React.ReactNode> = {
     file: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" />
       </svg>
     ),
     image: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" />
       </svg>
     ),
     video: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/>
+        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" /><line x1="7" y1="2" x2="7" y2="22" /><line x1="17" y1="2" x2="17" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /><line x1="2" y1="7" x2="7" y2="7" /><line x1="2" y1="17" x2="7" y2="17" /><line x1="17" y1="17" x2="22" y2="17" /><line x1="17" y1="7" x2="22" y2="7" />
       </svg>
     ),
     music: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
       </svg>
     ),
     code: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/>
+        <polyline points="16,18 22,12 16,6" /><polyline points="8,6 2,12 8,18" />
       </svg>
     ),
     pdf: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" />
       </svg>
     ),
     archive: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="21,8 21,21 3,21 3,8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>
+        <polyline points="21,8 21,21 3,21 3,8" /><rect x="1" y="3" width="22" height="5" /><line x1="10" y1="12" x2="14" y2="12" />
       </svg>
     ),
     download: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7,10 12,15 17,10" /><line x1="12" y1="15" x2="12" y2="3" />
       </svg>
     ),
     share: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
       </svg>
     ),
     trash: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        <polyline points="3,6 5,6 21,6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      </svg>
+    ),
+    edit: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
       </svg>
     ),
     copy: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
       </svg>
     ),
     check: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20,6 9,17 4,12"/>
+        <polyline points="20,6 9,17 4,12" />
       </svg>
     ),
     external: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15,3 21,3 21,9" /><line x1="10" y1="14" x2="21" y2="3" />
       </svg>
     ),
     calendar: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     ),
     user: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
       </svg>
     ),
     folder: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
       </svg>
     ),
     tag: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" />
       </svg>
     ),
     message: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
     link: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
       </svg>
     ),
     eye: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
       </svg>
     ),
     hash: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
+        <line x1="4" y1="9" x2="20" y2="9" /><line x1="4" y1="15" x2="20" y2="15" /><line x1="10" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="14" y2="21" />
       </svg>
     ),
   };
@@ -161,7 +167,7 @@ const formatDate = (date?: string | Date): string => {
 
 const getFileType = (filename: string): { type: string; icon: string; color: string } => {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
-  
+
   const types: Record<string, { icon: string; color: string }> = {
     // Images
     jpg: { icon: 'image', color: 'bg-purple-100 text-purple-600 border-purple-200' },
@@ -198,7 +204,7 @@ const getFileType = (filename: string): { type: string; icon: string; color: str
     tar: { icon: 'archive', color: 'bg-slate-100 text-slate-600 border-slate-200' },
     gz: { icon: 'archive', color: 'bg-slate-100 text-slate-600 border-slate-200' },
   };
-  
+
   const type = types[ext] || { icon: 'file', color: 'bg-slate-100 text-slate-600 border-slate-200' };
   return { type: ext.toUpperCase(), ...type };
 };
@@ -212,17 +218,17 @@ const isImageFile = (filename: string): boolean => {
 // Preview Components
 // ───────────────────────────────────────────────────────────────────────────────
 
-const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: string } }> = ({ 
-  file, 
-  type 
+const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: string } }> = ({
+  file,
+  type
 }) => {
   const [imageError, setImageError] = useState(false);
-  
+
   if (isImageFile(file.node_path || '') && file.public_url && !imageError) {
     return (
       <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
-        <img 
-          src={file.public_url} 
+        <img
+          src={file.public_url}
           alt={file.node_path}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           onError={() => setImageError(true)}
@@ -255,24 +261,24 @@ const FilePreview: React.FC<{ file: FileRecord; type: { icon: string; color: str
       </div>
     );
   }
-  
-    // Iframe preview for other formats with public_url
-    if (file.public_url) {
-      return (
-        <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
-          <iframe
-            src={file.public_url}
-            title={file.node_path}
-            className="w-full h-full border-0"
-            allowFullScreen
-          />
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <span className="text-xs text-white font-medium truncate">{file.node_path}</span>
-            <span className="text-xs text-white/80">{formatSize(file.size)}</span>
-          </div>
+
+  // Iframe preview for other formats with public_url
+  if (file.public_url) {
+    return (
+      <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden group">
+        <iframe
+          src={file.public_url}
+          title={file.node_path}
+          className="w-full h-full border-0"
+          allowFullScreen
+        />
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <span className="text-xs text-white font-medium truncate">{file.node_path}</span>
+          <span className="text-xs text-white/80">{formatSize(file.size)}</span>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   // Generic file icon preview
   return (
@@ -309,7 +315,7 @@ const DetailRow: React.FC<{
   onCopy?: () => void;
 }> = ({ icon, label, value, copyable, onCopy }) => {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = () => {
     if (onCopy) {
       onCopy();
@@ -332,8 +338,8 @@ const DetailRow: React.FC<{
               onClick={handleCopy}
               className={`
                 p-1 rounded transition-all duration-150
-                ${copied 
-                  ? 'text-emerald-600 bg-emerald-50' 
+                ${copied
+                  ? 'text-emerald-600 bg-emerald-50'
                   : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100'
                 }
               `}
@@ -368,16 +374,17 @@ const Tag: React.FC<{ label: string }> = ({ label }) => (
 // Main Component
 // ───────────────────────────────────────────────────────────────────────────────
 
-export const FileDetails: React.FC<FileDetailsProps> = ({ 
-  file, 
+export const FileDetails: React.FC<FileDetailsProps> = ({
+  file,
   className = "",
   onDownload,
   onShare,
-  onDelete
+  onDelete,
+  onEdit,
 }) => {
-  const [showFullPath, setShowFullPath] = useState(false);
+  // const [showFullPath, setShowFullPath] = useState(false);
   const fileType = useMemo(() => getFileType(file.node_path || ''), [file.node_path]);
-  
+
   const filename = file.node_path?.split('/').pop() || 'Unknown';
   const filepath = file.node_path || '';
   const directory = filepath.substring(0, filepath.lastIndexOf('/')) || '/';
@@ -406,11 +413,11 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
       ${className}
     `}>
       {/* Preview Section */}
-  <div className="relative">
+      <div className="relative">
         <FilePreview file={file} type={fileType} />
-        
+
         {/* Overlay Actions */}
-  <div className="absolute top-3 right-3 flex gap-2">
+        <div className="absolute top-3 right-3 flex gap-2">
           {(file.public_url) && (
             <button
               onClick={handleDownload}
@@ -444,9 +451,9 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
       </div>
 
       {/* Content Section */}
-  <div className="p-4 space-y-1">
+      <div className="p-4 space-y-1">
         {/* File Name Header */}
-  <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 truncate" title={filename}>
               {filename}
@@ -461,7 +468,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               <span className="text-xs text-slate-500 dark:text-slate-400">{formatSize(file.size)}</span>
             </div>
           </div>
-          
+
           {/* Quick Actions */}
           <div className="flex items-center gap-1">
             {file.public_url && (
@@ -473,20 +480,11 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
                 <Icon name="link" size={16} />
               </button>
             )}
-            {onDelete && (
-              <button
-                onClick={onDelete}
-                className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                title="Delete"
-              >
-                <Icon name="trash" size={16} />
-              </button>
-            )}
           </div>
         </div>
 
         {/* Details Grid */}
-  <div className="space-y-0.5">
+        <div className="space-y-0.5">
           {/* Owner */}
           {file.user && (
             <div className="flex items-start gap-3 py-2">
@@ -582,7 +580,7 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Public Link</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <a 
+                  <a
                     href={file.public_url}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -605,8 +603,8 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
       </div>
 
       {/* Footer Actions */}
-      {(onDownload || onShare || onDelete) && (
-  <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/70 flex items-center justify-between">
+      {(onDownload || onShare || onDelete || onEdit) && (
+        <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {(onDownload || file.public_url) && (
               <button
@@ -638,12 +636,26 @@ export const FileDetails: React.FC<FileDetailsProps> = ({
               </button>
             )}
           </div>
-          
+
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="
+                flex items-center gap-2 px-3 py-1.5 text-sm font-medium cursor-pointer
+                text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30
+                rounded-lg transition-all duration-150
+              "
+            >
+              <Icon name="edit" size={14} />
+              Edit
+            </button>
+          )}
+
           {onDelete && (
             <button
               onClick={onDelete}
               className="
-                flex items-center gap-2 px-3 py-1.5 text-sm font-medium
+                flex items-center gap-2 px-3 py-1.5 text-sm font-medium cursor-pointer
                 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30
                 rounded-lg transition-all duration-150
               "
