@@ -42,10 +42,10 @@ export interface CreateFileRequest {
 export interface UpdateFileRequest {
   media_id?: number;
   user_id?: number;
-  target_user?: number;
+  target_user?: number | null;
   node_path?: string;
   tags?: string[];
-  comment?: string;
+  comment?: string | null;
 }
 
 export interface UploadFileRequest {

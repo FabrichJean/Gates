@@ -14,9 +14,12 @@ import {
   formatDate,
 } from "../../utils/fileTreeUtils";
 import type { FileTreeNode } from "../../utils/fileTreeUtils";
+import type { FileRecord, UpdateFileRequest } from "../../types/file";
 import FileDetails from "./FileDetails";
 import { useAuthMe, useUsers } from "../../hooks/useAuth";
 import RoleEnum from "../../utils/roleEnum";
+import ConfirmAlert from "../ConfirmAlert";
+import FileEditModal from "./FileEditModal";
 
 export const ProfessionalFileExplorer: React.FC = () => {
   const {
@@ -71,14 +74,20 @@ export const ProfessionalFileExplorer: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState(new Set<string>([""]));
   const [showUpload, setShowUpload] = useState(false);
   // TODO: Replace with actual user id from context/auth
-  const { uploadFile } = useFileOperations();
+  const { uploadFile, deleteFile, updateFile } = useFileOperations();
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderLoading, setNewFolderLoading] = useState(false);
   const [newFolderError, setNewFolderError] = useState("");
   // File details modal state
-  const [detailsFile, setDetailsFile] = useState<any | null>(null);
+  const [detailsFile, setDetailsFile] = useState<FileRecord | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<
+    { id: number; name: string } | null
+  >(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFile, setEditFile] = useState<FileRecord | null>(null);
 
   // Build file tree from files
   const fileTree = useMemo(() => buildFileTree(files), [files]);
@@ -130,6 +139,70 @@ export const ProfessionalFileExplorer: React.FC = () => {
       });
     },
     [],
+  );
+
+  const openDeleteConfirm = useCallback(
+    (fileRecord: { id: number; node_path?: string | null }) => {
+      const name = fileRecord?.node_path?.split("/").pop() || "file";
+      setDeleteTarget({ id: fileRecord.id, name });
+      setDeleteConfirmOpen(true);
+    },
+    [],
+  );
+
+  const closeDeleteConfirm = useCallback(() => {
+    setDeleteConfirmOpen(false);
+    setDeleteTarget(null);
+  }, []);
+
+  const openEditModal = useCallback((fileRecord: FileRecord) => {
+    setEditFile(fileRecord);
+    setShowEditModal(true);
+  }, []);
+
+  const closeEditModal = useCallback(() => {
+    setShowEditModal(false);
+    setEditFile(null);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    const ok = await deleteFile(deleteTarget.id);
+    if (!ok) {
+      window.alert("Delete failed");
+      return;
+    }
+    closeDeleteConfirm();
+    closeEditModal();
+    setShowDetailsModal(false);
+    setDetailsFile(null);
+    clearSelection();
+    refetch();
+  }, [
+    deleteTarget,
+    deleteFile,
+    closeDeleteConfirm,
+    closeEditModal,
+    clearSelection,
+    refetch,
+  ]);
+
+  const handleEditSave = useCallback(
+    async (payload: UpdateFileRequest) => {
+      if (!editFile) return null;
+      const updated = await updateFile(editFile.id, payload);
+      if (!updated) {
+        window.alert("Update failed");
+        return null;
+      }
+      setDetailsFile((prev) =>
+        prev && prev.id === updated.id ? updated : prev,
+      );
+      setEditFile(updated);
+      refetch();
+      return updated;
+    },
+    [editFile, updateFile, refetch],
   );
 
   // Folder creation handler
@@ -259,91 +332,91 @@ export const ProfessionalFileExplorer: React.FC = () => {
               </div>
             </div>
           )}
-         {!showDateFilters ? <>
-          {/* Navigation Buttons */}
-          <div className="flex items-center space-x-1">
-            <button
-              className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              onClick={() => setCurrentPath(currentNode.parent?.path || "")}
-              disabled={!currentNode.parent}
-              title="Go back"
-            >
-              <svg
-                className="w-4 h-4 text-gray-600 dark:text-gray-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {!showDateFilters ? <>
+            {/* Navigation Buttons */}
+            <div className="flex items-center space-x-1">
+              <button
+                className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                onClick={() => setCurrentPath(currentNode.parent?.path || "")}
+                disabled={!currentNode.parent}
+                title="Go back"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              onClick={refetch}
-              title="Refresh"
-            >
-              <svg
-                className="w-4 h-4 text-gray-600 dark:text-gray-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-4 h-4 text-gray-600 dark:text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <button
+                className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                onClick={refetch}
+                title="Refresh"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-            </button>
-          </div>
+                <svg
+                  className="w-4 h-4 text-gray-600 dark:text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
+            </div>
 
-          {/* Breadcrumb Navigation */}
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-            <button
-              className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
-              onClick={() => setCurrentPath("")}
-            >
-              Root
-            </button>
-            {breadcrumbPath.length <= 3 ? (
-              breadcrumbPath.map((node) => (
-                <React.Fragment key={node.id}>
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <button
+                className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                onClick={() => setCurrentPath("")}
+              >
+                Root
+              </button>
+              {breadcrumbPath.length <= 3 ? (
+                breadcrumbPath.map((node) => (
+                  <React.Fragment key={node.id}>
+                    <span className="mx-2 text-gray-400">/</span>
+                    <button
+                      className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                      onClick={() => setCurrentPath(node.path)}
+                    >
+                      {node.name}
+                    </button>
+                  </React.Fragment>
+                ))
+              ) : (
+                <>
                   <span className="mx-2 text-gray-400">/</span>
                   <button
                     className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
-                    onClick={() => setCurrentPath(node.path)}
+                    onClick={() => setCurrentPath(breadcrumbPath[0].path)}
                   >
-                    {node.name}
+                    {breadcrumbPath[0].name}
                   </button>
-                </React.Fragment>
-              ))
-            ) : (
-              <>
-                <span className="mx-2 text-gray-400">/</span>
-                <button
-                  className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
-                  onClick={() => setCurrentPath(breadcrumbPath[0].path)}
-                >
-                  {breadcrumbPath[0].name}
-                </button>
-                <span className="mx-2 text-gray-400">/</span>
-                <span className="text-gray-400">...</span>
-                <span className="mx-2 text-gray-400">/</span>
-                <button
-                  className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
-                  onClick={() => setCurrentPath(breadcrumbPath[breadcrumbPath.length - 1].path)}
-                >
-                  {breadcrumbPath[breadcrumbPath.length - 1].name}
-                </button>
-              </>
-            )}
-          </div>
+                  <span className="mx-2 text-gray-400">/</span>
+                  <span className="text-gray-400">...</span>
+                  <span className="mx-2 text-gray-400">/</span>
+                  <button
+                    className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                    onClick={() => setCurrentPath(breadcrumbPath[breadcrumbPath.length - 1].path)}
+                  >
+                    {breadcrumbPath[breadcrumbPath.length - 1].name}
+                  </button>
+                </>
+              )}
+            </div>
           </> : null}
         </div>
 
@@ -358,45 +431,45 @@ export const ProfessionalFileExplorer: React.FC = () => {
           </button>
 
           {!showDateFilters ? <>
-          {/* Search */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search files..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48 px-3 py-1.5 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search files..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-48 px-3 py-1.5 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md 
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
-            </svg>
-          </div>
-
-          {/* User Filter */}
-          {user?.role === RoleEnum.SUPERADMIN ? (
-            <div className="w-max">
-              <UserSelector
-                users={users}
-                selectedUserId={selectedUser?.id ?? null}
-                onSelect={setSelectedUser}
-                placeholder="Filter by user..."
-                allowClear
-                showValidationBadge={false}
-              />
+              <svg
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </div>
-          ) : null}
+
+            {/* User Filter */}
+            {user?.role === RoleEnum.SUPERADMIN ? (
+              <div className="w-max">
+                <UserSelector
+                  users={users}
+                  selectedUserId={selectedUser?.id ?? null}
+                  onSelect={setSelectedUser}
+                  placeholder="Filter by user..."
+                  allowClear
+                  showValidationBadge={false}
+                />
+              </div>
+            ) : null}
           </> : null}
 
           {/* New Folder Button */}
@@ -496,7 +569,7 @@ export const ProfessionalFileExplorer: React.FC = () => {
                     setShowUpload(false);
                     refetch();
                   }}
-                  onUploadError={() => {}}
+                  onUploadError={() => { }}
                   currentPath={currentPath}
                 />
               </div>
@@ -505,11 +578,10 @@ export const ProfessionalFileExplorer: React.FC = () => {
           <div className="flex items-center bg-gray-200 dark:bg-gray-600 rounded-md p-0.5">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded text-xs ${
-                viewMode === "grid"
+              className={`p-1.5 rounded text-xs ${viewMode === "grid"
                   ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm"
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-              }`}
+                }`}
               title="Grid view"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -518,11 +590,10 @@ export const ProfessionalFileExplorer: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded text-xs ${
-                viewMode === "list"
+              className={`p-1.5 rounded text-xs ${viewMode === "list"
                   ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm"
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-              }`}
+                }`}
               title="List view"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -574,7 +645,7 @@ export const ProfessionalFileExplorer: React.FC = () => {
         </div>
         {/* File Details Modal */}
         {showDetailsModal && detailsFile && (
-          <div className="fixed inset-0 h-full w-full z-50 flex items-center justify-center bg-black/50 bg-opacity-30">
+          <div className="fixed inset-0 h-full w-full z-50 flex items-center justify-center bg-black/50 bg-opacity-30 p-6">
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-[50%] h-full relative overflow-auto">
               <button
                 className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
@@ -598,10 +669,41 @@ export const ProfessionalFileExplorer: React.FC = () => {
                   />
                 </svg>
               </button>
-              <FileDetails file={detailsFile} />
+              <FileDetails
+                file={detailsFile}
+                onEdit={
+                  user?.role === RoleEnum.SUPERADMIN
+                    ? () => openEditModal(detailsFile)
+                    : undefined
+                }
+                onDelete={
+                  user?.role === RoleEnum.SUPERADMIN
+                    ? () => openDeleteConfirm(detailsFile)
+                    : undefined
+                }
+              />
             </div>
           </div>
         )}
+        <ConfirmAlert
+          open={deleteConfirmOpen}
+          title="Delete file"
+          message={
+            deleteTarget
+              ? `Are you sure you want to delete "${deleteTarget.name}"?`
+              : "Are you sure you want to delete this file?"
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={handleConfirmDelete}
+          onClose={closeDeleteConfirm}
+        />
+        <FileEditModal
+          open={showEditModal}
+          file={editFile}
+          onClose={closeEditModal}
+          onSave={handleEditSave}
+        />
       </div>
 
       {/* Status Bar */}
@@ -632,53 +734,52 @@ const FileGridView: React.FC<{
   onFileDoubleClick,
   selectedFiles,
 }) => {
-  return (
-    <div className="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-      {node.children.map((child) => {
-        const isSelected =
-          child.fileRecord && selectedFiles.has(child.fileRecord.id.toString());
+    return (
+      <div className="p-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+        {node.children.map((child) => {
+          const isSelected =
+            child.fileRecord && selectedFiles.has(child.fileRecord.id.toString());
 
-        return (
-          <div
-            key={child.id}
-            className={`flex flex-col items-center p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
-              isSelected
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-            }`}
-            onClick={() =>
-              child.type === "folder"
-                ? onFolderClick(child.path)
-                : onFileClick(child)
-            }
-            onDoubleClick={() =>
-              child.type === "folder"
-                ? onFolderClick(child.path)
-                : onFileDoubleClick(child)
-            }
-          >
-            <div className="text-2xl mb-2">
-              {getFileIcon(child.type, child.extension)}
-            </div>
-            <div className="text-center w-full">
-              <p
-                className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate"
-                title={child.name}
-              >
-                {child.name}
-              </p>
-              {child.type === "file" && child.size && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {formatFileSize(child.size)}
+          return (
+            <div
+              key={child.id}
+              className={`flex flex-col items-center p-3 rounded-lg border transition-all cursor-pointer hover:shadow-md ${isSelected
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                }`}
+              onClick={() =>
+                child.type === "folder"
+                  ? onFolderClick(child.path)
+                  : onFileClick(child)
+              }
+              onDoubleClick={() =>
+                child.type === "folder"
+                  ? onFolderClick(child.path)
+                  : onFileDoubleClick(child)
+              }
+            >
+              <div className="text-2xl mb-2">
+                {getFileIcon(child.type, child.extension)}
+              </div>
+              <div className="text-center w-full">
+                <p
+                  className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate"
+                  title={child.name}
+                >
+                  {child.name}
                 </p>
-              )}
+                {child.type === "file" && child.size && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formatFileSize(child.size)}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+          );
+        })}
+      </div>
+    );
+  };
 
 // List View Component
 const FileListView: React.FC<{
@@ -698,84 +799,82 @@ const FileListView: React.FC<{
   expandedFolders,
   onToggleExpansion,
 }) => {
-  return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
-      {/* Header */}
-      <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-        <div className="col-span-6">Name</div>
-        <div className="col-span-2">Size</div>
-        <div className="col-span-2">Type</div>
-        <div className="col-span-2">Modified</div>
-      </div>
+    return (
+      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        {/* Header */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <div className="col-span-6">Name</div>
+          <div className="col-span-2">Size</div>
+          <div className="col-span-2">Type</div>
+          <div className="col-span-2">Modified</div>
+        </div>
 
-      {/* Files and Folders */}
-      {node.children.map((child) => {
-        const isSelected =
-          child.fileRecord && selectedFiles.has(child.fileRecord.id.toString());
-        const isExpanded = expandedFolders.has(child.path);
+        {/* Files and Folders */}
+        {node.children.map((child) => {
+          const isSelected =
+            child.fileRecord && selectedFiles.has(child.fileRecord.id.toString());
+          const isExpanded = expandedFolders.has(child.path);
 
-        return (
-          <div key={child.id}>
-            <div
-              className={`grid grid-cols-12 gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
-                isSelected ? "bg-blue-50 dark:bg-blue-900/20" : ""
-              }`}
-              onClick={() =>
-                child.type === "folder"
-                  ? onFolderClick(child.path)
-                  : onFileClick(child)
-              }
-              onDoubleClick={() =>
-                child.type === "folder"
-                  ? onFolderClick(child.path)
-                  : onFileDoubleClick(child)
-              }
-            >
-              <div className="col-span-6 flex items-center space-x-3 min-w-0">
-                <div className="flex items-center space-x-1">
-                  {child.type === "folder" && (
-                    <button
-                      onClick={(e) => onToggleExpansion(child.path, e)}
-                      className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                    >
-                      <svg
-                        className={`w-3 h-3 text-gray-400 transform transition-transform ${
-                          isExpanded ? "rotate-90" : ""
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
+          return (
+            <div key={child.id}>
+              <div
+                className={`grid grid-cols-12 gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${isSelected ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                  }`}
+                onClick={() =>
+                  child.type === "folder"
+                    ? onFolderClick(child.path)
+                    : onFileClick(child)
+                }
+                onDoubleClick={() =>
+                  child.type === "folder"
+                    ? onFolderClick(child.path)
+                    : onFileDoubleClick(child)
+                }
+              >
+                <div className="col-span-6 flex items-center space-x-3 min-w-0">
+                  <div className="flex items-center space-x-1">
+                    {child.type === "folder" && (
+                      <button
+                        onClick={(e) => onToggleExpansion(child.path, e)}
+                        className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                  <span className="text-lg">
-                    {getFileIcon(child.type, child.extension, isExpanded)}
+                        <svg
+                          className={`w-3 h-3 text-gray-400 transform transition-transform ${isExpanded ? "rotate-90" : ""
+                            }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                    <span className="text-lg">
+                      {getFileIcon(child.type, child.extension, isExpanded)}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-900 dark:text-gray-100 truncate font-medium">
+                    {child.name}
                   </span>
                 </div>
-                <span className="text-sm text-gray-900 dark:text-gray-100 truncate font-medium">
-                  {child.name}
-                </span>
-              </div>
-              <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                {child.type === "file" ? formatFileSize(child.size) : "—"}
-              </div>
-              <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                {child.type === "file"
-                  ? child.extension?.toUpperCase() || "File"
-                  : "Folder"}
-              </div>
-              <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                {formatDate(child.modified)}
+                <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  {child.type === "file" ? formatFileSize(child.size) : "—"}
+                </div>
+                <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  {child.type === "file"
+                    ? child.extension?.toUpperCase() || "File"
+                    : "Folder"}
+                </div>
+                <div className="col-span-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  {formatDate(child.modified)}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+          );
+        })}
+      </div>
+    );
+  };

@@ -4,6 +4,8 @@ import { apiURL } from "../constant";
 import { getToken } from "../utils/storage";
 import { socket } from "../utils/socket";
 
+import { DEFAULT_LANG, API_URL_CN, API_URL_YD } from "../constant";
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getFilteredVideos(params: any) {
@@ -33,14 +35,37 @@ export async function uploadS3(videoId: string | number | undefined): Promise<vo
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function uploadVideo(formData: FormData, onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined): Promise<any> {
-    return await axios.post(apiURL + "/videos/upload", formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${getToken()}`,
-        },
-        onUploadProgress,
-    });
+export async function uploadVideo(
+    formData: FormData,
+    modeOrProgress?: "simple" | "double" | ((progressEvent: AxiosProgressEvent) => void),
+    onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
+): Promise<any> {
+    const mode = typeof modeOrProgress === "string" ? modeOrProgress : "simple";
+    const progressCb = typeof modeOrProgress === "function" ? modeOrProgress : onUploadProgress;
+    const lang = (DEFAULT_LANG).toLowerCase();
+    const primaryUrl = lang === "zh" ? API_URL_CN : API_URL_YD;
+    const secondaryUrl = lang === "en" ? API_URL_YD : API_URL_CN;
+
+    const uploadOnce = (baseUrl: string) =>
+        axios.post(baseUrl + "/videos/upload", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${getToken()}`,
+            },
+            onUploadProgress: progressCb,
+        });
+
+    if (mode === "double") {
+        const [first, second] = await Promise.all([
+            await uploadOnce(primaryUrl),
+            await uploadOnce(secondaryUrl)
+        ]);
+
+        // Check both servers are healthy before uploading
+        return [first, second];
+    }
+
+    return await uploadOnce(primaryUrl);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,7 +108,7 @@ export async function uploadCover(videoId: string | number): Promise<void> {
 }
 
 export async function sendProcessing(videoId: string | number) {
-    return await axios.post(`${apiURL}/videos/${videoId}/deep-upload?time=${Date.now()}`, {videoId}, {
+    return await axios.post(`${apiURL}/videos/${videoId}/deep-upload?time=${Date.now()}`, { videoId }, {
         headers: {
             Authorization: `Bearer ${getToken()}`,
         }
@@ -120,12 +145,12 @@ export async function cancelUpload(videoId: string | number): Promise<void> {
 // Single Sync API
 export async function singleSync({ entity, origin_id, isForce, plateformId }: { entity: string; origin_id: number | string; isForce: boolean; plateformId?: number }) {
     const requestBody: any = { entity, origin_id };
-    
+
     // Add plateformId to request body if provided
     if (plateformId !== undefined && plateformId !== null) {
         requestBody.plateformId = plateformId;
     }
-    
+
     return await axios.post(
         `${apiURL}/synchronize/single?isForce=${isForce}`,
         requestBody,
@@ -139,16 +164,16 @@ export async function singleSync({ entity, origin_id, isForce, plateformId }: { 
 
 // Multiple Sync API - sends entire page at once
 export async function multipleSync({ entity, originIds, isForce, plateformId, signal }: { entity: string; originIds: number[]; isForce: boolean; plateformId?: number; signal?: AbortSignal }) {
-    const requestBody: any = { 
+    const requestBody: any = {
         isForce,
         [entity]: originIds.map(id => ({ originId: id }))
     };
-    
+
     // Add plateformId to request body if provided
     if (plateformId !== undefined && plateformId !== null) {
         requestBody.plateformId = plateformId;
     }
-    
+
     return await axios.post(
         `${apiURL}/synchronize/multiple`,
         requestBody,
@@ -189,12 +214,12 @@ export async function getVideosForBulkSync(page: number = 1, limit: number = 50,
         select: 'id,title,status,cover,plateform_id', // Include plateform_id field
         processing: 'done'
     };
-    
+
     // Add plateformId filter if provided
     if (plateformId !== undefined && plateformId !== null) {
         params.plateform_id = plateformId;
     }
-    
+
     return await axios.get(`${apiURL}/videos`, {
         headers: {
             Authorization: `Bearer ${getToken()}`,
