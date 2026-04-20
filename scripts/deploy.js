@@ -17,12 +17,16 @@ function loadRegionConfigs() {
 
   regions.forEach((region) => {
     const envFile = path.join(projectRoot, `.env.prod-${region}`);
+    
     if (fs.existsSync(envFile)) {
       const content = fs.readFileSync(envFile, 'utf-8');
       const config = {};
 
       content.split('\n').forEach((line) => {
-        const match = line.match(/^([^=]+)=(.*)$/);
+        const trimmedLine = line.trim();
+        if (!trimmedLine || trimmedLine.startsWith('#')) return; // Skip empty lines and comments
+        
+        const match = trimmedLine.match(/^([^=]+)=(.*)$/);
         if (match) {
           config[match[1].trim()] = match[2].trim();
         }
@@ -31,7 +35,7 @@ function loadRegionConfigs() {
       configs[region] = config;
     }
   });
-
+  
   return configs;
 }
 
@@ -78,6 +82,8 @@ function checkBranchBeforeDeploy() {
 function sendDeployEvent(region) {
   return new Promise((resolve, reject) => {
     const config = regionConfigs[region];
+        console.log(regionConfigs);
+
     if (!config) {
       reject(new Error(`Configuration non trouvée pour la région: ${region}`));
       return;
@@ -87,6 +93,9 @@ function sendDeployEvent(region) {
     const serviceUrl = config.VITE_SERVER;
     const endpoint = `${serviceUrl}/api/v1/deploy/${region}`;
     const url = new URL(endpoint);
+
+
+    
 
     const options = {
       hostname: url.hostname,
@@ -101,6 +110,8 @@ function sendDeployEvent(region) {
       timeout: 3600000, // 1 hour timeout for long deployments
     };
     
+    console.log(options);
+
 
     const req = http.request(options, (res) => {
       let buffer = '';
