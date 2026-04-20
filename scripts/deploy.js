@@ -110,9 +110,6 @@ function sendDeployEvent(region) {
       timeout: 3600000, // 1 hour timeout for long deployments
     };
     
-    console.log(options);
-
-
     const req = http.request(options, (res) => {
       let buffer = '';
 
