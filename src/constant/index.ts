@@ -19,9 +19,9 @@ export const PAGE_SIZE = 20;
 export const DEFAULT_LANG = "en";
 
 // PROD
-export const API_URL_CN = "http://192.168.1.79:6002/api/v1";
-export const API_URL_YD = "http://192.168.1.79:3000/api/v1";
+export const API_URL_CN = "http://192.168.1.97:3006/api/v1";
+export const API_URL_YD = "http://192.168.1.97:3001/api/v1";
 
 // TEST
-export const API_URL_CN_TEST = "http://192.168.1.79:6001/api/v1";
-export const API_URL_YD_TEST = "http://192.168.1.79:6004/api/v1";
+export const API_URL_CN_TEST = "http://192.168.1.97:3080/api/v1";
+export const API_URL_YD_TEST = "http://192.168.1.97:3070/api/v1";
