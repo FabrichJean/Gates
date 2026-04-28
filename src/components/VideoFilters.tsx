@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useUsers } from "../hooks/useAuth";
+import { useUsers, useAuthMe } from "../hooks/useAuth";
 import UseCategory from "../hooks/useCategory";
 import UseSubCategory from "../hooks/useSubCategory";
 import { mapStatus, mapStatusProcessing, reverseStatus } from "../utils/filter";
 import CreatorAutoComplete from "./CreatorAutoComplete";
 import type { Creator } from "./creators/CreatorList";
 import { useI18n } from "../i18n";
+import RoleEnum from "../utils/roleEnum";
 
 export type TFilter = {
     category_id: string;
@@ -18,6 +19,7 @@ export type TFilter = {
     processing: string;
     startedAt: string;
     endAt: string;
+    accessing?: string;
 };
 
 export default function VideoFilters({
@@ -34,6 +36,7 @@ export default function VideoFilters({
     scope?: "videos" | "bot";
 }) {
     const { t } = useI18n();
+    const { data: user } = useAuthMe();
     const { data: users } = useUsers("");
     const { data: cat } = UseCategory();
     const { data: subcat } = UseSubCategory(Number(filters?.category_id));
@@ -52,6 +55,7 @@ export default function VideoFilters({
                 processing: savedFilter.processing,
                 startedAt: savedFilter.startedAt || "",
                 endAt: savedFilter.endAt || "",
+                accessing: savedFilter.accessing || "",
                 // restore creatorSearch if present
                 creatorSearch: savedFilter.creatorSearch || savedFilter.creator || "",
             };
@@ -284,6 +288,45 @@ export default function VideoFilters({
                             </label>
                         </div>
                     </div>
+
+                    {/* Filtre Accessing (only for superadmins) */}
+                    {user?.role === RoleEnum.SUPERADMIN && (
+                        <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+                            <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Show accessing</p>
+                            <div className="flex gap-3">
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="accessing"
+                                        className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                        checked={filters.accessing === "all" || filters.accessing === ""}
+                                        onChange={() => handleChange("accessing", "all")}
+                                    />
+                                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.all")}</span>
+                                </label>
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="accessing"
+                                        className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                        checked={filters.accessing === "yes"}
+                                        onChange={() => handleChange("accessing", "yes")}
+                                    />
+                                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.yes")}</span>
+                                </label>
+                                <label className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="accessing"
+                                        className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                                        checked={filters.accessing === "no"}
+                                        onChange={() => handleChange("accessing", "no")}
+                                    />
+                                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{t("common.no")}</span>
+                                </label>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <form method="dialog" className="pt-3 flex justify-end gap-3">
