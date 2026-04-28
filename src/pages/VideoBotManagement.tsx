@@ -3,7 +3,7 @@ import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
 import { checkObjectContent } from "../utils/filter";
 import { useBotVideosContext } from "../context/BotVideosContext";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, useUsers } from "../hooks/useAuth";
 import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
@@ -11,6 +11,7 @@ import { updateVideoBot, cancelVideoBotUpload, convertBotVideoToMp4 } from "../a
 
 const VideoBotManagement = () => {
   const { user } = useAuth();
+  const { data: users } = useUsers("");
   const ctx = useBotVideosContext();
   if (!ctx) return null;
 
@@ -71,6 +72,7 @@ const VideoBotManagement = () => {
                   reFetchFn={reFetch}
                   detailsPath="/bot-videos"
                   convertToMp4Fn={convertBotVideoToMp4}
+                  selectableUsers={users || []}
                 />
               ))}
             </tbody>

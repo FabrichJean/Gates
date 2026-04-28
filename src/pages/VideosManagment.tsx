@@ -3,7 +3,7 @@ import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
 import { checkObjectContent } from "../utils/filter";
 import { useVideosContext } from "../context/VideosContext";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, useUsers } from "../hooks/useAuth";
 import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
@@ -11,6 +11,7 @@ import VideoTableRow from "../components/videos/VideoTableRow";
 const VideosManagment = () => {
 
   const { user } = useAuth();
+  const { data: users } = useUsers("");
   const ctx = useVideosContext();
   if (!ctx) return null;
 
@@ -26,6 +27,7 @@ const VideosManagment = () => {
     toWebapp,
     activate,
     send,
+    reFetch,
   } = ctx;
 
   const headerLoading = loading && (['transc', 'upload', 'cover', 'webapp'].includes(String(loading.type))
@@ -65,6 +67,8 @@ const VideosManagment = () => {
                   index={index}
                   onActivate={activate}
                   onSend={send}
+                  reFetchFn={reFetch}
+                  selectableUsers={users || []}
                 />
               ))}
             </tbody>

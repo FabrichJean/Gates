@@ -156,12 +156,11 @@ const VideoActions = ({
               className={`
                 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
                 text-sm font-medium transition-all duration-200
-                ${
-                  isDone
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
-                    : isDisabled
-                      ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                      : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
+                ${isDone
+                  ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                  : isDisabled
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
                 }
               `}
             >
@@ -202,6 +201,7 @@ const VideoActions = ({
               )}
             </button>
           )}
+
 
           {/* Processing State with Cancel & Resend */}
           {isProcessing && (
@@ -345,7 +345,7 @@ const VideoActions = ({
       )}
 
       {/* bouton single sync */}
-      {user?.role === RoleEnum.SUPERADMIN  && video.processing === "done" && (
+      {user?.role === RoleEnum.SUPERADMIN && video.processing === "done" && (
         <>
           <button
             type="button"

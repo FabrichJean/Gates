@@ -4,7 +4,7 @@ import Pagination from "../components/Pagination";
 import DeepLoader from "../components/DeepLoader";
 import { checkObjectContent } from "../utils/filter";
 import { useVideoForAppContext } from "../context/VideoForAppContext";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, useUsers } from "../hooks/useAuth";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
 import VideoForAppBulkEditModal from "../components/videos/VideoForAppBulkEditModal";
@@ -24,6 +24,7 @@ import { useVideoForAppRangeSelection } from "../hooks/useVideoForAppRangeSelect
 
 const VideoForAppManagement = () => {
   const { user } = useAuth();
+  const { data: users } = useUsers("");
   const ctx = useVideoForAppContext();
   if (!ctx) return null;
 
@@ -372,6 +373,7 @@ const VideoForAppManagement = () => {
                   showSelection={true}
                   isSelected={selectedVideos.has(video.id)}
                   onToggleSelection={toggleVideoSelection}
+                  selectableUsers={users || []}
                 />
               ))}
             </tbody>

@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiUser, FiPlay, FiClock, FiCalendar } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 import CheckingSuperadmin from "../CheckingSuperadmin";
 import VideoActions from "./VideoActions";
 import RoleEnum from "../../utils/roleEnum";
 import type { TVideo } from "../../hooks/useVideos";
 import { useAuth } from "../../hooks/useAuth";
 import { cdnS3 } from "../../utils/cdn";
+import { updateVideo } from "../../api/videos";
+import SelectedUserModal from "./modalSelectedUser";
+import type { User as SelectorUser } from "../UserSelector";
 
 interface VideoTableRowProps {
   video: TVideo;
@@ -25,6 +30,7 @@ interface VideoTableRowProps {
   showSelection?: boolean;
   isSelected?: boolean;
   onToggleSelection?: (videoId: number) => void;
+  selectableUsers?: SelectorUser[];
 }
 
 const VideoTableRow = ({
@@ -42,8 +48,11 @@ const VideoTableRow = ({
   showSelection = false,
   isSelected = false,
   onToggleSelection,
+  selectableUsers = [],
 }: VideoTableRowProps) => {
   const { user } = useAuth();
+  const [isSelectUserModalOpen, setIsSelectUserModalOpen] = useState(false);
+  const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
 
   const statusConfig = {
     uploaded: {
@@ -76,54 +85,100 @@ const VideoTableRow = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleAccessOwnerConfirm = async (selectedUser: SelectorUser | null) => {
+    if (!selectedUser) return;
+
+    try {
+      setIsUpdatingAccessOwner(true);
+
+      const effectiveUpdateFn = updateFn ?? updateVideo;
+      await effectiveUpdateFn(video.id, { user_id: selectedUser.id });
+
+      toast.success("Access owner updated");
+      setIsSelectUserModalOpen(false);
+      reFetchFn?.();
+    } catch (error) {
+      console.error("Failed to update access owner", error);
+      toast.error("Failed to update access owner");
+    } finally {
+      setIsUpdatingAccessOwner(false);
+    }
+  };
+
   return (
-    <motion.tr
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200 cursor-pointer"
-    >
-      {/* Selection Checkbox */}
-      {showSelection && (
-        <td className="py-4 px-6 text-center">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => onToggleSelection?.(video.id)}
-            className="checkbox checkbox-primary border-2 border-gray-300 dark:border-gray-500 checked:border-blue-500 dark:checked:border-blue-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
-          />
+    <>
+      <motion.tr
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        className="group border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200 cursor-pointer"
+      >
+        {/* Selection Checkbox */}
+        {showSelection && (
+          <td className="py-4 px-6 text-center">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelection?.(video.id)}
+              className="checkbox checkbox-primary border-2 border-gray-300 dark:border-gray-500 checked:border-blue-500 dark:checked:border-blue-400 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+            />
+          </td>
+        )}
+        {/* Référence */}
+        <td className="py-4 px-6">
+          <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+            {video.ref}
+          </span>
         </td>
-      )}
-      {/* Référence */}
-      <td className="py-4 px-6">
-        <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-          {video.ref}
-        </span>
-      </td>
 
-      {/* Utilisateur */}
-      <td className="py-4 px-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center">
-            <img src={`https://api.dicebear.com/9.x/croodles/svg?seed=${video?.user?.username}`} className="w-full h-full text-white" />
+        {/* Utilisateur */}
+        <td className="py-4 px-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center">
+              <img src={`https://api.dicebear.com/9.x/croodles/svg?seed=${video?.user?.username}`} className="w-full h-full text-white" />
+            </div>
+            {user?.role === RoleEnum.SUPERADMIN ? (
+              <Link
+                to={`/users/${video.user?.id}`}
+                className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+              >
+                {video.user?.username}
+              </Link>
+            ) : (
+              <span className="text-gray-900 dark:text-gray-100 font-medium">
+                {video.user?.username}
+              </span>
+            )}
+
+            {video.user?.username === "superadmin" && selectableUsers.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setIsSelectUserModalOpen(true)}
+                className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                text-sm font-medium transition-all duration-200 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:border-teal-300 dark:hover:border-teal-700"
+              >
+                <svg
+                  className="w-5 h-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+                  />
+                </svg>
+                Assign owner
+              </button>
+            ) : null}
           </div>
-          {user?.role === RoleEnum.SUPERADMIN ? (
-            <Link
-              to={`/users/${video.user?.id}`}
-              className="text-gray-900 dark:text-gray-100 font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-            >
-              {video.user?.username}
-            </Link>
-          ) : (
-            <span className="text-gray-900 dark:text-gray-100 font-medium">
-              {video.user?.username}
-            </span>
-          )}
-        </div>
-      </td>
+        </td>
 
-      {/* Créateur */}
-      <td className="py-4 px-6">
+        {/* Créateur */}
+        <td className="py-4 px-6">
         <div className="flex items-center gap-3">
           {video?.creatorObj?.avatar ? (
             <img
@@ -145,10 +200,10 @@ const VideoTableRow = ({
             {video?.creatorObj?.name ?? video.creator ?? '未知'}
           </Link>
         </div>
-      </td>
+        </td>
 
-      {/* Catégorie */}
-      <td className="py-4 px-6">
+        {/* Catégorie */}
+        <td className="py-4 px-6">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {video.category?.name}
@@ -157,18 +212,18 @@ const VideoTableRow = ({
             {video.subCategory?.name}
           </span>
         </div>
-      </td>
+        </td>
 
-      {/* Statut */}
-      <td className="py-4 px-6">
+        {/* Statut */}
+        <td className="py-4 px-6">
         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${getStatus().color}`}>
           {getStatus().icon}
           <span>{getStatus().label}</span>
         </div>
-      </td>
+        </td>
 
-      {/* Miniature */}
-      <td className="py-4 px-6">
+        {/* Miniature */}
+        <td className="py-4 px-6">
         <div className="relative group">
           <img
             src={`${cdnS3(video?.s3_urls.coverUrl) || video?.public_urls?.cover_url || ''}?t=` + Date.now()}
@@ -179,20 +234,20 @@ const VideoTableRow = ({
             <FiPlay className="w-5 h-5 text-white" />
           </div>
         </div>
-      </td>
+        </td>
 
-      {/* Durée */}
-      <td className="py-4 px-6">
+        {/* Durée */}
+        <td className="py-4 px-6">
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <FiClock className="w-4 h-4" />
           <span className="text-sm font-medium">
             {formatDuration(Number(video.duration))}
           </span>
         </div>
-      </td>
+        </td>
 
-      {/* Statut Actif */}
-      <td className="py-4 px-6">
+        {/* Statut Actif */}
+        <td className="py-4 px-6">
         <input
           type="checkbox"
           checked={!video.isDeleted}
@@ -201,10 +256,10 @@ const VideoTableRow = ({
             () => onActivate(video.id)
           }
         />
-      </td>
+        </td>
 
-      {/* Superadmin Check */}
-      <td className="py-4 px-6">
+        {/* Superadmin Check */}
+        <td className="py-4 px-6">
         <CheckingSuperadmin
           index={index}
           reFetch={() => window.dispatchEvent(new CustomEvent('request-videos-refetch', { detail: { delay: 500 } }))}
@@ -213,10 +268,10 @@ const VideoTableRow = ({
           updateFn={updateFn}
           hideTouchLink={hideTouchLink}
         />
-      </td>
+        </td>
 
-      {/* Actions */}
-      <td className="py-4 px-6">
+        {/* Actions */}
+        <td className="py-4 px-6">
         <VideoActions
           video={video}
           user={user!}
@@ -226,10 +281,10 @@ const VideoTableRow = ({
           detailsPath={detailsPath}
           convertToMp4Fn={convertToMp4Fn}
         />
-      </td>
+        </td>
 
-      {/* Date */}
-      <td className="py-4 px-6">
+        {/* Date */}
+        <td className="py-4 px-6">
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <FiCalendar className="w-4 h-4" />
           <span className="text-sm">
@@ -242,8 +297,21 @@ const VideoTableRow = ({
               : "-"}
           </span>
         </div>
-      </td>
-    </motion.tr>
+        </td>
+      </motion.tr>
+
+      <SelectedUserModal
+        open={isSelectUserModalOpen}
+        users={selectableUsers}
+        selectedUserId={video.user_id ?? video.user?.id ?? null}
+        onClose={() => setIsSelectUserModalOpen(false)}
+        onConfirm={handleAccessOwnerConfirm}
+        title="Select access owner"
+        description={`Choose the new owner for ${video.ref}.`}
+        confirmLabel="Save"
+        loading={isUpdatingAccessOwner}
+      />
+    </>
   );
 };
 
