@@ -138,12 +138,12 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     }
   };
 
-  const handleAccessOwnerConfirm = async (selectedUserId: number) => {
+  const handleAccessOwnerConfirm = async (selectedUserIds: number[]) => {
     if (!video) return;
     setIsUpdatingAccessOwner(true);
     try {
       await accessAPI.create({
-        target_user_id: selectedUserId,
+        target_users: selectedUserIds,
         entity: "video",
         resource_id: video.id,
       });
@@ -696,13 +696,14 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       <SelectedUserModal
         open={isSelectUserModalOpen}
         users={selectableUsers}
-        selectedUserId={video.user_id ?? video.user?.id ?? null}
+        selectedUserIds={[]}
         onClose={() => setIsSelectUserModalOpen(false)}
         onConfirm={handleAccessOwnerConfirm}
-        title="Select access owner"
-        description={`Choose the new owner for ${video.ref}.`}
+        title="Select access owners"
+        description={`Choose owners for ${video.ref}.`}
         confirmLabel="Save"
         loading={isUpdatingAccessOwner}
+        multiple={true}
       />
     </>
   );

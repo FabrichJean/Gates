@@ -49,10 +49,10 @@ export const accessAPI = {
   },
 
   create: async (data: {
-    target_user_id: number;
+    target_users: number[];
     entity: 'video' | 'post' | 'video_for_app' | 'post_for_app';
     resource_id: number;
-  }): Promise<{ message: string; access: AccessRecord }> => {
+  }): Promise<{ message: string; access: AccessRecord[] }> => {
     const response = await api.post('/access/add', data);
     return response.data;
   },

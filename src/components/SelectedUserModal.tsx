@@ -6,40 +6,72 @@ import UserSelector, { type User } from './UserSelector';
 interface SelectedUserModalProps {
   open: boolean;
   users: User[];
-  selectedUserId: number | null;
+  selectedUserId?: number | null;
+  selectedUserIds?: number[];
   onClose: () => void;
-  onConfirm: (userId: number) => void;
+  onConfirm: (userIds: number[]) => void;
   title: string;
   description: string;
   confirmLabel: string;
   loading?: boolean;
+  multiple?: boolean;
 }
 
 const SelectedUserModal: React.FC<SelectedUserModalProps> = ({
   open,
   users,
   selectedUserId,
+  selectedUserIds = [],
   onClose,
   onConfirm,
   title,
   description,
   confirmLabel,
   loading = false,
+  multiple = false,
 }) => {
   const [localSelectedUser, setLocalSelectedUser] = React.useState<User | null>(null);
+  const [localSelectedUsers, setLocalSelectedUsers] = React.useState<User[]>([]);
 
   React.useEffect(() => {
-    if (open && selectedUserId) {
-      const user = users.find(u => u.id === selectedUserId);
-      setLocalSelectedUser(user || null);
-    } else if (!open) {
+    if (open) {
+      if (multiple && selectedUserIds && selectedUserIds.length > 0) {
+        const selectedUsers = users.filter(u => selectedUserIds.includes(u.id));
+        setLocalSelectedUsers(selectedUsers);
+      } else if (!multiple && selectedUserId) {
+        const user = users.find(u => u.id === selectedUserId);
+        setLocalSelectedUser(user || null);
+      }
+    } else {
       setLocalSelectedUser(null);
+      setLocalSelectedUsers([]);
     }
-  }, [selectedUserId, users, open]);
+  }, [selectedUserId, selectedUserIds, users, open, multiple]);
 
   const handleConfirm = () => {
-    if (localSelectedUser?.id) {
-      onConfirm(localSelectedUser.id);
+    if (multiple) {
+      if (localSelectedUsers.length > 0) {
+        onConfirm(localSelectedUsers.map(u => u.id));
+      }
+    } else {
+      if (localSelectedUser?.id) {
+        onConfirm([localSelectedUser.id]);
+      }
+    }
+  };
+
+  const handleSelectUser = (user: User | null) => {
+    if (multiple) {
+      if (user) {
+        const isSelected = localSelectedUsers.some(u => u.id === user.id);
+        if (isSelected) {
+          setLocalSelectedUsers(prev => prev.filter(u => u.id !== user.id));
+        } else {
+          setLocalSelectedUsers(prev => [...prev, user]);
+        }
+      }
+    } else {
+      setLocalSelectedUser(user);
     }
   };
 
@@ -81,18 +113,63 @@ const SelectedUserModal: React.FC<SelectedUserModalProps> = ({
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Select Admin User
+                  {multiple ? 'Select Admin Users' : 'Select Admin User'}
                 </label>
-                <UserSelector
-                  users={users}
-                  selectedUserId={localSelectedUser?.id ?? null}
-                  onSelect={setLocalSelectedUser}
-                  placeholder="Choose admin user..."
-                  showValidationBadge={true}
-                  allowClear={true}
-                  className="w-full"
-                  maxHeight={300}
-                />
+                {multiple ? (
+                  <div className="space-y-2">
+                    <UserSelector
+                      users={users}
+                      selectedUserId={null}
+                      onSelect={handleSelectUser}
+                      placeholder="Add admin user..."
+                      showValidationBadge={true}
+                      allowClear={false}
+                      className="w-full"
+                      maxHeight={300}
+                    />
+                    {localSelectedUsers.length > 0 && (
+                      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-200 mb-2">
+                          Selected users ({localSelectedUsers.length})
+                        </p>
+                        <div className="space-y-2">
+                          {localSelectedUsers.map(user => (
+                            <div
+                              key={user.id}
+                              className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-blue-100 dark:border-blue-700"
+                            >
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {user.username}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {user.email}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => handleSelectUser(user)}
+                                className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <UserSelector
+                    users={users}
+                    selectedUserId={localSelectedUser?.id ?? null}
+                    onSelect={handleSelectUser}
+                    placeholder="Choose admin user..."
+                    showValidationBadge={true}
+                    allowClear={true}
+                    className="w-full"
+                    maxHeight={300}
+                  />
+                )}
               </div>
 
               <div className="flex gap-3">
@@ -105,7 +182,10 @@ const SelectedUserModal: React.FC<SelectedUserModalProps> = ({
                 </button>
                 <button
                   onClick={handleConfirm}
-                  disabled={!localSelectedUser?.id || loading}
+                  disabled={
+                    loading ||
+                    (multiple ? localSelectedUsers.length === 0 : !localSelectedUser?.id)
+                  }
                   className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {loading ? 'Loading...' : confirmLabel}
