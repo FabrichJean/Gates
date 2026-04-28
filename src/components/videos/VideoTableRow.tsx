@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { FiUser, FiPlay, FiClock, FiCalendar } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "react-hot-toast";
@@ -53,6 +53,7 @@ const VideoTableRow = ({
   const { user } = useAuth();
   const [isSelectUserModalOpen, setIsSelectUserModalOpen] = useState(false);
   const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
+  const [isHoveredBadge, setIsHoveredBadge] = useState(false);
 
   const statusConfig = {
     uploaded: {
@@ -133,15 +134,48 @@ const VideoTableRow = ({
 
         {/* Utilisateur */}
         <td className="py-4 px-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
             <div className="w-8 h-8 rounded-full flex items-center justify-center relative">
               <img src={`https://api.dicebear.com/9.x/croodles/svg?seed=${video?.user?.username}`} className="w-full h-full text-white rounded-full" />
               {video?.accesses && video.accesses.length > 0 && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
+                <div
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center cursor-pointer hover:bg-green-600 transition-colors z-10"
+                  onMouseEnter={() => user?.role === RoleEnum.SUPERADMIN && setIsHoveredBadge(true)}
+                  onMouseLeave={() => setIsHoveredBadge(false)}
+                >
                   <span className="text-xs font-bold text-white">{video.accesses.length}</span>
                 </div>
               )}
             </div>
+            
+            {user?.role === RoleEnum.SUPERADMIN && video?.accesses && video.accesses.length > 0 && (
+              <AnimatePresence>
+                {isHoveredBadge && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-12 top-0 z-50 bg-gray-900 dark:bg-gray-800 rounded-lg w-max shadow-xl p-3 border border-gray-700 dark:border-gray-600"
+                    onMouseEnter={() => setIsHoveredBadge(true)}
+                    onMouseLeave={() => setIsHoveredBadge(false)}
+                  >
+                    <div className="flex -space-x-2">
+                      {video.accesses.map((access) => (
+                        <motion.img
+                          key={access.id}
+                          src={`https://api.dicebear.com/9.x/croodles/svg?seed=${access.targetUser?.username || 'user'}`}
+                          alt={access.targetUser?.username}
+                          className="w-10 h-10 rounded-full border-2 border-gray-900 dark:border-gray-700 cursor-pointer hover:scale-110 transition-transform"
+                          title={access.targetUser?.username}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
+            
             {user?.role === RoleEnum.SUPERADMIN ? (
               <Link
                 to={`/users/${video.user?.id}`}

@@ -7,7 +7,6 @@ import { useAuth, useUsers } from "../hooks/useAuth";
 import VideoHeader from "../components/videos/VideoHeader";
 import VideoTableHeader from "../components/videos/VideoTableHeader";
 import VideoTableRow from "../components/videos/VideoTableRow";
-import { useEffect } from "react";
 
 const VideosManagment = () => {
 
