@@ -134,8 +134,13 @@ const VideoTableRow = ({
         {/* Utilisateur */}
         <td className="py-4 px-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center">
-              <img src={`https://api.dicebear.com/9.x/croodles/svg?seed=${video?.user?.username}`} className="w-full h-full text-white" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center relative">
+              <img src={`https://api.dicebear.com/9.x/croodles/svg?seed=${video?.user?.username}`} className="w-full h-full text-white rounded-full" />
+              {video?.accesses && video.accesses.length > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">{video.accesses.length}</span>
+                </div>
+              )}
             </div>
             {user?.role === RoleEnum.SUPERADMIN ? (
               <Link

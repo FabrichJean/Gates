@@ -351,7 +351,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
-                    {video?.accesses?.length ? (
+                    {user.role === RoleEnum.SUPERADMIN && video?.accesses?.length ? (
                       <div className="flex items-center gap-2">
                         <div className="flex -space-x-2">
                           {video.accesses

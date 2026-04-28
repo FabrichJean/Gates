@@ -69,6 +69,7 @@ export const VideosProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useVideosContext = () => {
   const ctx = useContext(VideosContext);
+  useEffect(ctx.reFetch, [])
   if (!ctx) throw new Error("useVideosContext must be used within a VideosProvider");
   return ctx;
 };
