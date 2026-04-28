@@ -65,6 +65,23 @@ const VideoHeader = ({
 
         {/* ---- Filtres et recherche ---- */}
         <div className="flex gap-2">
+          {user?.role === RoleEnum.SUPERADMIN && (
+            <button
+              onClick={() => {
+                setFilters({
+                  ...filters,
+                  accessing: filters.accessing === "yes" ? "" : "yes"
+                });
+              }}
+              className={`input input-ghost cursor-pointer transition-colors bg-gradient-to-b border rounded-lg ${
+                filters.accessing === "yes"
+                  ? "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700 bg-white to-gray-50 dark:from-gray-950 dark:to-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700"
+              }`}
+            >
+              Access
+            </button>
+          )}
           <button
             onClick={() => {
               const modal = document.getElementById(
