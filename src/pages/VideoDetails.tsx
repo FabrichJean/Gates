@@ -18,12 +18,13 @@ import {
   toggleBannedStatus,
   updateBannedStatus,
 } from "../api/videos";
+import { accessAPI } from "../api/access";
 import SingleSyncModal from "../components/SingleSyncModal";
 import type { SubCategory } from "../hooks/useSubCategory";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
-import { useAuthMe } from "../hooks/useAuth";
+import { useAuthMe, useUsers } from "../hooks/useAuth";
 import RoleEnum from "../utils/roleEnum";
 import useSocketSend from "../hooks/useSocketSend";
 import AnimatedAlert from "../components/AnimatedAlert";
@@ -33,6 +34,7 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import type { Platform } from "../hooks/usePlatform";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import GetPostTitles from "./posts/GetPostTitles";
+import SelectedUserModal from "../components/SelectedUserModal";
 import {
   Play,
   Edit3,
@@ -66,6 +68,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [singleSyncLoading, setSingleSyncLoading] = useState(false);
 
   const { data: user } = useAuthMe();
+  const { data: users = [] } = useUsers("");
   const { id: routeId } = useParams<{ id: string }>();
   const videoId = videoIdProp || routeId;
 
@@ -75,6 +78,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const [modifying, setModifying] = useState(false);
   const [currentCoverUrl, setCurrentCoverUrl] = useState<string | null>(null);
   const [showCover, setShowCover] = useState<boolean>(true);
+
+  const [isSelectUserModalOpen, setIsSelectUserModalOpen] = useState(false);
+  const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
+
+  const selectableUsers = users.filter((u: any) => u.role === 'admin' && !u.isDeleted);
 
   const { nextVideo, prevVideo, hasNext, hasPrev } = useNextVideo(routeId);
   const isPortrait = React.useMemo(() => {
@@ -91,11 +99,10 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       (cdnS3(video?.s3_urls?.coverUrl) ||
         video?.public_urls.local_cover_url ||
         video?.cover) +
-      "?t=" +
-      Date.now()
+        "?t=" +
+        Date.now(),
     );
   }, [video]);
-
 
   const send = async (videoId: number) => {
     try {
@@ -103,7 +110,9 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
       toast.success(t("videos.processing.workflow_started"));
       reFetch();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || t("videos.processing.send_error"));
+      toast.error(
+        err?.response?.data?.message || t("videos.processing.send_error"),
+      );
     }
   };
 
@@ -129,6 +138,27 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     }
   };
 
+  const handleAccessOwnerConfirm = async (selectedUserId: number) => {
+    if (!video) return;
+    setIsUpdatingAccessOwner(true);
+    try {
+      await accessAPI.create({
+        target_user_id: selectedUserId,
+        entity: "video",
+        resource_id: video.id,
+      });
+      toast.success(t("videos.access.created"));
+      setIsSelectUserModalOpen(false);
+      reFetch();
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || t("videos.access.error")
+      );
+    } finally {
+      setIsUpdatingAccessOwner(false);
+    }
+  };
+
   if (!video)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -143,9 +173,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
     );
 
   if (loading) {
-    return <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-20 rounded-xl">
-      <SexyShortLoader />
-    </div>
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-20 rounded-xl">
+        <SexyShortLoader />
+      </div>
+    );
   }
 
   return (
@@ -193,27 +225,33 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                       transition={{ delay: 0.1 }}
                     >
                       {/* Creator Info */}
-                      {(video)?.creatorObj && (
+                      {video?.creatorObj && (
                         <div className="">
                           <div className="flex items-start gap-3">
-                            {(video).creatorObj.avatar ? (
+                            {video.creatorObj.avatar ? (
                               <img
-                                src={cdnS3((video).creatorObj.avatar)}
-                                alt={(video).creatorObj.name}
+                                src={cdnS3(video.creatorObj.avatar)}
+                                alt={video.creatorObj.name}
                                 className="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
                               />
                             ) : (
-                              <Link to={'/creators/' + video.creatorObj.id} className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold">
-                                {(video).creatorObj.name?.charAt(0) || "U"}
+                              <Link
+                                to={"/creators/" + video.creatorObj.id}
+                                className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-bold"
+                              >
+                                {video.creatorObj.name?.charAt(0) || "U"}
                               </Link>
                             )}
                             <div>
-                              <Link to={'/creators/' + video.creatorObj.id} className="text-gray-800 dark:text-gray-200 font-medium">
-                                {(video).creatorObj.name}
+                              <Link
+                                to={"/creators/" + video.creatorObj.id}
+                                className="text-gray-800 dark:text-gray-200 font-medium"
+                              >
+                                {video.creatorObj.name}
                               </Link>
-                              {(video).creatorObj.gender && (
+                              {video.creatorObj.gender && (
                                 <div className="text-xs text-gray-500">
-                                  {(video).creatorObj.gender}
+                                  {video.creatorObj.gender}
                                 </div>
                               )}
                               <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -234,12 +272,15 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                   >
                     <div className="flex items-center gap-2">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${video.type === "1"
-                          ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
-                          : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                          }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          video.type === "1"
+                            ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                        }`}
                       >
-                        {video.type === "1" ? t("videos.type.short") : t("videos.type.long")}
+                        {video.type === "1"
+                          ? t("videos.type.short")
+                          : t("videos.type.long")}
                       </span>
                       {video?.plateform?.name && (
                         <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium">
@@ -247,6 +288,31 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
+                    {video.user?.username === "superadmin" &&
+                    selectableUsers.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsSelectUserModalOpen(true)}
+                        className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                text-sm font-medium transition-all duration-200 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:border-teal-300 dark:hover:border-teal-700"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+                          />
+                        </svg>
+                        Assign owner
+                      </button>
+                    ) : null}
                     <CheckingSuperadmin
                       index={0}
                       reFetch={reFetch}
@@ -270,10 +336,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                 >
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
                     <div
-                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${isPortrait
-                        ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
-                        : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
-                        } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
+                      className={`relative overflow-hidden rounded-xl shadow-2xl transition-all duration-300 ${
+                        isPortrait
+                          ? "max-w-md mx-auto bg-gradient-to-b from-black via-black to-black" // mode short
+                          : "aspect-video bg-gradient-to-br from-gray-900 via-black to-black" // mode normal
+                      } ${video.isBanned ? "ring-4 ring-red-500 ring-opacity-50" : ""}`}
                     >
                       {video.isBanned && (
                         <div className="absolute inset-0 z-20 flex items-start justify-end p-3 pointer-events-none">
@@ -284,23 +351,37 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                                 setShowCover(next);
                               }}
                               className="bg-black/40 text-white p-2 rounded-md hover:bg-black/60 transition"
-                              title={showCover ? t("videos.cover.hide") : t("videos.cover.show")}
+                              title={
+                                showCover
+                                  ? t("videos.cover.hide")
+                                  : t("videos.cover.show")
+                              }
                             >
-                              {showCover ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                              {showCover ? (
+                                <Eye className="w-4 h-4" />
+                              ) : (
+                                <EyeOff className="w-4 h-4" />
+                              )}
                             </button>
                           </div>
                         </div>
                       )}
 
-                      <div className={`w-full h-full ${video.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
+                      <div
+                        className={`w-full h-full ${video.isBanned && showCover ? "filter blur-sm brightness-75" : ""}`}
+                      >
                         <VideoPlayer
                           videoUrls={{
                             hlsUrl: video?.s3_urls?.hlsUrl,
                             temp_url: video?.public_urls?.temp_url,
                             coverUrl: cdnS3(video?.s3_urls?.coverUrl),
-                            cover_url: video?.public_urls?.cover_url
+                            cover_url: video?.public_urls?.cover_url,
                           }}
-                          poster={currentCoverUrl || cdnS3(video?.s3_urls?.coverUrl) || video?.public_urls?.cover_url}
+                          poster={
+                            currentCoverUrl ||
+                            cdnS3(video?.s3_urls?.coverUrl) ||
+                            video?.public_urls?.cover_url
+                          }
                           isPlaying={videoPlayed}
                           onPlay={() => setVideoPlayed(true)}
                           className="w-full h-full"
@@ -308,7 +389,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           autoPlay={true}
                         />
                       </div>
-
                     </div>
 
                     {/* Tags Section */}
@@ -320,7 +400,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </h3>
                       </div>
                       {Array.isArray((video as any)?.tagCategory) &&
-                        (video as any)?.tagCategory.length > 0 ? (
+                      (video as any)?.tagCategory.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {(video as any).tagCategory.map((tg: any) => (
                             <motion.span
@@ -342,7 +422,6 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
-
 
                     {/* Post Titles */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
@@ -398,17 +477,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                               if (video.checking !== "checked") {
                                 return alert.warning(
                                   t("videos.processing.needs_check_title"),
-                                  t("videos.processing.needs_check_body")
+                                  t("videos.processing.needs_check_body"),
                                 );
                               }
                               send(video.id);
                             }}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${video.processing === "working" ||
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              video.processing === "working" ||
                               (video.upload_status === 1 &&
                                 video.transfer_status === 1)
-                              ? "cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400"
-                              : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
-                              }`}
+                                ? "cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400"
+                                : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700"
+                            }`}
                           >
                             {video.processing === "working" ? (
                               <>
@@ -446,7 +526,8 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSingleSyncOpen(true)}
-                            className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700`}>
+                            className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 dark:hover:border-blue-700`}
+                          >
                             {t("videos.sync.action")}
                           </motion.button>
                           <SingleSyncModal
@@ -460,24 +541,39 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                             whileTap={{ scale: 0.98 }}
                             onClick={async () => {
                               const should = window.confirm(
-                                video.isBanned ? t("videos.ban.confirm_unban") : t("videos.ban.confirm_ban")
+                                video.isBanned
+                                  ? t("videos.ban.confirm_unban")
+                                  : t("videos.ban.confirm_ban"),
                               );
                               if (!should) return;
                               try {
                                 const nextIsBanned = !video.isBanned;
-                                await updateBannedStatus(video.id, nextIsBanned);
-                                toast.success(nextIsBanned ? t("videos.ban.success_ban") : t("videos.ban.success_unban"));
+                                await updateBannedStatus(
+                                  video.id,
+                                  nextIsBanned,
+                                );
+                                toast.success(
+                                  nextIsBanned
+                                    ? t("videos.ban.success_ban")
+                                    : t("videos.ban.success_unban"),
+                                );
                                 reFetch();
                               } catch (error: any) {
-                                toast.error(error?.response?.data?.message || t("videos.ban.error"));
+                                toast.error(
+                                  error?.response?.data?.message ||
+                                    t("videos.ban.error"),
+                                );
                               }
                             }}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${video.isBanned
-                              ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
-                              : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
-                              }`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                              video.isBanned
+                                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
+                            }`}
                           >
-                            {video.isBanned ? t("videos.ban.action_unban") : t("videos.ban.action_ban")}
+                            {video.isBanned
+                              ? t("videos.ban.action_unban")
+                              : t("videos.ban.action_ban")}
                           </motion.button>
                         </>
                       )}
@@ -489,10 +585,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         >
                           <Link
                             to={"/videos/" + prevVideo}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${hasPrev
-                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
-                              }`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              hasPrev
+                                ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
                           >
                             <ChevronLeft className="w-4 h-4" />
                             {t("videos.nav.prev")}
@@ -505,10 +602,11 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         >
                           <Link
                             to={"/videos/" + nextVideo}
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${hasNext
-                              ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                              : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
-                              }`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                              hasNext
+                                ? "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                : "bg-gray-50 dark:bg-gray-900 text-gray-400 cursor-not-allowed"
+                            }`}
                           >
                             {t("videos.nav.next")}
                             <ChevronRight className="w-4 h-4" />
@@ -594,6 +692,18 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SelectedUserModal
+        open={isSelectUserModalOpen}
+        users={selectableUsers}
+        selectedUserId={video.user_id ?? video.user?.id ?? null}
+        onClose={() => setIsSelectUserModalOpen(false)}
+        onConfirm={handleAccessOwnerConfirm}
+        title="Select access owner"
+        description={`Choose the new owner for ${video.ref}.`}
+        confirmLabel="Save"
+        loading={isUpdatingAccessOwner}
+      />
     </>
   );
 };
@@ -619,7 +729,7 @@ function EditVideo({
   const [uploading, setUploading] = useState(false);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(
-    cdnS3(video.s3_urls.coverUrl) || video.public_urls.cover_url
+    cdnS3(video.s3_urls.coverUrl) || video.public_urls.cover_url,
   );
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -627,7 +737,7 @@ function EditVideo({
   const [platform, setPlatform] = useState<Platform>(video?.plateform);
   const [category, setCategory] = useState<Category>(video?.category);
   const [subcategory, setSubCategory] = useState<SubCategory>(
-    video?.subCategory
+    video?.subCategory,
   );
 
   const [coupleTitles, setCoupleTitles] = useState<Couple[]>(
@@ -637,7 +747,7 @@ function EditVideo({
       i18_language: title.i18_language,
       title: title.title,
       description: title.description,
-    })) || []
+    })) || [],
   );
 
   const initialCreatorName =
@@ -655,7 +765,7 @@ function EditVideo({
   const [creator, setCreator] = useState<string | null>(initialCreatorName);
   const [creatorId, setCreatorId] = useState<number | null>(initialCreatorId);
   const [videoType, setVideoType] = useState<string>(
-    video?.type === "1" ? "short" : "long"
+    video?.type === "1" ? "short" : "long",
   );
 
   const [selectedPostTagCategories, setSelectedPostTagCategories] = useState<
@@ -664,7 +774,7 @@ function EditVideo({
     video.tagCategory?.map((t: any) => ({
       id: t.id,
       name: t.name,
-    })) ?? []
+    })) ?? [],
   );
 
   const [needVip, setNeedVip] = useState<boolean>(!!video?.need_vip);
@@ -685,7 +795,7 @@ function EditVideo({
         const res = await getTagCategoriesApi();
         const items = res?.data?.items ?? res?.data ?? [];
         const normalized = (Array.isArray(items) ? items : []).map(
-          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null })
+          (it: any) => ({ id: it.id, name: it.name, meta: it.meta ?? null }),
         );
         setAvailablePostTags(normalized);
         setPostTagSuggestions(normalized);
@@ -704,7 +814,7 @@ function EditVideo({
     }
     const q = postTagQuery.toLowerCase();
     setPostTagSuggestions(
-      availablePostTags.filter((t) => t.name.toLowerCase().includes(q))
+      availablePostTags.filter((t) => t.name.toLowerCase().includes(q)),
     );
   }, [postTagQuery, availablePostTags]);
 
@@ -748,7 +858,7 @@ function EditVideo({
         selectedPostTagCategories.map((t) => ({
           id: t.id ?? null,
           name: t.name,
-        }))
+        })),
       ),
     };
 
@@ -759,7 +869,7 @@ function EditVideo({
       const res = await updateVideo(video.id, formData, (progressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
+            (progressEvent.loaded * 100) / progressEvent.total,
           );
           setProgress(percentCompleted);
         }
@@ -777,8 +887,8 @@ function EditVideo({
       toast.error(
         t("videos.edit.update_error").replace(
           "{message}",
-          err.response?.data?.message || err.message || ""
-        )
+          err.response?.data?.message || err.message || "",
+        ),
       );
     } finally {
       setUploading(false);
@@ -789,7 +899,7 @@ function EditVideo({
   const addPostTagSuggestion = (tag: any) => {
     if (
       selectedPostTagCategories.some(
-        (existing) => existing.name.toLowerCase() === tag.name.toLowerCase()
+        (existing) => existing.name.toLowerCase() === tag.name.toLowerCase(),
       )
     ) {
       return;
@@ -801,7 +911,7 @@ function EditVideo({
   const addPostTagByName = (name: string) => {
     if (!name.trim()) return;
     const existed = selectedPostTagCategories.some(
-      (t) => t.name.toLowerCase() === name.toLowerCase()
+      (t) => t.name.toLowerCase() === name.toLowerCase(),
     );
     if (existed) return;
     setSelectedPostTagCategories((prev) => [...prev, { name }]);
@@ -843,22 +953,20 @@ function EditVideo({
             <button
               type="button"
               onClick={() => setNeedVip((v) => !v)}
-              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
-                }`}
+              className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                needVip ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${needVip ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                  needVip ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
-            <Link
-              to={`/touch/video/${video.id}`}
-              className="underline"
-            >
+            <Link to={`/touch/video/${video.id}`} className="underline">
               {t("videos.edit.use_touch_editor")}
             </Link>
           </div>
-
         </div>
 
         <div className="flex flex-col gap-8">
@@ -1120,7 +1228,8 @@ function EditVideo({
                         className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
                       >
                         <X className="w-3 h-3" />
-                      </button>+
+                      </button>
+                      +
                     </motion.span>
                   ))}
                 </AnimatePresence>
