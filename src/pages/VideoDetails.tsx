@@ -565,7 +565,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </Link>
                       )}
 
-                      {user?.role === RoleEnum.SUPERADMIN && (
+                      {(user?.role === RoleEnum.SUPERADMIN || video.accesses.find(v => v.target_user_id === user.id)) && (
                         <>
                           <motion.button
                             whileHover={{ scale: 1.02 }}

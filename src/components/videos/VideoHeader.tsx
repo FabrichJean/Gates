@@ -65,7 +65,7 @@ const VideoHeader = ({
 
         {/* ---- Filtres et recherche ---- */}
         <div className="flex gap-2">
-          {user?.role === RoleEnum.SUPERADMIN && (
+          {/* {user?.role === RoleEnum.SUPERADMIN && ( */}
             <button
               onClick={() => {
                 setFilters({
@@ -81,7 +81,7 @@ const VideoHeader = ({
             >
               Access
             </button>
-          )}
+          {/* )} */}
           <button
             onClick={() => {
               const modal = document.getElementById(
