@@ -64,16 +64,17 @@ import { useI18n } from "../i18n";
 
 interface AvatarWithTooltipProps {
   access: any;
+  reFetch: () => void
 }
 
-const AvatarWithTooltip: React.FC<AvatarWithTooltipProps> = ({ access }) => {
+const AvatarWithTooltip: React.FC<AvatarWithTooltipProps> = ({ access, reFetch }) => {
   const [isHovered, setIsHovered] = useState(false);
   const targetUser = access.targetUser;
 
   const handleRemoveAccess = async () => {
     try {
       await accessAPI.delete(access.id);
-      toast.success(`Removed access for ${targetUser?.username}`);
+      reFetch()
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to remove access");
     }
@@ -356,7 +357,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                           {video.accesses
                             .slice(0, isAccessesExpanded ? undefined : 3)
                             .map((access) => (
-                              <AvatarWithTooltip key={access.id} access={access} />
+                              <AvatarWithTooltip key={access.id} access={access} reFetch={reFetch}/>
                             ))}
                           {video.accesses.length > 3 && (
                             <motion.button
