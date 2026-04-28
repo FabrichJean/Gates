@@ -129,31 +129,37 @@ const SelectedUserModal: React.FC<SelectedUserModalProps> = ({
                     />
                     {localSelectedUsers.length > 0 && (
                       <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-xs font-medium text-blue-900 dark:text-blue-200 mb-2">
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-200 mb-3">
                           Selected users ({localSelectedUsers.length})
                         </p>
-                        <div className="space-y-2">
-                          {localSelectedUsers.map(user => (
-                            <div
-                              key={user.id}
-                              className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-blue-100 dark:border-blue-700"
-                            >
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {user.username}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {user.email}
-                                </p>
-                              </div>
-                              <button
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex -space-x-2">
+                            {localSelectedUsers.map(user => (
+                              <motion.div
+                                key={user.id}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                whileHover={{ scale: 1.2 }}
                                 onClick={() => handleSelectUser(user)}
-                                className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                                className="group relative"
                               >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
+                                <img
+                                  src={`https://api.dicebear.com/9.x/croodles/svg?seed=${user.username}`}
+                                  alt={user.username}
+                                  className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-900 ring-1 ring-blue-200 dark:ring-blue-800 cursor-pointer flex-shrink-0 transition-all duration-200"
+                                />
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+                                  <button
+                                    onClick={() => handleSelectUser(user)}
+                                    className="px-2 py-1 text-xs bg-gray-900 dark:bg-gray-800 text-white rounded whitespace-nowrap flex items-center gap-1 hover:bg-red-600 transition-colors"
+                                  >
+                                    {user.username}
+                                  </button>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     )}
