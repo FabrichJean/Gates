@@ -43,8 +43,14 @@ export async function uploadVideo(
     const mode = typeof modeOrProgress === "string" ? modeOrProgress : "simple";
     const progressCb = typeof modeOrProgress === "function" ? modeOrProgress : onUploadProgress;
     const lang = (DEFAULT_LANG).toLowerCase();
+    // const primaryUrl = lang === "zh" ? API_URL_CN : API_URL_YD;
+    // const secondaryUrl = lang === "en" ? API_URL_YD : API_URL_CN;
+
     const primaryUrl = lang === "zh" ? API_URL_CN : API_URL_YD;
-    const secondaryUrl = lang === "en" ? API_URL_YD : API_URL_CN;
+    const secondaryUrl = lang === "en" ? API_URL_CN : API_URL_YD;
+
+    console.log({primaryUrl, secondaryUrl, lang});
+    
 
     const uploadOnce = (baseUrl: string) =>
         axios.post(baseUrl + "/videos/upload", formData, {
