@@ -62,6 +62,39 @@ import { VideoPlayer } from "../components/VideoPlayer";
 import { cdnS3 } from "../utils/cdn";
 import { useI18n } from "../i18n";
 
+interface AvatarWithTooltipProps {
+  access: any;
+}
+
+const AvatarWithTooltip: React.FC<AvatarWithTooltipProps> = ({ access }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const targetUser = access.targetUser;
+
+  return (
+    <motion.div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      animate={{ scale: isHovered ? 1.2 : 1 }}
+      transition={{ duration: 0.2 }}
+      className="relative w-8 h-8 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 ring-1 ring-gray-200 dark:ring-gray-800 cursor-pointer flex-shrink-0 z-0 hover:z-50"
+      title={targetUser?.username}
+    >
+      <img
+        src={`https://api.dicebear.com/9.x/croodles/svg?seed=${targetUser?.username || 'user'}`}
+        alt={targetUser?.username}
+        className="w-full h-full object-cover rounded-full"
+      />
+      <motion.div 
+        animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 4 }}
+        transition={{ duration: 0.2 }}
+        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded whitespace-nowrap pointer-events-none z-50"
+      >
+        {targetUser?.username}
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
   const { t } = useI18n();
   const [singleSyncOpen, setSingleSyncOpen] = useState(false);
@@ -288,8 +321,27 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
-                    {video.user?.username === "superadmin" &&
-                    selectableUsers.length > 0 ? (
+                    {video?.accesses?.length ? (
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-2">
+                          {video.accesses.map((access) => (
+                            <AvatarWithTooltip key={access.id} access={access} />
+                          ))}
+                        </div>
+                        {selectableUsers.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setIsSelectUserModalOpen(true)}
+                            className="cursor-pointer inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                            title="Add more owners"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ) : selectableUsers.length > 0 ? (
                       <button
                         type="button"
                         onClick={() => setIsSelectUserModalOpen(true)}
