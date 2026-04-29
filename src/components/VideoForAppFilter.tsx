@@ -9,6 +9,8 @@ import {
   buildVideoForAppListParams,
   finalizeDurationHhMmSsInput,
 } from "../utils/videoForAppFilters";
+import { useAuthMe } from "../hooks/useAuth";
+import RoleEnum from "../utils/roleEnum";
 
 export type TAppFilter = {
   creator_id: string;
@@ -22,6 +24,7 @@ export type TAppFilter = {
   type?: string;
   durationMin?: string;
   durationMax?: string;
+  accessing?: string;
 };
 
 export default function VideoForAppFilter({
@@ -39,6 +42,8 @@ export default function VideoForAppFilter({
   setPage?: (p: number) => void;
   scope?: "videoForApp";
 }) {
+  const { data: user } = useAuthMe();
+  
   const selectedCategory = useMemo(() => {
     return filters.categorySearch && filters.category_id
       ? { id: parseInt(filters.category_id), name: filters.categorySearch } as Category
@@ -96,6 +101,7 @@ export default function VideoForAppFilter({
         type: filters.type,
         durationMin: filters.durationMin,
         durationMax: filters.durationMax,
+        accessing: filters.accessing,
       };
       localStorage.setItem(storageKey, JSON.stringify(filtersToSave));
     } catch (error) {
@@ -278,6 +284,45 @@ export default function VideoForAppFilter({
               ))}
             </div>
           </div>
+
+          {/* Filtre Accessing (only for superadmins) */}
+          {user?.role === RoleEnum.SUPERADMIN && (
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
+              <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">Show accessing</p>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="accessing"
+                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                    checked={filters.accessing === "all" || filters.accessing === ""}
+                    onChange={() => handleChange("accessing", "all")}
+                  />
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">All</span>
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="accessing"
+                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                    checked={filters.accessing === "yes"}
+                    onChange={() => handleChange("accessing", "yes")}
+                  />
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">Yes</span>
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="accessing"
+                    className="radio radio-sm accent-blue-500 dark:accent-blue-400"
+                    checked={filters.accessing === "no"}
+                    onChange={() => handleChange("accessing", "no")}
+                  />
+                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">No</span>
+                </label>
+              </div>
+            </div>
+          )}
           {/* <div className="p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">
             <p className="font-medium mb-2 text-gray-700 dark:text-gray-300">时长范围</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -527,6 +572,7 @@ export default function VideoForAppFilter({
                 tagSearch: "",
                 durationMin: "",
                 durationMax: "",
+                accessing: "",
               });
               setHasInteracted(false);
               setCategoryOpen(false);

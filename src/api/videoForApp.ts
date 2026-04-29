@@ -83,7 +83,7 @@ export interface VideoForAppListParams {
   [key: string]: string | number | boolean | null | undefined;
 }
 
-export async function fetchVideoForAppList(params: VideoForAppListParams) {
+export async function fetchVideoForAppList(params: VideoForAppListParams) {  
   const { data } = await axios.get<VideoForAppListResponse>(
     apiURL + "/videos-for-app",
     {
