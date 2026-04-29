@@ -10,7 +10,7 @@ import CategoryAutoComplete from "../components/CategoryAutoComplete";
 // creator removed as object; it's an optional string attribute on video
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
-import { TitlesForm } from "./Upload";
+import { TitlesForm } from "./UploadVideo";
 import { getTagCategoriesApi } from "../api/tagCategory";
 import { cdnS3 } from "../utils/cdn";
 

@@ -5,7 +5,7 @@ import { RiVipCrown2Fill } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { TitlesForm, type Couple } from "./Upload";
+import { TitlesForm, type Couple } from "./UploadVideo";
 import { useNextVideo, UseVideo, type TVideo } from "../hooks/useVideos";
 import { formatDateFR } from "../utils/date";
 import type { Category } from "../components/CategoryAutoComplete";

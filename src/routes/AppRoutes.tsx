@@ -4,7 +4,7 @@ import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
 import { AudiosProvider } from "../context/AudiosContext";
 import Login from "../pages/Login";
-import Upload from "../pages/Upload";
+import Upload from "../pages/UploadVideo";
 import BulkUpload from "../pages/BulkUpload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
