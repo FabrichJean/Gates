@@ -16,12 +16,12 @@ export const PAGE_SIZE = 20;
 
 //----------------------------- API URLS PROD AND TEST -----------------------------
 
-export const DEFAULT_LANG = config.app.defaultUiLanguage;
+export const DEFAULT_LANG = config.app.region;
 
 // PROD
 // export const API_URL_CN = "http://192.168.1.97:3006/api/v1";
 // export const API_URL_YD = "http://192.168.1.97:3005/api/v1";
 
 // TEST
-export const API_URL_CN = config.app.apiYD;
-export const API_URL_YD = config.app.apiCN;
+export const API_URL_CN = config.app.apiCN;
+export const API_URL_YD = config.app.apiYD;

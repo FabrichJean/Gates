@@ -37,20 +37,17 @@ export async function uploadS3(videoId: string | number | undefined): Promise<vo
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function uploadVideo(
     formData: FormData,
-    modeOrProgress?: "simple" | "double" | ((progressEvent: AxiosProgressEvent) => void),
+    modeOrProgress?: "upload_yd" | "upload_cn" | "upload" | ((progressEvent: AxiosProgressEvent) => void),
     onUploadProgress?: ((progressEvent: AxiosProgressEvent) => void) | undefined
 ): Promise<any> {
-    const mode = typeof modeOrProgress === "string" ? modeOrProgress : "simple";
+    const mode = typeof modeOrProgress === "string" ? modeOrProgress : "upload";
     const progressCb = typeof modeOrProgress === "function" ? modeOrProgress : onUploadProgress;
     const lang = (DEFAULT_LANG).toLowerCase();
     // const primaryUrl = lang === "zh" ? API_URL_CN : API_URL_YD;
     // const secondaryUrl = lang === "en" ? API_URL_YD : API_URL_CN;
 
-    const primaryUrl = lang === "zh" ? API_URL_CN : API_URL_YD;
-    const secondaryUrl = lang === "en" ? API_URL_CN : API_URL_YD;
-
-    console.log({primaryUrl, secondaryUrl, lang});
-    
+    const primaryUrl = lang === "cn" ? API_URL_CN : API_URL_YD;
+    const secondaryUrl = lang === "yd" ? API_URL_CN : API_URL_YD;    
 
     const uploadOnce = (baseUrl: string) =>
         axios.post(baseUrl + "/videos/upload", formData, {
@@ -61,7 +58,8 @@ export async function uploadVideo(
             onUploadProgress: progressCb,
         });
 
-    if (mode === "double") {
+    if (mode === "upload") {
+        console.log({primaryUrl, secondaryUrl, DEFAULT_LANG});    
         const [first, second] = await Promise.all([
             await uploadOnce(primaryUrl),
             await uploadOnce(secondaryUrl)
@@ -69,7 +67,15 @@ export async function uploadVideo(
 
         // Check both servers are healthy before uploading
         return [first, second];
+    } else if (mode === "upload_yd") {
+        console.log({API_URL_YD, API_URL_CN});
+        return await uploadOnce(API_URL_YD);
+    } else if (mode === "upload_cn") {
+        console.log({API_URL_CN, API_URL_YD});
+        return await uploadOnce(API_URL_CN);
     }
+
+    alert()
 
     return await uploadOnce(primaryUrl);
 }

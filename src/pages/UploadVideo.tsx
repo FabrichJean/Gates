@@ -46,6 +46,7 @@ import { useI18n } from "../i18n";
 import UploadChoiceModal, {
   type UploadChoice,
 } from "../components/videos/upload.modal.confirmation";
+import config from "../config/environment";
 
 export type Couple = {
   language: any;
@@ -439,7 +440,7 @@ const Upload = () => {
 
   const [needVip, setNeedVip] = useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [uploadChoice, setUploadChoice] = useState<UploadChoice>("simple");
+  const [uploadChoice, setUploadChoice] = useState<UploadChoice>(`upload${config.app.region ? `_${config.app.region}` : ""}` as UploadChoice);
 
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
