@@ -30,6 +30,7 @@ export const useVideoManagement = () => {
     processing: "",
     startedAt: "",
     endAt: "",
+    tagCategory: "",
   };
 
   const [filters, setFilters] = useState<TFilter>(() => ({

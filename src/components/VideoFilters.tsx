@@ -15,6 +15,7 @@ export type TFilter = {
     user_id: string;
     creator_id: string;
     creatorSearch?: string;
+    tagCategory?: string;
     isDeleted: string;
     processing: string;
     startedAt: string;
@@ -56,6 +57,7 @@ export default function VideoFilters({
                 startedAt: savedFilter.startedAt || "",
                 endAt: savedFilter.endAt || "",
                 accessing: savedFilter.accessing || "",
+                tagCategory: savedFilter.tagCategory || "",
                 // restore creatorSearch if present
                 creatorSearch: savedFilter.creatorSearch || savedFilter.creator || "",
             };
@@ -187,6 +189,28 @@ export default function VideoFilters({
                             onChange={handleCreatorChange}
                             onSelect={handleCreatorSelect}
                             placeholder={t("creator.autocomplete.placeholder")}
+                        />
+                    </div>
+
+                    {/* Tag Category search */}
+                    <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.tagCategory", {
+                            default: {
+                                en: "tagCategory",
+                                zh: "标签类别"
+                            }
+                        })}</label>
+                        <input
+                            type="text"
+                            placeholder={t("videos.filter.tagCategory.placeholder", {
+                                default: {
+                                    en: "Enter keyword",
+                                    zh: "输入关键字"
+                                }
+                            })}
+                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
+                            value={filters.tagCategory || ""}
+                            onChange={(e) => handleChange("tagCategory", e.target.value)}
                         />
                     </div>
                 </div>
@@ -340,6 +364,7 @@ export default function VideoFilters({
                                 user_id: "",
                                 creator_id: "",
                                 creatorSearch: "",
+                                tagCategory: "",
                                 isDeleted: "all",
                                 processing: "",
                                 sub_category_id: "",
