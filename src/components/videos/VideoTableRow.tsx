@@ -128,7 +128,7 @@ const VideoTableRow = ({
         {/* Référence */}
         <td className="py-4 px-6">
           <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-            {video.ref}
+            {video.ref || video.id}
           </span>
         </td>
 
