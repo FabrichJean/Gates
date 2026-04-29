@@ -20,7 +20,7 @@ import type { MangaTitles } from "../types/mangaTitles";
 import VideoPlayer from "../components/VideoPlayer";
 import toast from "react-hot-toast";
 import { usePlatformReactive } from '../hooks/usePlatform';
-import { useAuthMe } from '../hooks/useAuth';
+import { useAuthMe, useUsers } from '../hooks/useAuth';
 import CheckingSuperadmin from "../components/CheckingSuperadmin";
 import AnimatedAlert from "../components/AnimatedAlert";
 import { useAnimatedAlert, createQuickAlert } from "../hooks/useAnimatedAlert";
@@ -28,6 +28,7 @@ import useSocketSend from "../hooks/useSocketSend";
 import RoleEnum from "../utils/roleEnum";
 import { updateVideoForApp, updateVideoForAppBannedStatus } from "../api/videoForApp";
 import { cdnS3 } from '../utils/cdn';
+import AccessManager from "../components/AccessManager";
 
 
 // Helper function to get category display name
@@ -63,6 +64,7 @@ const getPlatformDisplayName = (platform?: { id: number, name: string }): string
 
 const VideoForAppDetails: React.FC = () => {
   const { data: user } = useAuthMe();
+  const { data: users = [] } = useUsers("");
   const { id: routeId } = useParams<{ id: string }>();
 
   const { data: video, reFetch, loading } = UseAppVideo(routeId);
@@ -71,6 +73,7 @@ const VideoForAppDetails: React.FC = () => {
 
   const [modifying, setModifying] = useState(false);
   const [showCover, setShowCover] = useState<boolean>(true);
+  const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
 
   const isPortrait = React.useMemo(() => {
     return video?.type === "1";
@@ -79,6 +82,12 @@ const VideoForAppDetails: React.FC = () => {
   // Platform data
   const { data: platforms } = usePlatformReactive();
   const [platform, setPlatform] = useState<{ id: number; name: string } | null>(null);
+
+  const selectableUsers = users.filter((u: any) => {
+    const isAdmin = u.role === 'admin' && !u.isDeleted;
+    const hasAccess = video?.accesses?.some((access: any) => access.target_user_id === u.id);
+    return isAdmin && !hasAccess;
+  });
 
   // Convert VideoForApp titles to MangaTitles format for i18n display
   const videoTitles: MangaTitles = video ? [
@@ -321,6 +330,23 @@ const VideoForAppDetails: React.FC = () => {
                         updateFn={updateVideoForApp}
                         reFetch={reFetch}
                         index={0}
+                      />
+                    </div>
+                  )}
+
+                  {/* Access Manager */}
+                  {user?.role === RoleEnum.SUPERADMIN && (
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+                      <h3 className="text-lg font-semibold mb-3">Access Owners</h3>
+                      <AccessManager
+                        resource_id={video?.id}
+                        entity="video_for_app"
+                        user={user}
+                        accesses={video?.accesses || []}
+                        selectableUsers={selectableUsers}
+                        reFetch={reFetch}
+                        isUpdatingAccessOwner={isUpdatingAccessOwner}
+                        setIsUpdatingAccessOwner={setIsUpdatingAccessOwner}
                       />
                     </div>
                   )}

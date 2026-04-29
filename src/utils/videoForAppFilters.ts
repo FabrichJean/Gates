@@ -158,6 +158,7 @@ export function buildVideoForAppListParams({
   error?: VideoForAppDurationError;
 } {
   let isDeletedValue: boolean | undefined;
+  let accessingValue: boolean | undefined;
 
   if (filters.isDeleted === "yes") {
     isDeletedValue = true;
@@ -165,6 +166,14 @@ export function buildVideoForAppListParams({
     isDeletedValue = false;
   } else {
     isDeletedValue = undefined;
+  }
+
+  if (filters.accessing === "yes") {
+    accessingValue = true;
+  } else if (filters.accessing === "no") {
+    accessingValue = false;
+  } else {
+    accessingValue = undefined;
   }
 
   let checkingValue: string | undefined;
@@ -207,6 +216,7 @@ export function buildVideoForAppListParams({
         subcategory_id: filters.subcategory_id || undefined,
         tag: filters.tagSearch || filters.tag || undefined,
         isDeleted: isDeletedValue,
+        accessing: accessingValue,
         checking: checkingValue,
         type: filters.type ? parseInt(filters.type, 10) : undefined,
         category: filters.categorySearch || undefined,
@@ -223,6 +233,7 @@ export function buildVideoForAppListParams({
     subcategory_id: filters.subcategory_id || undefined,
     tag: filters.tagSearch || filters.tag || undefined,
     isDeleted: isDeletedValue,
+    accessing: accessingValue,
     checking: checkingValue,
     type: filters.type ? parseInt(filters.type, 10) : undefined,
     category: filters.categorySearch || undefined,

@@ -14,6 +14,8 @@ interface AppConfig {
     environment: 'development' | 'production' | 'staging';
     region?: 'cn' | 'yd';
     defaultUiLanguage?: string;
+    apiYD?: string;
+    apiCN?: string;
   };
   features: {
     ollamaSuggestions: boolean;
@@ -22,7 +24,7 @@ interface AppConfig {
 }
 
 export const config: AppConfig = {
-  apiUrl: import.meta.env.VITE_API_URL || 'http://192.168.1.48:3000/api/v1',
+  apiUrl: import.meta.env.VITE_API_URL,
   authTimeout: parseInt(import.meta.env.VITE_AUTH_TIMEOUT || '3600000', 10),
 
   ollama: {
@@ -36,6 +38,8 @@ export const config: AppConfig = {
     environment: (import.meta.env.VITE_ENVIRONMENT || 'development') as 'development' | 'production' | 'staging',
     region: (import.meta.env.VITE_REGION as 'cn' | 'yd') || undefined,
     defaultUiLanguage: import.meta.env.VITE_DEFAULT_UI_LANGUAGE || undefined,
+    apiYD: import.meta.env.VITE_API_YD_URL,
+    apiCN: import.meta.env.VITE_API_CN_URL
   },
 
   features: {

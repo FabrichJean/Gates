@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import CategoryAutoComplete from "../components/CategoryAutoComplete";
 import SubCategoryAutoComplete from "../components/SubCategoryAutoComplete";
 import CreatorAutoComplete from "../components/CreatorAutoComplete";
-import { TitlesForm } from "./Upload";
+import { TitlesForm } from "./UploadVideo";
 import { UseBotVideo } from "../hooks/bot/useBotVideos";
 import { updateVideoBotWithProgress } from "../api/videoBot";
 import { getTagCategoriesApi } from "../api/tagCategory";

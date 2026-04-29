@@ -17,7 +17,6 @@ export default function UseCreators(opts?: { page?: number; limit?: number; q?: 
   const isAll = opts?.isAll || false;
   
   const url = isAll ? `${apiURL}/creators/all` : `${apiURL}/creators?page=${page}&limit=${limit}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
-  console.log("opts", opts);
 
   const res = useFetch<PaginatedCreators>(url, {
     headers: { Authorization: `Bearer ${getToken()}` },

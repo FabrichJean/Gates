@@ -4,7 +4,7 @@ import { VideosProvider } from "../context/VideosContext";
 import { BotVideosProvider } from "../context/BotVideosContext";
 import { AudiosProvider } from "../context/AudiosContext";
 import Login from "../pages/Login";
-import Upload from "../pages/Upload";
+import Upload from "../pages/UploadVideo";
 import BulkUpload from "../pages/BulkUpload";
 import VideoDetails from "../pages/VideoDetails";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -84,6 +84,7 @@ import RomanUpload from "../pages/romans/romanUpload";
 import { PostForAppProvider } from "../context/PostForAppContext";
 import { PostForAppSocketProvider } from "../context/PostForAppSocketContext";
 import { Explorer } from "../pages/Explorer";
+import AccessOwnerManager from "../pages/AccessOwner/accessOwner.manager";
 
 const AppRoutes = () => {
   const { visible: modalFloat } = useCardFlottant();
@@ -285,6 +286,16 @@ const AppRoutes = () => {
                     <Route path="touch/:id" element={<TouchVideo />} />
                   </Routes>
                 </VideosProvider>
+              </InsideSidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/access-owner"
+          element={
+            <ProtectedRoute>
+              <InsideSidebar>
+                <AccessOwnerManager />
               </InsideSidebar>
             </ProtectedRoute>
           }

@@ -20,10 +20,7 @@ export function UseAppVideo(id?: string) {
 
 export function useNextAppVideo(currentId?: string) {
   const ctx = useVideoForAppContext();
-  const data = ctx?.data;
-
-  console.log(data);
-  
+  const data = ctx?.data;  
 
   const currentVideoIndex = data?.videos?.findIndex(
     (vd) => String(vd.id) === String(currentId)

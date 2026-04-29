@@ -2,6 +2,7 @@ import axios from "axios";
 import { apiURL, token } from "../constant";
 import type { Category } from "../components/CategoryAutoComplete";
 import type { SubCategory } from "../hooks/useSubCategory";
+import type { Access } from "../hooks/useVideos";
 
 export interface Title {
     title: string;
@@ -52,6 +53,7 @@ export interface VideoForApp {
     hlsUrl: string;
     };
     titles: Title[];
+    accesses: Access[]
   // ...other fields as needed
 }
 
@@ -81,7 +83,7 @@ export interface VideoForAppListParams {
   [key: string]: string | number | boolean | null | undefined;
 }
 
-export async function fetchVideoForAppList(params: VideoForAppListParams) {
+export async function fetchVideoForAppList(params: VideoForAppListParams) {  
   const { data } = await axios.get<VideoForAppListResponse>(
     apiURL + "/videos-for-app",
     {

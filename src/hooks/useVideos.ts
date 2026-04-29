@@ -58,7 +58,7 @@ export type TVideo = {
     VideoTagCategory: VideoTagCategory;
   }[];
   nexts: TVideo[];
-
+  accesses: Access[];
   // Champs supplémentaires de la base de données (ajoutés sans casser l'existant)
   category_id: number;
   sub_category_id: number | null;
@@ -95,6 +95,18 @@ export type TVideo = {
 
   creatorObj: Creator;
 };
+
+export interface Access {
+  id: number;
+  user_id: number;
+  target_user_id: number;
+  entity: string;
+  resource_id: number;
+  createdAt: string;
+  updatedAt: string;
+  user: User;
+  targetUser: User;
+}
 
 export type User = {
   id: number;
