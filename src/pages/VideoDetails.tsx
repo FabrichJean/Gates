@@ -34,7 +34,7 @@ import { getTagCategoriesApi } from "../api/tagCategory";
 import type { Platform } from "../hooks/usePlatform";
 import PlatformSelectComponent from "../components/PlatformSelectComponent";
 import GetPostTitles from "./posts/GetPostTitles";
-import VideoAccessManager from "../components/VideoAccessManager";
+import AccessManager from "../components/AccessManager";
 import {
   Play,
   Edit3,
@@ -269,7 +269,7 @@ const VideoDetails: React.FC<{ videoIdProp?: string }> = ({ videoIdProp }) => {
                         </span>
                       )}
                     </div>
-                    <VideoAccessManager
+                    <AccessManager
                       resource_id={video.id}
                       accesses={video.accesses}
                       entity="video"

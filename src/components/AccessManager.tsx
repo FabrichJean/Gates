@@ -68,7 +68,7 @@ const AvatarWithTooltip: React.FC<AvatarWithTooltipProps> = ({ access, reFetch }
   );
 };
 
-interface VideoAccessManagerProps {
+interface AccessManagerProps {
   resource_id: any;
   entity: "video" | "post" | "video_for_app" | "post_for_app";
   user: any;
@@ -79,7 +79,7 @@ interface VideoAccessManagerProps {
   setIsUpdatingAccessOwner: (loading: boolean) => void;
 }
 
-const VideoAccessManager: React.FC<VideoAccessManagerProps> = ({
+const AccessManager: React.FC<AccessManagerProps> = ({
   resource_id,
   user, entity,
   selectableUsers,
@@ -203,4 +203,4 @@ const VideoAccessManager: React.FC<VideoAccessManagerProps> = ({
   );
 };
 
-export default VideoAccessManager;
+export default AccessManager;
