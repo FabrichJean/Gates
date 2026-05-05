@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Play, Clock, CheckCircle, AlertTriangle, Loader2, Film } from "lucide-react";
 import type { Video as BaseVideo } from "../../hooks/usePostForApp";
+import type { VideoUrls } from "../../hooks/useVideoPlayer";
 import { cdnS3 } from "../../utils/cdn";
+import VideoPlayer from "../../components/VideoPlayer";
 
 
 // Extend Video type locally to add 'type' property for editable select
@@ -183,16 +185,19 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
       {/* Modal de lecture vidéo */}
       {selectedVideo && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 h-full overflow-y-auto" onClick={() => setSelectedVideo(null)}>
-          <div className="relative max-w-4xl max-h-full w-full">
-            <video
-              controls
-              autoPlay
+          <div className="relative max-w-4xl max-h-full w-full" onClick={(e) => e.stopPropagation()}>
+            <VideoPlayer
+              videoUrls={{
+                hlsUrl: selectedVideo.s3_urls?.hlsUrl,
+                temp_url: selectedVideo.public_urls?.local_mp4_url,
+                coverUrl: selectedVideo.s3_urls?.coverUrl,
+                cover_url: selectedVideo.public_urls?.local_mp4_url,
+              } as VideoUrls}
+              poster={selectedVideo.s3_urls?.coverUrl ? cdnS3(selectedVideo.s3_urls.coverUrl) : undefined}
+              autoPlay={true}
+              isForApp={true}
               className="w-full max-h-full rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <source src={selectedVideo.s3_urls?.hlsUrl || selectedVideo.public_urls?.local_mp4_url} type="video/mp4" />
-              您的浏览器不支持视频播放。
-            </video>
+            />
 
             <button
               type="button"
