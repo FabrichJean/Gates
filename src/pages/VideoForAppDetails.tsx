@@ -29,6 +29,7 @@ import RoleEnum from "../utils/roleEnum";
 import { updateVideoForApp, updateVideoForAppBannedStatus } from "../api/videoForApp";
 import { cdnS3 } from '../utils/cdn';
 import AccessManager from "../components/AccessManager";
+import { useSocketCoverEncryption } from "../hooks/useSocketCoverEncryption";
 
 
 // Helper function to get category display name
@@ -74,6 +75,9 @@ const VideoForAppDetails: React.FC = () => {
   const [modifying, setModifying] = useState(false);
   const [showCover, setShowCover] = useState<boolean>(true);
   const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
+
+  // Hook pour écouter l'encryptage du cover
+  const { encryptionState, isEncrypting } = useSocketCoverEncryption(video?.id);
 
   const isPortrait = React.useMemo(() => {
     return video?.type === "1";
@@ -301,7 +305,7 @@ const VideoForAppDetails: React.FC = () => {
                       <div className={`w-full h-full ${video.isBanned && showCover ? 'filter blur-sm brightness-75' : ''}`}>
                         <VideoPlayer
                           videoUrls={{
-                            hlsUrl: video?.m3u8_path,
+                            hlsUrl: video?.s3_urls.hlsUrl,
                             coverUrl: video?.s3_urls?.coverUrl,
                           }}
                           poster={video?.cover}
@@ -354,11 +358,71 @@ const VideoForAppDetails: React.FC = () => {
                   {/* Cover */}
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
                     <h3 className="text-lg font-semibold mb-4">封面</h3>
-                    <img
-                      src={cdnS3(video?.s3_urls.coverUrl) || video?.public_urls.coverUrl || 'https://placehold.co/300x200'}
-                      alt="Cover"
-                      className="w-full rounded-lg"
-                    />
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img
+                        src={cdnS3(video?.s3_urls.coverUrl) || video?.public_urls?.coverUrl || 'https://placehold.co/300x200'}
+                        alt="Cover"
+                        className="w-full rounded-lg"
+                      />
+                      
+                      {/* Spinner et overlay lors de l'encryptage */}
+                      <AnimatePresence>
+                        {isEncrypting && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/60 rounded-lg flex flex-col items-center justify-center gap-3"
+                          >
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                              className="w-8 h-8 border-3 border-white border-t-transparent rounded-full"
+                            />
+                            <div className="text-white font-medium text-center">
+                              <div className="text-lg">{encryptionState.progress}%</div>
+                              <div className="text-xs text-gray-200 mt-1">{encryptionState.message}</div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Indicateur de succès */}
+                      <AnimatePresence>
+                        {encryptionState.status === 'complete' && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-green-500/60 rounded-lg flex items-center justify-center"
+                          >
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                              className="text-white text-4xl font-bold"
+                            >
+                              ✓
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Indicateur d'erreur */}
+                      <AnimatePresence>
+                        {encryptionState.status === 'error' && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-red-500/60 rounded-lg flex flex-col items-center justify-center gap-2"
+                          >
+                            <span className="text-white text-4xl font-bold">✕</span>
+                            <div className="text-white text-xs text-center px-2">{encryptionState.error}</div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
                   {/* Info */}

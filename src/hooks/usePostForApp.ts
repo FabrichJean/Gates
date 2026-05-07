@@ -64,26 +64,31 @@ export type Video = {
     id: number;
     checking: string;
     processing: string;
-    post_for_app_id: number;
+    type?: string;
+    post_id?: number;
+    post_for_app_id?: number;
     thumbnail_url: string | null;
-    duration: number;
+    duration: number | null;
     s3_hls_path: string | null;
     cdn_url: string | null;
-    local_mp4_path: string;
-    hash: string;
-    sys_code: string;
+    local_mp4_path: string | null;
+    s3_cover_path: string | null;
+    local_cover_path: string | null;
+    local_hls_path: string | null;
+    hash: string | null;
+    sys_code: string | null;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
-    public_urls: {
-        local_mp4_url: string;
-        hls_url: string;
-        local_hls_url: string | null;
+    public_urls?: {
+        local_mp4_url?: string;
+        hls_url?: string;
+        local_hls_url?: string | null;
     };
     s3_urls: {
-        hlsUrl: string | null;
-        cdnUrl: string | null;
-        coverUrl: string | null;
+        hlsUrl?: string | null;
+        coverUrl?: string | null;
+        cdnUrl?: string | null;
     };
 };
 

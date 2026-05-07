@@ -36,7 +36,7 @@ export const useVideoPlayer = ({
   const [error, setError] = useState<string | null>(null);
   const playerRef = useRef<HTMLVideoElement>(null);
 
-  const isHls = videoSrc ? videoSrc.startsWith('blob:') : false;
+  const isHls = videoSrc ? (videoSrc.startsWith('blob:') || videoSrc.includes('m3u8')) : false;
 
   // Cleanup blob URLs on unmount
   useEffect(() => {
@@ -57,19 +57,27 @@ export const useVideoPlayer = ({
       console.log(videoUrls);
       
       if (videoUrls.hlsUrl) {
-        // Fetch HLS content as blob
-        const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {
-          headers: {
-            "Authorization": `Bearer ${token()}`
-          },
-          params: {
-            url: videoUrls.hlsUrl
-          },
-          responseType: 'blob'
-        });
+        // Check if HLS URL contains 'no_key_' - if so, it needs to go through the play endpoint
+        const needsPlayEndpoint = videoUrls.hlsUrl.includes('m3u8');
+        
+        if (needsPlayEndpoint) {
+          // Fetch HLS content through play endpoint for no_key_ URLs
+          const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {
+            headers: {
+              "Authorization": `Bearer ${token()}`
+            },
+            params: {
+              url: videoUrls.hlsUrl
+            },
+            responseType: 'blob'
+          });
 
-        const hlsUrl = URL.createObjectURL(response.data);
-        setVideoSrc(hlsUrl);
+          const hlsUrl = URL.createObjectURL(response.data);
+          setVideoSrc(hlsUrl);
+        } else {
+          // Use direct HLS URL for URLs that don't contain no_key_
+          setVideoSrc(videoUrls.hlsUrl);
+        }
       } else if (videoUrls.temp_url) {
         // Use direct video URL
         setVideoSrc(videoUrls.temp_url);
