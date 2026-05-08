@@ -25,6 +25,7 @@ export type TAppFilter = {
   durationMin?: string;
   durationMax?: string;
   accessing?: string;
+  keyword?: string;
 };
 
 export default function VideoForAppFilter({
@@ -102,6 +103,7 @@ export default function VideoForAppFilter({
         durationMin: filters.durationMin,
         durationMax: filters.durationMax,
         accessing: filters.accessing,
+        keyword: filters.keyword,
       };
       localStorage.setItem(storageKey, JSON.stringify(filtersToSave));
     } catch (error) {
@@ -158,12 +160,17 @@ export default function VideoForAppFilter({
 
   // Soumission des filtres
   const submit = async () => {
+
     const { params: finalQuery, error } = buildVideoForAppListParams({
       filters,
       baseParams: params || {},
       page: "1",
       strictDuration: true,
     });
+    // Inject keyword if present in filters
+    if (filters.keyword) {
+      finalQuery.keyword = filters.keyword;
+    }
 
     if (error === "duration_min_format") {
       toast.error("La durée minimale doit être au format hh:mm:ss.");
@@ -203,7 +210,7 @@ export default function VideoForAppFilter({
 
   return (
     <dialog id="search_modal_52" className="modal">
-      <div className="flex flex-col gap-4 modal-box w-max bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+  <div className="flex flex-col gap-4 modal-box w-max bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 transition-colors duration-300">
         {/* Sélections principales */}
 
         {/* Filtres booléens */}
@@ -351,6 +358,20 @@ export default function VideoForAppFilter({
             </div>
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">格式为 hh:mm:ss，提交时会自动转换为秒。</p>
           </div> */}
+
+        {/* Keyword free-text filter */}
+        <div className="relative">
+          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Keyword <span className="font-medium text-sm">(search in title/desc)</span></label>
+          <input
+            type="text"
+            placeholder="Enter keyword..."
+            value={filters.keyword || ""}
+            onChange={(e) => {
+              setHasInteracted(true);
+              handleChange("keyword", e.target.value);
+            }}
+            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition"
+          />
         </div>
 
 
@@ -573,6 +594,7 @@ export default function VideoForAppFilter({
                 durationMin: "",
                 durationMax: "",
                 accessing: "",
+                keyword: "",
               });
               setHasInteracted(false);
               setCategoryOpen(false);
@@ -595,6 +617,7 @@ export default function VideoForAppFilter({
             应用
           </button>
         </form>
+      </div>
       </div>
     </dialog>
   );

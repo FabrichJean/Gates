@@ -7,8 +7,8 @@ import { buildVideoForAppListParams } from "../utils/videoForAppFilters";
 interface VideoForAppContextType {
   page: number;
   setPage: (p: number) => void;
-  filters: Record<string, any>;
-  setFilters: (f: Record<string, any>) => void;
+  filters: Record<string, any> & { keyword?: string };
+  setFilters: (f: Record<string, any> & { keyword?: string }) => void;
   params: Record<string, any>;
   data: { videos: VideoForApp[]; total: number; limit: number; page?: number } | null;
   loading: boolean;
@@ -26,7 +26,7 @@ export const useVideoForAppContext = () => useContext(VideoForAppContext);
 
 export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [filters, setFilters] = useState<Record<string, any> & { keyword?: string }>({});
   const [params] = useState<Record<string, any>>({});
   const [data, setData] = useState<{ videos: VideoForApp[]; total: number; limit: number; page?: number } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,11 +34,16 @@ export const VideoForAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const fetchData = useCallback(() => {
     setLoading(true);
     const { params } = buildVideoForAppListParams({ filters, page });
-      console.log(params);
+    // Inject keyword if present in filters
+    if (filters.keyword) {
+      params.keyword = filters.keyword;
+    }
 
+    console.log("91_08052026_299005", params);
+    
     fetchVideoForAppList(params)
       .then(res => setData({ videos: res.videos, total: res.total, limit: res.limit, page: res.page ?? page }))
-      .finally(() => setLoading(false));    
+      .finally(() => setLoading(false));
   }, [page, filters]);
 
   React.useEffect(() => {
