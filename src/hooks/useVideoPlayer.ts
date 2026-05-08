@@ -7,6 +7,7 @@ export interface VideoUrls {
   temp_url?: string;
   coverUrl?: string;
   cover_url?: string;
+  key?: string;
 }
 
 export interface UseVideoPlayerOptions {
@@ -63,7 +64,8 @@ export const useVideoPlayer = ({
             "Authorization": `Bearer ${token()}`
           },
           params: {
-            url: videoUrls.hlsUrl
+            url: videoUrls.hlsUrl,
+            ...(videoUrls.key ? { key: videoUrls.key } : {})
           },
           responseType: 'blob'
         });
