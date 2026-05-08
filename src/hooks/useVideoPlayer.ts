@@ -7,6 +7,7 @@ export interface VideoUrls {
   temp_url?: string;
   coverUrl?: string;
   cover_url?: string;
+  key?: string;
 }
 
 export interface UseVideoPlayerOptions {
@@ -55,32 +56,28 @@ export const useVideoPlayer = ({
 
     try {
       console.log(videoUrls);
-      
-      if (videoUrls.hlsUrl) {
-        // Check if HLS URL contains 'no_key_' - if so, it needs to go through the play endpoint
-        const needsPlayEndpoint = videoUrls.hlsUrl.includes('m3u8');
-        
-        if (needsPlayEndpoint) {
-          // Fetch HLS content through play endpoint for no_key_ URLs
-          const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {
-            headers: {
-              "Authorization": `Bearer ${token()}`
-            },
-            params: {
-              url: videoUrls.hlsUrl
-            },
-            responseType: 'blob'
-          });
 
-          const hlsUrl = URL.createObjectURL(response.data);
-          setVideoSrc(hlsUrl);
-        } else {
-          // Use direct HLS URL for URLs that don't contain no_key_
-          setVideoSrc(videoUrls.hlsUrl);
-        }
+      if (videoUrls.hlsUrl) {
+        // Fetch HLS content as blob
+        const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {
+          headers: {
+            "Authorization": `Bearer ${token()}`
+          },
+          params: {
+            url: videoUrls.hlsUrl,
+            ...(videoUrls.key ? { key: videoUrls.key } : {})
+          },
+          responseType: 'blob'
+        });
+
+        const hlsUrl = URL.createObjectURL(response.data);
+        setVideoSrc(hlsUrl);
       } else if (videoUrls.temp_url) {
         // Use direct video URL
         setVideoSrc(videoUrls.temp_url);
+      } else if (videoUrls.hlsUrl) {
+        // Use direct HLS URL for URLs that don't require a key
+        setVideoSrc(videoUrls.hlsUrl);
       }
     } catch (err) {
       console.error('Failed to load video', err);
@@ -104,6 +101,7 @@ export const useVideoPlayer = ({
         URL.revokeObjectURL(videoSrc);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUrls?.hlsUrl, videoUrls?.temp_url]);
 
   return {

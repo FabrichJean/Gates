@@ -202,6 +202,7 @@ import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSwitcher from './LanguageSwitcher';
 import ProcessModal from "./ProcessModal";
+import UrlVideoModal from "./UrlVideoModal";
 import { MdDynamicFeed } from "react-icons/md";
 import { useCardFlottant } from "../hooks/useCardFlottant";
 import useSyncOption from "../hooks/useSyncOption";
@@ -394,6 +395,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(initialIsCollapsed);
   const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
   const [showSidebar, setShowSidebar] = useState<boolean>(initialShowSidebar);
+  const [showUrlModal, setShowUrlModal] = useState(false);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   const openLogoutModal = () => dialogRef.current?.showModal();
@@ -483,6 +485,7 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
             <div className="neon-blob neon-cyan absolute -left-16 top-2 w-64 h-40" />
             <div className="neon-blob neon-purple absolute -right-12 -bottom-6 w-56 h-32" />
           </div>
+
           {/* Bouton menu */}
           <div
             onClick={toggleSidebar}
@@ -505,6 +508,15 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setShowUrlModal(true)}
+              className="p-1 border dark:border-gray-600 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+              </svg>
+            </button>
             <CreateNewDropdown />
             <OptionDisplayInline onLogoutRequest={openLogoutModal} />
           </div>
@@ -555,6 +567,11 @@ function InsideSidebar({ children }: React.PropsWithChildren) {
           {children}
         </main>
       </div>
+
+      <UrlVideoModal
+        open={showUrlModal}
+        onClose={() => setShowUrlModal(false)}
+      />
     </div>
   );
 }
