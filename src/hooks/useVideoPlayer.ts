@@ -56,7 +56,7 @@ export const useVideoPlayer = ({
 
     try {
       console.log(videoUrls);
-      
+
       if (videoUrls.hlsUrl) {
         // Fetch HLS content as blob
         const response = await axios.get(`${apiURL}/videos${isForApp ? "-for-app" : ""}/play`, {
@@ -70,15 +70,14 @@ export const useVideoPlayer = ({
           responseType: 'blob'
         });
 
-          const hlsUrl = URL.createObjectURL(response.data);
-          setVideoSrc(hlsUrl);
-        } else {
-          // Use direct HLS URL for URLs that don't contain no_key_
-          setVideoSrc(videoUrls.hlsUrl);
-        }
+        const hlsUrl = URL.createObjectURL(response.data);
+        setVideoSrc(hlsUrl);
       } else if (videoUrls.temp_url) {
         // Use direct video URL
         setVideoSrc(videoUrls.temp_url);
+      } else if (videoUrls.hlsUrl) {
+        // Use direct HLS URL for URLs that don't require a key
+        setVideoSrc(videoUrls.hlsUrl);
       }
     } catch (err) {
       console.error('Failed to load video', err);
@@ -102,6 +101,7 @@ export const useVideoPlayer = ({
         URL.revokeObjectURL(videoSrc);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUrls?.hlsUrl, videoUrls?.temp_url]);
 
   return {
