@@ -189,11 +189,9 @@ export default function GetVideoPostForApp({ videos, reFetch, editable, videoTyp
             <VideoPlayer
               videoUrls={{
                 hlsUrl: selectedVideo.s3_urls?.hlsUrl,
-                temp_url: selectedVideo.public_urls?.local_mp4_url,
-                coverUrl: selectedVideo.s3_urls?.coverUrl,
-                cover_url: selectedVideo.public_urls?.local_mp4_url,
+                temp_url: selectedVideo.public_urls?.local_mp4_url || selectedVideo.s3_hls_path,
               } as VideoUrls}
-              poster={selectedVideo.s3_urls?.coverUrl ? cdnS3(selectedVideo.s3_urls.coverUrl) : undefined}
+              poster={cdnS3(selectedVideo.s3_urls?.coverUrl || selectedVideo.thumbnail_url)}
               autoPlay={true}
               isForApp={true}
               className="w-full max-h-full rounded-lg"

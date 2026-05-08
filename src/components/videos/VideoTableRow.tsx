@@ -14,6 +14,7 @@ import { cdnS3 } from "../../utils/cdn";
 import { updateVideo } from "../../api/videos";
 import SelectedUserModal from "./modalSelectedUser";
 import type { User as SelectorUser } from "../UserSelector";
+import { useSocketCoverEncryption } from "../../hooks/useSocketCoverEncryption";
 
 interface VideoTableRowProps {
   video: TVideo;
@@ -54,6 +55,9 @@ const VideoTableRow = ({
   const [isSelectUserModalOpen, setIsSelectUserModalOpen] = useState(false);
   const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
   const [isHoveredBadge, setIsHoveredBadge] = useState(false);
+
+  // Hook pour écouter l'encryptage du cover
+  const { encryptionState, isEncrypting } = useSocketCoverEncryption(video.id);
 
   const statusConfig = {
     uploaded: {
@@ -244,6 +248,56 @@ const VideoTableRow = ({
             alt="封面"
             className="w-24 h-14 object-cover rounded-lg shadow-sm transition-all duration-200 group-hover:shadow-md group-hover:scale-105"
           />
+          
+          {/* Spinner et overlay lors de l'encryptage */}
+          <AnimatePresence>
+            {isEncrypting && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 rounded-lg flex flex-col items-center justify-center gap-2"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
+                />
+                <div className="text-xs text-white font-medium text-center">
+                  {encryptionState.progress}%
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Indicateur de succès */}
+          <AnimatePresence>
+            {encryptionState.status === 'complete' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-green-500/60 rounded-lg flex items-center justify-center"
+              >
+                <span className="text-white text-lg font-bold">✓</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Indicateur d'erreur */}
+          <AnimatePresence>
+            {encryptionState.status === 'error' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-red-500/60 rounded-lg flex items-center justify-center"
+              >
+                <span className="text-white text-lg font-bold">✕</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
           <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <FiPlay className="w-5 h-5 text-white" />
           </div>

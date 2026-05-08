@@ -370,7 +370,7 @@ export default function PlateformRelationsManager() {
   const { data: allPostCategories, reFetch: reFetchPostCategories } =
     useCategoryPost();
   const { data: allPostSubCategories } = useSubCategoryPost();
-  const { data: allCreators, reFetch: reFetchCreators } = UseCreators();
+  const { data: allCreators, reFetch: reFetchCreators } = UseCreators({isAll: true});
 
   const handleAddCategory = async (categoryId: number) => {
     if (!selectedPlateform)
