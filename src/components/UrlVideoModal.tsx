@@ -2,10 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent, ReactNode } from "react";
 import VideoPlayer from "./VideoPlayer";
 
+interface UrlVideoModalSubmitObject {
+  url: string;
+  key: string;
+  as_mp4: number;
+}
+
 interface UrlVideoModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (value: string) => void;
+  onSubmit?: (value: string | UrlVideoModalSubmitObject) => void;
   title?: string;
   placeholder?: string;
   submitLabel?: string;
@@ -265,6 +271,41 @@ export default function UrlVideoModal({
               >
                 {submitLabel}
               </button>
+              <button
+                type="button"
+                className="p-2 border cursor-pointer"
+                onClick={() => {
+                  if (disabled) return;
+                  const trimmed = currentValue.trim();
+                  if (!trimmed) {
+                    setSubmitError("URL requise");
+                    return;
+                  }
+                  setSubmitError(null);
+                  registerKeySuggestion(previewKey);
+                  setPreviewUrl(trimmed);
+                  setIsKeyOpen(false);
+                  setHighlightedKeyIndex(-1);
+                  if (keyBlurTimeoutRef.current !== null) {
+                    window.clearTimeout(keyBlurTimeoutRef.current);
+                    keyBlurTimeoutRef.current = null;
+                  }
+                  // Appel onSubmit avec as_mp4=1
+                  if (onSubmit) {
+                    const payload = {
+                      url: trimmed,
+                      key: previewKey,
+                      as_mp4: 1
+                    };
+                    console.log('Téléchargement MP4 payload:', payload);
+                    onSubmit(payload);
+                  }
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+                </svg>
+              </button>
             </form>
 
             <div className="flex items-start gap-2">
@@ -304,11 +345,10 @@ export default function UrlVideoModal({
                             handleKeyOptionSelect(key);
                           }}
                           onMouseEnter={() => setHighlightedKeyIndex(index)}
-                          className={`w-full text-left px-3 py-2 text-sm transition ${
-                            highlightedKeyIndex === index
-                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
-                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
+                          className={`w-full text-left px-3 py-2 text-sm transition ${highlightedKeyIndex === index
+                            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
                         >
                           {key}
                         </button>
