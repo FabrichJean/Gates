@@ -86,6 +86,31 @@ const VideoForAppDetails: React.FC = () => {
   const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
   const [copiedM3u8, setCopiedM3u8] = useState(false);
 
+  // Fonction utilitaire pour copier du texte avec fallback
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      // Essayer d'abord la Clipboard API (HTTPS/localhost)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } else {
+        // Fallback pour HTTP ou navigateurs sans support
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const success = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return success;
+      }
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      return false;
+    }
+  };
+
   // Hook pour écouter l'encryptage du cover
   const { encryptionState, isEncrypting } = useSocketCoverEncryption(video?.id);
 
@@ -596,15 +621,14 @@ const VideoForAppDetails: React.FC = () => {
                             </code>
                             <motion.button
                               onClick={async () => {
-                                try {
-                                  await navigator.clipboard.writeText(
-                                    video.s3_urls.hlsUrl,
-                                  );
+                                const success = await copyToClipboard(
+                                  video.s3_urls.hlsUrl,
+                                );
+                                if (success) {
                                   setCopiedM3u8(true);
                                   toast.success("Copied to clipboard");
                                   setTimeout(() => setCopiedM3u8(false), 2000);
-                                } catch (error) {
-                                  console.error("Failed to copy:", error);
+                                } else {
                                   toast.error("Failed to copy");
                                 }
                               }}
