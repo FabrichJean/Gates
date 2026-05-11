@@ -84,6 +84,7 @@ const VideoForAppDetails: React.FC = () => {
   const [modifying, setModifying] = useState(false);
   const [showCover, setShowCover] = useState<boolean>(true);
   const [isUpdatingAccessOwner, setIsUpdatingAccessOwner] = useState(false);
+  const [copiedM3u8, setCopiedM3u8] = useState(false);
 
   // Hook pour écouter l'encryptage du cover
   const { encryptionState, isEncrypting } = useSocketCoverEncryption(video?.id);
@@ -593,18 +594,40 @@ const VideoForAppDetails: React.FC = () => {
                             <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded truncate text-gray-700 dark:text-gray-300">
                               {video.s3_urls.hlsUrl}
                             </code>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  video.s3_urls.hlsUrl,
-                                );
-                                toast.success("Copied to clipboard");
+                            <motion.button
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(
+                                    video.s3_urls.hlsUrl,
+                                  );
+                                  setCopiedM3u8(true);
+                                  toast.success("Copied to clipboard");
+                                  setTimeout(() => setCopiedM3u8(false), 2000);
+                                } catch (error) {
+                                  console.error("Failed to copy:", error);
+                                  toast.error("Failed to copy");
+                                }
                               }}
-                              className="cursor-pointer p-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors flex items-center justify-center"
+                              animate={{
+                                scale: copiedM3u8 ? [1, 1.2, 1] : 1,
+                              }}
+                              transition={{ duration: 0.3 }}
+                              className={`cursor-pointer p-2 rounded transition-colors flex items-center justify-center ${
+                                copiedM3u8
+                                  ? "bg-green-500 text-white"
+                                  : "bg-blue-500 hover:bg-blue-600 text-white"
+                              }`}
                               title="Copy"
                             >
-                              <Copy className="w-4 h-4" />
-                            </button>
+                              <motion.div
+                                animate={{
+                                  rotate: copiedM3u8 ? 360 : 0,
+                                }}
+                                transition={{ duration: 0.4 }}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </motion.div>
+                            </motion.button>
                           </div>
                         </div>
                       )}
