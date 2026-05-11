@@ -49,6 +49,7 @@ export default function UrlVideoModal({
   const [highlightedKeyIndex, setHighlightedKeyIndex] = useState(-1);
   const keyBlurTimeoutRef = useRef<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (value !== undefined) {
@@ -358,11 +359,12 @@ export default function UrlVideoModal({
               {previewUrl && (
                 <button
                   type="button"
-                  className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Télécharger"
-                  disabled={disabled}
+                  disabled={disabled || isDownloading}
                   onClick={async () => {
                     try {
+                      setIsDownloading(true);
                       const params = new URLSearchParams({
                         url: previewUrl,
                         key: previewKey,
@@ -384,15 +386,24 @@ export default function UrlVideoModal({
                       link.click();
                       document.body.removeChild(link);
                       window.URL.revokeObjectURL(downloadUrl);
+                      setSubmitError(null);
                     } catch (error) {
                       console.error("Download error:", error);
                       setSubmitError(`Erreur téléchargement: ${error instanceof Error ? error.message : String(error)}`);
+                    } finally {
+                      setIsDownloading(false);
                     }
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-900 dark:text-white">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
-                  </svg>
+                  {isDownloading ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-900 dark:text-white animate-spin">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.995-1.465" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-900 dark:text-white">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+                    </svg>
+                  )}
                 </button>
               )}
             </div>
