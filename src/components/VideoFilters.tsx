@@ -15,7 +15,6 @@ export type TFilter = {
     user_id: string;
     creator_id: string;
     creatorSearch?: string;
-    globalSearch?: string;
     keyword?: string;
     tagCategory?: string;
     isDeleted: string;
@@ -62,8 +61,8 @@ export default function VideoFilters({
                 tagCategory: savedFilter.tagCategory || "",
                 // restore creatorSearch if present
                 creatorSearch: savedFilter.creatorSearch || savedFilter.creator || "",
-                // restore global search from previous 'globalSearch' or 'keyword'
-                globalSearch: savedFilter.globalSearch || savedFilter.keyword || "",
+                // restore keyword
+                keyword: savedFilter.keyword || "",
             };
 
             setFilters(_);
@@ -96,10 +95,9 @@ export default function VideoFilters({
 
     // Soumission des filtres
     const submit = async () => {
-        // On ne garde que les clés utiles, on mappe globalSearch -> keyword
+        // On ne garde que les clés utiles
         const {
-            globalSearch,
-            keyword: _oldKeyword,
+            keyword,
             creatorSearch,
             ...rest
         } = filters;
@@ -110,9 +108,9 @@ export default function VideoFilters({
             processing: filters.processing,
         };
 
-        // Place la valeur du champ global dans keyword uniquement
-        if (globalSearch && globalSearch.trim() !== "") {
-            data.keyword = globalSearch;
+        // Place la valeur du champ keyword
+        if (keyword && keyword.trim() !== "") {
+            data.keyword = keyword;
         }
 
         // Optionnel : ne pas envoyer creatorSearch si inutile
@@ -122,7 +120,7 @@ export default function VideoFilters({
         // Pour debug : log le payload envoyé
         console.log("Payload envoyé:", data);
 
-        localStorage.setItem("videos_filtered", JSON.stringify({ ...data, globalSearch }));
+        localStorage.setItem("videos_filtered", JSON.stringify({ ...data, keyword }));
 
         const safeParams = params || {};
         const finalQuery = { ...safeParams, ...data, page: '1' };
@@ -166,8 +164,8 @@ export default function VideoFilters({
                                     zh: "在所有字段中搜索"
                                 }                            })}
                             className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
-                            value={filters.globalSearch || ""}
-                            onChange={(e) => handleChange("globalSearch", e.target.value)}
+                            value={filters.keyword || ""}
+                            onChange={(e) => handleChange("keyword", e.target.value)}
                         />
                     </div>
                     <div>
@@ -395,7 +393,6 @@ export default function VideoFilters({
                                 user_id: "",
                                 creator_id: "",
                                     creatorSearch: "",
-                                    globalSearch: "",
                                     keyword: "",
                                 tagCategory: "",
                                 isDeleted: "all",
