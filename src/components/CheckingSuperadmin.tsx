@@ -50,9 +50,9 @@ function CheckingSuperadmin({
       }
     >
       <div
-        tabIndex={actual?.id}
+        tabIndex={0}
         role="button"
-        className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-max p-1 px-2 rounded-md cursor-default m-auto transition-colors duration-300 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800"
+        className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 w-max p-1 px-2 rounded-md cursor-pointer m-auto transition-colors duration-300 border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-800"
       >
         {checking === "checked" ? (
           <FaCheckDouble className="text-green-600 dark:text-green-400" />

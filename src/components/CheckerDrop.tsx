@@ -63,7 +63,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
         tabIndex={-1}
         className="dropdown-content menu bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dark:shadow-gray-900/50 z-50 w-56 p-2"
       >
-        {user?.role === "superadmin" && checking !== "null" ? (
+        {user?.role === "superadmin" ? (
           <div className="space-y-1">
             {["checked", "refused"].map((check) => (
               <button
@@ -89,7 +89,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
             ))}
           </div>
         ) : (
-          <>
+          <div className="space-y-1">
             {checking === "null" && (
               <button
                 onClick={() => update("waiting for checking")}
@@ -134,7 +134,7 @@ function CheckerDrop({ video, resource, user, checking, setChecking, openRefuseM
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </>
