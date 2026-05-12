@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent, ReactNode } from "react";
 import VideoPlayer from "./VideoPlayer";
+import { apiURL } from "../constant";
+
+interface UrlVideoModalSubmitObject {
+  url: string;
+  key: string;
+  as_mp4: number;
+}
 
 interface UrlVideoModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (value: string) => void;
+  onSubmit?: (value: string | UrlVideoModalSubmitObject) => void;
   title?: string;
   placeholder?: string;
   submitLabel?: string;
@@ -42,6 +49,7 @@ export default function UrlVideoModal({
   const [highlightedKeyIndex, setHighlightedKeyIndex] = useState(-1);
   const keyBlurTimeoutRef = useRef<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (value !== undefined) {
@@ -208,11 +216,11 @@ export default function UrlVideoModal({
           if (closeOnOverlay && !disabled) onClose();
         }}
       />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-auto">
         <div
           role="dialog"
           aria-modal="true"
-          className="w-full max-w-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl"
+          className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl flex flex-col"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -241,7 +249,7 @@ export default function UrlVideoModal({
             </button>
           </div>
 
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 overflow-y-auto flex-1">
             <form onSubmit={handleSubmit} className="flex items-stretch gap-2">
               <label
                 htmlFor="url-video-input"
@@ -304,11 +312,10 @@ export default function UrlVideoModal({
                             handleKeyOptionSelect(key);
                           }}
                           onMouseEnter={() => setHighlightedKeyIndex(index)}
-                          className={`w-full text-left px-3 py-2 text-sm transition ${
-                            highlightedKeyIndex === index
-                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
-                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
+                          className={`w-full text-left px-3 py-2 text-sm transition ${highlightedKeyIndex === index
+                            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                            }`}
                         >
                           {key}
                         </button>
@@ -331,13 +338,13 @@ export default function UrlVideoModal({
               </p>
             )}
 
-            <div className="aspect-video w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+            <div className="relative w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[300px] max-h-[500px]">
               {videoSlot ?? (
-                <div className="w-full h-full">
+                <div className="w-full h-full flex items-center justify-center">
                   {previewUrl ? (
                     <VideoPlayer
                       videoUrls={{ hlsUrl: previewUrl, key: previewKey }}
-                      className="w-full h-full"
+                      className="w-full h-full object-contain"
                       autoPlay
                     />
                   ) : (
@@ -348,6 +355,56 @@ export default function UrlVideoModal({
                     </div>
                   )}
                 </div>
+              )}
+              {previewUrl && (
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Télécharger"
+                  disabled={disabled || isDownloading}
+                  onClick={async () => {
+                    try {
+                      setIsDownloading(true);
+                      const params = new URLSearchParams({
+                        url: previewUrl,
+                        key: previewKey,
+                        as_mp4: "1"
+                      });
+                      
+                      const response = await fetch(apiURL+`/videos/play?${params.toString()}`);
+                      
+                      if (!response.ok) {
+                        throw new Error(`Download failed: ${response.statusText}`);
+                      }
+                      
+                      const blob = await response.blob();
+                      const downloadUrl = window.URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = downloadUrl;
+                      link.download = `video_${Date.now()}.mp4`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(downloadUrl);
+                      setSubmitError(null);
+                    } catch (error) {
+                      console.error("Download error:", error);
+                      setSubmitError(`Erreur téléchargement: ${error instanceof Error ? error.message : String(error)}`);
+                    } finally {
+                      setIsDownloading(false);
+                    }
+                  }}
+                >
+                  {isDownloading ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-900 dark:text-white animate-spin">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.995-1.465" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-900 dark:text-white">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" />
+                    </svg>
+                  )}
+                </button>
               )}
             </div>
           </div>

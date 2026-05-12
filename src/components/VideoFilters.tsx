@@ -15,6 +15,7 @@ export type TFilter = {
     user_id: string;
     creator_id: string;
     creatorSearch?: string;
+    keyword?: string;
     tagCategory?: string;
     isDeleted: string;
     processing: string;
@@ -60,6 +61,8 @@ export default function VideoFilters({
                 tagCategory: savedFilter.tagCategory || "",
                 // restore creatorSearch if present
                 creatorSearch: savedFilter.creatorSearch || savedFilter.creator || "",
+                // restore keyword
+                keyword: savedFilter.keyword || "",
             };
 
             setFilters(_);
@@ -92,15 +95,32 @@ export default function VideoFilters({
 
     // Soumission des filtres
     const submit = async () => {
-        const data = {
-            ...filters,
+        // On ne garde que les clés utiles
+        const {
+            keyword,
+            creatorSearch,
+            ...rest
+        } = filters;
+
+        const data: any = {
+            ...rest,
             isDeleted: mapStatus(filters.isDeleted),
             processing: filters.processing,
         };
 
-        console.log(filters.processing, data.processing)
+        // Place la valeur du champ keyword
+        if (keyword && keyword.trim() !== "") {
+            data.keyword = keyword;
+        }
 
-        localStorage.setItem("videos_filtered", JSON.stringify(data));
+        // Optionnel : ne pas envoyer creatorSearch si inutile
+        // (décommente si tu veux l'exclure du payload)
+        // delete data.creatorSearch;
+
+        // Pour debug : log le payload envoyé
+        console.log("Payload envoyé:", data);
+
+        localStorage.setItem("videos_filtered", JSON.stringify({ ...data, keyword }));
 
         const safeParams = params || {};
         const finalQuery = { ...safeParams, ...data, page: '1' };
@@ -108,20 +128,15 @@ export default function VideoFilters({
         try {
             let fetched: any;
             if (scope === "bot") {
-                // lazy import the bot api to avoid cycles
                 const { getFilteredBotVideos } = await import("../api/videoBot");
-                
                 fetched = await getFilteredBotVideos(finalQuery);
-                
             } else {
                 const { getFilteredVideos } = await import("../api/videos");
-                
                 fetched = await getFilteredVideos(finalQuery);
             }
-
             onSubmit(fetched.data);
         } catch (error) {
-            console.error(" Erreur lors du filtrage :", error);
+            console.error("Erreur lors du filtrage :", error);
         }
     };
 
@@ -139,6 +154,20 @@ export default function VideoFilters({
 
                 {/* Sélections principales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Global</label>
+                        <input
+                            type="text"
+                            placeholder={t("videos.filter.global.placeholder", {
+                                default: {
+                                    en: "Search in all fields",
+                                    zh: "在所有字段中搜索"
+                                }                            })}
+                            className="input input-bordered w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-300"
+                            value={filters.keyword || ""}
+                            onChange={(e) => handleChange("keyword", e.target.value)}
+                        />
+                    </div>
                     <div>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">{t("videos.filter.category")}</label>
                         <select
@@ -363,7 +392,8 @@ export default function VideoFilters({
                                 category_id: "",
                                 user_id: "",
                                 creator_id: "",
-                                creatorSearch: "",
+                                    creatorSearch: "",
+                                    keyword: "",
                                 tagCategory: "",
                                 isDeleted: "all",
                                 processing: "",
