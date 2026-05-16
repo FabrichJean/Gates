@@ -32,7 +32,7 @@ const STAGES: Stage[] = [
     label: '3. AWAKENING',
     title: 'AWAKENING',
     description: 'Ton univers prend forme. Les couches se construisent.',
-    autoContinueDelay: 5000,
+    autoContinueDelay: 7000,
   },
   {
     id: 4,
