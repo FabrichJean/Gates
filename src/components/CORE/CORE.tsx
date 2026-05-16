@@ -71,10 +71,12 @@ export const CORE: React.FC = () => {
       if (currentStage === 4) {
         setGateIsTransitioning(true);
 
-        // Transition immédiate vers CONNECTING (sans fade)
-        setCompletedStages((prev) => [...prev, currentStage]);
-        setCurrentStage(currentStage + 1);
-        setGateIsTransitioning(false);
+        // Laisser 300ms compression + 1400ms dispersion = 1700ms avant ConnectingStage
+        setTimeout(() => {
+          setCompletedStages((prev) => [...prev, currentStage]);
+          setCurrentStage(currentStage + 1);
+          setGateIsTransitioning(false);
+        }, 1700);
       } else {
         // Pour les autres transitions, utiliser le fade classique
         setIsTransitioning(true);

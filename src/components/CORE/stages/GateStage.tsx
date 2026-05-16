@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { CosmosCanvas } from '../CosmosCanvas';
+import { useEffect, useRef, useState } from "react";
+import { CosmosCanvas } from "../CosmosCanvas";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +9,7 @@ interface SideFragment {
   vx: number;
   length: number;
   opacity: number;
-  side: 'left' | 'right';
+  side: "left" | "right";
 }
 
 interface ArcNode {
@@ -53,7 +53,7 @@ const GateCanvas: React.FC = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
@@ -61,16 +61,19 @@ const GateCanvas: React.FC = () => {
       canvas.height = canvas.offsetHeight;
     };
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
 
     const w = canvas.width;
     const h = canvas.height;
 
     // Side fragments — short horizontal glitch lines on edges
     fragmentsRef.current = Array.from({ length: FRAGMENT_COUNT }, () => {
-      const side = Math.random() > 0.5 ? 'left' : 'right';
+      const side = Math.random() > 0.5 ? "left" : "right";
       return {
-        x: side === 'left' ? Math.random() * w * 0.25 : w * 0.75 + Math.random() * w * 0.25,
+        x:
+          side === "left"
+            ? Math.random() * w * 0.25
+            : w * 0.75 + Math.random() * w * 0.25,
         y: Math.random() * h,
         vx: (Math.random() - 0.5) * 0.4,
         length: Math.random() * 18 + 4,
@@ -129,7 +132,7 @@ const GateCanvas: React.FC = () => {
       // ── 2. Portal Arc (extremely subtle, almost ghost-like) ─────────────
       const arcCX = w * 0.5;
       const arcCY = h * 0.22;
-      const arcR = Math.min(w, h) * 0.30;
+      const arcR = Math.min(w, h) * 0.3;
       const rotation = t * 0.08; // very slow
 
       const nodes = arcNodesRef.current;
@@ -208,8 +211,8 @@ const GateCanvas: React.FC = () => {
       // ── 3. Side fragments — broken horizontal lines on edges ────────────
       fragmentsRef.current.forEach((f) => {
         f.x += f.vx;
-        if (f.side === 'left' && f.x > w * 0.3) f.x = -20;
-        if (f.side === 'right' && f.x < w * 0.7) f.x = w + 20;
+        if (f.side === "left" && f.x > w * 0.3) f.x = -20;
+        if (f.side === "right" && f.x < w * 0.7) f.x = w + 20;
 
         // Flicker effect
         const flicker = 0.7 + Math.sin(t * 3 + f.y) * 0.3;
@@ -243,9 +246,16 @@ const GateCanvas: React.FC = () => {
       });
 
       // ── 5. Edge vignette ────────────────────────────────────────────────
-      const edgeGrad = ctx.createRadialGradient(w / 2, h / 2, h * 0.35, w / 2, h / 2, h * 0.85);
-      edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-      edgeGrad.addColorStop(1, 'rgba(0,0,10,0.5)');
+      const edgeGrad = ctx.createRadialGradient(
+        w / 2,
+        h / 2,
+        h * 0.35,
+        w / 2,
+        h / 2,
+        h * 0.85,
+      );
+      edgeGrad.addColorStop(0, "rgba(0,0,0,0)");
+      edgeGrad.addColorStop(1, "rgba(0,0,10,0.5)");
       ctx.fillStyle = edgeGrad;
       ctx.fillRect(0, 0, w, h);
 
@@ -255,7 +265,7 @@ const GateCanvas: React.FC = () => {
     draw();
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener("resize", resize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
@@ -264,7 +274,7 @@ const GateCanvas: React.FC = () => {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full"
-      style={{ filter: 'contrast(1.05) brightness(0.95)' }}
+      style={{ filter: "contrast(1.05) brightness(0.95)" }}
     />
   );
 };
@@ -285,10 +295,14 @@ interface CharacterState {
   rotation: number;
 }
 
-export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning = false }) => {
-  const [timerText, setTimerText] = useState('00:00');
+export const GateStage: React.FC<GateStageProps> = ({
+  onEnter,
+  isTransitioning = false,
+}) => {
+  const [timerText, setTimerText] = useState("00:00");
   const [contentVisible, setContentVisible] = useState(false);
   const [characters, setCharacters] = useState<CharacterState[]>([]);
+  const [isCompressing, setIsCompressing] = useState(false);
   const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
@@ -298,7 +312,9 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
       const seconds = Math.floor(elapsed / 1000);
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
-      setTimerText(`${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+      setTimerText(
+        `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`,
+      );
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -313,20 +329,23 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
   useEffect(() => {
     if (!isTransitioning) return;
 
+    // Déclencher la compression immédiatement
+    setIsCompressing(true);
+
     startTimeRef.current = Date.now();
 
     // Créer les états pour chaque caractère
-    const titleText = 'THE SYSTEM';
-    const subtitleText = 'BUILDER • DEVELOPER • EXPLORER';
-    const buttonText = 'ENTER THE SYSTEM';
+    const titleText = "THE SYSTEM";
+    const subtitleText = "BUILDER • DEVELOPER • EXPLORER";
+    const buttonText = "ENTER THE SYSTEM";
 
     const allChars: CharacterState[] = [];
     const maxLife = 1400;
 
     const createCharStates = (text: string) => {
-      text.split('').forEach((char) => {
-        if (char === ' ') return;
-        
+      text.split("").forEach((char) => {
+        if (char === " ") return;
+
         // Direction vers le centre (vortex)
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 4 + 2.5;
@@ -348,13 +367,16 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
 
     // Ajouter des particules supplémentaires pour augmenter l'effet de désintégration
     const extraParticles = 100;
-    const symbols = ['✦', '◆', '•', '°', '⚡', '✧'];
+    const symbols = ["✦", "◆", "•", "°", "⚡", "✧"];
     for (let i = 0; i < extraParticles; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 4 + 2.5;
-      
+
       // 30% avec symboles visuels, 70% invisibles
-      const char = Math.random() < 0.3 ? symbols[Math.floor(Math.random() * symbols.length)] : '';
+      const char =
+        Math.random() < 0.3
+          ? symbols[Math.floor(Math.random() * symbols.length)]
+          : "";
 
       allChars.push({
         char,
@@ -371,15 +393,16 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
     const animate = () => {
       const now = Date.now();
       const elapsed = now - startTimeRef.current;
+      const dispersionStart = 300; // Attendre 300ms pour la compression
 
       setCharacters((prevChars) =>
         prevChars.map((char) => ({
           ...char,
-          life: elapsed,
-        }))
+          life: Math.max(0, elapsed - dispersionStart),
+        })),
       );
 
-      if (elapsed < maxLife) {
+      if (elapsed < maxLife + dispersionStart) {
         requestAnimationFrame(animate);
       }
     };
@@ -389,10 +412,27 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
   }, [isTransitioning]);
 
   return (
-    <div className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]">
+    <div
+      className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]"
+      style={{
+        transform: isCompressing ? "scale(0)" : "scale(1)",
+        transition: isCompressing
+          ? "transform 2000ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+          : "none",
+      }}
+    >
       {/* CosmosCanvas background - only terrain, blurred and faded */}
       {/* <div className="absolute inset-0 opacity-25" style={{ filter: 'blur(4px)', zIndex: 0 }}> */}
-        <CosmosCanvas config={{ particleCount: 0, nodeCount: 0, connectionDistance: 160, showParticles: true, showOrbits: true, showTerrain: true }} />
+      <CosmosCanvas
+        config={{
+          particleCount: 0,
+          nodeCount: 0,
+          connectionDistance: 160,
+          showParticles: true,
+          showOrbits: true,
+          showTerrain: true,
+        }}
+      />
       {/* </div> */}
 
       {/* <GateCanvas /> */}
@@ -401,8 +441,9 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
       <div
         className="absolute inset-0 pointer-events-none opacity-15"
         style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,30,0.12) 2px, rgba(0,0,30,0.12) 4px)',
-          backgroundSize: '100% 4px',
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,30,0.12) 2px, rgba(0,0,30,0.12) 4px)",
+          backgroundSize: "100% 4px",
         }}
       />
 
@@ -411,7 +452,7 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
         className={`
           flex-1 flex flex-col items-center justify-center gap-2 text-center 
           relative z-10 transition-all duration-1000 ease-out
-          ${!isTransitioning && contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+          ${!isTransitioning && contentVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
         `}
       >
         <div className="h-14 md:h-18" />
@@ -422,68 +463,71 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
             <span className="text-[#dce0ff]">THE SYSTEM</span>
           ) : (
             characters.map((char, i) => {
-                const progress = Math.min(1, char.life / char.maxLife);
-                const scale = Math.max(0.05, 1 - progress * 0.9);
-                const x = char.vx * progress * 200;
-                const y = char.vy * progress * 200;
-                const alpha = Math.max(0, 1 - progress);
-                const rotation = char.rotation + progress * 720;
+              const progress = Math.min(1, char.life / char.maxLife);
+              const scale = Math.max(0.05, 1 - progress * 0.9);
+              const x = char.vx * progress * 200;
+              const y = char.vy * progress * 200;
+              const alpha = Math.max(0, 1 - progress);
+              const rotation = char.rotation + progress * 720;
 
-                return (
-                  <span
-                    key={`title-${i}`}
-                    className="inline-block text-[#dce0ff]"
-                    style={{
-                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
-                      opacity: alpha,
-                      textShadow: `0 0 ${20 * alpha}px rgba(100, 200, 255, ${alpha * 0.7})`,
-                      transition: 'none',
-                      filter: `drop-shadow(0 0 ${10 * alpha}px rgba(100, 200, 255, ${alpha * 0.5}))`,
-                      display: 'inline-block',
-                    }}
-                  >
-                    {char.char}
-                  </span>
-                );
-              })
+              return (
+                <span
+                  key={`title-${i}`}
+                  className="inline-block text-[#dce0ff]"
+                  style={{
+                    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                    opacity: alpha,
+                    textShadow: `0 0 ${20 * alpha}px rgba(100, 200, 255, ${alpha * 0.7})`,
+                    transition: "none",
+                    filter: `drop-shadow(0 0 ${10 * alpha}px rgba(100, 200, 255, ${alpha * 0.5}))`,
+                    display: "inline-block",
+                  }}
+                >
+                  {char.char}
+                </span>
+              );
+            })
           )}
         </h1>
 
         {/* Subtitle - spans qui se désintègrent */}
         <p className="font-mono text-[12px] tracking-[0.25em] mt-0.5">
           {!isTransitioning ? (
-            <span className="text-[#a0b0ff]">BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER</span>
+            <span className="text-[#a0b0ff]">
+              BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER
+            </span>
           ) : (
             characters.map((char, i) => {
-                const progress = Math.min(1, char.life / char.maxLife);
-                const scale = Math.max(0.05, 1 - progress * 0.8);
-                const x = char.vx * progress * 120;
-                const y = char.vy * progress * 120;
-                const alpha = Math.max(0, 1 - progress);
-                const rotation = char.rotation + progress * 600;
+              const progress = Math.min(1, char.life / char.maxLife);
+              const scale = Math.max(0.05, 1 - progress * 0.8);
+              const x = char.vx * progress * 120;
+              const y = char.vy * progress * 120;
+              const alpha = Math.max(0, 1 - progress);
+              const rotation = char.rotation + progress * 600;
 
-                return (
-                  <span
-                    key={`subtitle-${i}`}
-                    className="inline-block text-[#a0b0ff]"
-                    style={{
-                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
-                      opacity: alpha,
-                      textShadow: `0 0 ${12 * alpha}px rgba(100, 180, 255, ${alpha * 0.6})`,
-                      transition: 'none',
-                      filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 180, 255, ${alpha * 0.4}))`,
-                      display: 'inline-block',
-                    }}
-                  >
-                    {char.char}
-                  </span>
-                );
-              })
+              return (
+                <span
+                  key={`subtitle-${i}`}
+                  className="inline-block text-[#a0b0ff]"
+                  style={{
+                    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                    opacity: alpha,
+                    textShadow: `0 0 ${12 * alpha}px rgba(100, 180, 255, ${alpha * 0.6})`,
+                    transition: "none",
+                    filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 180, 255, ${alpha * 0.4}))`,
+                    display: "inline-block",
+                  }}
+                >
+                  {char.char}
+                </span>
+              );
+            })
           )}
         </p>
 
         <p className="font-mono text-[11px] md:text-xs text-[#555] tracking-[0.15em] leading-relaxed mt-3">
-          A LIVING ECOSYSTEM OF<br />
+          A LIVING ECOSYSTEM OF
+          <br />
           IDEAS, PROJECTS AND EXPERIMENTS.
         </p>
 
@@ -510,31 +554,31 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
             <>
               <span className="text-[#5050a0] inline-block">&gt;</span>
               {characters.map((char, i) => {
-                  const progress = Math.min(1, char.life / char.maxLife);
-                  const scale = Math.max(0.05, 1 - progress * 0.8);
-                  const x = char.vx * progress * 120;
-                  const y = char.vy * progress * 120;
-                  const alpha = Math.max(0, 1 - progress);
-                  const rotation = char.rotation + progress * 600;
+                const progress = Math.min(1, char.life / char.maxLife);
+                const scale = Math.max(0.05, 1 - progress * 0.8);
+                const x = char.vx * progress * 120;
+                const y = char.vy * progress * 120;
+                const alpha = Math.max(0, 1 - progress);
+                const rotation = char.rotation + progress * 600;
 
-                  return (
-                    <span
-                      key={`button-${i}`}
-                      className="inline-block text-[#7070cc]"
-                      style={{
-                        transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
-                        opacity: alpha,
-                        textShadow: `0 0 ${12 * alpha}px rgba(100, 150, 255, ${alpha * 0.6})`,
-                        transition: 'none',
-                        filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 150, 255, ${alpha * 0.4}))`,
-                        display: 'inline-block',
-                        marginLeft: i === 0 ? '0.5rem' : '0',
-                      }}
-                    >
-                      {char.char}
-                    </span>
-                  );
-                })}
+                return (
+                  <span
+                    key={`button-${i}`}
+                    className="inline-block text-[#7070cc]"
+                    style={{
+                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                      opacity: alpha,
+                      textShadow: `0 0 ${12 * alpha}px rgba(100, 150, 255, ${alpha * 0.6})`,
+                      transition: "none",
+                      filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 150, 255, ${alpha * 0.4}))`,
+                      display: "inline-block",
+                      marginLeft: i === 0 ? "0.5rem" : "0",
+                    }}
+                  >
+                    {char.char}
+                  </span>
+                );
+              })}
             </>
           )}
         </button>
