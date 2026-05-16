@@ -111,6 +111,18 @@ export const CORE: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStage, autoPlay]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStage]);
+
   return (
     <div className="w-screen h-screen bg-black flex flex-col border-radius-3xl overflow-hidden">
       {/* Content with smooth transition */}
