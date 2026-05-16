@@ -329,7 +329,7 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
         </h1>
 
         <p className="font-mono text-[11px] md:text-xs text-[#5050a0] tracking-[0.25em] mt-0.5">
-          DEVELOPER &nbsp;•&nbsp; BUILDER &nbsp;•&nbsp; EXPLORER
+          BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER
         </p>
 
         <p className="font-mono text-[11px] md:text-xs text-[#555] tracking-[0.15em] leading-relaxed mt-3">

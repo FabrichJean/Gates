@@ -3,6 +3,8 @@ import { VoidStage } from './stages/VoidStage';
 import { SignalStage } from './stages/SignalStage';
 import { AwakeningStage } from './stages/AwakeningStage';
 import { GateStage } from './stages/GateStage';
+import { ConnectingStage } from './stages/ConnectingStage';
+import { CoreStage } from './stages/CoreStage';
 
 interface Stage {
   id: number;
@@ -39,6 +41,19 @@ const STAGES: Stage[] = [
     label: '4. GATE',
     title: 'GATE',
     description: 'La porte d\'entrée. Invitation à entrer dans ton monde.',
+  },
+  {
+    id: 5,
+    label: '5. CONNECTING',
+    title: 'CONNECTING',
+    description: 'Connexion au noyau du système.',
+    autoContinueDelay: 12000,
+  },
+  {
+    id: 6,
+    label: '6. CORE',
+    title: 'CORE',
+    description: 'Tu es au cœur du système. Explore et découvre.',
   },
 ];
 
@@ -96,7 +111,11 @@ export const CORE: React.FC = () => {
         {currentStage === 3 && (
           <AwakeningStage isActive={currentStage === 3} />
         )}
-        {currentStage === 4 && <GateStage onEnter={handleEnter} />}
+        {currentStage === 4 && <GateStage onEnter={handleNext} />}
+        {currentStage === 5 && (
+          <ConnectingStage isActive={currentStage === 5} onComplete={handleNext} />
+        )}
+        {currentStage === 6 && <CoreStage onViewSystem={() => console.log('View System')} />}
       </div>
     </div>
   );
