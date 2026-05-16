@@ -295,9 +295,80 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
 
       // ── 2. Orbital Sphere ────────────────────────────────────────────────
       if (finalConfig.showOrbits !== false) {
-        const sphereCX = w * 0.72;
-        const sphereCY = h * 0.30;
-        const sphereR = w * 0.18;
+        const COMET_APPEAR_TIME = 3000; // ms before sphere is fully visible
+        const COMET_TRAVEL_TIME = 10000; // time to travel across screen (increased to 10s)
+        const COMET_SMALL_DURATION = 8500; // duration to stay very small - 85% of journey
+        
+        let sphereCX = w * 0.72;
+        let sphereCY = h * 0.30;
+        let sphereR = w * 0.18;
+        
+        // Comet entrance animation
+        const cometElapsed = elapsed;
+        const cometProgress = Math.min(1, cometElapsed / COMET_TRAVEL_TIME);
+        
+        if (cometProgress < 1) {
+          // Comet travels in curved path (parabolic arc)
+          const startX = -w * 0.3;
+          const endX = w * 0.72;
+          const startY = h * 0.05; // starts higher
+          const endY = h * 0.30; // ends at final position
+          
+          // Linear horizontal movement
+          sphereCX = startX + (endX - startX) * cometProgress;
+          
+          // Curved vertical movement (parabolic arc downward)
+          const arcPower = 2.5; // controls curve shape - higher = more pronounced curve
+          const verticalCurve = Math.pow(cometProgress, arcPower) * (endY - startY);
+          sphereCY = startY + verticalCurve;
+          
+          // Size stays very small for COMET_SMALL_DURATION, then grows slowly at the end
+          const smallPhaseProgress = Math.min(1, cometElapsed / COMET_SMALL_DURATION);
+          const growthStartTime = COMET_SMALL_DURATION;
+          const growthDuration = COMET_TRAVEL_TIME - COMET_SMALL_DURATION;
+          const postSmallElapsed = Math.max(0, cometElapsed - growthStartTime);
+          const growthProgressLinear = growthDuration > 0 ? Math.min(1, postSmallElapsed / growthDuration) : 0;
+          
+          // Apply smooth easing to growth - makes it start slow and accelerate
+          const growthProgress = growthProgressLinear * growthProgressLinear * (3 - 2 * growthProgressLinear);
+          
+          // Size: stays at small value during COMET_SMALL_DURATION, then grows with easing
+          const easedProgress = smallPhaseProgress < 1 ? 0 : growthProgress;
+          sphereR = w * 0.02 + (w * 0.18 - w * 0.02) * easedProgress;
+          
+          // Draw comet tail
+          const tailLength = 100 + easedProgress * 150;
+          const tailOpacity = 0.4 - easedProgress * 0.2;
+          
+          ctx.beginPath();
+          ctx.moveTo(sphereCX - tailLength * easedProgress, sphereCY);
+          ctx.lineTo(sphereCX, sphereCY);
+          ctx.strokeStyle = `rgba(150,200,255,${tailOpacity})`;
+          ctx.lineWidth = 4 + easedProgress * 2;
+          ctx.lineCap = 'round';
+          ctx.globalAlpha = 0.6;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          
+          // Tail glow
+          ctx.beginPath();
+          ctx.moveTo(sphereCX - tailLength * easedProgress, sphereCY);
+          ctx.lineTo(sphereCX, sphereCY);
+          ctx.strokeStyle = `rgba(100,180,255,${tailOpacity * 0.5})`;
+          ctx.lineWidth = 12 + easedProgress * 4;
+          ctx.lineCap = 'round';
+          ctx.globalAlpha = 0.3;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          
+          // Comet head glow before arrival
+          const headGlow = 20 + easedProgress * 40;
+          ctx.beginPath();
+          ctx.arc(sphereCX, sphereCY, headGlow, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180,220,255,${0.3 * (1 - easedProgress * 0.5)})`;
+          ctx.fill();
+        }
+        
         const rotY = t * 0.25;
         const rotX = t * 0.12;
 
