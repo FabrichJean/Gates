@@ -314,3 +314,21 @@ body {
 .animate-pulse {
   animation: pulse-border 2s ease-in-out infinite;
 }
+
+/* Stage Transition Animation */
+.transition-opacity {
+  transition: opacity 0.6s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.stage-fade-in {
+  animation: fadeInOut 0.6s ease-in-out;
+}

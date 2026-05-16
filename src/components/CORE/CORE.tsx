@@ -46,11 +46,20 @@ export const CORE: React.FC = () => {
   const [currentStage, setCurrentStage] = useState(1);
   const [completedStages, setCompletedStages] = useState<number[]>([]);
   const [autoPlay, setAutoPlay] = useState(true);
+  const [transitionOpacity, setTransitionOpacity] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleNext = () => {
     if (currentStage < STAGES.length) {
-      setCompletedStages((prev) => [...prev, currentStage]);
-      setCurrentStage(currentStage + 1);
+      setIsTransitioning(true);
+      setTransitionOpacity(0);
+
+      setTimeout(() => {
+        setCompletedStages((prev) => [...prev, currentStage]);
+        setCurrentStage(currentStage + 1);
+        setTransitionOpacity(1);
+        setIsTransitioning(false);
+      }, 600);
     }
   };
 
@@ -75,9 +84,11 @@ export const CORE: React.FC = () => {
 
   return (
     <div className="w-screen h-screen bg-black flex flex-col border-radius-3xl overflow-hidden">
-
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Content with smooth transition */}
+      <div
+        className="flex-1 overflow-hidden transition-opacity duration-600"
+        style={{ opacity: transitionOpacity }}
+      >
         {currentStage === 1 && <VoidStage />}
         {currentStage === 2 && (
           <SignalStage isActive={currentStage === 2} />

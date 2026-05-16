@@ -12,7 +12,7 @@ const TERMINAL_LINES = [
   { text: 'INTERFACE LAYER... OK', delay: 3.0, highlight: true },
   { text: 'CONNECTING NODES...', delay: 3.9 },
   { text: 'BUILDING VISUALS...', delay: 4.8 },
-  { text: 'SYSTEM STATUS: ONLINE', delay: 5.7, online: true },
+  { text: 'SYSTEM STATUS: ', delay: 5.7, online: true },
 ];
 
 export const AwakeningStage: React.FC<AwakeningStageProps> = ({
@@ -41,10 +41,10 @@ export const AwakeningStage: React.FC<AwakeningStageProps> = ({
   return (
     <div className="flex flex-col flex-1 h-full bg-[#020208] relative overflow-hidden">
       {/* Cosmos background */}
-      <CosmosCanvas />
+      <CosmosCanvas config={{ particleCount: 0, nodeCount: 0, connectionDistance: 160, showParticles: true, showOrbits: false, showTerrain: true }}/>
 
       {/* Terminal content */}
-      <div className="flex-1 font-mono text-sm text-[#777] leading-8 tracking-wide relative z-10 px-9 py-7">
+      <div className="flex-1 font-mono text-sm text-[#bcbcbc] leading-8 tracking-wide relative z-10 px-9 py-7">
         {TERMINAL_LINES.map((line, idx) => (
           <div key={idx} className="overflow-hidden whitespace-nowrap">
             {visibleLines.includes(idx) && (

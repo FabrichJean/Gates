@@ -15,4 +15,7 @@ export interface CosmosConfig {
   particleCount: number;
   nodeCount: number;
   connectionDistance: number;
+  showParticles?: boolean;
+  showOrbits?: boolean;
+  showTerrain?: boolean;
 }
