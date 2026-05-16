@@ -327,13 +327,14 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
       text.split('').forEach((char) => {
         if (char === ' ') return;
         
+        // Direction vers le centre (vortex)
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 3 + 2;
+        const speed = Math.random() * 4 + 2.5;
 
         allChars.push({
           char,
           vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 1.2,
+          vy: Math.sin(angle) * speed - 0.5,
           life: 0,
           maxLife,
           rotation: Math.random() * 360,
@@ -344,6 +345,26 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
     createCharStates(titleText);
     createCharStates(subtitleText);
     createCharStates(buttonText);
+
+    // Ajouter des particules supplémentaires pour augmenter l'effet de désintégration
+    const extraParticles = 100;
+    const symbols = ['✦', '◆', '•', '°', '⚡', '✧'];
+    for (let i = 0; i < extraParticles; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 4 + 2.5;
+      
+      // 30% avec symboles visuels, 70% invisibles
+      const char = Math.random() < 0.3 ? symbols[Math.floor(Math.random() * symbols.length)] : '';
+
+      allChars.push({
+        char,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 0.5,
+        life: 0,
+        maxLife,
+        rotation: Math.random() * 360,
+      });
+    }
 
     setCharacters(allChars);
 
@@ -400,13 +421,11 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
           {!isTransitioning ? (
             <span className="text-[#dce0ff]">THE SYSTEM</span>
           ) : (
-            characters
-              .filter((_, i) => i < 10)
-              .map((char, i) => {
+            characters.map((char, i) => {
                 const progress = Math.min(1, char.life / char.maxLife);
-                const scale = Math.max(0.05, 1 - progress * 0.8);
-                const x = char.vx * progress * 120;
-                const y = char.vy * progress * 120;
+                const scale = Math.max(0.05, 1 - progress * 0.9);
+                const x = char.vx * progress * 200;
+                const y = char.vy * progress * 200;
                 const alpha = Math.max(0, 1 - progress);
                 const rotation = char.rotation + progress * 720;
 
@@ -435,9 +454,7 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
           {!isTransitioning ? (
             <span className="text-[#a0b0ff]">BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER</span>
           ) : (
-            characters
-              .filter((_, i) => i >= 10 && i < 40)
-              .map((char, i) => {
+            characters.map((char, i) => {
                 const progress = Math.min(1, char.life / char.maxLife);
                 const scale = Math.max(0.05, 1 - progress * 0.8);
                 const x = char.vx * progress * 120;
@@ -492,9 +509,7 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning =
           ) : (
             <>
               <span className="text-[#5050a0] inline-block">&gt;</span>
-              {characters
-                .filter((_, i) => i >= 40)
-                .map((char, i) => {
+              {characters.map((char, i) => {
                   const progress = Math.min(1, char.life / char.maxLife);
                   const scale = Math.max(0.05, 1 - progress * 0.8);
                   const x = char.vx * progress * 120;
