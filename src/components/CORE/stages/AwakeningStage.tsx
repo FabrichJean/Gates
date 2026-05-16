@@ -6,7 +6,7 @@ interface AwakeningStageProps {
 }
 
 const TERMINAL_LINES = [
-  { text: '> INITIALIZING FABRICH SYSTEM...', delay: 0.3 },
+  { text: '> INITIALIZING SYSTEM...', delay: 0.3 },
   { text: 'LOADING UNIVERSE LAYERS...', delay: 1.2 },
   { text: 'CORE STRUCTURE... OK', delay: 2.1, highlight: true },
   { text: 'INTERFACE LAYER... OK', delay: 3.0, highlight: true },
@@ -39,7 +39,7 @@ export const AwakeningStage: React.FC<AwakeningStageProps> = ({
   }, [isActive]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-[520px] bg-[#020208] relative overflow-hidden">
+    <div className="flex flex-col flex-1 h-full bg-[#020208] relative overflow-hidden">
       {/* Cosmos background */}
       <CosmosCanvas />
 

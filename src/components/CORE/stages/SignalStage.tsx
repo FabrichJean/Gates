@@ -15,7 +15,7 @@ export const SignalStage: React.FC<SignalStageProps> = ({
       return;
     }
 
-    const line1 = '> INITIALIZING FABRICH SYSTEM...';
+    const line1 = '> INITIALIZING SYSTEM...';
     setLines([line1]);
 
     const timer = setTimeout(() => {
@@ -36,13 +36,6 @@ export const SignalStage: React.FC<SignalStageProps> = ({
             {line}
           </div>
         ))}
-      </div>
-
-      {/* Footer */}
-      <div className="flex justify-between items-center px-9 py-5">
-        <div className="font-mono text-xs text-[#00e5c0] tracking-widest animate-pulse">
-          AUTO CONTINUE...
-        </div>
       </div>
     </div>
   );

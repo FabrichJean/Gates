@@ -30,6 +30,9 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
   const particlesRef = useRef<Particle[]>([]);
   const nodesRef = useRef<Node[]>([]);
   const isInitializedRef = useRef(false);
+  const startTimeRef = useRef<number>(0);
+  const visibleParticleCountRef = useRef<number>(0);
+  const particleAppearDurationRef = useRef<number>(3000);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -50,6 +53,7 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
 
     // Initialize particles and nodes only once
     if (!isInitializedRef.current) {
+      startTimeRef.current = Date.now();
       particlesRef.current = Array.from(
         { length: finalConfig.particleCount },
         () => ({
@@ -72,6 +76,7 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
       );
 
       isInitializedRef.current = true;
+      visibleParticleCountRef.current = 0;
     }
 
     const particles = particlesRef.current;
@@ -80,8 +85,15 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw particles
-      particles.forEach((p) => {
+      // Calculate progressive particle visibility
+      const elapsedTime = Date.now() - startTimeRef.current;
+      const progress = Math.min(
+        elapsedTime / particleAppearDurationRef.current,
+        1
+      );
+
+      // Draw ALL particles with progressive opacity
+      particles.forEach((p, idx) => {
         p.x += p.vx;
         p.y += p.vy;
 
@@ -90,9 +102,28 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
         if (p.y < 0) p.y = canvas.height;
         if (p.y > canvas.height) p.y = 0;
 
+        // Calculate when this particle should start appearing
+        // Distribute appearance over the full duration
+        const particleStartTime = (idx / particles.length) * particleAppearDurationRef.current;
+        const particleFadeInDuration = 500; // 500ms fade-in per particle
+        const particleElapsedTime = elapsedTime - particleStartTime;
+        
+        // Calculate opacity for this specific particle
+        let particleOpacity = 0;
+        if (particleElapsedTime >= 0) {
+          particleOpacity = Math.min(1, particleElapsedTime / particleFadeInDuration);
+          
+          // Apply smoothstep easing for smooth fade-in
+          if (particleOpacity < 1) {
+            particleOpacity = particleOpacity * particleOpacity * (3 - 2 * particleOpacity);
+          }
+        }
+        
+        const finalOpacity = p.o * particleOpacity;
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(100,160,255,${p.o})`;
+        ctx.fillStyle = `rgba(100,160,255,${finalOpacity})`;
         ctx.fill();
       });
 
