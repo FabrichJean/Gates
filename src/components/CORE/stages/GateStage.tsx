@@ -273,11 +273,23 @@ const GateCanvas: React.FC = () => {
 
 interface GateStageProps {
   onEnter?: () => void;
+  isTransitioning?: boolean;
 }
 
-export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
+interface CharacterState {
+  char: string;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  rotation: number;
+}
+
+export const GateStage: React.FC<GateStageProps> = ({ onEnter, isTransitioning = false }) => {
   const [timerText, setTimerText] = useState('00:00');
   const [contentVisible, setContentVisible] = useState(false);
+  const [characters, setCharacters] = useState<CharacterState[]>([]);
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const start = Date.now();
@@ -292,9 +304,68 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setContentVisible(true), 800);
-    return () => clearTimeout(t);
-  }, []);
+    if (!isTransitioning) {
+      const t = setTimeout(() => setContentVisible(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, [isTransitioning]);
+
+  useEffect(() => {
+    if (!isTransitioning) return;
+
+    startTimeRef.current = Date.now();
+
+    // Créer les états pour chaque caractère
+    const titleText = 'THE SYSTEM';
+    const subtitleText = 'BUILDER • DEVELOPER • EXPLORER';
+    const buttonText = 'ENTER THE SYSTEM';
+
+    const allChars: CharacterState[] = [];
+    const maxLife = 1400;
+
+    const createCharStates = (text: string) => {
+      text.split('').forEach((char) => {
+        if (char === ' ') return;
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 3 + 2;
+
+        allChars.push({
+          char,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.2,
+          life: 0,
+          maxLife,
+          rotation: Math.random() * 360,
+        });
+      });
+    };
+
+    createCharStates(titleText);
+    createCharStates(subtitleText);
+    createCharStates(buttonText);
+
+    setCharacters(allChars);
+
+    const animate = () => {
+      const now = Date.now();
+      const elapsed = now - startTimeRef.current;
+
+      setCharacters((prevChars) =>
+        prevChars.map((char) => ({
+          ...char,
+          life: elapsed,
+        }))
+      );
+
+      if (elapsed < maxLife) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    const frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isTransitioning]);
 
   return (
     <div className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]">
@@ -319,17 +390,79 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
         className={`
           flex-1 flex flex-col items-center justify-center gap-2 text-center 
           relative z-10 transition-all duration-1000 ease-out
-          ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+          ${!isTransitioning && contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
         `}
       >
         <div className="h-14 md:h-18" />
 
-        <h1 className="font-mono text-[28px] md:text-[32px] font-bold text-[#e0e0f0] tracking-[0.18em] uppercase">
-          The System
+        {/* Title - spans qui se désintègrent */}
+        <h1 className="font-mono text-[48px] font-bold tracking-[0.18em] uppercase">
+          {!isTransitioning ? (
+            <span className="text-[#dce0ff]">THE SYSTEM</span>
+          ) : (
+            characters
+              .filter((_, i) => i < 10)
+              .map((char, i) => {
+                const progress = Math.min(1, char.life / char.maxLife);
+                const scale = Math.max(0.05, 1 - progress * 0.8);
+                const x = char.vx * progress * 120;
+                const y = char.vy * progress * 120;
+                const alpha = Math.max(0, 1 - progress);
+                const rotation = char.rotation + progress * 720;
+
+                return (
+                  <span
+                    key={`title-${i}`}
+                    className="inline-block text-[#dce0ff]"
+                    style={{
+                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                      opacity: alpha,
+                      textShadow: `0 0 ${20 * alpha}px rgba(100, 200, 255, ${alpha * 0.7})`,
+                      transition: 'none',
+                      filter: `drop-shadow(0 0 ${10 * alpha}px rgba(100, 200, 255, ${alpha * 0.5}))`,
+                      display: 'inline-block',
+                    }}
+                  >
+                    {char.char}
+                  </span>
+                );
+              })
+          )}
         </h1>
 
-        <p className="font-mono text-[11px] md:text-xs text-[#5050a0] tracking-[0.25em] mt-0.5">
-          BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER
+        {/* Subtitle - spans qui se désintègrent */}
+        <p className="font-mono text-[12px] tracking-[0.25em] mt-0.5">
+          {!isTransitioning ? (
+            <span className="text-[#a0b0ff]">BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER</span>
+          ) : (
+            characters
+              .filter((_, i) => i >= 10 && i < 40)
+              .map((char, i) => {
+                const progress = Math.min(1, char.life / char.maxLife);
+                const scale = Math.max(0.05, 1 - progress * 0.8);
+                const x = char.vx * progress * 120;
+                const y = char.vy * progress * 120;
+                const alpha = Math.max(0, 1 - progress);
+                const rotation = char.rotation + progress * 600;
+
+                return (
+                  <span
+                    key={`subtitle-${i}`}
+                    className="inline-block text-[#a0b0ff]"
+                    style={{
+                      transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                      opacity: alpha,
+                      textShadow: `0 0 ${12 * alpha}px rgba(100, 180, 255, ${alpha * 0.6})`,
+                      transition: 'none',
+                      filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 180, 255, ${alpha * 0.4}))`,
+                      display: 'inline-block',
+                    }}
+                  >
+                    {char.char}
+                  </span>
+                );
+              })
+          )}
         </p>
 
         <p className="font-mono text-[11px] md:text-xs text-[#555] tracking-[0.15em] leading-relaxed mt-3">
@@ -337,19 +470,58 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
           IDEAS, PROJECTS AND EXPERIMENTS.
         </p>
 
+        {/* Button - spans qui se désintègrent */}
         <button
           onClick={onEnter}
+          disabled={isTransitioning}
           className="
-            font-mono border border-[#3a3a7c] text-[#7070cc] text-xs 
+            font-mono border border-[#3a3a7c] text-xs 
             px-8 py-3.5 rounded-sm w-60 text-center tracking-[0.2em] mt-5 
             cursor-pointer bg-transparent 
             hover:bg-[#0a0a24] hover:text-[#aaaaff] hover:border-[#5050a0] 
             hover:shadow-[0_0_20px_rgba(80,80,160,0.15)]
+            disabled:opacity-50 disabled:cursor-not-allowed
             transition-all duration-300 text-nowrap
           "
         >
-          <span className="mr-2 text-[#5050a0]">&gt;</span>
-          ENTER THE SYSTEM
+          {!isTransitioning ? (
+            <>
+              <span className="text-[#5050a0]">&gt;</span>
+              <span className="text-[#7070cc]"> ENTER THE SYSTEM</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[#5050a0] inline-block">&gt;</span>
+              {characters
+                .filter((_, i) => i >= 40)
+                .map((char, i) => {
+                  const progress = Math.min(1, char.life / char.maxLife);
+                  const scale = Math.max(0.05, 1 - progress * 0.8);
+                  const x = char.vx * progress * 120;
+                  const y = char.vy * progress * 120;
+                  const alpha = Math.max(0, 1 - progress);
+                  const rotation = char.rotation + progress * 600;
+
+                  return (
+                    <span
+                      key={`button-${i}`}
+                      className="inline-block text-[#7070cc]"
+                      style={{
+                        transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+                        opacity: alpha,
+                        textShadow: `0 0 ${12 * alpha}px rgba(100, 150, 255, ${alpha * 0.6})`,
+                        transition: 'none',
+                        filter: `drop-shadow(0 0 ${6 * alpha}px rgba(100, 150, 255, ${alpha * 0.4}))`,
+                        display: 'inline-block',
+                        marginLeft: i === 0 ? '0.5rem' : '0',
+                      }}
+                    >
+                      {char.char}
+                    </span>
+                  );
+                })}
+            </>
+          )}
         </button>
       </div>
 

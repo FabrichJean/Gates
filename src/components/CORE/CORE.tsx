@@ -63,18 +63,32 @@ export const CORE: React.FC = () => {
   const [autoPlay, setAutoPlay] = useState(true);
   const [transitionOpacity, setTransitionOpacity] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [gateIsTransitioning, setGateIsTransitioning] = useState(false);
 
   const handleNext = () => {
     if (currentStage < STAGES.length) {
-      setIsTransitioning(true);
-      setTransitionOpacity(0);
+      // Si on passe de GATE à CONNECTING, déclencher la dispersion
+      if (currentStage === 4) {
+        setGateIsTransitioning(true);
 
-      setTimeout(() => {
-        setCompletedStages((prev) => [...prev, currentStage]);
-        setCurrentStage(currentStage + 1);
-        setTransitionOpacity(1);
-        setIsTransitioning(false);
-      }, 1000);
+        // Laisser 1.5 secondes pour la dispersion et transformation
+        setTimeout(() => {
+          setCompletedStages((prev) => [...prev, currentStage]);
+          setCurrentStage(currentStage + 1);
+          setGateIsTransitioning(false);
+        }, 1500);
+      } else {
+        // Pour les autres transitions, utiliser le fade classique
+        setIsTransitioning(true);
+        setTransitionOpacity(0);
+
+        setTimeout(() => {
+          setCompletedStages((prev) => [...prev, currentStage]);
+          setCurrentStage(currentStage + 1);
+          setTransitionOpacity(1);
+          setIsTransitioning(false);
+        }, 1000);
+      }
     }
   };
 
@@ -111,7 +125,7 @@ export const CORE: React.FC = () => {
         {currentStage === 3 && (
           <AwakeningStage isActive={currentStage === 3} />
         )}
-        {currentStage === 4 && <GateStage onEnter={handleNext} />}
+        {currentStage === 4 && <GateStage onEnter={handleNext} isTransitioning={gateIsTransitioning} />}
         {currentStage === 5 && (
           <ConnectingStage isActive={currentStage === 5} onComplete={handleNext} />
         )}
