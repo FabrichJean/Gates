@@ -292,14 +292,18 @@ export const GateStage: React.FC<GateStageProps> = ({ onEnter }) => {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setContentVisible(true), 400);
+    const t = setTimeout(() => setContentVisible(true), 800);
     return () => clearTimeout(t);
   }, []);
 
   return (
     <div className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]">
       {/* CosmosCanvas background - only terrain, blurred and faded */}
-      <CosmosCanvas config={{ particleCount: 0, nodeCount: 0, connectionDistance: 160, showParticles: true, showOrbits: true, showTerrain: true }} />
+      {/* <div className="absolute inset-0 opacity-25" style={{ filter: 'blur(4px)', zIndex: 0 }}> */}
+        <CosmosCanvas config={{ particleCount: 0, nodeCount: 0, connectionDistance: 160, showParticles: true, showOrbits: true, showTerrain: true }} />
+      {/* </div> */}
+
+      {/* <GateCanvas /> */}
 
       {/* CSS scanline overlay */}
       <div

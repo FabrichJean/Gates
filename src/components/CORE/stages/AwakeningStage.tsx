@@ -6,13 +6,13 @@ interface AwakeningStageProps {
 }
 
 const TERMINAL_LINES = [
-  { text: '> INITIALIZING SYSTEM...', delay: 0.3 },
-  { text: 'LOADING UNIVERSE LAYERS...', delay: 1.2 },
-  { text: 'CORE STRUCTURE... OK', delay: 2.1, highlight: true },
-  { text: 'INTERFACE LAYER... OK', delay: 3.0, highlight: true },
-  { text: 'CONNECTING NODES...', delay: 3.9 },
-  { text: 'BUILDING VISUALS...', delay: 4.8 },
-  { text: 'SYSTEM STATUS: ', delay: 5.7, online: true },
+  { text: '> INITIALIZING SYSTEM...', delay: 0.5 },
+  { text: 'LOADING UNIVERSE LAYERS...', delay: 1.3 },
+  { text: 'CORE STRUCTURE... OK', delay: 2.0, highlight: true },
+  { text: 'INTERFACE LAYER... OK', delay: 2.7, highlight: true },
+  { text: 'CONNECTING NODES...', delay: 3.3 },
+  { text: 'BUILDING VISUALS...', delay: 3.9 },
+  { text: 'SYSTEM STATUS: ', delay: 4.5, online: true },
 ];
 
 export const AwakeningStage: React.FC<AwakeningStageProps> = ({

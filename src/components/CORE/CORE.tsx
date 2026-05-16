@@ -18,21 +18,21 @@ const STAGES: Stage[] = [
     label: '1. VOID',
     title: 'VOID',
     description: 'Le vide initial. Rupture totale avec le web classique.',
-    autoContinueDelay: 2500,
+    autoContinueDelay: 4500,
   },
   {
     id: 2,
     label: '2. SIGNAL',
     title: 'SIGNAL',
     description: 'Un premier signal. Le système se réveille.',
-    autoContinueDelay: 3000,
+    autoContinueDelay: 3500,
   },
   {
     id: 3,
     label: '3. AWAKENING',
     title: 'AWAKENING',
     description: 'Ton univers prend forme. Les couches se construisent.',
-    autoContinueDelay: 8000,
+    autoContinueDelay: 8500,
   },
   {
     id: 4,
@@ -59,7 +59,7 @@ export const CORE: React.FC = () => {
         setCurrentStage(currentStage + 1);
         setTransitionOpacity(1);
         setIsTransitioning(false);
-      }, 600);
+      }, 1000);
     }
   };
 

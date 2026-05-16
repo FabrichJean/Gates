@@ -193,7 +193,7 @@ export const CosmosCanvas: React.FC<{ config?: Partial<CosmosConfig> }> = ({
   ];
 
   useEffect(() => {
-    const timeouts: NodeJS.Timeout[] = [];
+    const timeouts: number[] = [];
     
     terminalLines.forEach((line, idx) => {
       const t = setTimeout(() => {
