@@ -277,9 +277,10 @@ const CoreSphereCanvas: React.FC = () => {
 
 interface CoreStageProps {
   onViewSystem?: () => void;
+  scaleIn?: boolean;
 }
 
-export const CoreStage: React.FC<CoreStageProps> = ({ onViewSystem }) => {
+export const CoreStage: React.FC<CoreStageProps> = ({ onViewSystem, scaleIn = true }) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -288,7 +289,14 @@ export const CoreStage: React.FC<CoreStageProps> = ({ onViewSystem }) => {
   }, []);
 
   return (
-    <div className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]">
+    <div 
+      className="relative flex flex-col flex-1 h-full bg-black overflow-hidden rounded-lg border border-[#1a1a2e]"
+      style={{
+        transform: scaleIn ? 'scale(1)' : 'scale(0)',
+        transformOrigin: 'center center',
+        transition: scaleIn ? 'transform 5000ms cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+      }}
+    >
       <CoreBgCanvas />
 
       <div

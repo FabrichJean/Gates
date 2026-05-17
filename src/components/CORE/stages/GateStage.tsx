@@ -494,7 +494,7 @@ export const GateStage: React.FC<GateStageProps> = ({
         <p className="font-mono text-[12px] tracking-[0.25em] mt-0.5">
           {!isTransitioning ? (
             <span className="text-[#a0b0ff]">
-              BUILDER &nbsp;•&nbsp; DEVELOPER &nbsp;•&nbsp; EXPLORER
+              BUILD &nbsp;•&nbsp; DEVELOP &nbsp;•&nbsp; EXPLOR
             </span>
           ) : (
             characters.map((char, i) => {

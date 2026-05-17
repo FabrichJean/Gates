@@ -64,6 +64,8 @@ export const CORE: React.FC = () => {
   const [transitionOpacity, setTransitionOpacity] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [gateIsTransitioning, setGateIsTransitioning] = useState(false);
+  const [coreScaleIn, setCoreScaleIn] = useState(false);
+  const [showConnectingBg, setShowConnectingBg] = useState(true);
 
   const handleNext = () => {
     if (currentStage < STAGES.length) {
@@ -77,6 +79,22 @@ export const CORE: React.FC = () => {
           setCurrentStage(currentStage + 1);
           setGateIsTransitioning(false);
         }, 1700);
+      } else if (currentStage === 5) {
+        // Transition de CONNECTING à CORE : CoreStage zoom-in par dessus
+        setCoreScaleIn(false);
+        setCurrentStage(currentStage + 1);
+        setTransitionOpacity(1); // Reset opacity pour pas de fade
+        
+        // Déclencher l'animation de scale après le changement
+        requestAnimationFrame(() => {
+          setCoreScaleIn(true);
+        });
+        
+        // Masquer ConnectingStage après l'animation du CoreStage (3000ms)
+        setTimeout(() => {
+          setShowConnectingBg(false);
+          setCompletedStages((prev) => [...prev, 5]);
+        }, 3000);
       } else {
         // Pour les autres transitions, utiliser le fade classique
         setIsTransitioning(true);
@@ -127,8 +145,11 @@ export const CORE: React.FC = () => {
     <div className="w-screen h-screen bg-black flex flex-col border-radius-3xl overflow-hidden">
       {/* Content with smooth transition */}
       <div
-        className="flex-1 overflow-hidden transition-opacity duration-600"
-        style={{ opacity: transitionOpacity }}
+        className="flex-1 overflow-hidden"
+        style={{ 
+          opacity: transitionOpacity,
+          transition: currentStage === 6 ? 'none' : 'opacity 600ms ease-out'
+        }}
       >
         {currentStage === 1 && <VoidStage />}
         {currentStage === 2 && (
@@ -141,7 +162,23 @@ export const CORE: React.FC = () => {
         {currentStage === 5 && (
           <ConnectingStage isActive={currentStage === 5} onComplete={handleNext} />
         )}
-        {currentStage === 6 && <CoreStage onViewSystem={() => console.log('View System')} />}
+        
+        {/* CoreStage appears on top of ConnectingStage during transition */}
+        {currentStage === 6 && (
+          <>
+            {/* ConnectingStage as background - visible during scale-in */}
+            {showConnectingBg && (
+              <div className="absolute inset-0 z-0">
+                <ConnectingStage isActive={false} />
+              </div>
+            )}
+            
+            {/* CoreStage in foreground with scale animation */}
+            <div className="relative z-10 flex-1 flex flex-col w-full h-full">
+              <CoreStage onViewSystem={() => console.log('View System')} scaleIn={coreScaleIn} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
