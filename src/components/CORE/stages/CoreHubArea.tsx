@@ -2,6 +2,7 @@ import { CORE_STAGE_DATA } from './coreStageData';
 import { CorePortraitCanvas } from './CorePortraitCanvas';
 import { OrbitalSatellite } from './OrbitalSatellite';
 import { HolographicOverlay } from './HolographicOverlay';
+import { ConstellationBackground } from './ConstellationBackground';
 
 export const CoreHubArea: React.FC = () => {
   const { hub, satellites, quote } = CORE_STAGE_DATA;
@@ -21,6 +22,9 @@ export const CoreHubArea: React.FC = () => {
 
       {/* Hub area - Cinematic consciousness core */}
       <div className="flex-1 relative flex flex-col items-center justify-center p-5 overflow-hidden bg-gradient-to-b from-black via-[#0a0a15] to-black">
+        {/* Constellation background */}
+        <ConstellationBackground />
+
         {/* Holographic interface overlay */}
         <HolographicOverlay />
 
