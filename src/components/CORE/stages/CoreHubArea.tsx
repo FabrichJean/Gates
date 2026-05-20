@@ -4,6 +4,7 @@ import { OrbitalSatellite } from './OrbitalSatellite';
 import { HolographicOverlay } from './HolographicOverlay';
 import { ConstellationBackground } from './ConstellationBackground';
 import { CosmicClouds } from './CosmicClouds';
+import { HubOrbitalCanvas } from './HubOrbitalCanvas';
 
 export const CoreHubArea: React.FC = () => {
   const { hub, satellites, quote } = CORE_STAGE_DATA;
@@ -28,6 +29,11 @@ export const CoreHubArea: React.FC = () => {
 
         {/* Constellation background */}
         <ConstellationBackground />
+
+        {/* Orbital canvas - connecting satellites to center */}
+        <div className="absolute inset-0 pointer-events-none">
+          <HubOrbitalCanvas satellites={satellites} />
+        </div>
 
         {/* Holographic interface overlay */}
         <HolographicOverlay />

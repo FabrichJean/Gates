@@ -5,12 +5,15 @@ import { CoreRightPanel } from './CoreRightPanel';
 import { CoreBottomBar } from './CoreBottomBar';
 import { CinematicFrame } from './CinematicFrame';
 
+type ViewMode = 'center' | 'left' | 'right' | 'bottom';
+
 interface CoreStageProps {
   onViewSystem?: () => void;
   scaleIn?: boolean;
 }
 
 export const CoreStage: React.FC<CoreStageProps> = ({ onViewSystem, scaleIn = true }) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('center');
   useEffect(() => {
     const updateClock = () => {
       const clockEl = document.getElementById('core-clock');
@@ -36,26 +39,80 @@ export const CoreStage: React.FC<CoreStageProps> = ({ onViewSystem, scaleIn = tr
         }}
       >
         <div className="flex flex-col h-full bg-gradient-to-b from-black via-[#0a0a15] to-[#050510]">
+          {/* View mode switcher */}
+          <div className="flex items-center justify-center gap-2 px-5 py-2.5 border-b border-white/[0.05] bg-black/30 font-mono text-[9px]">
+            <button
+              onClick={() => setViewMode('center')}
+              className={`px-3 py-1.5 border rounded transition-all ${
+                viewMode === 'center'
+                  ? 'border-purple-400 text-purple-300 bg-purple-400/10'
+                  : 'border-white/[0.1] text-white/[0.5] hover:border-white/[0.2] hover:text-white/[0.7]'
+              }`}
+            >
+              CORE
+            </button>
+            <button
+              onClick={() => setViewMode('left')}
+              className={`px-3 py-1.5 border rounded transition-all ${
+                viewMode === 'left'
+                  ? 'border-cyan-400 text-cyan-300 bg-cyan-400/10'
+                  : 'border-white/[0.1] text-white/[0.5] hover:border-white/[0.2] hover:text-white/[0.7]'
+              }`}
+            >
+              BIO
+            </button>
+            <button
+              onClick={() => setViewMode('right')}
+              className={`px-3 py-1.5 border rounded transition-all ${
+                viewMode === 'right'
+                  ? 'border-blue-400 text-blue-300 bg-blue-400/10'
+                  : 'border-white/[0.1] text-white/[0.5] hover:border-white/[0.2] hover:text-white/[0.7]'
+              }`}
+            >
+              ACTIVITY
+            </button>
+            <button
+              onClick={() => setViewMode('bottom')}
+              className={`px-3 py-1.5 border rounded transition-all ${
+                viewMode === 'bottom'
+                  ? 'border-amber-400 text-amber-300 bg-amber-400/10'
+                  : 'border-white/[0.1] text-white/[0.5] hover:border-white/[0.2] hover:text-white/[0.7]'
+              }`}
+            >
+              VISION
+            </button>
+          </div>
+
           {/* Main grid layout */}
           <div className="flex flex-1 overflow-hidden border-b border-white/[0.05]">
             {/* Left sidebar */}
-            <div className="w-64 px-5 py-6 border-r border-white/[0.05] overflow-y-auto">
-              <CoreLeftSidebar />
-            </div>
+            {viewMode === 'left' && (
+              <div className="w-full px-5 py-6 border-r border-white/[0.05] overflow-y-auto">
+                <CoreLeftSidebar />
+              </div>
+            )}
 
             {/* Center hub */}
-            <div className="flex-1 border-r border-white/[0.05]">
-              <CoreHubArea />
-            </div>
+            {viewMode === 'center' && (
+              <div className="flex-1 border-r border-white/[0.05]">
+                <CoreHubArea />
+              </div>
+            )}
 
             {/* Right panel */}
-            <div className="w-64 px-4 py-6 overflow-y-auto">
-              <CoreRightPanel />
-            </div>
-          </div>
+            {viewMode === 'right' && (
+              <div className="w-full px-4 py-6 overflow-y-auto">
+                <CoreRightPanel />
+              </div>
+            )}
 
-          {/* Bottom bar */}
-          <CoreBottomBar />
+            {/* Bottom bar content */}
+            {viewMode === 'bottom' && (
+              <div className="flex-1 px-5 py-6 overflow-y-auto">
+                <CoreBottomBar />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Corner brackets */}
