@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface HubCanvasProps {
   satellites: Array<{
@@ -15,7 +15,7 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
@@ -23,16 +23,21 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
       canvas.height = canvas.offsetHeight;
     };
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
 
-    // Map satellite positions to coordinates (relative 0-1)
-    const satPositions: Record<string, { rx: number; ry: number; color: string }> = {
-      'sat-tl': { rx: 0.14, ry: 0.22, color: '#a0c0e0' },
-      'sat-ml': { rx: 0.06, ry: 0.5, color: '#00e0b0' },
-      'sat-bl': { rx: 0.14, ry: 0.75, color: '#00d090' },
-      'sat-tr': { rx: 0.86, ry: 0.22, color: '#a0c0e0' },
-      'sat-mr': { rx: 0.91, ry: 0.5, color: '#e0b840' },
-      'sat-br': { rx: 0.86, ry: 0.75, color: '#80d0a0' },
+    // Get satellite elements to calculate their exact positions
+    const getSatellitePosition = (satId: string): { x: number; y: number } | null => {
+      const satElement = document.querySelector(`[data-satellite-id="${satId}"]`);
+      if (!satElement || !canvas.parentElement) return null;
+
+      const satRect = satElement.getBoundingClientRect();
+      const canvasRect = canvas.parentElement.getBoundingClientRect();
+
+      // Calculate relative position to canvas parent
+      const x = satRect.left - canvasRect.left + satRect.width / 2;
+      const y = satRect.top - canvasRect.top + satRect.height / 2;
+
+      return { x, y };
     };
 
     let t = 0;
@@ -43,7 +48,7 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
       ctx.clearRect(0, 0, w, h);
 
       const cx = w / 2;
-      const cy = h * 0.46;
+      const cy = h / 2;
 
       // Orbit rings
       [0.18, 0.3, 0.42].forEach((r, i) => {
@@ -56,36 +61,44 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
         ctx.setLineDash([]);
       });
 
-      // Connecting lines: satellites → center
+      // Connecting lines: satellites → center (STRAIGHT LINES)
       satellites.forEach((sat) => {
-        const satData = satPositions[sat.position];
-        if (!satData) return;
+        const satPos = getSatellitePosition(sat.id);
+        if (!satPos) return;
 
-        const sx = satData.rx * w;
-        const sy = satData.ry * h;
+        const sx = satPos.x;
+        const sy = satPos.y;
 
         // Create gradient for connecting line
         const grad = ctx.createLinearGradient(sx, sy, cx, cy);
-        grad.addColorStop(0, satData.color + '00');
-        grad.addColorStop(0.4, satData.color + '55');
-        grad.addColorStop(1, satData.color + '20');
+        grad.addColorStop(0, sat.color + "00");
+        grad.addColorStop(0.4, sat.color + "55");
+        grad.addColorStop(1, sat.color + "20");
 
+        // Draw straight line from satellite to center
         ctx.beginPath();
         ctx.moveTo(sx, sy);
-        // Slight curve
-        const mx = (sx + cx) / 2 + (sy - cy) * 0.1;
-        const my = (sy + cy) / 2 + (cx - sx) * 0.05;
-        ctx.quadraticCurveTo(mx, my, cx, cy);
+        ctx.lineTo(cx, cy);
         ctx.strokeStyle = grad;
         ctx.lineWidth = 1;
         ctx.stroke();
       });
 
-      // Orbiting dots
+      // Connection points at satellites
       satellites.forEach((sat, i) => {
-        const satData = satPositions[sat.position];
-        if (!satData) return;
+        const satPos = getSatellitePosition(sat.id);
+        if (!satPos) return;
 
+        const sx = satPos.x;
+        const sy = satPos.y;
+
+        // Draw connection point at satellite
+        ctx.beginPath();
+        ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+        ctx.fillStyle = sat.color + "66";
+        ctx.fill();
+
+        // Draw orbiting dots around center
         const angle = t * 0.5 + i * ((Math.PI * 2) / 6);
         const orbitR = Math.min(w, h) * 0.3;
         const ox = cx + Math.cos(angle) * orbitR;
@@ -93,14 +106,14 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
 
         ctx.beginPath();
         ctx.arc(ox, oy, 2, 0, Math.PI * 2);
-        ctx.fillStyle = satData.color + 'aa';
+        ctx.fillStyle = sat.color + "aa";
         ctx.fill();
       });
 
       // Center glow
       const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
-      grd.addColorStop(0, 'rgba(100, 40, 180, 0.15)');
-      grd.addColorStop(1, 'rgba(100, 40, 180, 0)');
+      grd.addColorStop(0, "rgba(100, 40, 180, 0.15)");
+      grd.addColorStop(1, "rgba(100, 40, 180, 0)");
       ctx.beginPath();
       ctx.arc(cx, cy, 80, 0, Math.PI * 2);
       ctx.fillStyle = grd;
@@ -113,10 +126,15 @@ export const HubOrbitalCanvas: React.FC<HubCanvasProps> = ({ satellites }) => {
     draw();
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener("resize", resize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [satellites]);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+    />
+  );
 };

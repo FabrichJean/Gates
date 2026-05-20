@@ -95,7 +95,7 @@ export const OrbitalSatellite: React.FC<SatelliteProps> = ({
         .orbit-bob-5 { animation: orbit-bob-5 4.8s ease-in-out infinite; }
 
         .satellite-core {
-          animation: ${isHovered ? 'pulse-satellite 1.5s ease-in-out infinite' : 'none'};
+          animation: 'pulse-satellite 1.5s ease-in-out infinite';
         }
 
         .core-ring {
